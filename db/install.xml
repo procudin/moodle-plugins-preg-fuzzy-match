@@ -1,7 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="question/type/QTYPEID/db" VERSION="20060825" COMMENT="XMLDB file for this question type">
-  <TABLES>
-	<!-- TODO define any necessary tables here. This is probably most easily
-	done using the Moodle table editor. -->
-  </TABLES>
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="" VERSION="" COMMENT="XMLDB file for question type: WriteRegEx" xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd">
+    <TABLES>
+        <TABLE NAME="mdl_question_writeregex" COMMENT="Table for question type: WriteRegEx">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="question" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="regexnotation" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="testtype" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="helptype" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="penalty" TYPE="float" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="showhelpformat" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="textexplonation" TYPE="text" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="showerrorfromat" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="fk_question" TYPE="foreign" FIELDS="question" REFTABLE="mdl_question" REFFIELDS="id" />
+            </KEYS>
+        </TABLE>
+
+        <TABLE NAME="mdl_question_writeregex_test_string" COMMENT="">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="question" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="answer" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="teststring" TYPE="char" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="comment" TYPE="text" NOTNULL="true" SEQUENCE="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="fk_question" TYPE="foreign" FIELDS="question" REFTABLE="mdl_question" REFFIELDS="id" />
+                <KEY NAME="fk_answer" TYPE="foreign" FIELDS="answer" REFTABLE="mdl_question_answers" REFFIELDS="id" />
+            </KEYS>
+        </TABLE>
+    </TABLES
 </XMLDB>
