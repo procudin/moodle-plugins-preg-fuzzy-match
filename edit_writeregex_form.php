@@ -11,7 +11,7 @@
 require_once($CFG->dirroot.'/question/type/edit_question_form.php');
 
 /**
- * QTYPENAME editing form definition.
+ * Write Reg Ex editing form definition.
  * 
  * See http://docs.moodle.org/en/Development:lib/formslib.php for information
  * about the Moodle forms library, which is based on the HTML Quickform PEAR library.

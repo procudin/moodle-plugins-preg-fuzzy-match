@@ -1,6 +1,6 @@
 <?php
 /**
- * The question type class for the QTYPENAME question type.
+ * The question type class for the Write Reg Ex question type.
  *
  * @copyright &copy; 2006 YOURNAME
  * @author YOUREMAILADDRESS
@@ -9,7 +9,7 @@
  *//** */
 
 /**
- * The QTYPENAME question class
+ * The Write Reg Ex question class
  *
  * TODO give an overview of how the class works here.
  */
