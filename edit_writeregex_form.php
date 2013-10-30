@@ -3,7 +3,7 @@
  * The editing form code for this question type.
  *
  * @copyright &copy; 2013 M. Navrotskiy
- * @author YOUREMAILADDRESS
+ * @author m.navrotskiy@gmail.com
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  * @package YOURPACKAGENAME
  *//** */
