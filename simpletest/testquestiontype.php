@@ -11,10 +11,11 @@
 require_once(dirname(__FILE__) . '/../../../../config.php');
 
 global $CFG;
-require_once($CFG->libdir . '/simpletestlib.php');
+//require_once($CFG->libdir . '/simpletestlib.php');
 require_once($CFG->dirroot . '/question/type/writeregex/questiontype.php');
+require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
-class writeregex_qtype_test extends UnitTestCase {
+class qtype_writeregex_test extends advanced_testcase {
     var $qtype;
     
     function setUp() {
@@ -26,7 +27,7 @@ class writeregex_qtype_test extends UnitTestCase {
     }
 
     function test_name() {
-        $this->assertEqual($this->qtype->name(), 'writeregex');
+        $this->assertEquals($this->qtype->name(), 'writeregex');
     }
     
     // TODO write unit tests for the other methods of the question type class.
