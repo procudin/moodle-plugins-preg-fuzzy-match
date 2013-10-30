@@ -9,11 +9,11 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0)
     $dbman = $DB->get_manager();
 
     // new version is: 2013102500
-    if ($oldversion < 2013102200) // Now define current version, but new is '2013102500'.
+    if ($oldversion < 2013102500) // Now define current version, but new is '2013102500'.
     {
         // Define field wikipage to be added to mdl_question_writeregex
-        $table = new xmldb_table('question_writeregex'); // TODO: Проверить префикс дб
-        $field = new xmldb_field('wikipage', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, '0', 'showerrorformat');
+        $table = new xmldb_table('qtype_writeregex_options');
+        $field = new xmldb_field('compareautomatercentage', XMLDB_TYPE_FLOAT, '4', '2', XMLDB_NOTNULL, null, '0', 'compareregexpercentage');
 
         // Add field wikipage
         if (!$dbman->field_exists($table, $field))
@@ -22,7 +22,7 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0)
         }
 
         // Upgrade version
-        upgrade_plugin_savepoint(true, 2013102500, 'question', 'writeregex'); // TODO: Проверить правильность ввода
+        upgrade_plugin_savepoint(true, 2013102500, 'qtype', 'writeregex');
 
     }
 
