@@ -1,4 +1,4 @@
-<?php // $Id: qtype_TEMPLATE.php,v 1.3 2009/02/26 14:39:44 mjollnir_ Exp $
+<?php // $Id: qtype_writeregex.php,v 1.3 2009/02/26 14:39:44 mjollnir_ Exp $
 /**
  * The language strings for the QTYPENAME question type.
  *    
