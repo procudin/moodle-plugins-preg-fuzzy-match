@@ -2,7 +2,7 @@
 /**
  * Unit tests for this question type.
  *
- * @copyright &copy; 2006 YOURNAME
+ * @copyright &copy; 2013 M. Navrotskiy
  * @author YOUREMAILADDRESS
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  * @package YOURPACKAGENAME

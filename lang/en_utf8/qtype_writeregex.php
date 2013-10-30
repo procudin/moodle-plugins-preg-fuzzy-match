@@ -1,8 +1,8 @@
 <?php // $Id: qtype_writeregex.php,v 1.3 2009/02/26 14:39:44 mjollnir_ Exp $
 /**
- * The language strings for the QTYPENAME question type.
+ * The language strings for the Write Reg Ex question type.
  *    
- * @copyright &copy; 2006 YOURNAME
+ * @copyright &copy; 2013 M. Navrotskiy
  * @author YOUREMAILADDRESS
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  * @package YOURPACKAGENAME
