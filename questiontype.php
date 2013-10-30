@@ -5,7 +5,7 @@
  * @copyright &copy; 2013 M. Navrotskiy
  * @author m.navrotskiy@gmail.com
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package YOURPACKAGENAME
+ * @package writeregex
  *//** */
 
 /**
