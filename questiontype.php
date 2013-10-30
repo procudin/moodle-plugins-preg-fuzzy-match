@@ -13,7 +13,10 @@
  *
  * TODO give an overview of how the class works here.
  */
-class writeregex_qtype extends default_questiontype {
+
+require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
+
+class writeregex_qtype extends qtype_shortanswer {
 
     function name() {
         return 'writeregex';
@@ -26,7 +29,7 @@ class writeregex_qtype extends default_questiontype {
     /**
      * @return boolean to indicate success of failure.
      */
-    function get_question_options(&$question) {
+    public function get_question_options($question) {
         // TODO code to retrieve the extra data you stored in the database into
         // $question->options.
         return true;
@@ -48,13 +51,13 @@ class writeregex_qtype extends default_questiontype {
      * @param integer $questionid The question being deleted
      * @return boolean to indicate success of failure.
      */
-    function delete_question($questionid) {
-        // TODO delete any    
+    public function delete_question($questionid, $contextid) {
+        // TODO delete any
         return true;
     }
 
     function create_session_and_responses(&$question, &$state, $cmoptions, $attempt) {
-        // TODO create a blank repsonse in the $state->responses array, which    
+        // TODO create a blank repsonse in the $state->responses array, which
         // represents the situation before the student has made a response.
         return true;
     }
@@ -64,16 +67,16 @@ class writeregex_qtype extends default_questiontype {
         // database field question_states.answer into the $state->responses array.
         return true;
     }
-    
+
     function save_session_and_responses(&$question, &$state) {
         // TODO package up the students response from the $state->responses
         // array into a string and save it in the question_states.answer field.
-    
+
         $responses = '';
-    
+
         return set_field('question_states', 'answer', $responses, 'id', $state->id);
     }
-    
+
     function print_question_formulation_and_controls(&$question, &$state, $cmoptions, $options) {
         global $CFG;
 
@@ -83,20 +86,20 @@ class writeregex_qtype extends default_questiontype {
         $questiontext = $this->format_text($question->questiontext,
                 $question->questiontextformat, $cmoptions);
         $image = get_question_image($question, $cmoptions->course);
-    
+
         // TODO prepare any other data necessary. For instance
         $feedback = '';
         if ($options->feedback) {
-    
+
         }
-    
+
         include("$CFG->dirroot/question/type/writeregex/display.html");
     }
-    
+
     function grade_responses(&$question, &$state, $cmoptions) {
         // TODO assign a grade to the response in state.
     }
-    
+
     function compare_responses($question, $state, $teststate) {
         // TODO write the code to return two different student responses, and
         // return two if the should be considered the same.
@@ -110,7 +113,7 @@ class writeregex_qtype extends default_questiontype {
      */
     function test_response(&$question, &$state, $answer) {
         // TODO if your code uses the question_answer table, write a method to
-        // determine whether the student's response in $state matches the    
+        // determine whether the student's response in $state matches the
         // answer in $answer.
         return false;
     }
@@ -166,5 +169,5 @@ class writeregex_qtype extends default_questiontype {
 }
 
 // Register this question type with the system.
-question_register_questiontype(new writeregex_qtype());
+//question_register_questiontype(new writeregex_qtype());
 ?>
