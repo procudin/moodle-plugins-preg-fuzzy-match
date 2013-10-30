@@ -13,10 +13,10 @@
  *
  * TODO give an overview of how the class works here.
  */
-class QTYPEID_qtype extends default_questiontype {
+class writeregex_qtype extends default_questiontype {
 
     function name() {
-        return 'QTYPEID';
+        return 'writeregex';
     }
     
     // TODO think about whether you need to override the is_manual_graded or
@@ -90,7 +90,7 @@ class QTYPEID_qtype extends default_questiontype {
     
         }
     
-        include("$CFG->dirroot/question/type/QTYPEID/display.html");
+        include("$CFG->dirroot/question/type/writeregex/display.html");
     }
     
     function grade_responses(&$question, &$state, $cmoptions) {
@@ -166,5 +166,5 @@ class QTYPEID_qtype extends default_questiontype {
 }
 
 // Register this question type with the system.
-question_register_questiontype(new QTYPEID_qtype());
+question_register_questiontype(new writeregex_qtype());
 ?>

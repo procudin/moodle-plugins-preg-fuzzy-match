@@ -8,9 +8,9 @@
  * @package YOURPACKAGENAME
  *//** */
 
-$string['addingQTYPEID'] = 'Adding QTYPENAME.';
-$string['editingQTYPEID'] = 'Editing QTYPENAME.';
-$string['QTYPEID'] = 'QTYPENAME.';
+$string['addingwriteregex'] = 'Adding QTYPENAME.';
+$string['editingwriteregex'] = 'Editing QTYPENAME.';
+$string['writeregex'] = 'QTYPENAME.';
 // TODO add any other requred strings.
 
 ?>

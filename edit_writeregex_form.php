@@ -16,7 +16,7 @@ require_once($CFG->dirroot.'/question/type/edit_question_form.php');
  * See http://docs.moodle.org/en/Development:lib/formslib.php for information
  * about the Moodle forms library, which is based on the HTML Quickform PEAR library.
  */
-class question_edit_QTYPEID_form extends question_edit_form {
+class question_edit_writeregex_form extends question_edit_form {
     function definition_inner(&$mform) {
         // TODO, add any form fields you need.
         // $mform->addElement( ... );
@@ -49,7 +49,7 @@ class question_edit_QTYPEID_form extends question_edit_form {
     }
 
     function qtype() {
-        return 'QTYPEID';
+        return 'writeregex';
     }
 }
 ?>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="" VERSION="" COMMENT="XMLDB file for question type: WriteRegEx" xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="question/type/writeregex/db" VERSION="2013102200" COMMENT="XMLDB file for question type: WriteRegEx">
     <TABLES>
         <TABLE NAME="mdl_question_writeregex" COMMENT="Table for question type: WriteRegEx">
             <FIELDS>
