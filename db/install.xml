@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <XMLDB PATH="question/type/writeregex/db" VERSION="2013102200" COMMENT="XMLDB file for question type: WriteRegEx">
     <TABLES>
-        <TABLE NAME="mdl_question_writeregex" COMMENT="Table for question type: WriteRegEx">
+        <TABLE NAME="qtype_writeregex_options" COMMENT="Table for question type: WriteRegEx">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
-                <FIELD NAME="question" TYPE="int" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="regexnotation" TYPE="int" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="testtype" TYPE="int" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="helptype" TYPE="int" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="penalty" TYPE="float" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="showhelpformat" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="question" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="regexnotation" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="testtype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="helptype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="penalty" TYPE="float" LENGTH="4" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="showhelpformat" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
                 <FIELD NAME="textexplonation" TYPE="text" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="showerrorfromat" TYPE="int" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="showerrorfromat" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -19,12 +19,12 @@
             </KEYS>
         </TABLE>
 
-        <TABLE NAME="mdl_question_writeregex_test_string" COMMENT="">
+        <TABLE NAME="qtype_writeregex_tests" COMMENT="">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
-                <FIELD NAME="question" TYPE="int" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="answer" TYPE="int" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="teststring" TYPE="char" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="question" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="answer" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="teststring" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" />
                 <FIELD NAME="comment" TYPE="text" NOTNULL="true" SEQUENCE="false" />
             </FIELDS>
             <KEYS>
@@ -33,5 +33,5 @@
                 <KEY NAME="fk_answer" TYPE="foreign" FIELDS="answer" REFTABLE="mdl_question_answers" REFFIELDS="id" />
             </KEYS>
         </TABLE>
-    </TABLES
+    </TABLES>
 </XMLDB>
