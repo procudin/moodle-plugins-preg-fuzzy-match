@@ -1,36 +1,23 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="question/type/writeregex/db" VERSION="2013102200" COMMENT="XMLDB file for question type: WriteRegEx">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="question/type/writeregex/db" VERSION="20131030" COMMENT="XMLDB file for question type: WriteRegEx" xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="qtype_writeregex_options" COMMENT="Table for question type: WriteRegEx">
             <FIELDS>
-                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
-                <FIELD NAME="question" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="regexnotation" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="testtype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="helptype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="penalty" TYPE="float" LENGTH="4" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="showhelpformat" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="textexplonation" TYPE="text" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="showerrorfromat" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of question"/>
+                <FIELD NAME="notation" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="syntaxtreehinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="syntaxtreehintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="explgraphhinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="explgraphhintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="descriptionhinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="descriptionhintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="teststringshinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="teststringshintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="compareregexpercentage" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-                <KEY NAME="fk_question" TYPE="foreign" FIELDS="question" REFTABLE="mdl_question" REFFIELDS="id" />
-            </KEYS>
-        </TABLE>
-
-        <TABLE NAME="qtype_writeregex_tests" COMMENT="">
-            <FIELDS>
-                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
-                <FIELD NAME="question" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="answer" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="teststring" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" />
-                <FIELD NAME="comment" TYPE="text" NOTNULL="true" SEQUENCE="false" />
-            </FIELDS>
-            <KEYS>
-                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
-                <KEY NAME="fk_question" TYPE="foreign" FIELDS="question" REFTABLE="mdl_question" REFFIELDS="id" />
-                <KEY NAME="fk_answer" TYPE="foreign" FIELDS="answer" REFTABLE="mdl_question_answers" REFFIELDS="id" />
+                <KEY NAME="fk_question" TYPE="foreign" FIELDS="questionid" REFTABLE="mdl_question" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
     </TABLES>
