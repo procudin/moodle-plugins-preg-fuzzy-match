@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once(dirname(__FILE__) . '/../../../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,7 +43,7 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
     var $qtype;
 
     function setUp() {
-        $this->qtype = new writeregex_qtype();
+        $this->qtype = new qtype_writeregex();
         error_log('[setUp]', 3, 'writeregex_log.txt');
     }
 
@@ -66,57 +67,44 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
         $this->assertEquals(1, 1);
     }
 
+    public function run_sql_script_for_test ($sql_script) {
+        error_log("[run_sql_script]\n", 3, "writeregex_log.txt");
+
+        global $CFG;
+
+        $vals = array(
+            'db_user' => 'root',
+            'db_pass' => '',
+            'db_host' => 'localhost',
+            'db_name' => 'moodle'
+        );
+
+        $script_path = $CFG->dirroot . '/question/type/writeregex/tests/';
+
+        $command = "mysql -u{$vals['db_user']} -p{$vals['db_pass']} "
+            . "-h {$vals['db_host']} -D {$vals['db_name']} < {$script_path}";
+
+//        $output = shell_exec($command . '/test_generate_new_id__append_1.sql');
+        $output = shell_exec($command . $sql_script);
+
+        $this->assertEquals(1, 1);
+    }
+
     function test_delete_question() {
         error_log('[test_delete_question]', 3, 'writeregex_log.txt');
+
+
         $this->assertEquals(1, 1);
     }
 
     function test_generate_new_id() {
         error_log('[test_generate_new_id]', 3, 'writeregex_log.txt');
-        // prepare test data
-        global $DB;
 
-        $record1 = new stdClass();
-        $record1->id = 1;
-        $record1->questionid = 1;
-        $record1->notation = 1;
-        $record1->syntaxtreehinttype = 1;
-        $record1->syntaxtreehintpenalty = 1.02;
-        $record1->explgraphhinttype = 1;
-        $record1->explgraphhintpenalty = 1.02;
-        $record1->descriptionhinttype = 1;
-        $record1->descriptionhintpenalty = 1.02;
-        $record1->teststringshinttype = 1;
-        $record1->teststringshintpenalty = 1.02;
-        $record1->compareregexpercentage = 0.3;
-        $record1->compareautomatercentage = 0.4;
+        // prepare data for test_1:
+        $this->run_sql_script_for_test('/test_generate_new_id__append_1.sql');
 
-        $new_id = $DB->insert_record('qtype_writeregex_options', $record1);
-
-        $this->assertEquals($new_id, 1);
-
-        $record2 = new stdClass();
-        $record2->id = 2;
-        $record2->questionid = 1;
-        $record2->notation = 1;
-        $record2->syntaxtreehinttype = 1;
-        $record2->syntaxtreehintpenalty = 1.02;
-        $record2->explgraphhinttype = 1;
-        $record2->explgraphhintpenalty = 1.02;
-        $record2->descriptionhinttype = 1;
-        $record2->descriptionhintpenalty = 1.02;
-        $record2->teststringshinttype = 1;
-        $record2->teststringshintpenalty = 1.02;
-        $record2->compareregexpercentage = 0.3;
-        $record2->compareautomatercentage = 0.4;
-
-        $new_id = $DB->insert_record('qtype_writeregex_options', $record2);
-
-        $this->assertEquals($new_id, 2);
-
-        $g_id = $this->qtype->generate_new_id();
-
-        $this->assertEquals($g_id, 3);
+        // remove data for test_1:
+        $this->run_sql_script_for_test('/test_generate_new_id__remove_1.sql');
     }
 }
 
