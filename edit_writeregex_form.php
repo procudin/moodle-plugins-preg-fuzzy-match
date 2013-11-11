@@ -52,7 +52,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
 //                question_bank::fraction_options());
 //
 //        $this->add_interactive_settings();
-        error_log('[definition_inner]', 3, 'writeregex_log.txt');
+        error_log("[definition_inner-{start}\n", 3, 'writeregex_log.txt');
 
         global $CFG;
 
@@ -63,10 +63,75 @@ class qtype_writeregex_edit_form extends question_edit_form {
             'val_2' => get_string('wre_notation_moodle', 'qtype_writeregex')
         );
 
+        // Syntax tree options
+        $syntax_tree_options = array(
+            'val_0' => get_string('wre_st_none', 'qtype_writeregex'),
+            'val_1' => get_string('wre_st_student', 'qtype_writeregex'),
+            'val_2' => get_string('wre_st_answer', 'qtype_writeregex'),
+            'val_3' => get_string('wre_st_both', 'qtype_writeregex')
+        );
+        $syntax_tree = array();
+
+        // Explaining graph options
+        $expl_graph_options = array(
+            '0' => get_string('wre_eg_none', 'qtype_writeregex'),
+            '1' => get_string('wre_eg_student', 'qtype_writeregex'),
+            '2' => get_string('wre_eg_answer', 'qtype_writeregex'),
+            '3' => get_string('wre_eg_both', 'qtype_writeregex')
+        );
+        $expl_graph = array();
+
+        // Description options
+        $description_options = array(
+            '0' => get_string('wre_d_none', 'qtype_writeregex'),
+            '1' => get_string('wre_d_student', 'qtype_writeregex'),
+            '2' => get_string('wre_d_answer', 'qtype_writeregex'),
+            '3' => get_string('wre_d_both', 'qtype_writeregex')
+        );
+        $description = array();
+
+        // Test string options
+        $test_string_options = array(
+            '0' => get_string('wre_td_none', 'qtype_writeregex'),
+            '1' => get_string('wre_td_student', 'qtype_writeregex'),
+            '2' => get_string('wre_td_answer', 'qtype_writeregex'),
+            '3' => get_string('wre_td_both', 'qtype_writeregex')
+        );
+        $test_string = array();
+
         $mform = $this->_form;
 
         $mform->addElement('select', 'wre_notation',get_string('wre_notation', 'qtype_writeregex'), $notation_options);
-        $mform->setType('email', PARAM_NOTAGS);
+
+        $syntax_tree[] =& $mform->createElement('select', 'wre_st', get_string('wre_st', 'qtype_writeregex'),
+            $syntax_tree_options);
+        $syntax_tree[] =& $mform->createElement('text', 'wre_st_penalty',
+            get_string('wre_st_penalty', 'qtype_writeregex'));
+        $mform->setType('wre_st_penalty', PARAM_INT);
+        $mform->addGroup($syntax_tree, 'wre_st_group', '', array(' '), false);
+
+        $expl_graph[] =& $mform->createElement('select', 'wre_eg', get_string('wre_eg', 'qtype_writeregex'),
+            $expl_graph_options);
+        $expl_graph[] =& $mform->createElement('text', 'wre_eg_penalty',
+            get_string('wre_eg_penalty', 'qtype_writeregex'));
+        $mform->setType('wre_eg_penalty', PARAM_INT);
+        $mform->addGroup($expl_graph, 'wre_eg_group', '', array(' '), false);
+
+        $description[] =& $mform->createElement('select', 'wre_d', get_string('wre_d', 'qtype_writeregex'),
+            $description_options);
+        $description[] =& $mform->createElement('text', 'wre_d_penalty',
+            get_string('wre_d_penalty', 'qtype_writeregex'));
+        $mform->setType('wre_d_penalty', PARAM_INT);
+        $mform->addGroup($description, 'wre_d_group', '', array(' '), false);
+
+        $test_string[] =& $mform->createElement('select', 'wre_td', get_string('wre_td', 'qtype_writeregex'),
+            $test_string_options);
+        $test_string[] =& $mform->createElement('text', 'wre_td_penalty',
+            get_string('wre_td_penalty', 'qtype_writeregex'));
+        $mform->setType('wre_td_penalty', PARAM_INT);
+        $mform->addGroup($test_string, 'wre_td_group', '', array(' '), false);
+
+        error_log("[definition_inner-{end}]\n", 3, 'writeregex_log.txt');
     }
 
     protected function get_more_choices_string() {

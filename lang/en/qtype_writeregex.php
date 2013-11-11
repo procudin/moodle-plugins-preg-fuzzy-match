@@ -42,7 +42,40 @@ $string['pluginnameadding'] = 'Adding a Write RegEx question';
 $string['pluginnameediting'] = 'Editing a Write RegEx question';
 $string['pluginnamesummary'] = 'Write a regular expression answer.';
 $string['wre_notation'] = 'Notation';
+
 /* Notation of regexp. */
 $string['wre_notation_simple'] = 'Simple';
 $string['wre_notation_extended'] = 'Extended';
 $string['wre_notation_moodle'] = 'Moodle Short Answer';
+
+/* Syntax tree hint. */
+$string['wre_st'] = 'Syntax tree hint';
+$string['wre_st_penalty'] = 'Penalty';
+$string['wre_st_none'] = 'None';
+$string['wre_st_student'] = 'Show the student\'s answer';
+$string['wre_st_answer'] = 'Show the correct answer';
+$string['wre_st_both'] = 'Show the student\'s answer and the correct answer (both)';
+
+/* Explaining graph hint. */
+$string['wre_eg'] = 'Explaining graph hint';
+$string['wre_eg_penalty'] = 'Penalty';
+$string['wre_eg_none'] = 'None';
+$string['wre_eg_student'] = 'Show the student\'s answer';
+$string['wre_eg_answer'] = 'Show the correct answer';
+$string['wre_eg_both'] = 'Show the student\'s answer and the correct answer (both)';
+
+/* Description hint. */
+$string['wre_d'] = 'Description hint';
+$string['wre_d_penalty'] = 'Penalty';
+$string['wre_d_none'] = 'None';
+$string['wre_d_student'] = 'Show the student\'s answer';
+$string['wre_d_answer'] = 'Show the correct answer';
+$string['wre_d_both'] = 'Show the student\'s answer and the correct answer (both)';
+
+/* Test string hint. */
+$string['wre_td'] = 'Test string hint';
+$string['wre_td_penalty'] = 'Penalty';
+$string['wre_td_none'] = 'None';
+$string['wre_td_student'] = 'Show the student\'s answer';
+$string['wre_td_answer'] = 'Show the correct answer';
+$string['wre_td_both'] = 'Show the student\'s answer and the correct answer (both)';

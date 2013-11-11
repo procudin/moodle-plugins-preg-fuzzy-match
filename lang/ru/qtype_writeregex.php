@@ -42,7 +42,40 @@ $string['pluginnameadding'] = 'Добавить вопрос Write RegEx';
 $string['pluginnameediting'] = 'Изменение вопроса Write RegEx';
 $string['pluginnamesummary'] = 'Allows a response of one or a few words that is graded by comparing against various model answers, which may contain wildcards.';
 $string['wre_notation'] = 'Нотация';
+
 /* Notation of regexp. */
 $string['wre_notation_simple'] = 'Простая';
 $string['wre_notation_extended'] = 'Расширенная';
 $string['wre_notation_moodle'] = 'Moodle Short Answer';
+
+/* Syntax tree hint. */
+$string['wre_st'] = 'Синтаксическое дерево';
+$string['wre_st_penalty'] = 'Штраф';
+$string['wre_st_none'] = 'Отсутствует';
+$string['wre_st_student'] = 'Демонстрация для ответа студента';
+$string['wre_st_answer'] = 'Демонстрация для правильного ответа';
+$string['wre_st_both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
+
+/* Explaining graph hint. */
+$string['wre_eg'] = 'Граф объяснения';
+$string['wre_eg_penalty'] = 'Штраф';
+$string['wre_eg_none'] = 'Отсутствует';
+$string['wre_eg_student'] = 'Демонстрация для ответа студента';
+$string['wre_eg_answer'] = 'Демонстрация для правильного ответа';
+$string['wre_eg_both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
+
+/* Description hint. */
+$string['wre_d'] = 'Объяснение выражения';
+$string['wre_d_penalty'] = 'Штраф';
+$string['wre_d_none'] = 'Отсутствует';
+$string['wre_d_student'] = 'Демонстрация для ответа студента';
+$string['wre_d_answer'] = 'Демонстрация для правильного ответа';
+$string['wre_d_both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
+
+/* Test string hint. */
+$string['wre_td'] = 'Тестовые строки';
+$string['wre_td_penalty'] = 'Штраф';
+$string['wre_td_none'] = 'Отсутствует';
+$string['wre_td_student'] = 'Демонстрация для ответа студента';
+$string['wre_td_answer'] = 'Демонстрация для правильного ответа';
+$string['wre_td_both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
