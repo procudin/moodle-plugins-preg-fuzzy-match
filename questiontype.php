@@ -1,173 +1,162 @@
 <?php
-/**
- * The question type class for the Write Reg Ex question type.
- *
- * @copyright &copy; 2013 M. Navrotskiy
- * @author m.navrotskiy@gmail.com
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package writeregex
- *//** */
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The Write Reg Ex question class
+ * Question type class for the short answer question type.
  *
- * TODO give an overview of how the class works here.
+ * @package    qtype
+ * @subpackage shortanswer
+ * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
 
-class writeregex_qtype extends qtype_shortanswer {
+defined('MOODLE_INTERNAL') || die();
 
-    function name() {
-        return 'writeregex';
-    }
-    
-    // TODO think about whether you need to override the is_manual_graded or
-    // is_usable_by_random methods form the base class. Most the the time you
-    // Won't need to.
+//require_once($CFG->libdir . '/questionlib.php');
+//require_once($CFG->dirroot . '/question/engine/lib.php');
+//require_once($CFG->dirroot . '/question/type/shortanswer/question.php');
 
-    /**
-     * @return boolean to indicate success of failure.
-     */
-    public function get_question_options($question) {
-        // TODO code to retrieve the extra data you stored in the database into
-        // $question->options.
-        return true;
-    }
 
-    /**
-     * Save the units and the answers associated with this question.
-     * @return boolean to indicate success of failure.
-     */
-    function save_question_options($question) {
-        // TODO code to save the extra data to your database tables from the
-        // $question object, which has all the post data from editquestion.html
-        return true;
+/**
+ * The short answer question type.
+ *
+ * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class qtype_writeregex extends question_type {
+    public function extra_question_fields() {
+//        return array('qtype_shortanswer_options', 'usecase');
+        error_log('[extra_question_fields]', 3, 'writeregex_log.txt');
     }
 
-    /**
-     * Deletes question from the question-type specific tables
-     *
-     * @param integer $questionid The question being deleted
-     * @return boolean to indicate success of failure.
-     */
-    public function delete_question($questionid, $contextid) {
-        // TODO delete any
-        return true;
+    public function move_files($questionid, $oldcontextid, $newcontextid) {
+//        parent::move_files($questionid, $oldcontextid, $newcontextid);
+//        $this->move_files_in_answers($questionid, $oldcontextid, $newcontextid);
+//        $this->move_files_in_hints($questionid, $oldcontextid, $newcontextid);
+        error_log('[move_files]', 3, 'writeregex_log.txt');
     }
 
-    function create_session_and_responses(&$question, &$state, $cmoptions, $attempt) {
-        // TODO create a blank repsonse in the $state->responses array, which
-        // represents the situation before the student has made a response.
-        return true;
+    protected function delete_files($questionid, $contextid) {
+//        parent::delete_files($questionid, $contextid);
+//        $this->delete_files_in_answers($questionid, $contextid);
+//        $this->delete_files_in_hints($questionid, $contextid);
+        error_log('[delete_files]', 3, 'writeregex_log.txt');
     }
 
-    function restore_session_and_responses(&$question, &$state) {
-        // TODO unpack $state->responses[''], which has just been loaded from the
-        // database field question_states.answer into the $state->responses array.
-        return true;
+    public function save_question_options($question) {
+//        global $DB;
+//        $result = new stdClass();
+//
+//        $context = $question->context;
+//
+//        $oldanswers = $DB->get_records('question_answers',
+//                array('question' => $question->id), 'id ASC');
+//
+//        $maxfraction = -1;
+//
+//        // Insert all the new answers.
+//        foreach ($question->answer as $key => $answerdata) {
+//            // Check for, and ignore, completely blank answer from the form.
+//            if (trim($answerdata) == '' && $question->fraction[$key] == 0 &&
+//                    html_is_blank($question->feedback[$key]['text'])) {
+//                continue;
+//            }
+//
+//            // Update an existing answer if possible.
+//            $answer = array_shift($oldanswers);
+//            if (!$answer) {
+//                $answer = new stdClass();
+//                $answer->question = $question->id;
+//                $answer->answer = '';
+//                $answer->feedback = '';
+//                $answer->id = $DB->insert_record('question_answers', $answer);
+//            }
+//
+//            $answer->answer   = trim($answerdata);
+//            $answer->fraction = $question->fraction[$key];
+//            $answer->feedback = $this->import_or_save_files($question->feedback[$key],
+//                    $context, 'question', 'answerfeedback', $answer->id);
+//            $answer->feedbackformat = $question->feedback[$key]['format'];
+//            $DB->update_record('question_answers', $answer);
+//
+//            if ($question->fraction[$key] > $maxfraction) {
+//                $maxfraction = $question->fraction[$key];
+//            }
+//        }
+//
+//        $parentresult = parent::save_question_options($question);
+//        if ($parentresult !== null) {
+//            // Parent function returns null if all is OK.
+//            return $parentresult;
+//        }
+//
+//        // Delete any left over old answer records.
+//        $fs = get_file_storage();
+//        foreach ($oldanswers as $oldanswer) {
+//            $fs->delete_area_files($context->id, 'question', 'answerfeedback', $oldanswer->id);
+//            $DB->delete_records('question_answers', array('id' => $oldanswer->id));
+//        }
+//
+//        $this->save_hints($question);
+//
+//        // Perform sanity checks on fractional grades.
+//        if ($maxfraction != 1) {
+//            $result->noticeyesno = get_string('fractionsnomax', 'question', $maxfraction * 100);
+//            return $result;
+//        }
+        error_log('[save_question_options]', 3, 'writeregex_log.txt');
     }
 
-    function save_session_and_responses(&$question, &$state) {
-        // TODO package up the students response from the $state->responses
-        // array into a string and save it in the question_states.answer field.
-
-        $responses = '';
-
-        return set_field('question_states', 'answer', $responses, 'id', $state->id);
+    protected function initialise_question_instance(question_definition $question, $questiondata) {
+//        parent::initialise_question_instance($question, $questiondata);
+//        $this->initialise_question_answers($question, $questiondata);
+        error_log('[initialise_question_instance]', 3, 'writeregex_log.txt');
     }
 
-    function print_question_formulation_and_controls(&$question, &$state, $cmoptions, $options) {
-        global $CFG;
-
-        $readonly = empty($options->readonly) ? '' : 'disabled="disabled"';
-
-        // Print formulation
-        $questiontext = $this->format_text($question->questiontext,
-                $question->questiontextformat, $cmoptions);
-        $image = get_question_image($question, $cmoptions->course);
-
-        // TODO prepare any other data necessary. For instance
-        $feedback = '';
-        if ($options->feedback) {
-
-        }
-
-        include("$CFG->dirroot/question/type/writeregex/display.html");
+    public function get_random_guess_score($questiondata) {
+//        foreach ($questiondata->options->answers as $aid => $answer) {
+//            if ('*' == trim($answer->answer)) {
+//                return $answer->fraction;
+//            }
+//        }
+//        return 0;
+        error_log('[get_random_guess_score]', 3, 'writeregex_log.txt');
     }
 
-    function grade_responses(&$question, &$state, $cmoptions) {
-        // TODO assign a grade to the response in state.
+    public function get_possible_responses($questiondata) {
+//        $responses = array();
+//
+//        $starfound = false;
+//        foreach ($questiondata->options->answers as $aid => $answer) {
+//            $responses[$aid] = new question_possible_response($answer->answer,
+//                    $answer->fraction);
+//            if ($answer->answer === '*') {
+//                $starfound = true;
+//            }
+//        }
+//
+//        if (!$starfound) {
+//            $responses[0] = new question_possible_response(
+//                    get_string('didnotmatchanyanswer', 'question'), 0);
+//        }
+//
+//        $responses[null] = question_possible_response::no_response();
+//
+//        return array($questiondata->id => $responses);
+        error_log('[get_possible_responses]', 3, 'writeregex_log.txt');
     }
-
-    function compare_responses($question, $state, $teststate) {
-        // TODO write the code to return two different student responses, and
-        // return two if the should be considered the same.
-        return false;
-    }
-
-    /**
-     * Checks whether a response matches a given answer, taking the tolerance
-     * and units into account. Returns a true for if a response matches the
-     * answer, false if it doesn't.
-     */
-    function test_response(&$question, &$state, $answer) {
-        // TODO if your code uses the question_answer table, write a method to
-        // determine whether the student's response in $state matches the
-        // answer in $answer.
-        return false;
-    }
-
-    function check_response(&$question, &$state){
-        // TODO
-        return false;
-    }
-
-    function get_correct_responses(&$question, &$state) {
-        // TODO
-        return false;
-    }
-
-    function get_all_responses(&$question, &$state) {
-        $result = new stdClass;
-        // TODO
-        return $result;
-    }
-
-    function get_actual_response($question, $state) {
-        // TODO
-        $responses = '';
-        return $responses;
-    }
-
-    /**
-     * Backup the data in the question
-     *
-     * This is used in question/backuplib.php
-     */
-    function backup($bf,$preferences,$question,$level=6) {
-        $status = true;
-
-        // TODO write code to backup an instance of your question type.
-
-        return $status;
-    }
-
-    /**
-     * Restores the data in the question
-     *
-     * This is used in question/restorelib.php
-     */
-    function restore($old_question_id,$new_question_id,$info,$restore) {
-        $status = true;
-
-        // TODO write code to restore an instance of your question type.
-
-        return $status;
-    }
-
 }
-
-// Register this question type with the system.
-//question_register_questiontype(new writeregex_qtype());
-?>
