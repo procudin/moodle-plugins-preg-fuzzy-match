@@ -57,6 +57,26 @@ class qtype_writeregex extends question_type {
         error_log('[delete_files]', 3, 'writeregex_log.txt');
     }
 
+    /**
+     * Generate new id of question's option.
+     * @return int Actual vaule of id.
+     */
+    public function generate_new_id() {
+        global $DB; // Database
+        $result = 1;
+        $records = $DB->get_records('qtype_writeregex_options', null, 'id ASC', 'id');
+
+        foreach ($records as $record) {
+            if ($record->id == $result) {
+                $result++;
+            } else {
+                break;
+            }
+        }
+
+        return $result;
+    }
+
     public function save_question_options($question) {
 //        global $DB;
 //        $result = new stdClass();
