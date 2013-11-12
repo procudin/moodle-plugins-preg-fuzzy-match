@@ -85,3 +85,7 @@ $string['wre_cre'] = 'Проверка совпадения регулярных
 $string['wre_cre_no'] = 'Да';
 $string['wre_cre_yes'] = 'Нет';
 $string['wre_cre_percentage'] = 'Доля';
+
+/* Compare regexp's automats */
+$string['wre_acre'] = 'Проверка совпадения конечных автоматов регулярных выражений';
+$string['wre_acre_percentage'] = 'Доля';

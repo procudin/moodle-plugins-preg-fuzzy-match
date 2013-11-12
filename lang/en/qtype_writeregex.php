@@ -85,3 +85,7 @@ $string['wre_cre'] = 'Compare regexp';
 $string['wre_cre_no'] = 'No';
 $string['wre_cre_yes'] = 'Yes';
 $string['wre_cre_percentage'] = 'Percentage';
+
+/* Compare regexp's automats */
+$string['wre_acre'] = 'Compare regexp\'s automats';
+$string['wre_acre_percentage'] = 'Percentage';
