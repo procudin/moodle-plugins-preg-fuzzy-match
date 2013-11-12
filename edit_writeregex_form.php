@@ -99,6 +99,13 @@ class qtype_writeregex_edit_form extends question_edit_form {
         );
         $test_string = array();
 
+        // Compare regex options
+        $comp_regex_options = array(
+            '0' => get_string('wre_cre_yes', 'qtype_writeregex'),
+            '1' => get_string('wre_cre_no', 'qtype_writeregex')
+        );
+        $comp_regex = array();
+
         $mform = $this->_form;
 
         $mform->addElement('select', 'wre_notation',get_string('wre_notation', 'qtype_writeregex'), $notation_options);
@@ -130,6 +137,13 @@ class qtype_writeregex_edit_form extends question_edit_form {
             get_string('wre_td_penalty', 'qtype_writeregex'));
         $mform->setType('wre_td_penalty', PARAM_INT);
         $mform->addGroup($test_string, 'wre_td_group', '', array(' '), false);
+
+        $comp_regex[] =& $mform->createElement('select', 'wre_cre', get_string('wre_cre', 'qtype_writeregex'),
+            $comp_regex_options);
+        $comp_regex[] =& $mform->createElement('text', 'wre_cre_percentage',
+            get_string('wre_cre_percentage', 'qtype_writeregex'));
+        $mform->setType('wre_cre_percentage', PARAM_INT);
+        $mform->addGroup($comp_regex, 'wre_cre_group', '', array(' '), false);
 
         error_log("[definition_inner-{end}]\n", 3, 'writeregex_log.txt');
     }

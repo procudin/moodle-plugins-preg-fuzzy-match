@@ -79,3 +79,9 @@ $string['wre_td_none'] = 'Отсутствует';
 $string['wre_td_student'] = 'Демонстрация для ответа студента';
 $string['wre_td_answer'] = 'Демонстрация для правильного ответа';
 $string['wre_td_both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
+
+/* Compare regex. */
+$string['wre_cre'] = 'Проверка совпадения регулярных выражений';
+$string['wre_cre_no'] = 'Да';
+$string['wre_cre_yes'] = 'Нет';
+$string['wre_cre_percentage'] = 'Доля';

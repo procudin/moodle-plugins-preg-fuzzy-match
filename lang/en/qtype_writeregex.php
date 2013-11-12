@@ -79,3 +79,9 @@ $string['wre_td_none'] = 'None';
 $string['wre_td_student'] = 'Show the student\'s answer';
 $string['wre_td_answer'] = 'Show the correct answer';
 $string['wre_td_both'] = 'Show the student\'s answer and the correct answer (both)';
+
+/* Compare regex. */
+$string['wre_cre'] = 'Compare regexp';
+$string['wre_cre_no'] = 'No';
+$string['wre_cre_yes'] = 'Yes';
+$string['wre_cre_percentage'] = 'Percentage';
