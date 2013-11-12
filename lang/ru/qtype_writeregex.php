@@ -89,3 +89,6 @@ $string['wre_cre_percentage'] = 'Доля';
 /* Compare regexp's automats */
 $string['wre_acre'] = 'Проверка совпадения конечных автоматов регулярных выражений';
 $string['wre_acre_percentage'] = 'Доля';
+
+$string['wre_regexp_answers'] = 'Регулярное выражение';
+$string['wre_regexp_ts'] = 'Тестовая строка {$a}';

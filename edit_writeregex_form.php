@@ -109,7 +109,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
         // Compare regexp's automat
         $comp_aregex = array();
 
-        $mform = $this->_form;
+        // $mform = $this->_form;
 
         $mform->addElement('select', 'wre_notation',get_string('wre_notation', 'qtype_writeregex'), $notation_options);
 
@@ -153,6 +153,17 @@ class qtype_writeregex_edit_form extends question_edit_form {
             get_string('wre_acre_percentage', 'qtype_writeregex'));
         $mform->setType('wre_acre_percentage', PARAM_INT);
         $mform->addGroup($comp_aregex, 'wre_acre_group', '', array(' '), false);
+
+
+        // $mform->addElement('header', 'wre_regexp_answers', get_string('wre_regexp_answers', 'qtype_writeregex'));
+       
+        // $mform->closeHeaderBefore('nameforyourheaderelement');
+
+        $this->add_per_answer_fields($mform, get_string('wre_regexp_answers', 'qtype_writeregex'),
+               question_bank::fraction_options());
+
+        $this->add_per_answer_fields($mform, get_string('wre_regexp_ts', 'qtype_writeregex', '{no}'),
+               question_bank::fraction_options());
 
 
         $this->add_interactive_settings();
