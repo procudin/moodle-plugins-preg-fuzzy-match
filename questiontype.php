@@ -38,35 +38,21 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_writeregex extends question_type {
-    public function extra_question_fields() {
-//        return array('qtype_shortanswer_options', 'usecase');
-        error_log('[extra_question_fields]', 3, 'writeregex_log.txt');
-    }
-
-    public function move_files($questionid, $oldcontextid, $newcontextid) {
-//        parent::move_files($questionid, $oldcontextid, $newcontextid);
-//        $this->move_files_in_answers($questionid, $oldcontextid, $newcontextid);
-//        $this->move_files_in_hints($questionid, $oldcontextid, $newcontextid);
-        error_log('[move_files]', 3, 'writeregex_log.txt');
-    }
-
-    protected function delete_files($questionid, $contextid) {
-//        parent::delete_files($questionid, $contextid);
-//        $this->delete_files_in_answers($questionid, $contextid);
-//        $this->delete_files_in_hints($questionid, $contextid);
-        error_log('[delete_files]', 3, 'writeregex_log.txt');
-    }
 
     /**
      * Generate new id of question's option.
      * @return int Actual vaule of id.
      */
     public function generate_new_id() {
+
+        error_log("[generate_new_id]\n", 3, "writeregex_log.txt");
+
         global $DB; // Database
         $result = 1;
         $records = $DB->get_records('qtype_writeregex_options', null, 'id ASC', 'id');
 
         foreach ($records as $record) {
+            error_log('<' . $result . '>', 3, $CFG->dirroot . 'writeregex_log.txt');
             if ($record->id == $result) {
                 $result++;
             } else {
@@ -77,106 +63,34 @@ class qtype_writeregex extends question_type {
         return $result;
     }
 
+    public function get_question_options($question){
+
+        error_log("[get_question_options]\n", 3, "writeregex_log.txt");
+    }
+
     public function save_question_options($question) {
-//        global $DB;
-//        $result = new stdClass();
-//
-//        $context = $question->context;
-//
-//        $oldanswers = $DB->get_records('question_answers',
-//                array('question' => $question->id), 'id ASC');
-//
-//        $maxfraction = -1;
-//
-//        // Insert all the new answers.
-//        foreach ($question->answer as $key => $answerdata) {
-//            // Check for, and ignore, completely blank answer from the form.
-//            if (trim($answerdata) == '' && $question->fraction[$key] == 0 &&
-//                    html_is_blank($question->feedback[$key]['text'])) {
-//                continue;
-//            }
-//
-//            // Update an existing answer if possible.
-//            $answer = array_shift($oldanswers);
-//            if (!$answer) {
-//                $answer = new stdClass();
-//                $answer->question = $question->id;
-//                $answer->answer = '';
-//                $answer->feedback = '';
-//                $answer->id = $DB->insert_record('question_answers', $answer);
-//            }
-//
-//            $answer->answer   = trim($answerdata);
-//            $answer->fraction = $question->fraction[$key];
-//            $answer->feedback = $this->import_or_save_files($question->feedback[$key],
-//                    $context, 'question', 'answerfeedback', $answer->id);
-//            $answer->feedbackformat = $question->feedback[$key]['format'];
-//            $DB->update_record('question_answers', $answer);
-//
-//            if ($question->fraction[$key] > $maxfraction) {
-//                $maxfraction = $question->fraction[$key];
-//            }
-//        }
-//
-//        $parentresult = parent::save_question_options($question);
-//        if ($parentresult !== null) {
-//            // Parent function returns null if all is OK.
-//            return $parentresult;
-//        }
-//
-//        // Delete any left over old answer records.
-//        $fs = get_file_storage();
-//        foreach ($oldanswers as $oldanswer) {
-//            $fs->delete_area_files($context->id, 'question', 'answerfeedback', $oldanswer->id);
-//            $DB->delete_records('question_answers', array('id' => $oldanswer->id));
-//        }
-//
-//        $this->save_hints($question);
-//
-//        // Perform sanity checks on fractional grades.
-//        if ($maxfraction != 1) {
-//            $result->noticeyesno = get_string('fractionsnomax', 'question', $maxfraction * 100);
-//            return $result;
-//        }
-        error_log('[save_question_options]', 3, 'writeregex_log.txt');
+
+        error_log("[save_question_options]\n", 3, "writeregex_log.txt");
     }
 
     protected function initialise_question_instance(question_definition $question, $questiondata) {
-//        parent::initialise_question_instance($question, $questiondata);
-//        $this->initialise_question_answers($question, $questiondata);
-        error_log('[initialise_question_instance]', 3, 'writeregex_log.txt');
+
+        error_log("[initialise_question_instance]\n", 3, "writeregex_log.txt");
     }
 
-    public function get_random_guess_score($questiondata) {
-//        foreach ($questiondata->options->answers as $aid => $answer) {
-//            if ('*' == trim($answer->answer)) {
-//                return $answer->fraction;
-//            }
-//        }
-//        return 0;
-        error_log('[get_random_guess_score]', 3, 'writeregex_log.txt');
+    public function delete_question($questionid, $contextid){
+
+        error_log("[delete_question]\n", 3, "writeregex_log.txt");
     }
 
-    public function get_possible_responses($questiondata) {
-//        $responses = array();
-//
-//        $starfound = false;
-//        foreach ($questiondata->options->answers as $aid => $answer) {
-//            $responses[$aid] = new question_possible_response($answer->answer,
-//                    $answer->fraction);
-//            if ($answer->answer === '*') {
-//                $starfound = true;
-//            }
-//        }
-//
-//        if (!$starfound) {
-//            $responses[0] = new question_possible_response(
-//                    get_string('didnotmatchanyanswer', 'question'), 0);
-//        }
-//
-//        $responses[null] = question_possible_response::no_response();
-//
-//        return array($questiondata->id => $responses);
-        error_log('[get_possible_responses]', 3, 'writeregex_log.txt');
+    public function import_from_xml($data, $question, qformat_xml $format, $extra=null){
+
+        error_log("[import_from_xml]\n", 3, "writeregex_log.txt");
     }
+
+    public function export_to_xml($question, qformat_xml $format, $extra=null){
+
+        error_log("[export_to_xml]\n", 3, "writeregex_log.txt");
+    }
+
 }
