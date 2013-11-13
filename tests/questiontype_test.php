@@ -90,6 +90,29 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
         $this->assertEquals(1, 1);
     }
 
+    private function form_options($id, $questionid, $notation, $syntaxtreetype, $syntaxtreepenalty,
+     $explgraphtype, $explgraphpenalty, $desctype, $descpenalty, $teststringtype, $teststringpenalty,
+     $compareregex, $compareautomat) {
+
+        $result = new stdClass();
+
+        $result->id = $id;
+        $result->questionid = $questionid;
+        $result->notation = $notation;
+        $result->syntaxtreehinttype = $syntaxtreetype;
+        $result->syntaxtreehintpenalty = $syntaxtreepenalty;
+        $result->explgraphhinttype = $explgraphtype;
+        $result->explgraphhintpenalty = $explgraphpenalty;
+        $result->descriptionhinttype = $desctype;
+        $result->descriptionhintpenalty = $descpenalty;
+        $result->teststringshinttype = $teststringtype;
+        $result->teststringshintpenalty = $teststringpenalty;
+        $result->compareregexpercentage = $compareregex;
+        $result->compareautomatercentage = $compareautomat;
+
+        return $result;
+    }
+
     function test_delete_question() {
         error_log('[test_delete_question]', 3, 'writeregex_log.txt');
 
@@ -98,13 +121,19 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
     }
 
     function test_generate_new_id() {
-        error_log('[test_generate_new_id]', 3, 'writeregex_log.txt');
+        error_log("[test_generate_new_id]\n", 3, 'writeregex_log.txt');
 
-        // prepare data for test_1:
-        $this->run_sql_script_for_test('/test_generate_new_id__append_1.sql');
+        // prepare test data
+        global $DB;
 
-        // remove data for test_1:
-        $this->run_sql_script_for_test('/test_generate_new_id__remove_1.sql');
+        $record1 = $this->form_options(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        $new_id = $DB->insert_record('qtype_writeregex_options', $record1);
+        $this->assertEquals($new_id, 1);
+
+        $calc_id = $this->qtype->generate_new_id();
+        $this->assertEquals($calc_id, 2);
+
+        $record2 = $this->form_options(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     }
 }
 

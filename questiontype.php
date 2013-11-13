@@ -46,6 +46,7 @@ class qtype_writeregex extends question_type {
     public function generate_new_id() {
 
         error_log("[generate_new_id]\n", 3, "writeregex_log.txt");
+        global $CFG;
 
         global $DB; // Database
         $result = 1;
