@@ -88,6 +88,10 @@ class qtype_writeregex extends question_type {
     public function get_question_options($question){
 
         error_log("[get_question_options]\n", 3, "writeregex_log.txt");
+
+        $result = new stdClass();
+
+        return $result;
     }
 
     public function save_question_options($question) {

@@ -59,7 +59,26 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
 
     function test_get_question_options() {
         error_log('[test_get_question_options]', 3, 'writeregex_log.txt');
-        $this->assertEquals(1, 1);
+
+        global $DB;
+
+        $DB->delete_records('qtype_writeregex_options');
+
+        $record1 = $this->form_options(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        $record2 = $this->form_options(2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+
+        $DB->insert_record('qtype_writeregex_options', $record1);
+        $DB->insert_record('qtype_writeregex_options', $record2);
+
+        $this->assertEquals($DB->count_records('qtype_writeregex_options'), 2);
+
+        $question = new stdClass();
+        $question->id = 1;
+
+        $new_question = $this->qtype->get_question_options($question);
+
+        $this->assertEquals($new_question->options->id, 1);
+        
     }
 
     function test_save_question_options() {
