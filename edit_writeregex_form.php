@@ -36,22 +36,7 @@ defined('MOODLE_INTERNAL') || die();
 class qtype_writeregex_edit_form extends question_edit_form {
 
     protected function definition_inner($mform) {
-//        $menu = array(
-//            get_string('caseno', 'qtype_shortanswer'),
-//            get_string('caseyes', 'qtype_shortanswer')
-//        );
-//        $mform->addElement('select', 'usecase',
-//                get_string('casesensitive', 'qtype_shortanswer'), $menu);
-//
-//        $mform->addElement('static', 'answersinstruct',
-//                get_string('correctanswers', 'qtype_shortanswer'),
-//                get_string('filloutoneanswer', 'qtype_shortanswer'));
-//        $mform->closeHeaderBefore('answersinstruct');
-//
-//        $this->add_per_answer_fields($mform, get_string('answerno', 'qtype_shortanswer', '{no}'),
-//                question_bank::fraction_options());
-//
-//        $this->add_interactive_settings();
+
         error_log("[definition_inner-{start}\n", 3, 'writeregex_log.txt');
 
         global $CFG;
@@ -178,10 +163,6 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     protected function data_preprocessing($question) {
 
-//        echo '<pre>';
-//        print_r($question);
-//        echo '</pre>';
-
         $question = parent::data_preprocessing($question);
         $question = $this->data_preprocessing_answers($question);
         $question = $this->data_preprocessing_hints($question);
@@ -189,11 +170,19 @@ class qtype_writeregex_edit_form extends question_edit_form {
         if (isset($question->id)) {
             $local_qtype = new qtype_writeregex();
             $q = $local_qtype->get_question_options($question);
-        }
 
-//        echo '<pre>';
-//        print_r($q);
-//        echo '</pre>';
+            $question->wre_notation        = $q->options->notation;
+            $question->wre_st              = $q->options->syntaxtreehinttype;
+            $question->wre_st_penalty      = $q->options->syntaxtreehintpenalty;
+            $question->wre_eg              = $q->options->explgraphhinttype;
+            $question->wre_eg_penalty      = $q->options->explgraphhintpenalty;
+            $question->wre_d               = $q->options->descriptionhinttype;
+            $question->wre_d_penalty       = $q->options->descriptionhintpenalty;
+            $question->wre_td              = $q->options->teststringshinttype;
+            $question->wre_td_penalty      = $q->options->teststringshintpenalty;
+            $question->wre_cre_percentage  = $q->options->compareregexpercentage;
+            $question->wre_acre_percentage = $q->options->compareautomatercentage;
+        }
 
         return $question;
 //        error_log('[data_preprocessing]', 3, 'writeregex_log.txt');
