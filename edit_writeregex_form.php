@@ -177,40 +177,40 @@ class qtype_writeregex_edit_form extends question_edit_form {
     }
 
     protected function data_preprocessing($question) {
-//        $question = parent::data_preprocessing($question);
-//        $question = $this->data_preprocessing_answers($question);
-//        $question = $this->data_preprocessing_hints($question);
-//
-//        return $question;
-        error_log('[data_preprocessing]', 3, 'writeregex_log.txt');
+        $question = parent::data_preprocessing($question);
+        $question = $this->data_preprocessing_answers($question);
+        $question = $this->data_preprocessing_hints($question);
+
+        return $question;
+//        error_log('[data_preprocessing]', 3, 'writeregex_log.txt');
     }
 
     public function validation($data, $files) {
-//        $errors = parent::validation($data, $files);
-//        $answers = $data['answer'];
-//        $answercount = 0;
-//        $maxgrade = false;
-//        foreach ($answers as $key => $answer) {
-//            $trimmedanswer = trim($answer);
-//            if ($trimmedanswer !== '') {
-//                $answercount++;
-//                if ($data['fraction'][$key] == 1) {
-//                    $maxgrade = true;
-//                }
-//            } else if ($data['fraction'][$key] != 0 ||
-//                    !html_is_blank($data['feedback'][$key]['text'])) {
-//                $errors["answeroptions[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
-//                $answercount++;
-//            }
-//        }
-//        if ($answercount==0) {
-//            $errors['answeroptions[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
-//        }
-//        if ($maxgrade == false) {
-//            $errors['answeroptions[0]'] = get_string('fractionsnomax', 'question');
-//        }
-//        return $errors;
-        error_log('[validation]', 3, 'writeregex_log.txt');
+        $errors = parent::validation($data, $files);
+        $answers = $data['answer'];
+        $answercount = 0;
+        $maxgrade = false;
+        foreach ($answers as $key => $answer) {
+            $trimmedanswer = trim($answer);
+            if ($trimmedanswer !== '') {
+                $answercount++;
+                if ($data['fraction'][$key] == 1) {
+                    $maxgrade = true;
+                }
+            } else if ($data['fraction'][$key] != 0 ||
+                    !html_is_blank($data['feedback'][$key]['text'])) {
+                $errors["answeroptions[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
+                $answercount++;
+            }
+        }
+        if ($answercount==0) {
+            $errors['answeroptions[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
+        }
+        if ($maxgrade == false) {
+            $errors['answeroptions[0]'] = get_string('fractionsnomax', 'question');
+        }
+        return $errors;
+//        error_log('[validation]', 3, 'writeregex_log.txt');
     }
 
     public function qtype() {
