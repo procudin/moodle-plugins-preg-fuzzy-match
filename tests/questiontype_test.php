@@ -102,20 +102,19 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
      $explgraphtype, $explgraphpenalty, $desctype, $descpenalty, $teststringtype, $teststringpenalty,
      $compareregex, $compareautomat) {
 
-        $result = array(
-            'questionid'          => $questionid,
-            'wre_notation'        => $notation,
-            'wre_st'              => $syntaxtreetype,
-            'wre_st_penalty'      => $syntaxtreepenalty,
-            'wre_eg'              => $explgraphtype,
-            'wre_eg_penalty'      => $explgraphpenalty,
-            'wre_d'               => $desctype,
-            'wre_d_penalty'       => $descpenalty,
-            'wre_td'              => $teststringtype,
-            'wre_td_penalty'      => $teststringpenalty,
-            'wre_cre_percentage'  => $compareregex,
-            'wre_acre_percentage' => $compareautomat
-            );
+        $result = new stdClass();
+        $result->id = $questionid;
+        $result->wre_notation = $notation;
+        $result->wre_st = $syntaxtreetype;
+        $result->wre_st_penalty = $syntaxtreepenalty;
+        $result->wre_eg = $explgraphtype;
+        $result->wre_eg_penalty = $explgraphpenalty;
+        $result->wre_d = $desctype;
+        $result->wre_d_penalty = $descpenalty;
+        $result->wre_td = $teststringtype;
+        $result->wre_td_penalty = $teststringpenalty;
+        $result->wre_cre_percentage = $compareregex;
+        $result->wre_acre_percentage = $compareautomat;
 
         return $result;
     }

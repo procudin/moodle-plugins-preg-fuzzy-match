@@ -68,19 +68,23 @@ class qtype_writeregex extends question_type {
 
         $result = new stdClass();
 
+//        echo '<pre>';
+//        print_r($question);
+//        echo '</pre>';
+
         $result->id = 0;
-        $result->questionid = intval ($question['questionid']);
-        $result->notation = intval ($question['wre_notation']);
-        $result->syntaxtreehinttype = intval ($question['wre_st']);
-        $result->syntaxtreehintpenalty = floatval($question['wre_st_penalty']);
-        $result->explgraphhinttype = intval ($question['wre_eg']);
-        $result->explgraphhintpenalty = floatval($question['wre_eg_penalty']);
-        $result->descriptionhinttype = intval ($question['wre_d']);
-        $result->descriptionhintpenalty = floatval($question['wre_d_penalty']);
-        $result->teststringshinttype = intval ($question['wre_td']);
-        $result->teststringshintpenalty = floatval($question['wre_td_penalty']);
-        $result->compareregexpercentage = floatval($question['wre_cre_percentage']);
-        $result->compareautomatercentage = floatval($question['wre_acre_percentage']);
+        $result->questionid = intval ($question->id);
+        $result->notation = intval ($question->wre_notation);
+        $result->syntaxtreehinttype = intval ($question->wre_st);
+        $result->syntaxtreehintpenalty = floatval($question->wre_st_penalty);
+        $result->explgraphhinttype = intval ($question->wre_eg);
+        $result->explgraphhintpenalty = floatval($question->wre_eg_penalty);
+        $result->descriptionhinttype = intval ($question->wre_d);
+        $result->descriptionhintpenalty = floatval($question->wre_d_penalty);
+        $result->teststringshinttype = intval ($question->wre_td);
+        $result->teststringshintpenalty = floatval($question->wre_td_penalty);
+        $result->compareregexpercentage = floatval($question->wre_cre_percentage);
+        $result->compareautomatercentage = floatval($question->wre_acre_percentage);
 
         return $result;
     }
@@ -105,6 +109,12 @@ class qtype_writeregex extends question_type {
         global $DB;
 
         $DB->insert_record('qtype_writeregex_options', $std_question);
+
+        $parentresult = parent::save_question_options($question);
+        if ($parentresult !== null) {
+            // Parent function returns null if all is OK.
+            return $parentresult;
+        }
 
         error_log("[save_question_options]\n", 3, "writeregex_log.txt");
     }
