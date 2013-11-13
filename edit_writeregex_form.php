@@ -58,17 +58,17 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
         // RegEx notations.
         $notation_options = array(
-            'val_0' => get_string('wre_notation_simple', 'qtype_writeregex'),
-            'val_1' => get_string('wre_notation_extended', 'qtype_writeregex'),
-            'val_2' => get_string('wre_notation_moodle', 'qtype_writeregex')
+            '0' => get_string('wre_notation_simple', 'qtype_writeregex'),
+            '1' => get_string('wre_notation_extended', 'qtype_writeregex'),
+            '2' => get_string('wre_notation_moodle', 'qtype_writeregex')
         );
 
         // Syntax tree options
         $syntax_tree_options = array(
-            'val_0' => get_string('wre_st_none', 'qtype_writeregex'),
-            'val_1' => get_string('wre_st_student', 'qtype_writeregex'),
-            'val_2' => get_string('wre_st_answer', 'qtype_writeregex'),
-            'val_3' => get_string('wre_st_both', 'qtype_writeregex')
+            '0' => get_string('wre_st_none', 'qtype_writeregex'),
+            '1' => get_string('wre_st_student', 'qtype_writeregex'),
+            '2' => get_string('wre_st_answer', 'qtype_writeregex'),
+            '3' => get_string('wre_st_both', 'qtype_writeregex')
         );
         $syntax_tree = array();
 
