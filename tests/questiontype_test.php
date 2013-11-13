@@ -65,7 +65,17 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
     function test_save_question_options() {
         error_log('[get_possible_responses]', 3, 'writeregex_log.txt');
         
-        //
+        global $DB;
+
+        $DB->delete_records('qtype_writeregex_options');
+
+        $record1 = $this->generate_question_2(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        $record2 = $this->generate_question_2(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+
+        $this->qtype->save_question_options($record1);
+        $this->qtype->save_question_options($record2);
+
+        $this->assertEquals($DB->count_records('qtype_writeregex_options'), 2);
 
     }
 
@@ -84,7 +94,7 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
             'wre_d_penalty'       => $descpenalty,
             'wre_td'              => $teststringtype,
             'wre_td_penalty'      => $teststringpenalty,
-            'wre_cre_percentage'  => $compareregex
+            'wre_cre_percentage'  => $compareregex,
             'wre_acre_percentage' => $compareautomat
             );
 
