@@ -134,6 +134,15 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
         $this->assertEquals($calc_id, 2);
 
         $record2 = $this->form_options(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        $new_id = $DB->insert_record('qtype_writeregex_options', $record2);
+        $this->assertEquals($new_id, 2);
+
+        $calc_id = $this->qtype->generate_new_id();
+        $this->assertEquals($calc_id, 3);
+
+        $DB->delete_records('qtype_writeregex_options', array('id' => 1));
+        $calc_id = $this->qtype->generate_new_id();
+        $this->assertEquals($calc_id, 1);
     }
 }
 
