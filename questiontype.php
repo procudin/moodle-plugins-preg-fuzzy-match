@@ -81,6 +81,12 @@ class qtype_writeregex extends question_type {
 
     public function delete_question($questionid, $contextid){
 
+        parent::delete_question($questionid, $contextid);
+
+        global $DB;
+
+        $DB->delete_records('qtype_writeregex_options', array('questionid' => $questionid));
+
         error_log("[delete_question]\n", 3, "writeregex_log.txt");
     }
 
