@@ -89,7 +89,11 @@ class qtype_writeregex extends question_type {
 
         error_log("[get_question_options]\n", 3, "writeregex_log.txt");
 
+        global $DB;
+
         $result = new stdClass();
+
+        $result->options = $DB->get_record('qtype_writeregex_options', array('questionid' => $question->id));
 
         return $result;
     }
