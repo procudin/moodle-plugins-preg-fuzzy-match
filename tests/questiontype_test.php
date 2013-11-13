@@ -64,30 +64,31 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
 
     function test_save_question_options() {
         error_log('[get_possible_responses]', 3, 'writeregex_log.txt');
-        $this->assertEquals(1, 1);
+        
+        //
+
     }
 
-    public function run_sql_script_for_test ($sql_script) {
-        error_log("[run_sql_script]\n", 3, "writeregex_log.txt");
+    function generate_question_2 ($questionid, $notation, $syntaxtreetype, $syntaxtreepenalty,
+     $explgraphtype, $explgraphpenalty, $desctype, $descpenalty, $teststringtype, $teststringpenalty,
+     $compareregex, $compareautomat) {
 
-        global $CFG;
+        $result = array(
+            'questionid'          => $questionid,
+            'wre_notation'        => $notation,
+            'wre_st'              => $syntaxtreetype,
+            'wre_st_penalty'      => $syntaxtreepenalty,
+            'wre_eg'              => $explgraphtype,
+            'wre_eg_penalty'      => $explgraphpenalty,
+            'wre_d'               => $desctype,
+            'wre_d_penalty'       => $descpenalty,
+            'wre_td'              => $teststringtype,
+            'wre_td_penalty'      => $teststringpenalty,
+            'wre_cre_percentage'  => $compareregex
+            'wre_acre_percentage' => $compareautomat
+            );
 
-        $vals = array(
-            'db_user' => 'root',
-            'db_pass' => '',
-            'db_host' => 'localhost',
-            'db_name' => 'moodle'
-        );
-
-        $script_path = $CFG->dirroot . '/question/type/writeregex/tests/';
-
-        $command = "mysql -u{$vals['db_user']} -p{$vals['db_pass']} "
-            . "-h {$vals['db_host']} -D {$vals['db_name']} < {$script_path}";
-
-//        $output = shell_exec($command . '/test_generate_new_id__append_1.sql');
-        $output = shell_exec($command . $sql_script);
-
-        $this->assertEquals(1, 1);
+        return $result;
     }
 
     private function form_options($id, $questionid, $notation, $syntaxtreetype, $syntaxtreepenalty,
@@ -147,9 +148,6 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
 
 
         error_log('[test_delete_question]', 3, 'writeregex_log.txt');
-
-
-        $this->assertEquals(1, 1);
     }
 
     function test_generate_new_id() {
