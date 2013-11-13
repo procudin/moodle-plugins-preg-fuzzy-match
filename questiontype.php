@@ -64,6 +64,27 @@ class qtype_writeregex extends question_type {
         return $result;
     }
 
+    private function form_options($question) {
+
+        $result = new stdClass();
+
+        $result->id = 0;
+        $result->questionid = $question['questionid'];
+        $result->notation = $question['wre_notation'];
+        $result->syntaxtreehinttype = $question['wre_st'];
+        $result->syntaxtreehintpenalty = $question['wre_st_penalty'];
+        $result->explgraphhinttype = $question['wre_eg'];
+        $result->explgraphhintpenalty = $question['wre_eg_penalty'];
+        $result->descriptionhinttype = $question['wre_d'];
+        $result->descriptionhintpenalty = $question['wre_d_penalty'];
+        $result->teststringshinttype = $question['wre_td'];
+        $result->teststringshintpenalty = $question['wre_td_penalty'];
+        $result->compareregexpercentage = $question['wre_cre_percentage'];
+        $result->compareautomatercentage = $question['wre_acre_percentage'];
+
+        return $result;
+    }
+
     public function get_question_options($question){
 
         error_log("[get_question_options]\n", 3, "writeregex_log.txt");
