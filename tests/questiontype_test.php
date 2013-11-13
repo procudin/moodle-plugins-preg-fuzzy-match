@@ -114,6 +114,38 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
     }
 
     function test_delete_question() {
+
+        global $DB;
+
+        $DB->delete_records('qtype_writeregex_options');
+
+        $record1 = $this->form_options(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        $record2 = $this->form_options(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+
+        $DB->insert_record('qtype_writeregex_options', $record1);
+        $DB->insert_record('qtype_writeregex_options', $record2);
+
+        $this->assertEquals($DB->count_records('qtype_writeregex_options'), 2);
+
+        $this->qtype->delete_question(1, 1);
+
+        $this->assertEquals($DB->count_records('qtype_writeregex_options'), 0);
+
+        $DB->delete_records('qtype_writeregex_options');
+
+        $record1 = $this->form_options(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        $record2 = $this->form_options(2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+
+        $DB->insert_record('qtype_writeregex_options', $record1);
+        $DB->insert_record('qtype_writeregex_options', $record2);
+
+        $this->assertEquals($DB->count_records('qtype_writeregex_options'), 2);
+
+        $this->qtype->delete_question(1, 1);
+
+        $this->assertEquals($DB->count_records('qtype_writeregex_options'), 1);
+
+
         error_log('[test_delete_question]', 3, 'writeregex_log.txt');
 
 
@@ -125,6 +157,8 @@ class qtype_writeregex_test extends PHPUnit_Framework_TestCase {
 
         // prepare test data
         global $DB;
+
+        $DB->delete_records('qtype_writeregex_options');
 
         $record1 = $this->form_options(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         $new_id = $DB->insert_record('qtype_writeregex_options', $record1);
