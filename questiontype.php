@@ -92,6 +92,12 @@ class qtype_writeregex extends question_type {
 
     public function save_question_options($question) {
 
+        $std_question = $this->form_options($question);
+
+        global $DB;
+
+        $DB->insert_record('qtype_writeregex_options', $std_question);
+
         error_log("[save_question_options]\n", 3, "writeregex_log.txt");
     }
 
