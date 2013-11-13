@@ -111,6 +111,8 @@ class qtype_writeregex extends question_type {
 
     protected function initialise_question_instance(question_definition $question, $questiondata) {
 
+        parent::initialise_question_instance($question, $questiondata);
+
         error_log("[initialise_question_instance]\n", 3, "writeregex_log.txt");
     }
 
