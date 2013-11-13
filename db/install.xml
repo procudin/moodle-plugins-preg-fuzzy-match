@@ -10,14 +10,14 @@
                 <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of question"/>
                 <FIELD NAME="notation" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="syntaxtreehinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
-                <FIELD NAME="syntaxtreehintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="syntaxtreehintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="explgraphhinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
-                <FIELD NAME="explgraphhintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="explgraphhintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="descriptionhinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
-                <FIELD NAME="descriptionhintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="descriptionhintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="teststringshinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
-                <FIELD NAME="teststringshintpenalty" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
-                <FIELD NAME="compareregexpercentage" TYPE="number" LENGTH="4" NOTNULL="true" SEQUENCE="false" DECIMALS="2"/>
+                <FIELD NAME="teststringshintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
+                <FIELD NAME="compareregexpercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
