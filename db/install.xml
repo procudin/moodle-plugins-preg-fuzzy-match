@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="question/type/writeregex/db" VERSION="20131030" COMMENT="XMLDB file for question type: WriteRegEx"
+<XMLDB PATH="question/type/writeregex/db" VERSION="2013102500" COMMENT="XMLDB file for question type: WriteRegEx"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
         >
