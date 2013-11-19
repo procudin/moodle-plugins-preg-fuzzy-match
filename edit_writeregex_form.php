@@ -144,10 +144,10 @@ class qtype_writeregex_edit_form extends question_edit_form {
        
         // $mform->closeHeaderBefore('nameforyourheaderelement');
 
-        $this->add_per_answer_fields($mform, get_string('wre_regexp_answers', 'qtype_writeregex'),
+        $this->add_per_answer_fields($mform, 'wre_regexp_answers',
                question_bank::fraction_options());
 
-        $this->add_per_answer_fields($mform, get_string('wre_regexp_ts', 'qtype_writeregex', '{no}'),
+        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
                question_bank::fraction_options());
 
 
@@ -156,9 +156,34 @@ class qtype_writeregex_edit_form extends question_edit_form {
         error_log("[definition_inner-{end}]\n", 3, 'writeregex_log.txt');
     }
 
+    protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
+                                             $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+        // Some code here...
+        $mform->addElement('header', 'answerhdr', get_string($label, 'qtype_writeregex'), '');
+        $mform->setExpanded('answerhdr', 1);
+
+        $answersoption = '';
+        $repeatedoptions = array();
+        $repeated = $this->get_per_answer_fields($mform, get_string($label, 'qtype_writeregex'), $gradeoptions,
+            $repeatedoptions, $answersoption);
+
+        if (isset($this->question->options)) {
+            $repeatsatstart = count($this->question->options->$answersoption);
+        } else {
+            $repeatsatstart = $minoptions;
+        }
+
+//        echo '<pre>';
+//        print_r($repeated[0]);
+//        echo '</pre>';
+
+        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
+            'noanswers', 'addanswers', $addoptions,
+            $this->get_more_choices_string(), true);
+    }
+
     protected function get_more_choices_string() {
-//        return get_string('addmoreanswerblanks', 'qtype_shortanswer');
-        error_log('[get_more_choices_string]', 3, 'writeregex_log.txt');
+        return get_string('addmorechoiceblanks', 'question');
     }
 
     protected function data_preprocessing($question) {

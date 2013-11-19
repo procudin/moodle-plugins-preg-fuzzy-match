@@ -91,4 +91,4 @@ $string['wre_acre'] = 'Проверка совпадения конечных а
 $string['wre_acre_percentage'] = 'Доля';
 
 $string['wre_regexp_answers'] = 'Регулярное выражение';
-$string['wre_regexp_ts'] = 'Тестовая строка {$a}';
+$string['wre_regexp_ts'] = 'Тестовая строка';

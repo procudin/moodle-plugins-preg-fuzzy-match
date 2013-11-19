@@ -91,4 +91,4 @@ $string['wre_acre'] = 'Compare regexp\'s automats';
 $string['wre_acre_percentage'] = 'Percentage';
 
 $string['wre_regexp_answers'] = 'Regular expression';
-$string['wre_regexp_ts'] = 'Test string {$a}';
+$string['wre_regexp_ts'] = 'Test string';
