@@ -96,6 +96,9 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
         // $mform = $this->_form;
 
+        $mform->addElement('hidden', 'wre_id', 'qwe');
+        $mform->setType('wre_id', PARAM_RAW);
+
         $mform->addElement('select', 'wre_notation',get_string('wre_notation', 'qtype_writeregex'), $notation_options);
 
         $syntax_tree[] =& $mform->createElement('select', 'wre_st', get_string('wre_st', 'qtype_writeregex'),
@@ -231,6 +234,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
             $question->wre_td_penalty      = $q->options->teststringshintpenalty;
             $question->wre_cre_percentage  = $q->options->compareregexpercentage;
             $question->wre_acre_percentage = $q->options->compareautomatercentage;
+            $question->wre_id              = $q->options->id;
         }
 
         return $question;
