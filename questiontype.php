@@ -110,9 +110,9 @@ class qtype_writeregex extends question_type {
 
         global $DB;
 
-        echo '<pre>';
-        print_r($question);
-        echo '</pre>';
+//        echo '<pre>';
+//        print_r($question);
+//        echo '</pre>';
 
         $DB->insert_record('qtype_writeregex_options', $std_question);
 
@@ -122,7 +122,16 @@ class qtype_writeregex extends question_type {
             return $parentresult;
         }
 
+        $answer = new stdClass();
+        $answer->question = $question->id;
+        $answer->answer = $question->wre_regexp_answers_answer[0];
+        $answer->fraction = $question->fraction[0];
+        $answer->feedback = '';
+        $answer->id = $DB->insert_record('question_answers', $answer);
+
         error_log("[save_question_options]\n", 3, "writeregex_log.txt");
+
+        return '';
     }
 
     protected function initialise_question_instance(question_definition $question, $questiondata) {
