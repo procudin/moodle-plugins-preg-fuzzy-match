@@ -147,8 +147,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
                question_bank::fraction_options());
 
-        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
-               question_bank::fraction_options());
+//        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
+//               question_bank::fraction_options());
 
 
         $this->add_interactive_settings();
@@ -158,13 +158,18 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
                                              $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+//        global $CFG;
+//        echo '<pre>';
+//        print_r($CFG->libdir.'/formslib.php');
+//        echo '</pre>';
+
         // Some code here...
         $mform->addElement('header', 'answerhdr', get_string($label, 'qtype_writeregex'), '');
         $mform->setExpanded('answerhdr', 1);
 
         $answersoption = '';
         $repeatedoptions = array();
-        $repeated = $this->get_per_answer_fields($mform, get_string($label, 'qtype_writeregex'), $gradeoptions,
+        $repeated = $this->get_per_answer_fields($mform, $label, $gradeoptions,
             $repeatedoptions, $answersoption);
 
         if (isset($this->question->options)) {
@@ -173,8 +178,9 @@ class qtype_writeregex_edit_form extends question_edit_form {
             $repeatsatstart = $minoptions;
         }
 
+
 //        echo '<pre>';
-//        print_r($repeated[0]);
+//        print_r($repeated[0]->_elements[0]->_attributes['name']);
 //        echo '</pre>';
 
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
@@ -184,6 +190,24 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     protected function get_more_choices_string() {
         return get_string('addmorechoiceblanks', 'question');
+    }
+
+    protected function get_per_answer_fields($mform, $label, $gradeoptions,
+                                             &$repeatedoptions, &$answersoption) {
+        $repeated = array();
+
+        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
+
+        $repeated[] =& $mform->createElement('select', 'fraction', get_string('grade'), $gradeoptions);
+        $repeated[] =& $mform->createElement('editor', 'feedback', get_string('feedback', 'question'),
+            array('rows' => 5), $this->editoroptions);
+
+        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = $label;
+
+        return $repeated;
     }
 
     protected function data_preprocessing($question) {
@@ -215,7 +239,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
-        $answers = $data['answer'];
+        $answers = $data['wre_regexp_answers_answer'];
         $answercount = 0;
         $maxgrade = false;
         foreach ($answers as $key => $answer) {

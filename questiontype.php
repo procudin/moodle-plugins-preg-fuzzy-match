@@ -110,9 +110,9 @@ class qtype_writeregex extends question_type {
 
         global $DB;
 
-//        echo '<pre>';
-//        print_r($question);
-//        echo '</pre>';
+        echo '<pre>';
+        print_r($question);
+        echo '</pre>';
 
         $DB->insert_record('qtype_writeregex_options', $std_question);
 
