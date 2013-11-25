@@ -150,8 +150,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
                question_bank::fraction_options());
 
-//        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
-//               question_bank::fraction_options());
+        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
+               question_bank::fraction_options());
 
 
         $this->add_interactive_settings();
@@ -159,14 +159,15 @@ class qtype_writeregex_edit_form extends question_edit_form {
         error_log("[definition_inner-{end}]\n", 3, 'writeregex_log.txt');
     }
 
-    protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
-                                             $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-//        global $CFG;
-//        echo '<pre>';
-//        print_r($CFG->libdir.'/formslib.php');
-//        echo '</pre>';
+    private function add_test_strings(&$mform, $label, $gradeoptions,
+                                     $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+        echo '<pre>';
+        print_r($label);
+        echo '</pre>';
+    }
 
-        // Some code here...
+    private function add_regexp_strings(&$mform, $label, $gradeoptions,
+                                        $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
         $mform->addElement('header', 'answerhdr', get_string($label, 'qtype_writeregex'), '');
         $mform->setExpanded('answerhdr', 1);
 
@@ -189,6 +190,21 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noanswers', 'addanswers', $addoptions,
             $this->get_more_choices_string(), true);
+    }
+
+    protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
+                                             $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+//        global $CFG;
+//        echo '<pre>';
+//        print_r($CFG->libdir.'/formslib.php');
+//        echo '</pre>';
+
+        // Some code here...
+        if ($label == 'wre_regexp_ts') {
+            $this->add_test_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
+        } else {
+            $this->add_regexp_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
+        }
     }
 
     protected function get_more_choices_string() {
