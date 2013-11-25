@@ -161,9 +161,23 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     private function add_test_strings(&$mform, $label, $gradeoptions,
                                      $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        echo '<pre>';
-        print_r($label);
-        echo '</pre>';
+        $mform->addElement('header', 'teststrhdr', get_string($label, 'qtype_writeregex'), '');
+        $mform->setExpanded('teststrhdr', 1);
+
+        $answersoption = '';
+        $repeatedoptions = array();
+        $repeated = $this->get_per_answer_fields($mform, $label, $gradeoptions,
+            $repeatedoptions, $answersoption);
+
+        if (isset($this->question->options)) {
+            $repeatsatstart = count($this->question->options->$answersoption);
+        } else {
+            $repeatsatstart = $minoptions;
+        }
+
+        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
+            'noanswers', 'addanswers', $addoptions,
+            $this->get_more_choices_string(), true);
     }
 
     private function add_regexp_strings(&$mform, $label, $gradeoptions,
