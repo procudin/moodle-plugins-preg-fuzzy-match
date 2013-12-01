@@ -208,11 +208,6 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
                                              $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-//        global $CFG;
-//        echo '<pre>';
-//        print_r($CFG->libdir.'/formslib.php');
-//        echo '</pre>';
-
         // Some code here...
         if ($label == 'wre_regexp_ts') {
             $this->add_test_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
@@ -225,8 +220,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return get_string('addmorechoiceblanks', 'question');
     }
 
-    protected function get_per_answer_fields($mform, $label, $gradeoptions,
-                                             &$repeatedoptions, &$answersoption) {
+    private function  get_per_answer_fields_regexp($mform, $label, $gradeoptions,
+                                                   &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
@@ -239,6 +234,18 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = $label;
+
+        return $repeated;
+    }
+
+    protected function get_per_answer_fields($mform, $label, $gradeoptions,
+                                             &$repeatedoptions, &$answersoption) {
+        $repeated = array();
+
+        if ($label == 'wre_regexp_ts') {
+            $repeated = $this->get_per_answer_fields_regexp($mform, $label,
+                $gradeoptions, $repeatedoptions, $answersoption);
+        }
 
         return $repeated;
     }
