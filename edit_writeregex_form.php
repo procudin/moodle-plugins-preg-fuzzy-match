@@ -175,6 +175,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
             $repeatsatstart = $minoptions;
         }
 
+        $repeatsatstart = 5;
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noanswers', 'addanswers', $addoptions,
             $this->get_more_choices_string(), true);
@@ -195,11 +196,6 @@ class qtype_writeregex_edit_form extends question_edit_form {
         } else {
             $repeatsatstart = $minoptions;
         }
-
-
-//        echo '<pre>';
-//        print_r($repeated[0]->_elements[0]->_attributes['name']);
-//        echo '</pre>';
 
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noanswers', 'addanswers', $addoptions,
@@ -238,12 +234,31 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $repeated;
     }
 
+    private function  get_per_answer_fields_strings($mform, $label, $gradeoptions,
+                                                   &$repeatedoptions, &$answersoption) {
+        $repeated = array();
+
+        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
+
+        $repeated[] =& $mform->createElement('select', 'fraction', get_string('grade'), $gradeoptions);
+
+        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = $label;
+
+        return $repeated;
+    }
+
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
                                              &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
-        if ($label == 'wre_regexp_ts') {
+        if ($label != 'wre_regexp_ts') {
             $repeated = $this->get_per_answer_fields_regexp($mform, $label,
+                $gradeoptions, $repeatedoptions, $answersoption);
+        } else {
+            $repeated = $this->get_per_answer_fields_strings($mform, $label,
                 $gradeoptions, $repeatedoptions, $answersoption);
         }
 
