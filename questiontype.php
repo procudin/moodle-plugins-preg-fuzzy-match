@@ -104,6 +104,31 @@ class qtype_writeregex extends question_type {
         return $result;
     }
 
+    private function save_regexp_answers($question) {
+
+        global $DB;
+
+        $answers_value = $question->wre_regexp_answers_answer;
+        $answers_fraction = $question->wre_regexp_answers_fraction;
+        $answers_feedback = $question->wre_regexp_answers_feedback;
+
+        $index = 0;
+
+        foreach ($answers_value as $item) {
+
+            $answer = new stdClass();
+            $answer->question = $question->id;
+            $answer->answer = $item;
+            $answer->answerformat = 1;
+            $answer->fraction = $answers_fraction[$index];
+            $answer->feedback = $answers_feedback[$index]['text'];
+            $answer->feedbackformat = $answers_feedback[$index]['format'];
+            $answer->id = $DB->insert_record('question_answers', $answer);
+
+            $index++;
+        }
+    }
+
     public function save_question_options($question) {
 
         $std_question = $this->form_options($question);
@@ -122,12 +147,8 @@ class qtype_writeregex extends question_type {
             return $parentresult;
         }
 
-        $answer = new stdClass();
-        $answer->question = $question->id;
-        $answer->answer = $question->wre_regexp_answers_answer[0];
-        $answer->fraction = $question->fraction[0];
-        $answer->feedback = '';
-        $answer->id = $DB->insert_record('question_answers', $answer);
+        // Step 1: save regexp
+        $this->save_regexp_answers($question);
 
         error_log("[save_question_options]\n", 3, "writeregex_log.txt");
 

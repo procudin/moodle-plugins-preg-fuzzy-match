@@ -223,8 +223,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
 
-        $repeated[] =& $mform->createElement('select', 'fraction', get_string('grade'), $gradeoptions);
-        $repeated[] =& $mform->createElement('editor', 'feedback', get_string('feedback', 'question'),
+        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
+        $repeated[] =& $mform->createElement('editor', $label . '_feedback', get_string('feedback', 'question'),
             array('rows' => 5), $this->editoroptions);
 
         $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
