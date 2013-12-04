@@ -241,7 +241,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
 
-        $repeated[] =& $mform->createElement('select', 'fraction', get_string('grade'), $gradeoptions);
+        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
 
         $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
@@ -295,28 +295,28 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
-        $answers = $data['wre_regexp_answers_answer'];
-        $answercount = 0;
-        $maxgrade = false;
-        foreach ($answers as $key => $answer) {
-            $trimmedanswer = trim($answer);
-            if ($trimmedanswer !== '') {
-                $answercount++;
-                if ($data['fraction'][$key] == 1) {
-                    $maxgrade = true;
-                }
-            } else if ($data['fraction'][$key] != 0 ||
-                    !html_is_blank($data['feedback'][$key]['text'])) {
-                $errors["answeroptions[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
-                $answercount++;
-            }
-        }
-        if ($answercount==0) {
-            $errors['answeroptions[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
-        }
-        if ($maxgrade == false) {
-            $errors['answeroptions[0]'] = get_string('fractionsnomax', 'question');
-        }
+//        $answers = $data['wre_regexp_answers_answer'];
+//        $answercount = 0;
+//        $maxgrade = false;
+//        foreach ($answers as $key => $answer) {
+//            $trimmedanswer = trim($answer);
+//            if ($trimmedanswer !== '') {
+//                $answercount++;
+//                if ($data['fraction'][$key] == 1) {
+//                    $maxgrade = true;
+//                }
+//            } else if ($data['fraction'][$key] != 0 ||
+//                    !html_is_blank($data['feedback'][$key]['text'])) {
+//                $errors["answeroptions[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
+//                $answercount++;
+//            }
+//        }
+//        if ($answercount==0) {
+//            $errors['answeroptions[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
+//        }
+//        if ($maxgrade == false) {
+//            $errors['answeroptions[0]'] = get_string('fractionsnomax', 'question');
+//        }
         return $errors;
 //        error_log('[validation]', 3, 'writeregex_log.txt');
     }

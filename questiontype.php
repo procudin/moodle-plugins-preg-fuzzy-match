@@ -116,14 +116,43 @@ class qtype_writeregex extends question_type {
 
         foreach ($answers_value as $item) {
 
-            $answer = new stdClass();
-            $answer->question = $question->id;
-            $answer->answer = $item;
-            $answer->answerformat = 1;
-            $answer->fraction = $answers_fraction[$index];
-            $answer->feedback = $answers_feedback[$index]['text'];
-            $answer->feedbackformat = $answers_feedback[$index]['format'];
-            $answer->id = $DB->insert_record('question_answers', $answer);
+            if (!empty($item)) {
+
+                $answer = new stdClass();
+                $answer->question = $question->id;
+                $answer->answer = $item;
+                $answer->answerformat = 1;
+                $answer->fraction = $answers_fraction[$index];
+                $answer->feedback = $answers_feedback[$index]['text'];
+                $answer->feedbackformat = $answers_feedback[$index]['format'];
+                $answer->id = $DB->insert_record('question_answers', $answer);
+            }
+
+            $index++;
+        }
+    }
+
+    private function save_test_string_answers($question) {
+
+        global $DB;
+
+        $answers_value = $question->wre_regexp_ts_answer;
+        $answers_fraction = $question->wre_regexp_ts_fraction;
+
+        $index = 0;
+
+        foreach ($answers_value as $item) {
+
+            if (!empty($item)) {
+                $answer = new stdClass();
+                $answer->question = $question->id;
+                $answer->answer = $item;
+                $answer->answerformat = 2;
+                $answer->fraction = $answers_fraction[$index];
+                $answer->feedback = '';
+                $answer->feedbackformat = 0;
+                $answer->id = $DB->insert_record('question_answers', $answer);
+            }
 
             $index++;
         }
@@ -135,9 +164,9 @@ class qtype_writeregex extends question_type {
 
         global $DB;
 
-//        echo '<pre>';
-//        print_r($question);
-//        echo '</pre>';
+        echo '<pre>';
+        print_r($question);
+        echo '</pre>';
 
         $DB->insert_record('qtype_writeregex_options', $std_question);
 
@@ -149,6 +178,9 @@ class qtype_writeregex extends question_type {
 
         // Step 1: save regexp
         $this->save_regexp_answers($question);
+
+        // Step 2: save test strings
+        $this->save_test_string_answers($question);
 
         error_log("[save_question_options]\n", 3, "writeregex_log.txt");
 
