@@ -188,6 +188,37 @@ class qtype_writeregex extends question_type {
         return $result;
     }
 
+    /**
+     * Метод добавления/изменения ответов на вопрос.
+     * @param $question Вопрос.
+     */
+    protected function save_update_answers ($question) {
+
+        $answers_value = $question->wre_regexp_answers_answer;
+        $answers_fraction = $question->wre_regexp_answers_fraction;
+        $answers_feedback = $question->wre_regexp_answers_feedback;
+        $answers_id = $question->regexp_id;
+
+        $index = 0;
+
+        foreach ($answers_value as $item) {
+
+            if (!empty($item)) {
+
+                if ($answers_id[$index] != 'qwe' and !isset($answers_id[$index])) {
+                    $this->save_regexp_answer($item, $answers_fraction[$index],
+                        $answers_feedback[$index], $answers_feedback[$index]['format']);
+                } else {
+                    $this->update_regexp_answer($item, $answers_fraction[$index],
+                        $answers_feedback[$index], $answers_feedback[$index]['format'], $answers_id[$index]);
+                }
+
+            }
+
+            $index++;
+        }
+    }
+
     protected function update_regexp_answers ($question) {
 
         global $DB;
