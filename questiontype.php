@@ -151,6 +151,21 @@ class qtype_writeregex extends question_type {
     }
 
     /**
+     * Метод сохранения ответа тестовых строк в бд.
+     * @param $value Значение ответа.
+     * @param $fraction Оценка ответа.
+     * @param $questionid Идентификатор вопроса.
+     */
+    protected function save_test_string_answer ($value, $fraction, $questionid) {
+
+        global $DB;
+
+        $result = $this->form_test_string_answer($value, $fraction, $questionid);
+
+        $result->id = $DB->insert_record('question_answers', $result);
+    }
+
+    /**
      * Метод обновления regexp ответа в бд.
      * @param $value Значение ответа.
      * @param $fraction Оценка ответа.
