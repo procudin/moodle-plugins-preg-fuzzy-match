@@ -150,6 +150,25 @@ class qtype_writeregex extends question_type {
     }
 
     /**
+     * Метод обновления regexp ответа в бд.
+     * @param $value Значение ответа.
+     * @param $fraction Оценка ответа.
+     * @param $feedback Описание ответа.
+     * @param $feedbackformat Формат описания ответа.
+     * @param $id Идентификатор ответа.
+     */
+    protected function update_regexp_answer ($value, $fraction, $feedback, $feedbackformat, $id) {
+
+        global $DB;
+
+        $result = $this->form_regexp_answer($value, $fraction, $feedback, $feedbackformat);
+
+        $result->id = $id;
+
+        $DB->update_record('question_answer', $result);
+    }
+
+    /**
      * Метод формирования stdClass ответа в виде regexp.
      * @param $value Значение ответа.
      * @param $fraction Оценка.
