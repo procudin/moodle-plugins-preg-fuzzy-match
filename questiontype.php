@@ -193,6 +193,27 @@ class qtype_writeregex extends question_type {
     }
 
     /**
+     * Метод формирования stdClass ответа тестовых строк.
+     * @param $value Значение ответа.
+     * @param $fraction Оценка ответа.
+     * @param $questionid Идентификатор вопроса.
+     * @return stdClass Ответ в виде класса ждя сохранения в бд.
+     */
+    protected function form_test_string_answer ($value, $fraction, $questionid) {
+
+        $result = new stdClass();
+
+        $result->answer = $value;
+        $result->question = $questionid;
+        $result->answerformat = 2;
+        $result->fraction = $fraction;
+        $result->feedback = '';
+        $result->feedbackformat = 0;
+
+        return $result;
+    }
+
+    /**
      * Метод добавления/изменения regexp ответов на вопрос.
      * @param $question Вопрос.
      */
