@@ -35,6 +35,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 class qtype_writeregex_edit_form extends question_edit_form {
 
+    protected $jsmodule = array(
+        'name' => 'writeregex_module',
+        'fullpath' => '/question/type/writeregex/writeregex_module.js'
+    );
+
     protected function definition_inner($mform) {
 
         error_log("[definition_inner-{start}\n", 3, 'writeregex_log.txt');
@@ -156,7 +161,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
         $this->add_interactive_settings();
 
-        error_log("[definition_inner-{end}]\n", 3, 'writeregex_log.txt');
+        global $PAGE;
+        //$PAGE->requires->js_init_call('M.writeregex_module.init', null, true, $this->jsmodule);
     }
 
     private function add_test_strings(&$mform, $label, $gradeoptions,
@@ -404,7 +410,6 @@ class qtype_writeregex_edit_form extends question_edit_form {
 //            $errors['answeroptions[0]'] = get_string('fractionsnomax', 'question');
 //        }
         return $errors;
-//        error_log('[validation]', 3, 'writeregex_log.txt');
     }
 
     public function qtype() {
