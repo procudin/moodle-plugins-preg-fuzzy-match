@@ -277,6 +277,34 @@ class qtype_writeregex extends question_type {
         }
     }
 
+    /**
+     * Метод добавления/изменения ответов на вопрос типа тестовая строка.
+     * @param $question Вопрос.
+     */
+    protected function save_update_test_string_answers ($question) {
+
+        $answers_value = $question->wre_regexp_ts_answer;
+        $answers_fraction = $question->wre_regexp_ts_fraction;
+        $answers_id = $question->test_string_id;
+
+        $index = 0;
+
+        foreach ($answers_value as $item) {
+
+            if (!empty($item)) {
+
+                if ($answers_id[$index] == 'qwe') {
+                    $this->save_test_string_answer($item, $answers_fraction[$index], $question->id);
+                } else {
+                    $this->update_test_string_answer($item, $answers_fraction[$index],
+                        $answers_id[$index], $question->id);
+                }
+            }
+
+            $index++;
+        }
+    }
+
     protected function update_regexp_answers ($question) {
 
         global $DB;
@@ -381,9 +409,7 @@ class qtype_writeregex extends question_type {
         $this->save_update_regexp_answers($question);
 
         // Step 2: save test strings
-        $this->save_test_string_answers($question);
-
-        error_log("[save_question_options]\n", 3, "writeregex_log.txt");
+        $this->save_update_test_string_answers($question);
 
         return '';
     }
