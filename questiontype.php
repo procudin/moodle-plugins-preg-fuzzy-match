@@ -100,6 +100,7 @@ class qtype_writeregex extends question_type {
         $result = new stdClass();
 
         $result->options = $DB->get_record('qtype_writeregex_options', array('questionid' => $question->id));
+        $result->answers = $DB->get_records('question_answers', array('question' => $question->id));
 
         return $result;
     }
@@ -132,6 +133,34 @@ class qtype_writeregex extends question_type {
         }
     }
 
+    protected function update_regexp_answers ($question) {
+
+        global $DB;
+
+        $answers_value = $question->wre_regexp_answers_answer;
+        $answers_fraction = $question->wre_regexp_answers_fraction;
+        $answers_feedback = $question->wre_regexp_answers_feedback;
+
+        $index = 0;
+
+        foreach ($answers_value as $item) {
+
+            if (!empty($item)) {
+
+                $answer = new stdClass();
+                $answer->question = $question->id;
+                $answer->answer = $item;
+                $answer->answerformat = 1;
+                $answer->fraction = $answers_fraction[$index];
+                $answer->feedback = $answers_feedback[$index]['text'];
+                $answer->feedbackformat = $answers_feedback[$index]['format'];
+                //$answer->id =
+            }
+
+            $index++;
+        }
+    }
+
     private function save_test_string_answers($question) {
 
         global $DB;
@@ -158,7 +187,27 @@ class qtype_writeregex extends question_type {
         }
     }
 
+    protected function update_question_options ($question) {
+
+        $std_question = $this->form_options($question);
+
+        $std_question->id = $question->wre_id;
+
+        global $DB;
+
+        $DB->update_record('qtype_writeregex_options', $std_question);
+
+        return '';
+    }
+
     public function save_question_options($question) {
+
+        if (isset($question->wre_id)) {
+            return $this->update_question_options($question);
+
+            // Step 1: update regexp
+            //
+        }
 
         $std_question = $this->form_options($question);
 
