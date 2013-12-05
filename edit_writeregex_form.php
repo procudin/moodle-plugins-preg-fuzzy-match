@@ -224,7 +224,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
-        $repeated [] =& $mform->createElement('hidden', 'regexp_id', '');
+        $repeated [] =& $mform->createElement('hidden', 'regexp_id', 'qwe');
 
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
@@ -245,7 +245,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
-        $repeated [] =& $mform->createElement('hidden', 'test_string_id', '');
+        $repeated [] =& $mform->createElement('hidden', 'test_string_id', 'qwe');
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
 

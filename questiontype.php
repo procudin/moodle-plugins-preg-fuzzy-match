@@ -139,12 +139,13 @@ class qtype_writeregex extends question_type {
      * @param $fraction Оценка ответа.
      * @param $feedback Описание ответа.
      * @param $feedbackformat Формат описания ответа.
+     * @param $questionid Идентифкатор вопроса.
      */
-    protected function save_regexp_answer ($value, $fraction, $feedback, $feedbackformat) {
+    protected function save_regexp_answer ($value, $fraction, $feedback, $feedbackformat, $questionid) {
 
         global $DB;
 
-        $result = $this->form_regexp_answer($value, $fraction, $feedback, $feedbackformat);
+        $result = $this->form_regexp_answer($value, $fraction, $feedback, $feedbackformat, $questionid);
 
         $result->id = $DB->insert_record('question_answers', $result);
     }
@@ -156,12 +157,13 @@ class qtype_writeregex extends question_type {
      * @param $feedback Описание ответа.
      * @param $feedbackformat Формат описания ответа.
      * @param $id Идентификатор ответа.
+     * @param $questionid Идентификатор вопроса.
      */
-    protected function update_regexp_answer ($value, $fraction, $feedback, $feedbackformat, $id) {
+    protected function update_regexp_answer ($value, $fraction, $feedback, $feedbackformat, $id, $questionid) {
 
         global $DB;
 
-        $result = $this->form_regexp_answer($value, $fraction, $feedback, $feedbackformat);
+        $result = $this->form_regexp_answer($value, $fraction, $feedback, $feedbackformat, $questionid);
 
         $result->id = $id;
 
@@ -174,12 +176,14 @@ class qtype_writeregex extends question_type {
      * @param $fraction Оценка.
      * @param $feedback Описание.
      * @param $feedbackformat Формат описания.
+     * @param $questionid Идентификатор вопроса.
      * @return stdClass Ответ в виде класса для сохранения в бд.
      */
-    protected function  form_regexp_answer ($value, $fraction, $feedback, $feedbackformat) {
+    protected function  form_regexp_answer ($value, $fraction, $feedback, $feedbackformat, $questionid) {
         $result = new stdClass();
 
         $result->answer = $value;
+        $result->question = $questionid;
         $result->answerformat = 1;
         $result->fraction = $fraction;
         $result->feedback = $feedback;
@@ -189,10 +193,10 @@ class qtype_writeregex extends question_type {
     }
 
     /**
-     * Метод добавления/изменения ответов на вопрос.
+     * Метод добавления/изменения regexp ответов на вопрос.
      * @param $question Вопрос.
      */
-    protected function save_update_answers ($question) {
+    protected function save_update_regexp_answers ($question) {
 
         $answers_value = $question->wre_regexp_answers_answer;
         $answers_fraction = $question->wre_regexp_answers_fraction;
@@ -205,12 +209,12 @@ class qtype_writeregex extends question_type {
 
             if (!empty($item)) {
 
-                if ($answers_id[$index] != 'qwe' and !isset($answers_id[$index])) {
+                if ($answers_id[$index] == 'qwe') {
                     $this->save_regexp_answer($item, $answers_fraction[$index],
-                        $answers_feedback[$index], $answers_feedback[$index]['format']);
-                } else {
+                        $answers_feedback[$index]['text'], $answers_feedback[$index]['format'], $question->id);
+               } else {
                     $this->update_regexp_answer($item, $answers_fraction[$index],
-                        $answers_feedback[$index], $answers_feedback[$index]['format'], $answers_id[$index]);
+                        $answers_feedback[$index]['text'], $answers_feedback[$index]['format'], $answers_id[$index], $question->id);
                 }
 
             }
@@ -320,7 +324,7 @@ class qtype_writeregex extends question_type {
         }
 
         // Step 1: save regexp
-        $this->save_regexp_answers($question);
+        $this->save_update_regexp_answers($question);
 
         // Step 2: save test strings
         $this->save_test_string_answers($question);
