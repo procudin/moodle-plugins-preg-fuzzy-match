@@ -182,7 +182,25 @@ class qtype_writeregex extends question_type {
 
         $result->id = $id;
 
-        $DB->update_record('question_answer', $result);
+        $DB->update_record('question_answers', $result);
+    }
+
+    /**
+     * Метод изменения тестовой строки в бд.
+     * @param $value Значение строки.
+     * @param $fraction Оценка.
+     * @param $id Идентификатор строки.
+     * @param $questionid Идентификатор вопроса.
+     */
+    protected function update_test_string_answer ($value, $fraction, $id, $questionid) {
+
+        global $DB;
+
+        $result = $this->form_test_string_answer($value, $fraction, $questionid);
+
+        $result->id = $id;
+
+        $DB->update_record('question_answers', $result);
     }
 
     /**
