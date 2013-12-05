@@ -362,6 +362,11 @@ class qtype_writeregex extends question_type {
         }
     }
 
+    /**
+     * Метод изменения параметров и ответов для типа вопроса.
+     * @param $question Вопрос.
+     * @return string
+     */
     protected function update_question_options ($question) {
 
         $std_question = $this->form_options($question);
@@ -372,19 +377,20 @@ class qtype_writeregex extends question_type {
 
         $DB->update_record('qtype_writeregex_options', $std_question);
 
+        // Step 1: update regexp
+        $this->save_update_regexp_answers($question);
+
+        // Step 2: update test string
+        $this->save_update_test_string_answers($question);
+
         return '';
     }
 
     public function save_question_options($question) {
 
         if ($question->wre_id != 'qwe') {
-            echo '<pre>';
-            print_r($question->wre_id);
-            echo '</pre>';
-            $result = $this->update_question_options($question);
 
-            // Step 1: update regexp
-            $this->update_regexp_answers($question);
+            $result = $this->update_question_options($question);
 
             return $result;
         }
