@@ -134,6 +134,22 @@ class qtype_writeregex extends question_type {
     }
 
     /**
+     * Метод сохранения regexp ответа в бд.
+     * @param $value Значение ответа.
+     * @param $fraction Оценка ответа.
+     * @param $feedback Описание ответа.
+     * @param $feedbackformat Формат описания ответа.
+     */
+    protected function save_regexp_answer ($value, $fraction, $feedback, $feedbackformat) {
+
+        global $DB;
+
+        $result = $this->form_regexp_answer($value, $fraction, $feedback, $feedbackformat);
+
+        $result->id = $DB->insert_record('question_answers', $result);
+    }
+
+    /**
      * Метод формирования stdClass ответа в виде regexp.
      * @param $value Значение ответа.
      * @param $fraction Оценка.
