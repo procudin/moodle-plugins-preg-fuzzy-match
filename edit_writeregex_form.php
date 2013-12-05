@@ -224,7 +224,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
-        $repeated [] =& $mform->createElement('hidden', 'regexp_id', 'qwe');
+        $repeated [] =& $mform->createElement('hidden', 'regexp_id', '');
 
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
@@ -245,12 +245,14 @@ class qtype_writeregex_edit_form extends question_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
+        $repeated [] =& $mform->createElement('hidden', 'test_string_id', '');
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
 
         $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
 
         $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = $label;
 
@@ -308,10 +310,11 @@ class qtype_writeregex_edit_form extends question_edit_form {
             $question->wre_regexp_answers_answer = $this->forming_regexp_answers_value($answer_regexp);
             $question->wre_regexp_answers_fraction = $this->forming_regexp_answers_fraction($answer_regexp);
             $question->wre_regexp_answers_feedback = $this->forming_regexp_answers_feedback($answer_regexp);
-//            $question->regexp_id = $this
+            $question->regexp_id = $this->forming_regexp_answers_id($answer_regexp);
 
             $question->wre_regexp_ts_answer = $this->forming_regexp_answers_value($answer_string);
             $question->wre_regexp_ts_fraction = $this->forming_regexp_answers_fraction($answer_string);
+            $question->test_string_id = $this->forming_regexp_answers_id($answer_string);
         }
 
 //        echo '<pre>';

@@ -133,6 +133,26 @@ class qtype_writeregex extends question_type {
         }
     }
 
+    /**
+     * Метод формирования stdClass ответа в виде regexp.
+     * @param $value Значение ответа.
+     * @param $fraction Оценка.
+     * @param $feedback Описание.
+     * @param $feedbackformat Формат описания.
+     * @return stdClass Ответ в виде класса для сохранения в бд.
+     */
+    protected function  form_regexp_answer ($value, $fraction, $feedback, $feedbackformat) {
+        $result = new stdClass();
+
+        $result->answer = $value;
+        $result->answerformat = 1;
+        $result->fraction = $fraction;
+        $result->feedback = $feedback;
+        $result->feedbackformat = $feedbackformat;
+
+        return $result;
+    }
+
     protected function update_regexp_answers ($question) {
 
         global $DB;
@@ -140,6 +160,7 @@ class qtype_writeregex extends question_type {
         $answers_value = $question->wre_regexp_answers_answer;
         $answers_fraction = $question->wre_regexp_answers_fraction;
         $answers_feedback = $question->wre_regexp_answers_feedback;
+        $answers_id = $question->regexp_id;
 
         $index = 0;
 
@@ -154,7 +175,9 @@ class qtype_writeregex extends question_type {
                 $answer->fraction = $answers_fraction[$index];
                 $answer->feedback = $answers_feedback[$index]['text'];
                 $answer->feedbackformat = $answers_feedback[$index]['format'];
-                //$answer->id =
+                $answer->id = $answers_id[$index];
+
+                $DB->update_record('question_answer', $answer);
             }
 
             $index++;
@@ -202,11 +225,16 @@ class qtype_writeregex extends question_type {
 
     public function save_question_options($question) {
 
-        if (isset($question->wre_id)) {
-            return $this->update_question_options($question);
+        if ($question->wre_id != 'qwe') {
+            echo '<pre>';
+            print_r($question->wre_id);
+            echo '</pre>';
+            $result = $this->update_question_options($question);
 
             // Step 1: update regexp
-            //
+            $this->update_regexp_answers($question);
+
+            return $result;
         }
 
         $std_question = $this->form_options($question);
