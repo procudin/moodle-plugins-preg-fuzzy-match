@@ -197,6 +197,10 @@ class qtype_writeregex_edit_form extends question_edit_form {
             $repeatsatstart = $minoptions;
         }
 
+//        echo '<pre>';
+//        print_r('Count ' . print_r($repeatsatstart, true));
+//        echo '</pre>';
+        $addoptions = 1;
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noanswers', 'addanswers', $addoptions,
             $this->get_more_choices_string(), true);
@@ -220,6 +224,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
+        $repeated [] =& $mform->createElement('hidden', 'regexp_id', 'qwe');
+
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
 
@@ -228,6 +234,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
             array('rows' => 5), $this->editoroptions);
 
         $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['regexp_id']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = $label;
 
@@ -274,6 +281,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
         if (isset($question->id)) {
             $local_qtype = new qtype_writeregex();
             $q = $local_qtype->get_question_options($question);
+            $answer_regexp = array();
+            $answer_string = array();
 
             $question->wre_notation        = $q->options->notation;
             $question->wre_st              = $q->options->syntaxtreehinttype;
@@ -287,10 +296,84 @@ class qtype_writeregex_edit_form extends question_edit_form {
             $question->wre_cre_percentage  = $q->options->compareregexpercentage;
             $question->wre_acre_percentage = $q->options->compareautomatercentage;
             $question->wre_id              = $q->options->id;
+
+            foreach($q->answers as $answer) {
+                if ($answer->answerformat == 1) {
+                    $answer_regexp[] = $answer;
+                } else if ($answer->answerformat == 2) {
+                    $answer_string[] = $answer;
+                }
+            }
+
+            $question->wre_regexp_answers_answer = $this->forming_regexp_answers_value($answer_regexp);
+            $question->wre_regexp_answers_fraction = $this->forming_regexp_answers_fraction($answer_regexp);
+            $question->wre_regexp_answers_feedback = $this->forming_regexp_answers_feedback($answer_regexp);
+//            $question->regexp_id = $this
+
+            $question->wre_regexp_ts_answer = $this->forming_regexp_answers_value($answer_string);
+            $question->wre_regexp_ts_fraction = $this->forming_regexp_answers_fraction($answer_string);
+        }
+
+//        echo '<pre>';
+//        print_r($question);
+//        echo '</pre>';
+
+        return $question;
+    }
+
+    protected function forming_regexp_answers_id ($answers) {
+        $result = array();
+
+        foreach ($answers as $item) {
+
+            $result[] = $item->id;
+        }
+
+        return $result;
+    }
+
+    protected function  forming_regexp_answers_fraction ($answers) {
+        $result = array();
+
+        foreach ($answers as $item) {
+            $result[] = $item->fraction;
+        }
+
+        return $result;
+    }
+
+    protected function forming_regexp_answers_feedback ($answer) {
+        $result = array();
+
+        foreach ($answer as $item) {
+            $feedback = array();
+            $feedback['text'] = $item->feedback;
+            $feedback['format'] = $item->feedbackformat;
+            $result[] = $feedback;
+        }
+
+        return $result;
+    }
+
+    protected function forming_regexp_answers_value ($answers) {
+        $result = array();
+
+        foreach ($answers as $item) {
+            $result[] = $item->answer;
+        }
+
+        return $result;
+    }
+
+    protected function data_preprocessing_answers($question, $withanswerfiles = false) {
+
+        $question = parent::data_preprocessing_answers($question);
+
+        if (isset($question->id)) {
+//            $answer = ;
         }
 
         return $question;
-//        error_log('[data_preprocessing]', 3, 'writeregex_log.txt');
     }
 
     public function validation($data, $files) {
