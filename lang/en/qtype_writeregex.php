@@ -92,3 +92,6 @@ $string['wre_acre_percentage'] = 'Percentage';
 
 $string['wre_regexp_answers'] = 'Regular expression';
 $string['wre_regexp_ts'] = 'Test string';
+
+/* Ошибка суммы типов проверок. */
+$string['wre_error_matching'] = 'Sum of all matching type is not equal 100%';

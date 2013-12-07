@@ -42,8 +42,6 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
     protected function definition_inner($mform) {
 
-        error_log("[definition_inner-{start}\n", 3, 'writeregex_log.txt');
-
         global $CFG;
 
         // RegEx notations.
@@ -147,6 +145,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $mform->setType('wre_acre_percentage', PARAM_FLOAT);
         $mform->addGroup($comp_aregex, 'wre_acre_group', '', array(' '), false);
 
+        $mform->addElement('text','shortname', 'shortname','maxlength="15" size="10"');
+        $mform->setType('shortname', PARAM_MULTILANG);
 
         // $mform->addElement('header', 'wre_regexp_answers', get_string('wre_regexp_answers', 'qtype_writeregex'));
        
@@ -161,8 +161,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
         $this->add_interactive_settings();
 
-        global $PAGE;
-        //$PAGE->requires->js_init_call('M.writeregex_module.init', null, true, $this->jsmodule);
+//        global $PAGE;
+//        $PAGE->requires->js_init_call('M.writeregex_module.init', null, true, $this->jsmodule);
     }
 
     private function add_test_strings(&$mform, $label, $gradeoptions,
@@ -385,35 +385,31 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $question;
     }
 
+    public function validation_type_of_match ($element, $value, $arg) {
+
+        echo '<pre>';
+        print_r($element);
+        print_r($value);
+        print_r($arg);
+        echo '</pre>';
+
+    }
+
     public function validation($data, $files) {
+
         $errors = parent::validation($data, $files);
-//        $answers = $data['wre_regexp_answers_answer'];
-//        $answercount = 0;
-//        $maxgrade = false;
-//        foreach ($answers as $key => $answer) {
-//            $trimmedanswer = trim($answer);
-//            if ($trimmedanswer !== '') {
-//                $answercount++;
-//                if ($data['fraction'][$key] == 1) {
-//                    $maxgrade = true;
-//                }
-//            } else if ($data['fraction'][$key] != 0 ||
-//                    !html_is_blank($data['feedback'][$key]['text'])) {
-//                $errors["answeroptions[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
-//                $answercount++;
-//            }
-//        }
-//        if ($answercount==0) {
-//            $errors['answeroptions[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
-//        }
-//        if ($maxgrade == false) {
-//            $errors['answeroptions[0]'] = get_string('fractionsnomax', 'question');
-//        }
+
+        $val = $data['wre_acre_percentage'];
+
+        if ($val != 10) {
+            $errors['wre_acre_percentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        }
+
         return $errors;
     }
 
     public function qtype() {
-        error_log('[qtype]', 3, 'writeregex_log.txt');
+
         return 'writeregex';
     }
 }

@@ -3,8 +3,20 @@
  */
 M.writeregex_module = (function() {
     var self = {
+
+        wre_cre : null,
+
         init : function() {
-            alert('JS загружен!');
+
+            this.wre_cre = document.getElementById('wre_cre_percentage');
+
+            this.wre_cre.onChange(function() {
+               alert('qwe');
+            });
+        },
+
+        wre_cre_edit : function(value) {
+            alert('value');
         }
     };
 
