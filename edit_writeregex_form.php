@@ -400,12 +400,29 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $result;
     }
 
+    /**
+     * Метод выбора поля ввода типа сравнения для отображения ошибки над ним.
+     * @param $data Данные с формы.
+     * @param $errors Массив ошибок.
+     */
+    protected function select_error_input($data, &$errors) {
+
+        $val1 = $data['wre_cre_percentage'];
+        $val2 = $data['wre_acre_percentage'];
+
+        if ($val2 < $val1) {
+            $errors['wre_acre_percentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        } else {
+            $errors['wre_cre_percentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        }
+    }
+
     public function validation($data, $files) {
 
         $errors = parent::validation($data, $files);
 
         if (!$this->is_validate_match_type($data)) {
-            $errors['wre_cre_percentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+            $this->select_error_input($data, $errors);
         }
 
         return $errors;
