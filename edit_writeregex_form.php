@@ -417,6 +417,36 @@ class qtype_writeregex_edit_form extends question_edit_form {
         }
     }
 
+    /**
+     * Метод проверки regexp ответов.
+     * @param $data Данные с формы.
+     * @param $errors Список ошибок.
+     */
+    public function validate_regexp_answers($data, &$errors) {
+
+        $answers_value = $data['wre_regexp_answers_answer'];
+        $fractions_value = $data['wre_regexp_answers_fraction'];
+
+        $count = 0;
+        $fraction = 0;
+        foreach ($answers_value as $item) {
+            if ($item != '') {
+                if ($fractions_value[$count] == 1.0) {
+                    $fraction++;
+                }
+                $count++;
+            }
+        }
+
+        if ($count < 1) {
+            $errors['wre_regexp_answers_answer[0]'] = get_string('wre_regexp_answers_count', 'qtype_writeregex');
+        }
+
+        if ($fraction < 1) {
+            $errors['wre_regexp_answers_fraction[0]'] = get_string('wre_regexp_fractions_count', 'qtype_writeregex');
+        }
+    }
+
     public function validation($data, $files) {
 
         $errors = parent::validation($data, $files);
@@ -424,6 +454,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
         if (!$this->is_validate_match_type($data)) {
             $this->select_error_input($data, $errors);
         }
+
+        $this->validate_regexp_answers($data, $errors);
 
         return $errors;
     }

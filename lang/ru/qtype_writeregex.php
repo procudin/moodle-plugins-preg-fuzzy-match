@@ -95,3 +95,7 @@ $string['wre_regexp_ts'] = 'Тестовая строка';
 
 /* Ошибка суммы типов проверок. */
 $string['wre_error_matching'] = 'Сумма всех типов проверок не равна 100%';
+
+/* Ошибки ответов regexp. */
+$string['wre_regexp_answers_count'] = 'Должен быть хотя бы один ответ';
+$string['wre_regexp_fractions_count'] = 'Хотя бы один из ответов должен иметь оценку 100%';
