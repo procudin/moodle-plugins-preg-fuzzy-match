@@ -99,3 +99,7 @@ $string['wre_error_matching'] = 'Сумма всех типов проверок
 /* Ошибки ответов regexp. */
 $string['wre_regexp_answers_count'] = 'Должен быть хотя бы один ответ';
 $string['wre_regexp_fractions_count'] = 'Хотя бы один из ответов должен иметь оценку 100%';
+
+/* Ошибки ответов тестовых строк. */
+$string['wre_ts_answers_count'] = 'Должен быть хотя бы один ответ';
+$string['wre_ts_fractions_count'] = 'Хотя бы один из ответов должен иметь оценку 100%';

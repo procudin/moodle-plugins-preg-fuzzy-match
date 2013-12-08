@@ -99,3 +99,7 @@ $string['wre_error_matching'] = 'Sum of all matching type is not equal 100%';
 /* Ошибки ответов regexp. */
 $string['wre_regexp_answers_count'] = 'Must be at least one answer';
 $string['wre_regexp_fractions_count'] = 'At least one of the answers must have a fraction 100%';
+
+/* Ошибки ответов тестовых строк. */
+$string['wre_ts_answers_count'] = 'Must be at least one answer';
+$string['wre_ts_fractions_count'] = 'At least one of the answers must have a fraction 100%';
