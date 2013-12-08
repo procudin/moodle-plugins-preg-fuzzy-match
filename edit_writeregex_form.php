@@ -382,24 +382,30 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $question;
     }
 
-    public function validation_type_of_match ($element, $value, $arg) {
+    /**
+     * Метод проверки того, что сумма типов проверки соответствует 100.
+     * @param $data Данные с формы.
+     * @return bool false, если ошибка есть
+     */
+    public function is_validate_match_type ($data) {
+        $result = true;
 
-        echo '<pre>';
-        print_r($element);
-        print_r($value);
-        print_r($arg);
-        echo '</pre>';
+        $val1 = $data['wre_cre_percentage'];
+        $val2 = $data['wre_acre_percentage'];
 
+        if ($val1 + $val2 < 100) {
+            $result = false;
+        }
+
+        return $result;
     }
 
     public function validation($data, $files) {
 
         $errors = parent::validation($data, $files);
 
-        $val = $data['wre_acre_percentage'];
-
-        if ($val != 10) {
-            $errors['wre_acre_percentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        if (!$this->is_validate_match_type($data)) {
+            $errors['wre_cre_percentage'] = get_string('wre_error_matching', 'qtype_writeregex');
         }
 
         return $errors;
