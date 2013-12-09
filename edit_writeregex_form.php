@@ -149,6 +149,8 @@ class qtype_writeregex_edit_form extends question_edit_form {
        
         // $mform->closeHeaderBefore('nameforyourheaderelement');
 
+        $this->add_rules($mform);
+
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
                question_bank::fraction_options());
 
@@ -160,6 +162,15 @@ class qtype_writeregex_edit_form extends question_edit_form {
 
 //        global $PAGE;
 //        $PAGE->requires->js_init_call('M.writeregex_module.init', null, true, $this->jsmodule);
+    }
+
+    /**
+     * Метод установки правил для формы.
+     * @param $mform Форма ввода вопроса.
+     */
+    private function add_rules ($mform) {
+
+        $mform->disabledIf('wre_acre_percentage', 'wre_acre', 'eq', 0);
     }
 
     private function add_test_strings(&$mform, $label, $gradeoptions,
