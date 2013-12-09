@@ -149,6 +149,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
        
         // $mform->closeHeaderBefore('nameforyourheaderelement');
 
+        $this->set_default_values($mform);
         $this->add_rules($mform);
 
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
@@ -170,7 +171,25 @@ class qtype_writeregex_edit_form extends question_edit_form {
      */
     private function add_rules ($mform) {
 
+        $mform->disabledIf('wre_cre_percentage', 'wre_cre', 'eq', 0);
         $mform->disabledIf('wre_acre_percentage', 'wre_acre', 'eq', 0);
+    }
+
+	/**
+	 * Метод установки значений по умолчанию для формы.
+	 * @param $mform Форма ввода вопроса.
+	 */
+    private function set_default_values ($mform) {
+
+        $mform->setDefault('wre_st_penalty', '0.0000000');
+        $mform->setDefault('wre_eg_penalty', '0.0000000');
+        $mform->setDefault('wre_d_penalty', '0.0000000');
+        $mform->setDefault('wre_td_penalty', '0.0000000');
+
+        $mform->setDefault('wre_cre', 1);
+        $mform->setDefault('wre_cre_percentage', 100);
+
+        $mform->setDefault('wre_acre_percentage', 0);
     }
 
     private function add_test_strings(&$mform, $label, $gradeoptions,
