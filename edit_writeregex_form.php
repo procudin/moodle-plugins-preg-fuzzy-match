@@ -40,16 +40,27 @@ class qtype_writeregex_edit_form extends question_edit_form {
         'fullpath' => '/question/type/writeregex/writeregex_module.js'
     );
 
-    protected function definition_inner($mform) {
+    /**
+     * Метод получения массива значений нотации RegExp.
+     * @return array Массив возможных нотаций.
+     */
+    protected function  get_notation_options_array() {
 
-        global $CFG;
-
-        // RegEx notations.
         $notation_options = array(
             '0' => get_string('wre_notation_simple', 'qtype_writeregex'),
             '1' => get_string('wre_notation_extended', 'qtype_writeregex'),
             '2' => get_string('wre_notation_moodle', 'qtype_writeregex')
         );
+
+        return $notation_options;
+    }
+
+    protected function definition_inner($mform) {
+
+        global $CFG;
+
+        // RegEx notations.
+        $notation_options = $this->get_notation_options_array();
 
         // Syntax tree options
         $syntax_tree_options = array(
