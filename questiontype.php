@@ -436,7 +436,7 @@ class qtype_writeregex extends question_type {
     }
 
     public function export_to_xml($question, qformat_xml $format, $extra=null){
-
+        return parent::export_to_xml($question, $format, $extra);
     }
 
 }
