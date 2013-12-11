@@ -136,12 +136,6 @@ class qtype_writeregex_edit_form extends question_edit_form {
         // Test string options
         $test_string_options = $this->get_test_string_options_array();
 
-        // Compare regex options
-        $comp_regex_options = array(
-            '0' => get_string('wre_cre_yes', 'qtype_writeregex'),
-            '1' => get_string('wre_cre_no', 'qtype_writeregex')
-        );
-
         $mform->addElement('hidden', 'wre_id', 'qwe');
         $mform->setType('wre_id', PARAM_RAW);
 

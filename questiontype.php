@@ -47,7 +47,6 @@ class qtype_writeregex extends question_type {
      */
     public function generate_new_id() {
 
-        error_log("[generate_new_id]\n", 3, "writeregex_log.txt");
         global $CFG;
 
         global $DB; // Database
@@ -92,8 +91,6 @@ class qtype_writeregex extends question_type {
     }
 
     public function get_question_options($question){
-
-        error_log("[get_question_options]\n", 3, "writeregex_log.txt");
 
         global $DB;
 
@@ -423,8 +420,6 @@ class qtype_writeregex extends question_type {
     protected function initialise_question_instance(question_definition $question, $questiondata) {
 
         parent::initialise_question_instance($question, $questiondata);
-
-        error_log("[initialise_question_instance]\n", 3, "writeregex_log.txt");
     }
 
     public function delete_question($questionid, $contextid){
@@ -434,18 +429,14 @@ class qtype_writeregex extends question_type {
         global $DB;
 
         $DB->delete_records('qtype_writeregex_options', array('questionid' => $questionid));
-
-        error_log("[delete_question]\n", 3, "writeregex_log.txt");
     }
 
     public function import_from_xml($data, $question, qformat_xml $format, $extra=null){
-
-        error_log("[import_from_xml]\n", 3, "writeregex_log.txt");
+        return parent::import_from_xml($data, $question, $format, $extra);
     }
 
     public function export_to_xml($question, qformat_xml $format, $extra=null){
 
-        error_log("[export_to_xml]\n", 3, "writeregex_log.txt");
     }
 
 }
