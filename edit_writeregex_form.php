@@ -462,7 +462,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $val1 = $data['wre_cre_percentage'];
         $val2 = $data['wre_acre_percentage'];
 
-        if ($val1 + $val2 < 100) {
+        if ($val1 + $val2 != 100) {
             $result = false;
         }
 
