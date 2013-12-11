@@ -103,6 +103,22 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $description_options;
     }
 
+    /**
+     * Метод получения массива вариантов подсказки в виде тестовых строк.
+     * @return array Массив возможных вариантов подсказок в виде тестовых строк.
+     */
+    protected function get_test_string_options_array() {
+
+        $test_string_options = array(
+            '0' => get_string('wre_td_none', 'qtype_writeregex'),
+            '1' => get_string('wre_td_student', 'qtype_writeregex'),
+            '2' => get_string('wre_td_answer', 'qtype_writeregex'),
+            '3' => get_string('wre_td_both', 'qtype_writeregex')
+        );
+
+        return $test_string_options;
+    }
+
     protected function definition_inner($mform) {
 
         // RegEx notations.
@@ -118,13 +134,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $description_options =$this->get_description_options_array();
 
         // Test string options
-        $test_string_options = array(
-            '0' => get_string('wre_td_none', 'qtype_writeregex'),
-            '1' => get_string('wre_td_student', 'qtype_writeregex'),
-            '2' => get_string('wre_td_answer', 'qtype_writeregex'),
-            '3' => get_string('wre_td_both', 'qtype_writeregex')
-        );
-        $test_string = array();
+        $test_string_options = $this->get_test_string_options_array();
 
         // Compare regex options
         $comp_regex_options = array(
