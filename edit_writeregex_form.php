@@ -71,6 +71,22 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $syntax_tree_options;
     }
 
+    /**
+     * Метод получения массива вариантов подсказки в виде объясняющего графа.
+     * @return array Массив возможных вариантов подсказок в виде объясняющего графа.
+     */
+    protected function get_explanation_graph_options_array() {
+
+        $expl_graph_options = array(
+            '0' => get_string('wre_eg_none', 'qtype_writeregex'),
+            '1' => get_string('wre_eg_student', 'qtype_writeregex'),
+            '2' => get_string('wre_eg_answer', 'qtype_writeregex'),
+            '3' => get_string('wre_eg_both', 'qtype_writeregex')
+        );
+
+        return $expl_graph_options;
+    }
+
     protected function definition_inner($mform) {
 
         // RegEx notations.
@@ -80,13 +96,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $syntax_tree_options = $this->get_syntax_tree_options_array();
 
         // Explaining graph options
-        $expl_graph_options = array(
-            '0' => get_string('wre_eg_none', 'qtype_writeregex'),
-            '1' => get_string('wre_eg_student', 'qtype_writeregex'),
-            '2' => get_string('wre_eg_answer', 'qtype_writeregex'),
-            '3' => get_string('wre_eg_both', 'qtype_writeregex')
-        );
-        $expl_graph = array();
+        $expl_graph_options = $this->get_explanation_graph_options_array();
 
         // Description options
         $description_options = array(
