@@ -55,21 +55,29 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $notation_options;
     }
 
-    protected function definition_inner($mform) {
+    /**
+     * Метод получения массива вариантов подсказки в виде синтаксического дерева.
+     * @return array Массив возможных вариантов подсказок в виде синтаксического дерева.
+     */
+    protected function  get_syntax_tree_options_array() {
 
-        global $CFG;
-
-        // RegEx notations.
-        $notation_options = $this->get_notation_options_array();
-
-        // Syntax tree options
         $syntax_tree_options = array(
             '0' => get_string('wre_st_none', 'qtype_writeregex'),
             '1' => get_string('wre_st_student', 'qtype_writeregex'),
             '2' => get_string('wre_st_answer', 'qtype_writeregex'),
             '3' => get_string('wre_st_both', 'qtype_writeregex')
         );
-        $syntax_tree = array();
+
+        return $syntax_tree_options;
+    }
+
+    protected function definition_inner($mform) {
+
+        // RegEx notations.
+        $notation_options = $this->get_notation_options_array();
+
+        // Syntax tree options
+        $syntax_tree_options = $this->get_syntax_tree_options_array();
 
         // Explaining graph options
         $expl_graph_options = array(
