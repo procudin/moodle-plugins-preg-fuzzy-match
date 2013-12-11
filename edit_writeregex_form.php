@@ -141,12 +141,6 @@ class qtype_writeregex_edit_form extends question_edit_form {
             '0' => get_string('wre_cre_yes', 'qtype_writeregex'),
             '1' => get_string('wre_cre_no', 'qtype_writeregex')
         );
-        $comp_regex = array();
-
-        // Compare regexp's automat
-        $comp_aregex = array();
-
-        // $mform = $this->_form;
 
         $mform->addElement('hidden', 'wre_id', 'qwe');
         $mform->setType('wre_id', PARAM_RAW);
@@ -158,45 +152,34 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $mform->addElement('text', 'wre_st_penalty',
             get_string('wre_st_penalty', 'qtype_writeregex'));
         $mform->setType('wre_st_penalty', PARAM_FLOAT);
-//        $mform->addGroup($syntax_tree, 'wre_st_group', '', array(' '), false);
 
         $mform->addElement('select', 'wre_eg', get_string('wre_eg', 'qtype_writeregex'),
             $expl_graph_options);
         $mform->addElement('text', 'wre_eg_penalty',
             get_string('wre_eg_penalty', 'qtype_writeregex'));
         $mform->setType('wre_eg_penalty', PARAM_FLOAT);
-//        $mform->addGroup($expl_graph, 'wre_eg_group', '', array(' '), false);
 
         $mform->addElement('select', 'wre_d', get_string('wre_d', 'qtype_writeregex'),
             $description_options);
         $mform->addElement('text', 'wre_d_penalty',
             get_string('wre_d_penalty', 'qtype_writeregex'));
         $mform->setType('wre_d_penalty', PARAM_FLOAT);
-//        $mform->addGroup($description, 'wre_d_group', '', array(' '), false);
 
         $mform->addElement('select', 'wre_td', get_string('wre_td', 'qtype_writeregex'),
             $test_string_options);
         $mform->addElement('text', 'wre_td_penalty',
             get_string('wre_td_penalty', 'qtype_writeregex'));
         $mform->setType('wre_td_penalty', PARAM_FLOAT);
-//        $mform->addGroup($test_string, 'wre_td_group', '', array(' '), false);
 
-        $mform->addElement('select', 'wre_cre', get_string('wre_cre', 'qtype_writeregex'),
-            $comp_regex_options);
+        $mform->addElement('selectyesno', 'wre_cre', get_string('wre_cre', 'qtype_writeregex'));
         $mform->addElement('text', 'wre_cre_percentage',
             get_string('wre_cre_percentage', 'qtype_writeregex'));
         $mform->setType('wre_cre_percentage', PARAM_FLOAT);
-//        $mform->addGroup($comp_regex, 'wre_cre_group', '', array(' '), false);
 
         $mform->addElement('selectyesno', 'wre_acre', get_string('wre_acre', 'qtype_writeregex'));
         $mform->addElement('text', 'wre_acre_percentage',
             get_string('wre_acre_percentage', 'qtype_writeregex'));
         $mform->setType('wre_acre_percentage', PARAM_FLOAT);
-//        $mform->addGroup($comp_aregex, 'wre_acre_group', '', array(' '), false);
-
-        // $mform->addElement('header', 'wre_regexp_answers', get_string('wre_regexp_answers', 'qtype_writeregex'));
-       
-        // $mform->closeHeaderBefore('nameforyourheaderelement');
 
         $this->set_default_values($mform);
         $this->add_rules($mform);
