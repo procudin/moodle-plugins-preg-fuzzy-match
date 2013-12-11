@@ -87,6 +87,22 @@ class qtype_writeregex_edit_form extends question_edit_form {
         return $expl_graph_options;
     }
 
+    /**
+     * Метод получения массива вариантов подсказки в виде объяснения.
+     * @return array Массив возможных вариантов подсказок в виде объяснения.
+     */
+    protected function get_description_options_array() {
+
+        $description_options = array(
+            '0' => get_string('wre_d_none', 'qtype_writeregex'),
+            '1' => get_string('wre_d_student', 'qtype_writeregex'),
+            '2' => get_string('wre_d_answer', 'qtype_writeregex'),
+            '3' => get_string('wre_d_both', 'qtype_writeregex')
+        );
+
+        return $description_options;
+    }
+
     protected function definition_inner($mform) {
 
         // RegEx notations.
@@ -99,13 +115,7 @@ class qtype_writeregex_edit_form extends question_edit_form {
         $expl_graph_options = $this->get_explanation_graph_options_array();
 
         // Description options
-        $description_options = array(
-            '0' => get_string('wre_d_none', 'qtype_writeregex'),
-            '1' => get_string('wre_d_student', 'qtype_writeregex'),
-            '2' => get_string('wre_d_answer', 'qtype_writeregex'),
-            '3' => get_string('wre_d_both', 'qtype_writeregex')
-        );
-        $description = array();
+        $description_options =$this->get_description_options_array();
 
         // Test string options
         $test_string_options = array(
