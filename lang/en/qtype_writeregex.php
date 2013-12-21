@@ -73,12 +73,12 @@ $string['wre_d_answer'] = 'Show the correct answer';
 $string['wre_d_both'] = 'Show the student\'s answer and the correct answer (both)';
 
 /* Test string hint. */
-$string['wre_td'] = 'Test string hint';
-$string['wre_td_penalty'] = 'Penalty';
-$string['wre_td_none'] = 'None';
-$string['wre_td_student'] = 'Show the student\'s answer';
-$string['wre_td_answer'] = 'Show the correct answer';
-$string['wre_td_both'] = 'Show the student\'s answer and the correct answer (both)';
+$string['teststrings'] = 'Test string hint';
+$string['penalty'] = 'Penalty';
+$string['none'] = 'None';
+$string['student'] = 'Show the student\'s answer';
+$string['answer'] = 'Show the correct answer';
+$string['both'] = 'Show the student\'s answer and the correct answer (both)';
 
 /* Compare regex. */
 $string['wre_cre'] = 'Compare regexp';

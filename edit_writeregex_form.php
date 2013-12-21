@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/edit_shortanswer_form.php');
+require_once($CFG->dirroot . '/question/type/preg/questiontype.php');
 
 /**
  * Опреление формы изменения вопроса типа Write Regex.
@@ -39,12 +40,66 @@ require_once($CFG->dirroot . '/question/type/shortanswer/edit_shortanswer_form.p
  */
 class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
+    /* Поля класса. */
+    private $hintsoptions = array();
+
     /**
      * Add question-type specific form fields.
      *
      * @param MoodleQuickForm $mform the form being built.
      */
     protected function definition_inner($mform) {
+
+        global $CFG;
+
+        // init hints options
+        $this->hintsoptions = array(
+            '0' => get_string('none', 'qtype_writeregex'),
+            '1' => get_string('student', 'qtype_writeregex'),
+            '2' => get_string('answer', 'qtype_writeregex'),
+            '3' => get_string('both', 'qtype_writeregex')
+        );
+
+        // include preg
+        $pregclass = 'qtype_preg';
+        $preg = new $pregclass;
+
+        // add notations
+        $notations = $preg->available_notations();
+        $mform->addElement('select', 'notation', get_string('notation', 'qtype_preg'), $notations);
+        $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
+
+        // add syntax tree options
+        $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
+            $this->hintsoptions);
+        $mform->addElement('text', 'syntaxtreehintpenalty',
+            get_string('penalty', 'qtype_writeregex'));
+        $mform->setType('syntaxtreehintpenalty', PARAM_FLOAT);
+        $mform->setDefault('syntaxtreehintpenalty', '0.0000000');
+
+        // add explaining graph options
+        $mform->addElement('select', 'explgraphhinttype', get_string('wre_eg', 'qtype_writeregex'),
+            $this->hintsoptions);
+        $mform->addElement('text', 'explgraphhintpenalty',
+            get_string('penalty', 'qtype_writeregex'));
+        $mform->setType('explgraphhintpenalty', PARAM_FLOAT);
+        $mform->setDefault('explgraphhintpenalty', '0.0000000');
+
+        // add description options
+        $mform->addElement('select', 'descriptionhinttype', get_string('wre_d', 'qtype_writeregex'),
+            $this->hintsoptions);
+        $mform->addElement('text', 'descriptionhintpenalty',
+            get_string('penalty', 'qtype_writeregex'));
+        $mform->setType('descriptionhintpenalty', PARAM_FLOAT);
+        $mform->setDefault('descriptionhintpenalty', '0.0000000');
+
+        // add test string option
+        $mform->addElement('select', 'teststringshinttype', get_string('teststrings', 'qtype_writeregex'),
+            $this->hintsoptions);
+        $mform->addElement('text', 'teststringshintpenalty',
+            get_string('teststrings', 'qtype_writeregex'));
+        $mform->setType('teststringshintpenalty', PARAM_FLOAT);
+        $mform->setDefault('teststringshintpenalty', '0.0000000');
 
         parent::definition_inner($mform);
     }
