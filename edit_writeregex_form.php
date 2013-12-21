@@ -101,7 +101,15 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setType('teststringshintpenalty', PARAM_FLOAT);
         $mform->setDefault('teststringshintpenalty', '0.0000000');
 
-        parent::definition_inner($mform);
+        // add asnwers fields.
+        $this->add_per_answer_fields($mform, 'wre_regexp_answers',
+            question_bank::fraction_options());
+
+        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
+            question_bank::fraction_options());
+
+
+        $this->add_interactive_settings();
     }
 
     /**
@@ -116,8 +124,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
                                              &$repeatedoptions, &$answersoption) {
-        return parent::get_per_answer_fields($mform, $label, $gradeoptions,
-            $repeatedoptions, $answersoption);
+        return parent::get_per_answer_fields($mform, $label, $gradeoptions, $repeatedoptions, $answersoption);
     }
 
     /**
@@ -143,17 +150,135 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
-     * Метод добавления полей ответа.
+     * Метод вставки полей - regexp.
+     * @param $mform
+     * @param $label
+     * @param $gradeoptions
+     * @param $repeatedoptions
+     * @param $answersoption
+     * @return array
+     */
+    private function  get_per_answer_fields_regexp($mform, $label, $gradeoptions,
+                                                   &$repeatedoptions, &$answersoption) {
+        $repeated = array();
+
+        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
+
+        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
+        $repeated[] =& $mform->createElement('editor', $label . '_feedback', get_string('feedback', 'question'),
+            array('rows' => 5), $this->editoroptions);
+
+        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['regexp_id']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = $label;
+
+        return $repeated;
+    }
+
+    /**
+     * Метод вставки полей - тестовых строк.
+     * @param $mform
+     * @param $label
+     * @param $gradeoptions
+     * @param $repeatedoptions
+     * @param $answersoption
+     * @return array
+     */
+    private function  get_per_answer_fields_strings($mform, $label, $gradeoptions,
+                                                    &$repeatedoptions, &$answersoption) {
+        $repeated = array();
+        
+        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
+
+        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
+
+        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = $label;
+
+        return $repeated;
+    }
+
+    /**
+     * Метод добавления ответов - тестовых строк
+     * @param $mform
+     * @param $label
+     * @param $gradeoptions
+     * @param int $minoptions
+     * @param int $addoptions
+     */
+    private function add_test_strings(&$mform, $label, $gradeoptions,
+                                      $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+        $mform->addElement('header', 'teststrhdr', get_string($label, 'qtype_writeregex'), '');
+        $mform->setExpanded('teststrhdr', 1);
+
+        $answersoption = '';
+        $repeatedoptions = array();
+        $repeated = $this->get_per_answer_fields_strings($mform, $label, $gradeoptions,
+            $repeatedoptions, $answersoption);
+
+        if (isset($this->question->options)) {
+            $repeatsatstart = count($this->question->options->$answersoption);
+        } else {
+            $repeatsatstart = $minoptions;
+        }
+
+        $repeatsatstart = 5;
+        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
+            'noanswers', 'addanswers', $addoptions,
+            $this->get_more_choices_string(), true);
+    }
+
+    /**
+     * Метод добавления ответов regexp
+     * @param $mform
+     * @param $label
+     * @param $gradeoptions
+     * @param int $minoptions
+     * @param int $addoptions
+     */
+    private function add_regexp_strings(&$mform, $label, $gradeoptions,
+                                        $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+        $mform->addElement('header', 'answerhdr', get_string($label, 'qtype_writeregex'), '');
+        $mform->setExpanded('answerhdr', 1);
+
+        $answersoption = '';
+        $repeatedoptions = array();
+        $repeated = $this->get_per_answer_fields_regexp($mform, $label, $gradeoptions,
+            $repeatedoptions, $answersoption);
+
+        if (isset($this->question->options)) {
+            $repeatsatstart = count($this->question->options->$answersoption);
+        } else {
+            $repeatsatstart = $minoptions;
+        }
+
+        $addoptions = 1;
+        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
+            'noanswers', 'addanswers', $addoptions,
+            $this->get_more_choices_string(), true);
+    }
+
+    /**
+     * Функция добавления разделов с ответами.
      * @param object $mform Форма.
-     * @param the $label Подпись.
-     * @param the $gradeoptions Дополнительные опции.
-     * @param int|the $minoptions Дополнительные опции.
-     * @param int|the $addoptions Дополнительные опции.
+     * @param the $label Подпись раздела.
+     * @param the $gradeoptions
+     * @param int|the $minoptions
+     * @param int|the $addoptions
      */
     protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
                                              $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-
-        parent::add_per_answer_fields($mform, $label, $gradeoptions, $minoptions, $addoptions);
+        // Select type of answers fields
+        if ($label == 'wre_regexp_ts') {
+            $this->add_test_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
+        } else {
+            $this->add_regexp_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
+        }
     }
 
     protected function get_more_choices_string() {
