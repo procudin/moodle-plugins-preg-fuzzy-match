@@ -61,6 +61,20 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
+     * Метод для выполнения сохранения дополнительных свойств вопроса методами суперкласса вопроса.
+     * @return array Массив, состоящий из имени таблицы опций типа вопроса WriteRegEx,
+     * и ее столбцов для сохранения данных.
+     */
+    public function extra_question_fields() {
+
+        return array('qtype_writeregex_options',
+            'notation', 'syntaxtreehinttype', 'syntaxtreehintpenalty', 'explgraphhinttype', 'explgraphhintpenalty',
+            'descriptionhinttype', 'descriptionhintpenalty', 'teststringshinttype', 'teststringshintpenalty',
+            'compareregexpercentage', 'compareautomatercentage'
+        );
+    }
+
+    /**
      * Метод инициализации экземпляра вопроса.
      * @param question_definition $question Описание вопроса.
      * @param object $questiondata Данные вопроса.

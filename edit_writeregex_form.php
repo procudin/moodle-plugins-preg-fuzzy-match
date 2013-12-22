@@ -189,7 +189,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     private function  get_per_answer_fields_strings($mform, $label, $gradeoptions,
                                                     &$repeatedoptions, &$answersoption) {
         $repeated = array();
-        
+
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
 
