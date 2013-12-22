@@ -117,8 +117,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
             question_bank::fraction_options());
 
-//        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
-//            question_bank::fraction_options());
+        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
+            question_bank::fraction_options());
 
 
         $this->add_interactive_settings();

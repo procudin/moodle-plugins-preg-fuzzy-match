@@ -57,11 +57,64 @@ class qtype_writeregex extends qtype_shortanswer {
      */
     public function save_question_options($question) {
 
-        echo '<pre>';
-        print_r($question);
-        echo '</pre>';
+        $result = parent::save_question_options($question);
 
-        return parent::save_question_options($question);
+        // save test strings
+        $this->save_test_strings_answers($question);
+
+        return $result;
+    }
+
+    /**
+     * Метод сохранения ответов (тестовых строк).
+     * @param $question Вопрос.
+     */
+    private function save_test_strings_answers ($question) {
+
+        global $DB;
+        $answers = $question->wre_regexp_ts_answer;
+        $answersfractions = $question->wre_regexp_ts_fraction;
+        $index = 0;
+
+        $tableanswers = $DB->get_records('question_answers', array('question' => $question->id, 'answerformat' => 2));
+
+        foreach ($answers as $item) {
+
+            if (!empty($item)) {
+
+                $answer = $this->get_test_string_answer_object($item, $answersfractions[$index], $question->id);
+
+                $index++;
+
+                if (!isset($tableanswers[$index])) {
+                    $DB->insert_record('question_answers', $answer);
+                } else {
+                    $DB->update_record('question_answers', $answer);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Метод формирования stdClass ответа (тестовые строки).
+     * @param $answer Тестовая строка.
+     * @param $fraction Оценка.
+     * @param $questionid Идентифкатор ответа.
+     * @return stdClass Ответ.
+     */
+    private function get_test_string_answer_object ($answer, $fraction, $questionid) {
+
+        $result = new stdClass();
+
+        $result->answer = $answer;
+        $result->question = $questionid;
+        $result->answerformat = 2;
+        $result->fraction = $fraction;
+        $result->feedback = '';
+        $result->feedbackformat = 0;
+
+        return $result;
     }
 
     /**
