@@ -157,7 +157,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         foreach ($question->options->answers as $answer) {
 
-            if ($answer->answerformat == 0) { // if this is a regexp string
+            if ($answer->answerformat != 127) { // if this is a regexp string
 
                 $question->answer[] = $answer->answer;
                 $question->fraction[] = $answer->fraction;

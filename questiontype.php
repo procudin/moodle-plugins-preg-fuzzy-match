@@ -61,6 +61,10 @@ class qtype_writeregex extends qtype_shortanswer {
 
         $result = parent::save_question_options($question);
 
+        echo '<pre>';
+        print_r($question);
+        echo '</pre>';
+
         // save test strings
         $this->save_test_strings_answers($question);
 
