@@ -47,7 +47,9 @@ class qtype_writeregex extends qtype_shortanswer {
      */
     public function get_question_options($question){
 
-        return parent::get_question_options($question);
+        $result = parent::get_question_options($question);
+
+        return $result;
     }
 
     /**

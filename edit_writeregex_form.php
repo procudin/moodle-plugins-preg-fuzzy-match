@@ -147,7 +147,33 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     protected function data_preprocessing_answers($question, $withanswerfiles = false) {
 
-        return parent::data_preprocessing_answers($question, $withanswerfiles);
+        $question = parent::data_preprocessing_answers($question, $withanswerfiles);
+
+        $question->answer = array();
+        $question->fraction = array();
+        $question->feedback = array();
+        $question->wre_regexp_ts_answer = array();
+        $question->wre_regexp_ts_fraction = array();
+
+        foreach ($question->options->answers as $answer) {
+
+            if ($answer->answerformat == 0) { // if this is a regexp string
+
+                $question->answer[] = $answer->answer;
+                $question->fraction[] = $answer->fraction;
+                $feedback = array();
+                $feedback['text'] = $answer->feedback;
+                $feedback['format'] = $answer->feedbackformat;
+                $question->feedback[] = $feedback;
+
+            } else { // if this is a test string
+
+                $question->wre_regexp_ts_answer[] = $answer->answer;
+                $question->wre_regexp_ts_fraction[] = $answer->fraction;
+            }
+        }
+
+        return $question;
     }
 
     /**
@@ -232,12 +258,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $repeated = $this->get_per_answer_fields_strings($mform, $label, $gradeoptions,
             $repeatedoptions, $answersoption);
 
-        if (isset($this->question->options)) {
-            $repeatsatstart = count($this->question->options->$answersoption);
-        } else {
-            $repeatsatstart = $minoptions;
-        }
-
         $repeatsatstart = 5;
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noanswers', 'addanswers', $addoptions,
@@ -297,9 +317,18 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         return get_string('addmorechoiceblanks', 'question');
     }
 
+    /**
+     * Метод подготовки данных для отображения.
+     * @param object $question Вопрос.
+     * @return object Вопрос с данными.
+     */
     protected function data_preprocessing($question) {
 
-        return parent::data_preprocessing($question);
+        $question = parent::data_preprocessing($question);
+        $question = $this->data_preprocessing_answers($question);
+        $question = $this->data_preprocessing_hints($question);
+
+        return $question;
     }
 
     public function qtype() {
