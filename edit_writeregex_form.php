@@ -101,12 +101,24 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setType('teststringshintpenalty', PARAM_FLOAT);
         $mform->setDefault('teststringshintpenalty', '0.0000000');
 
+        // add compare regex percentage
+        $mform->addElement('selectyesno', 'compareregex', get_string('wre_cre', 'qtype_writeregex'));
+        $mform->addElement('text', 'compareregexpercentage',
+            get_string('wre_cre_percentage', 'qtype_writeregex'));
+        $mform->setType('compareregexpercentage', PARAM_FLOAT);
+
+        // add compare automate percentage
+        $mform->addElement('selectyesno', 'compareautomate', get_string('wre_acre', 'qtype_writeregex'));
+        $mform->addElement('text', 'compareautomatercentage',
+            get_string('wre_acre_percentage', 'qtype_writeregex'));
+        $mform->setType('compareautomatercentage', PARAM_FLOAT);
+
         // add asnwers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
             question_bank::fraction_options());
 
-        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
-            question_bank::fraction_options());
+//        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
+//            question_bank::fraction_options());
 
 
         $this->add_interactive_settings();
@@ -162,17 +174,16 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
-        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
+        $repeated [] =& $mform->createElement('textarea', 'answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
 
-        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
-        $repeated[] =& $mform->createElement('editor', $label . '_feedback', get_string('feedback', 'question'),
+        $repeated[] =& $mform->createElement('select', 'fraction', get_string('grade'), $gradeoptions);
+        $repeated[] =& $mform->createElement('editor', 'feedback', get_string('feedback', 'question'),
             array('rows' => 5), $this->editoroptions);
 
-        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
-        $repeatedoptions['regexp_id']['type'] = PARAM_RAW;
+        $repeatedoptions['answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
-        $answersoption = $label;
+        $answersoption = 'answers';
 
         return $repeated;
     }
