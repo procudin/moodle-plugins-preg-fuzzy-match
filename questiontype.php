@@ -82,8 +82,11 @@ class qtype_writeregex extends qtype_shortanswer {
         $answersfractions = $question->wre_regexp_ts_fraction;
         $index = 0;
 
-        $tableanswers = $DB->get_records('question_answers', array('question' => $question->id, 'answerformat' => 2));
+        $tableanswers = $DB->get_records('question_answers',
+            array('question' => $question->id, 'answerformat' => 2),
+            'id ASC');
 
+        // insert (update) new test strings answers
         foreach ($answers as $item) {
 
             if (!empty($item)) {
@@ -96,8 +99,15 @@ class qtype_writeregex extends qtype_shortanswer {
                     $DB->insert_record('question_answers', $answer);
                 } else {
                     $DB->update_record('question_answers', $answer);
+                    unset($tableanswers[$index]);
                 }
             }
+        }
+
+        // remove old answers
+        foreach ($tableanswers as $item) {
+
+            $DB->delete_records('question_answers', array('id' => $item->id));
         }
 
     }
@@ -115,7 +125,7 @@ class qtype_writeregex extends qtype_shortanswer {
 
         $result->answer = $answer;
         $result->question = $questionid;
-        $result->answerformat = 2;
+        $result->answerformat = 127;
         $result->fraction = $fraction;
         $result->feedback = '';
         $result->feedbackformat = 0;
