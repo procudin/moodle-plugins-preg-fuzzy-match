@@ -228,13 +228,15 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
-        $repeated [] =& $mform->createElement('textarea', 'answer',
-            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
-
-        $repeated[] =& $mform->createElement('select', 'fraction', get_string('grade'), $gradeoptions);
-        $repeated[] =& $mform->createElement('editor', 'feedback', get_string('feedback', 'question'),
-            array('rows' => 5), $this->editoroptions);
-
+        $answeroptions = array();
+        $answeroptions[] = $mform->createElement('text', 'answer',
+            '', array('size' => 40));
+        $answeroptions[] = $mform->createElement('select', 'fraction',
+            get_string('grade'), $gradeoptions);
+        $repeated[] = $mform->createElement('group', 'answeroptions',
+            get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
+        $repeated[] = $mform->createElement('editor', 'feedback',
+            get_string('feedback', 'question'), array('rows' => 5), $this->editoroptions);
         $repeatedoptions['answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = 'answers';
