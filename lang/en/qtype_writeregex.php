@@ -103,3 +103,9 @@ $string['wre_regexp_fractions_count'] = 'At least one of the answers must have a
 /* Ошибки ответов тестовых строк. */
 $string['wre_ts_answers_count'] = 'Must be at least one answer';
 $string['wre_ts_fractions_count'] = 'At least one of the answers must have a fraction 100%';
+
+/* Справочные кнопки. */
+$string['compare'] = 'You can specify a weight check in regexps and automata';
+$string['compare_title'] = 'You can specify a weight check in regexps and automata';
+$string['compare_help'] = 'Comparison is carried out directly in regexps and automata. If you specify a value for
+regexps 1, the value for automatic turn 0 (total value = comparison of regexp + comparison of engines).';

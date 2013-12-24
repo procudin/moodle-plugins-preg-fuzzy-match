@@ -105,6 +105,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addElement('text', 'compareregexpercentage',
             get_string('wre_cre_percentage', 'qtype_writeregex'));
         $mform->setType('compareregexpercentage', PARAM_FLOAT);
+        $mform->addHelpButton('compareregexpercentage', 'compare', 'qtype_writeregex');
 
         // add compare automate percentage
         $mform->addElement('text', 'compareautomatercentage',
