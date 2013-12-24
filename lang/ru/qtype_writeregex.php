@@ -84,11 +84,11 @@ $string['both'] = 'Демонстрация для ответа студента
 $string['wre_cre'] = 'Проверка совпадения регулярных выражений';
 $string['wre_cre_no'] = 'Да';
 $string['wre_cre_yes'] = 'Нет';
-$string['wre_cre_percentage'] = 'Значение в %';
+$string['wre_cre_percentage'] = 'Проверка совпадения регулярных выражений (в %)';
 
 /* Compare regexp's automats */
 $string['wre_acre'] = 'Проверка совпадения конечных автоматов регулярных выражений';
-$string['wre_acre_percentage'] = 'Значение в %';
+$string['wre_acre_percentage'] = 'Проверка совпадения конечных автоматов регулярных выражений в %';
 
 $string['wre_regexp_answers'] = 'Регулярное выражение';
 $string['wre_regexp_ts'] = 'Тестовая строка';

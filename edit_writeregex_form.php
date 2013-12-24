@@ -97,18 +97,16 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addElement('select', 'teststringshinttype', get_string('teststrings', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addElement('text', 'teststringshintpenalty',
-            get_string('teststrings', 'qtype_writeregex'));
+            get_string('penalty', 'qtype_writeregex'));
         $mform->setType('teststringshintpenalty', PARAM_FLOAT);
         $mform->setDefault('teststringshintpenalty', '0.0000000');
 
         // add compare regex percentage
-        $mform->addElement('selectyesno', 'compareregex', get_string('wre_cre', 'qtype_writeregex'));
         $mform->addElement('text', 'compareregexpercentage',
             get_string('wre_cre_percentage', 'qtype_writeregex'));
         $mform->setType('compareregexpercentage', PARAM_FLOAT);
 
         // add compare automate percentage
-        $mform->addElement('selectyesno', 'compareautomate', get_string('wre_acre', 'qtype_writeregex'));
         $mform->addElement('text', 'compareautomatercentage',
             get_string('wre_acre_percentage', 'qtype_writeregex'));
         $mform->setType('compareautomatercentage', PARAM_FLOAT);
@@ -149,6 +147,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $question = parent::data_preprocessing_answers($question, $withanswerfiles);
 
+        // if it is new question
+        if (!isset($question->id)) return $question;
+
         $question->answer = array();
         $question->fraction = array();
         $question->feedback = array();
@@ -184,7 +185,33 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     public function validation($data, $files) {
 
-        return parent::validation($data, $files);
+        $errors = parent::validation($data, $files);
+
+        $strings = $data['wre_regexp_ts_answer'];
+        $answercount = 0;
+        $maxgrade = false;
+
+        foreach ($strings as $key => $item) {
+            $trimmeditem = trim($item);
+            if ($trimmeditem != '') {
+                $answercount++;
+                if ($data['wre_regexp_ts_fraction'] == 1) {
+                    $maxgrade = true;
+                }
+            } else if ($data['wre_regexp_ts_fraction'][$key] != 0) {
+                $errors["wre_regexp_ts_answer[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
+                $answercount++;
+            }
+        }
+
+        if ($answercount==0) {
+            $errors['wre_regexp_ts_answer[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
+        }
+        if ($maxgrade == false) {
+            $errors['wre_regexp_ts_answer[0]'] = get_string('fractionsnomax', 'question');
+        }
+
+        return $errors;
     }
 
     /**
