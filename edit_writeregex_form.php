@@ -107,10 +107,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setType('compareregexpercentage', PARAM_FLOAT);
         $mform->addHelpButton('compareregexpercentage', 'compare', 'qtype_writeregex');
 
-        // add compare automate percentage
-        $mform->addElement('text', 'compareautomatercentage',
-            get_string('wre_acre_percentage', 'qtype_writeregex'));
-        $mform->setType('compareautomatercentage', PARAM_FLOAT);
+//        // add compare automate percentage
+//        $mform->addElement('text', 'compareautomatercentage',
+//            get_string('wre_acre_percentage', 'qtype_writeregex'));
+//        $mform->setType('compareautomatercentage', PARAM_FLOAT);
 
         // add asnwers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
@@ -196,7 +196,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $trimmeditem = trim($item);
             if ($trimmeditem != '') {
                 $answercount++;
-                if ($data['wre_regexp_ts_fraction'] == 1) {
+                if ($data['wre_regexp_ts_fraction'][$key] == 1) {
                     $maxgrade = true;
                 }
             } else if ($data['wre_regexp_ts_fraction'][$key] != 0) {
