@@ -5,7 +5,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/renderer.php');
 
-class qtype_preg_renderer extends qtype_shortanswer_renderer {
+class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
     public function formulation_and_controls(question_attempt $qa,
                                              question_display_options $options) {
 
