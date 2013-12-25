@@ -143,7 +143,7 @@ class qtype_writeregex extends qtype_shortanswer {
         return array('qtype_writeregex_options',
             'notation', 'syntaxtreehinttype', 'syntaxtreehintpenalty', 'explgraphhinttype', 'explgraphhintpenalty',
             'descriptionhinttype', 'descriptionhintpenalty', 'teststringshinttype', 'teststringshintpenalty',
-            'compareregexpercentage', 'compareautomatercentage'
+            'compareregexpercentage'
         );
     }
 
