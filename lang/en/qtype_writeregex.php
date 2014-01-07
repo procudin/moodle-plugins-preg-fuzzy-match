@@ -89,6 +89,10 @@ $string['wre_cre_percentage'] = 'Percentage';
 /* Compare regexp's automats */
 $string['wre_acre'] = 'Compare regexp\'s automats';
 $string['wre_acre_percentage'] = 'Percentage';
+$string['compareautomatapercentage'] = 'Checking regular expression matching (in %) for automata';
+
+/* Compare regexps by test strings */
+$string['compareregexpteststrings'] = 'Checking regular expression matching (in %) in test strings';
 
 $string['wre_regexp_answers'] = 'Regular expression';
 $string['wre_regexp_ts'] = 'Test string';

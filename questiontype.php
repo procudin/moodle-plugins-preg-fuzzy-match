@@ -60,10 +60,10 @@ class qtype_writeregex extends qtype_shortanswer {
     public function save_question_options($question) {
 
         $result = parent::save_question_options($question);
-
-        echo '<pre>';
-        print_r($question);
-        echo '</pre>';
+//
+//        echo '<pre>';
+//        print_r($question);
+//        echo '</pre>';
 
         // save test strings
         $this->save_test_strings_answers($question);
@@ -83,8 +83,11 @@ class qtype_writeregex extends qtype_shortanswer {
         $index = 0;
 
         $tableanswers = $DB->get_records('question_answers',
-            array('question' => $question->id, 'answerformat' => 2),
-            'id ASC');
+            array('question' => $question->id, 'answerformat' => 1));
+
+        echo '<pre>';
+        print_r($tableanswers);
+        echo '</pre>';
 
         // insert (update) new test strings answers
         foreach ($answers as $item) {
@@ -125,7 +128,7 @@ class qtype_writeregex extends qtype_shortanswer {
 
         $result->answer = $answer;
         $result->question = $questionid;
-        $result->answerformat = 127;
+        $result->answerformat = 1;
         $result->fraction = $fraction;
         $result->feedback = '';
         $result->feedbackformat = 0;

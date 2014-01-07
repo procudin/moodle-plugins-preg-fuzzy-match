@@ -105,8 +105,19 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addElement('text', 'compareregexpercentage',
             get_string('wre_cre_percentage', 'qtype_writeregex'));
         $mform->setType('compareregexpercentage', PARAM_FLOAT);
-        $mform->addHelpButton('compareregexpercentage', 'compare', 'qtype_writeregex');
-        $mform->setDefault('compareregexpercentage', '50');
+        $mform->setDefault('compareregexpercentage', '34');
+
+        // add compare regexps automata percentage
+        $mform->addElement('text', 'compareautomatapercentage',
+            get_string('compareautomatapercentage', 'qtype_writeregex'));
+        $mform->setType('compareautomatapercentage', PARAM_FLOAT);
+        $mform->setDefault('compareautomatapercentage', '33');
+
+        // add compare regexp by test strings
+        $mform->addElement('text', 'compareregexpteststrings',
+            get_string('compareregexpteststrings', 'qtype_writeregex'));
+        $mform->setType('compareregexpteststrings', PARAM_FLOAT);
+        $mform->setDefault('compareregexpteststrings', '33');
 
         // add asnwers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
@@ -142,36 +153,34 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     protected function data_preprocessing_answers($question, $withanswerfiles = false) {
 
-        $question = parent::data_preprocessing_answers($question, $withanswerfiles);
+        if (empty($question->options->answers)) {
+            return $question;
+        }
 
-        // if it is new question
-        if (!isset($question->id)) return $question;
-
-        $question->answer = array();
-        $question->fraction = array();
-        $question->feedback = array();
-        $question->wre_regexp_ts_answer = array();
-        $question->wre_regexp_ts_fraction = array();
-
+        $key = 0;
         foreach ($question->options->answers as $answer) {
 
-            if ($answer->answerformat != 127) { // if this is a regexp string
-
-                $question->answer[] = $answer->answer;
-                $question->fraction[] = $answer->fraction;
-                $feedback = array();
-                $feedback['text'] = $answer->feedback;
-                $feedback['format'] = $answer->feedbackformat;
-                $question->feedback[] = $feedback;
-
-            } else { // if this is a test string
+            if ($answer->answerformat == 0) {
+                $question->answer[$key] = $answer->answer;
+                $question->fraction[$key] = 0 + $answer->fraction;
+                $question->feedback[$key] = array();
+                $question->feedback[$key]['text'] = $answer->feedback;
+                $question->feedback[$key]['format'] = $answer->feedbackformat;
+            } else if ($answer->answerformat == 1) {
 
                 $question->wre_regexp_ts_answer[] = $answer->answer;
                 $question->wre_regexp_ts_fraction[] = $answer->fraction;
             }
+
+            $key++;
         }
 
+        echo '<pre>';
+        print_r($question);
+        echo '</pre>';
+
         return $question;
+
     }
 
     /**
@@ -225,12 +234,12 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $repeated = array();
 
         $answeroptions = array();
-        $answeroptions[] = $mform->createElement('text', 'answer',
-            '', array('size' => 40));
-        $answeroptions[] = $mform->createElement('select', 'fraction',
+        $repeated[] = $mform->createElement('textarea', 'answer',
+            '', 'wrap="virtual" rows="2" cols="80"');
+        $repeated[] = $mform->createElement('select', 'fraction',
             get_string('grade'), $gradeoptions);
-        $repeated[] = $mform->createElement('group', 'answeroptions',
-            get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
+//        $repeated[] = $mform->createElement('group', 'answeroptions',
+//            get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
         $repeated[] = $mform->createElement('editor', 'feedback',
             get_string('feedback', 'question'), array('rows' => 5), $this->editoroptions);
         $repeatedoptions['answer']['type'] = PARAM_RAW;
@@ -238,6 +247,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $answersoption = 'answers';
 
         return $repeated;
+
     }
 
     /**
@@ -254,7 +264,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $repeated = array();
 
         $repeated [] =& $mform->createElement('textarea', $label . '_answer',
-            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="60"', $this->editoroptions);
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"', $this->editoroptions);
 
         $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
 
@@ -343,6 +353,65 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         return get_string('addmorechoiceblanks', 'question');
     }
 
+    protected function add_interactive_settings($withclearwrong = false,
+                                                $withshownumpartscorrect = false) {
+        $mform = $this->_form;
+
+        $mform->addElement('header', 'multitriesheader',
+            get_string('settingsformultipletries', 'question'));
+
+        $penalties = array(
+            1.0000000,
+            0.5000000,
+            0.3333333,
+            0.2500000,
+            0.2000000,
+            0.1000000,
+            0.0000000
+        );
+        if (!empty($this->question->penalty) && !in_array($this->question->penalty, $penalties)) {
+            $penalties[] = $this->question->penalty;
+            sort($penalties);
+        }
+        $penaltyoptions = array();
+        foreach ($penalties as $penalty) {
+            $penaltyoptions["$penalty"] = (100 * $penalty) . '%';
+        }
+
+        $mform->addElement('select', 'penalty',
+            get_string('penaltyforeachincorrecttry', 'question'), $penaltyoptions);
+        $mform->addHelpButton('penalty', 'penaltyforeachincorrecttry', 'question');
+        $mform->setDefault('penalty', 0.3333333);
+
+
+        // add syntax tree options
+        $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+        // add explaining graph options
+        $mform->addElement('select', 'explgraphhinttype', get_string('wre_eg', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+
+        // add description options
+        $mform->addElement('select', 'descriptionhinttype', get_string('wre_d', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+
+        // add test string option
+        $mform->addElement('select', 'teststringshinttype', get_string('teststrings', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+    }
+
+    protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
+        $mform = $this->_form;
+        $repeatedoptions = array();
+        $repeated = array();
+
+        return array($repeated, $repeatedoptions);
+    }
+
     /**
      * Метод подготовки данных для отображения.
      * @param object $question Вопрос.
@@ -351,8 +420,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     protected function data_preprocessing($question) {
 
         $question = parent::data_preprocessing($question);
-        $question = $this->data_preprocessing_answers($question);
-        $question = $this->data_preprocessing_hints($question);
+//        $question = $this->data_preprocessing_answers($question);
+//        $question = $this->data_preprocessing_hints($question);
 
         return $question;
     }
