@@ -217,6 +217,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $errors['wre_regexp_ts_answer[0]'] = get_string('fractionsnomax', 'question');
         }
 
+        $regex = $data['compareregexpercentage'];
+        $automata = $data['compareautomatapercentage'];
+        $test = $data['compareregexpteststrings'];
+
+        if ($regex + $automata + $test != 100) {
+            $errors['compareregexpercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        }
+
         return $errors;
     }
 
