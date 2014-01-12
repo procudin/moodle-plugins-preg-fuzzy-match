@@ -40,6 +40,10 @@ require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
  */
 class qtype_writeregex extends qtype_shortanswer {
 
+    public function test_string_answer_format_value() {
+        return 1;
+    }
+
     /**
      * Метод получения свойств вопроса.
      * @param object $question Вопрос.
@@ -58,15 +62,27 @@ class qtype_writeregex extends qtype_shortanswer {
      * @return object|stdClass
      */
     public function save_question_options($question) {
+        global $DB;
+        $result = new stdClass();
 
-        echo '<pre>';
-        print_r($question);
-        echo '</pre>';
+        // remove all answers
+        $DB->delete_records('question_answers', array('question' => $question->id));
 
-        $result = parent::save_question_options($question);
+        // insert regexp answers
+        parent::save_question_options($question);
 
-        // save test strings
-        $this->save_test_strings_answers($question);
+        // insert test string answers
+        foreach ($question->wre_regexp_ts_answer as $key => $answer) {
+
+            if (trim($answer) == '' && $question->wre_regexp_ts_fraction[$key] == 0) {
+                continue;
+            }
+
+            $record = $this->get_test_string_answer_object($answer,
+                $question->wre_regexp_ts_fraction[$key], $question->id);
+
+            $DB->insert_record('question_answers', $record);
+        }
 
         return $result;
     }
@@ -83,11 +99,7 @@ class qtype_writeregex extends qtype_shortanswer {
         $index = 0;
 
         $tableanswers = $DB->get_records('question_answers',
-            array('question' => $question->id, 'answerformat' => 1));
-
-//        echo '<pre>';
-//        print_r($tableanswers);
-//        echo '</pre>';
+            array('question' => $question->id, 'answerformat' => $this->test_string_answer_format_value()));
 
         // insert (update) new test strings answers
         foreach ($answers as $item) {
@@ -128,7 +140,7 @@ class qtype_writeregex extends qtype_shortanswer {
 
         $result->answer = $answer;
         $result->question = $questionid;
-        $result->answerformat = 1;
+        $result->answerformat = $this->test_string_answer_format_value();
         $result->fraction = $fraction;
         $result->feedback = '';
         $result->feedbackformat = 0;

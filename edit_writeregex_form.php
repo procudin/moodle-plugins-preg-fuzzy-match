@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/edit_shortanswer_form.php');
 require_once($CFG->dirroot . '/question/type/preg/questiontype.php');
+require_once($CFG->dirroot . '/question/type/writeregex/questiontype.php');
 
 /**
  * Опреление формы изменения вопроса типа Write Regex.
@@ -156,11 +157,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             return $question;
         }
 
+        $questiontype = 'qtype_writeregex';
+        $questiontypeclass = new $questiontype;
+
         $key = 0;
         $index = 0;
         foreach ($question->options->answers as $answer) {
 
-            if ($answer->answerformat == 0) {
+            if ($answer->answerformat != $questiontypeclass->test_string_answer_format_value()) {
                 $question->answer[$key] = $answer->answer;
                 unset($this->_form->_defaultValues["fraction[$key]"]);
                 $question->fraction[$key] = $answer->fraction;
@@ -168,7 +172,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                 $question->feedback[$key]['text'] = $answer->feedback;
                 $question->feedback[$key]['format'] = $answer->feedbackformat;
                 $key++;
-            } else if ($answer->answerformat == 1) {
+            } else if ($answer->answerformat == $questiontypeclass->test_string_answer_format_value()) {
 
                 $question->wre_regexp_ts_answer[$index] = $answer->answer;
                 $question->wre_regexp_ts_fraction[$index] = $answer->fraction;
@@ -407,7 +411,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
-        $mform = $this->_form;
         $repeatedoptions = array();
         $repeated = array();
 
