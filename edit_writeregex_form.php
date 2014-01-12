@@ -49,7 +49,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @param MoodleQuickForm $mform the form being built.
      */
     protected function definition_inner($mform) {
-
         global $CFG;
 
         // init hints options
@@ -158,26 +157,25 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         }
 
         $key = 0;
+        $index = 0;
         foreach ($question->options->answers as $answer) {
 
             if ($answer->answerformat == 0) {
                 $question->answer[$key] = $answer->answer;
-                $question->fraction[$key] = 0 + $answer->fraction;
+                unset($this->_form->_defaultValues["fraction[$key]"]);
+                $question->fraction[$key] = $answer->fraction;
                 $question->feedback[$key] = array();
                 $question->feedback[$key]['text'] = $answer->feedback;
                 $question->feedback[$key]['format'] = $answer->feedbackformat;
+                $key++;
             } else if ($answer->answerformat == 1) {
 
-                $question->wre_regexp_ts_answer[] = $answer->answer;
-                $question->wre_regexp_ts_fraction[] = $answer->fraction;
+                $question->wre_regexp_ts_answer[$index] = $answer->answer;
+                $question->wre_regexp_ts_fraction[$index] = $answer->fraction;
+                $index++;
             }
 
-            $key++;
         }
-
-        echo '<pre>';
-        print_r($question);
-        echo '</pre>';
 
         return $question;
 
@@ -241,13 +239,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                                                    &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
-        $answeroptions = array();
         $repeated[] = $mform->createElement('textarea', 'answer',
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"');
         $repeated[] = $mform->createElement('select', 'fraction',
             get_string('grade'), $gradeoptions);
-//        $repeated[] = $mform->createElement('group', 'answeroptions',
-//            get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
         $repeated[] = $mform->createElement('editor', 'feedback',
             get_string('feedback', 'question'), array('rows' => 5), $this->editoroptions);
         $repeatedoptions['answer']['type'] = PARAM_RAW;
@@ -357,7 +352,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     protected function get_more_choices_string() {
-
         return get_string('addmorechoiceblanks', 'question');
     }
 
@@ -393,21 +387,21 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
 
         // add syntax tree options
-        $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
+        $mform->addElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // add explaining graph options
-        $mform->addElement('select', 'explgraphhinttype', get_string('wre_eg', 'qtype_writeregex'),
+        $mform->addElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
             $this->hintsoptions);
 
 
         // add description options
-        $mform->addElement('select', 'descriptionhinttype', get_string('wre_d', 'qtype_writeregex'),
+        $mform->addElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
             $this->hintsoptions);
 
 
         // add test string option
-        $mform->addElement('select', 'teststringshinttype', get_string('teststrings', 'qtype_writeregex'),
+        $mform->addElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
             $this->hintsoptions);
 
     }
@@ -426,10 +420,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @return object Вопрос с данными.
      */
     protected function data_preprocessing($question) {
-
         $question = parent::data_preprocessing($question);
-//        $question = $this->data_preprocessing_answers($question);
-//        $question = $this->data_preprocessing_hints($question);
 
         return $question;
     }
