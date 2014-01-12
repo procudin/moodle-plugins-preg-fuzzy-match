@@ -243,7 +243,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $answeroptions = array();
         $repeated[] = $mform->createElement('textarea', 'answer',
-            '', 'wrap="virtual" rows="2" cols="80"');
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"');
         $repeated[] = $mform->createElement('select', 'fraction',
             get_string('grade'), $gradeoptions);
 //        $repeated[] = $mform->createElement('group', 'answeroptions',
