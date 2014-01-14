@@ -68,8 +68,28 @@ class qtype_writeregex extends qtype_shortanswer {
         // remove all answers
         $DB->delete_records('question_answers', array('question' => $question->id));
 
+        if (!isset($question->wre_regexp_ts_answer) && !isset($question->wre_regexp_ts_fraction)){
+            $question->wre_regexp_ts_answer = array();
+            $question->wre_regexp_ts_fraction = array();
+            echo '<pre>';
+            print_r($question);
+            echo '</pre>';
+            foreach ($question->answer as $index => $item) {
+
+                if ($item['answerformat'] == $this->test_string_answer_format_value()) {
+
+                    $question->wre_regexp_ts_answer[] = $question->answer[$index];
+                    $question->wre_regexp_ts_fraction[] = $question->fraction[$index];
+
+                    unset($question->answer[$index]);
+                    unset($question->fraction[$index]);
+                }
+            }
+        }
+
         // insert regexp answers
         parent::save_question_options($question);
+
 
         // insert test string answers
         foreach ($question->wre_regexp_ts_answer as $key => $answer) {

@@ -195,6 +195,29 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $errors = parent::validation($data, $files);
 
+        $answers = $data['answer'];
+        $answercount = 0;
+        $maxgrade = false;
+        foreach ($answers as $key => $answer) {
+            $trimmedanswer = trim($answer);
+            if ($trimmedanswer !== '') {
+                $answercount++;
+                if ($data['fraction'][$key] == 1) {
+                    $maxgrade = true;
+                }
+            } else if ($data['fraction'][$key] != 0 ||
+                !html_is_blank($data['feedback'][$key]['text'])) {
+                $errors["answer[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
+                $answercount++;
+            }
+        }
+        if ($answercount==0) {
+            $errors['answer[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
+        }
+        if ($maxgrade == false) {
+            $errors['answer[0]'] = get_string('fractionsnomax', 'question');
+        }
+
         $strings = $data['wre_regexp_ts_answer'];
         $answercount = 0;
         $maxgrade = false;
