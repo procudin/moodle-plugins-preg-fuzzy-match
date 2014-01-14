@@ -1,8 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="question/type/writeregex/db" VERSION="2013102500" COMMENT="XMLDB file for question type: WriteRegEx"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
-        >
+<XMLDB PATH="question/type/writeregex/db" VERSION="2013102500" COMMENT="XMLDB file for question type: WriteRegEx" xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <TABLES>
         <TABLE NAME="qtype_writeregex_options" COMMENT="Table for question type: WriteRegEx">
             <FIELDS>
@@ -18,6 +14,8 @@
                 <FIELD NAME="teststringshinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="teststringshintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="compareregexpercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
+                <FIELD NAME="compareautomatapercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
+                <FIELD NAME="compareregexpteststrings" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
