@@ -382,62 +382,91 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         return get_string('addmorechoiceblanks', 'question');
     }
 
-    protected function add_interactive_settings($withclearwrong = false,
-                                                $withshownumpartscorrect = false) {
+//    protected function add_interactive_settings($withclearwrong = false,
+//                                                $withshownumpartscorrect = false) {
+//        $mform = $this->_form;
+//
+//        $mform->addElement('header', 'multitriesheader',
+//            get_string('settingsformultipletries', 'question'));
+//
+//        $penalties = array(
+//            1.0000000,
+//            0.5000000,
+//            0.3333333,
+//            0.2500000,
+//            0.2000000,
+//            0.1000000,
+//            0.0000000
+//        );
+//        if (!empty($this->question->penalty) && !in_array($this->question->penalty, $penalties)) {
+//            $penalties[] = $this->question->penalty;
+//            sort($penalties);
+//        }
+//        $penaltyoptions = array();
+//        foreach ($penalties as $penalty) {
+//            $penaltyoptions["$penalty"] = (100 * $penalty) . '%';
+//        }
+//
+//        $mform->addElement('select', 'penalty',
+//            get_string('penaltyforeachincorrecttry', 'question'), $penaltyoptions);
+//        $mform->addHelpButton('penalty', 'penaltyforeachincorrecttry', 'question');
+//        $mform->setDefault('penalty', 0.3333333);
+//
+//
+//        // add syntax tree options
+//        $mform->addElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
+//            $this->hintsoptions);
+//
+//        // add explaining graph options
+//        $mform->addElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
+//            $this->hintsoptions);
+//
+//
+//        // add description options
+//        $mform->addElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
+//            $this->hintsoptions);
+//
+//
+//        // add test string option
+//        $mform->addElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
+//            $this->hintsoptions);
+//
+//    }
+
+    protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
+        $repeated = array();
+
+        $parentresult = parent::get_hint_fields($withclearwrong, $withshownumpartscorrect);
+
+//        echo '<pre>';
+//        print_r($parentresult[0]);
+//        echo '</pre>';
+
+        // add our inputs
         $mform = $this->_form;
-
-        $mform->addElement('header', 'multitriesheader',
-            get_string('settingsformultipletries', 'question'));
-
-        $penalties = array(
-            1.0000000,
-            0.5000000,
-            0.3333333,
-            0.2500000,
-            0.2000000,
-            0.1000000,
-            0.0000000
-        );
-        if (!empty($this->question->penalty) && !in_array($this->question->penalty, $penalties)) {
-            $penalties[] = $this->question->penalty;
-            sort($penalties);
-        }
-        $penaltyoptions = array();
-        foreach ($penalties as $penalty) {
-            $penaltyoptions["$penalty"] = (100 * $penalty) . '%';
-        }
-
-        $mform->addElement('select', 'penalty',
-            get_string('penaltyforeachincorrecttry', 'question'), $penaltyoptions);
-        $mform->addHelpButton('penalty', 'penaltyforeachincorrecttry', 'question');
-        $mform->setDefault('penalty', 0.3333333);
-
+        $count = count($parentresult[0]);
 
         // add syntax tree options
-        $mform->addElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // add explaining graph options
-        $mform->addElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
             $this->hintsoptions);
 
 
         // add description options
-        $mform->addElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
             $this->hintsoptions);
 
 
         // add test string option
-        $mform->addElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
+        $repeated[$count] = $mform->createElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
             $this->hintsoptions);
 
-    }
+        $parentresult[0] = array_merge($parentresult[0], $repeated);
 
-    protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
-        $repeatedoptions = array();
-        $repeated = array();
-
-        return array($repeated, $repeatedoptions);
+        return $parentresult;
     }
 
     /**
