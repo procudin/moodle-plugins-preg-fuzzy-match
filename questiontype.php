@@ -68,25 +68,6 @@ class qtype_writeregex extends qtype_shortanswer {
         // remove all answers
         $DB->delete_records('question_answers', array('question' => $question->id));
 
-        if (!isset($question->wre_regexp_ts_answer) && !isset($question->wre_regexp_ts_fraction)){
-            $question->wre_regexp_ts_answer = array();
-            $question->wre_regexp_ts_fraction = array();
-            echo '<pre>';
-            print_r($question);
-            echo '</pre>';
-            foreach ($question->answer as $index => $item) {
-
-                if ($item['answerformat'] == $this->test_string_answer_format_value()) {
-
-                    $question->wre_regexp_ts_answer[] = $question->answer[$index];
-                    $question->wre_regexp_ts_fraction[] = $question->fraction[$index];
-
-                    unset($question->answer[$index]);
-                    unset($question->fraction[$index]);
-                }
-            }
-        }
-
         // insert regexp answers
         parent::save_question_options($question);
 
@@ -105,46 +86,6 @@ class qtype_writeregex extends qtype_shortanswer {
         }
 
         return $result;
-    }
-
-    /**
-     * Метод сохранения ответов (тестовых строк).
-     * @param $question Вопрос.
-     */
-    private function save_test_strings_answers ($question) {
-
-        global $DB;
-        $answers = $question->wre_regexp_ts_answer;
-        $answersfractions = $question->wre_regexp_ts_fraction;
-        $index = 0;
-
-        $tableanswers = $DB->get_records('question_answers',
-            array('question' => $question->id, 'answerformat' => $this->test_string_answer_format_value()));
-
-        // insert (update) new test strings answers
-        foreach ($answers as $item) {
-
-            if (!empty($item)) {
-
-                $answer = $this->get_test_string_answer_object($item, $answersfractions[$index], $question->id);
-
-                $index++;
-
-                if (!isset($tableanswers[$index])) {
-                    $DB->insert_record('question_answers', $answer);
-                } else {
-                    $DB->update_record('question_answers', $answer);
-                    unset($tableanswers[$index]);
-                }
-            }
-        }
-
-        // remove old answers
-        foreach ($tableanswers as $item) {
-
-            $DB->delete_records('question_answers', array('id' => $item->id));
-        }
-
     }
 
     /**
