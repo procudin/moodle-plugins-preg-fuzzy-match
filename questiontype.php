@@ -53,6 +53,49 @@ class qtype_writeregex extends qtype_shortanswer {
 
         $result = parent::get_question_options($question);
 
+        $question->syntaxtreehint = array();
+        $question->explgraphhint = array();
+        $question->descriptionhint = array();
+        $question->teststringshint = array();
+
+        foreach ($question->hints as $key => $hint) {
+            // get syntaxtreehint
+            if (preg_match("/^\\nsyntaxtreehint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
+
+                $syntaxtreehint = preg_replace('/^\\nsyntaxtreehint#/', '', $value);
+                $syntaxtreehint = preg_replace('/\\n$/', '', $syntaxtreehint);
+
+                $question->syntaxtreehint[] = $syntaxtreehint[0];
+            }
+
+            // get explgraphhint
+            if (preg_match("/\\nexplgraphhint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
+
+                $explgraphhint = preg_replace('/^\\nexplgraphhint#/', '', $value);
+                $explgraphhint = preg_replace('/\\n$/', '', $explgraphhint);
+
+                $question->explgraphhint[] = $explgraphhint[0];
+            }
+
+            // get descriptionhint
+            if (preg_match("/\\ndescriptionhint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
+
+                $descriptionhint = preg_replace('/^\\ndescriptionhint#/', '', $value);
+                $descriptionhint = preg_replace('/\\n$/', '', $descriptionhint);
+
+                $question->descriptionhint[] = $descriptionhint[0];
+            }
+
+            // get teststringshint
+            if (preg_match("/\\nteststringshint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
+
+                $teststringshint = preg_replace('/^\\nteststringshint#/', '', $value);
+                $teststringshint = preg_replace('/\\n$/', '', $teststringshint);
+
+                $question->teststringshint[] = $teststringshint[0];
+            }
+        }
+
         return $result;
     }
 
@@ -142,16 +185,16 @@ class qtype_writeregex extends qtype_shortanswer {
         $result = "\n";
 
         // add syntaxtreehint
-        $result = $result . "syntaxtreehint#" . $formdata->syntaxtreehint[$number] . "\\n";
+        $result = $result . "syntaxtreehint#" . $formdata->syntaxtreehint[$number] . "\n";
 
         // add explgraphhint
-        $result = $result . "explgraphhint#" . $formdata->explgraphhint[$number] . "\\n";
+        $result = $result . "explgraphhint#" . $formdata->explgraphhint[$number] . "\n";
 
         // add descriptionhint
-        $result = $result . "descriptionhint#" . $formdata->descriptionhint[$number] . "\\n";
+        $result = $result . "descriptionhint#" . $formdata->descriptionhint[$number] . "\n";
 
         //add teststringshint
-        $result = $result . "teststringshint#" . $formdata->teststringshint[$number] . "\\n";
+        $result = $result . "teststringshint#" . $formdata->teststringshint[$number] . "\n";
 
         return $result;
     }
