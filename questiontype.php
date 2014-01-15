@@ -68,6 +68,33 @@ class qtype_writeregex extends qtype_shortanswer {
         // remove all answers
         $DB->delete_records('question_answers', array('question' => $question->id));
 
+//        echo '<pre>';
+//        print_r($question);
+//        echo '</pre>';
+
+        if (!isset($question->wre_regexp_ts_answer)) {
+
+            $answers = array();
+            $answersstrings = array();
+            $fraction = array();
+            $fractionstrings = array();
+
+            foreach ($question->answer as $index => $item) {
+                if ($question->answerformat[$index] == $this->test_string_answer_format_value()) {
+                    $answersstrings[] = $item;
+                    $fractionstrings[] = $question->fraction[$index];
+                } else {
+                    $answers[] = $item;
+                    $fraction[] = $question->fraction[$index];
+                }
+            }
+
+            $question->answer = $answers;
+            $question->fraction = $fraction;
+            $question->wre_regexp_ts_answer = $answersstrings;
+            $question->wre_regexp_ts_fraction = $fractionstrings;
+        }
+
         // insert regexp answers
         parent::save_question_options($question);
 
@@ -193,7 +220,52 @@ class qtype_writeregex extends qtype_shortanswer {
      * @return bool|object РЕзультат.
      */
     public function import_from_xml($data, $question, qformat_xml $format, $extra=null){
-        return parent::import_from_xml($data, $question, $format, $extra);
+
+        $question_type = $data['@']['type'];
+        if ($question_type != $this->name()) {
+            return false;
+        }
+
+        $extraquestionfields = $this->extra_question_fields();
+        if (!is_array($extraquestionfields)) {
+            return false;
+        }
+
+        // Omit table name.
+        array_shift($extraquestionfields);
+        $qo = $format->import_headers($data);
+        $qo->qtype = $question_type;
+
+        foreach ($extraquestionfields as $field) {
+            $qo->$field = $format->getpath($data, array('#', $field, 0, '#'), '');
+        }
+
+        // Run through the answers.
+        $answers = $data['#']['answer'];
+        $a_count = 0;
+        $extraanswersfields = $this->extra_answer_fields();
+        if (is_array($extraanswersfields)) {
+            array_shift($extraanswersfields);
+        }
+        foreach ($answers as $answer) {
+            $ans = $format->import_answer($answer, true);
+            if (!$this->has_html_answers()) {
+                $qo->answer[$a_count] = $ans->answer['text'];
+            } else {
+                $qo->answer[$a_count] = $ans->answer;
+            }
+            $qo->answerformat[$a_count] = $ans->answer['format'];
+            $qo->fraction[$a_count] = $ans->fraction;
+            $qo->feedback[$a_count] = $ans->feedback;
+            if (is_array($extraanswersfields)) {
+                foreach ($extraanswersfields as $field) {
+                    $qo->{$field}[$a_count] =
+                        $format->getpath($answer, array('#', $field, 0, '#'), '');
+                }
+            }
+            ++$a_count;
+        }
+        return $qo;
     }
 
     /**
