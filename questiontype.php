@@ -89,6 +89,47 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
+     * Функция сохранения подсказок в бд.
+     * @param $formdata
+     * @param bool $withparts
+     */
+    public function save_hints($formdata, $withparts = false) {
+
+        parent::save_hints($formdata, $withparts);
+
+    }
+
+    /**
+     * Save additional question type data into the hint optional field.
+     * @param object $formdata the data from the form.
+     * @param int $number number of hint to get options from.
+     * @param bool $withparts whether question have parts.
+     * @return string value to save into the options field of question_hints table.
+     */
+    protected function save_hint_options($formdata, $number, $withparts) {
+
+//        echo '<pre>';
+//        print_r($number);
+//        echo '</pre>';
+
+        $result = "\n";
+
+        // add syntaxtreehint
+        $result = $result . "syntaxtreehint#" . $formdata->syntaxtreehint[$number] . "\\n";
+
+        // add explgraphhint
+        $result = $result . "explgraphhint#" . $formdata->explgraphhint[$number] . "\\n";
+
+        // add descriptionhint
+        $result = $result . "descriptionhint#" . $formdata->descriptionhint[$number] . "\\n";
+
+        //add teststringshint
+        $result = $result . "teststringshint#" . $formdata->teststringshint[$number] . "\\n";
+
+        return $result;
+    }
+
+    /**
      * Метод формирования stdClass ответа (тестовые строки).
      * @param $answer Тестовая строка.
      * @param $fraction Оценка.
