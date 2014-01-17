@@ -207,31 +207,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @return array Массив ошибок.
      */
     public function validation($data, $files) {
-
         $errors = parent::validation($data, $files);
-
-//        $answers = $data['answer'];
-//        $answercount = 0;
-//        $maxgrade = false;
-//        foreach ($answers as $key => $answer) {
-//            $trimmedanswer = trim($answer);
-//            if ($trimmedanswer !== '') {
-//                $answercount++;
-//                if ($data['fraction'][$key] == 1) {
-//                    $maxgrade = true;
-//                }
-//            } else if ($data['fraction'][$key] != 0 ||
-//                !html_is_blank($data['feedback'][$key]['text'])) {
-//                $errors["answer[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
-//                $answercount++;
-//            }
-//        }
-//        if ($answercount==0) {
-//            $errors['answer[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
-//        }
-//        if ($maxgrade == false) {
-//            $errors['answer[0]'] = get_string('fractionsnomax', 'question');
-//        }
 
         $strings = $data['wre_regexp_ts_answer'];
         $answercount = 0;
@@ -279,20 +255,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     private function  get_per_answer_fields_regexp($mform, $label, $gradeoptions,
                                                    &$repeatedoptions, &$answersoption) {
-//        $repeated = array();
-//
-//        $repeated[] = $mform->createElement('textarea', 'answer',
-//            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"');
-//        $repeated[] = $mform->createElement('select', 'fraction',
-//            get_string('grade'), $gradeoptions);
-//        $repeated[] = $mform->createElement('editor', 'feedback',
-//            get_string('feedback', 'question'), array('rows' => 5), $this->editoroptions);
-//        $repeatedoptions['answer']['type'] = PARAM_RAW;
-//        $repeatedoptions['fraction']['default'] = 0;
-//        $answersoption = 'answers';
 
         $repeated = array();
         $answeroptions = array();
+        $answeroptions[] = $mform->CreateElement('hidden', 'freply', 'yes'); // fake element
         $repeated[] = $mform->createElement('group', 'answeroptions',
             get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
         $repeated[] = $mform->createElement('textarea', 'answer',
@@ -302,7 +268,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $repeated[] = $mform->createElement('editor', 'feedback',
             get_string('feedback', 'question'), array('rows' => 8, 'cols' => 80), $this->editoroptions);
         $repeated[] = $mform->addElement('html', '<hr />');
-        $repeatedoptions['answer']['type'] = PARAM_RAW;
+        $repeatedoptions['freply']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = 'answers';
         return $repeated;
