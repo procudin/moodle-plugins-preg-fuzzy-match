@@ -210,28 +210,28 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $errors = parent::validation($data, $files);
 
-        $answers = $data['answer'];
-        $answercount = 0;
-        $maxgrade = false;
-        foreach ($answers as $key => $answer) {
-            $trimmedanswer = trim($answer);
-            if ($trimmedanswer !== '') {
-                $answercount++;
-                if ($data['fraction'][$key] == 1) {
-                    $maxgrade = true;
-                }
-            } else if ($data['fraction'][$key] != 0 ||
-                !html_is_blank($data['feedback'][$key]['text'])) {
-                $errors["answer[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
-                $answercount++;
-            }
-        }
-        if ($answercount==0) {
-            $errors['answer[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
-        }
-        if ($maxgrade == false) {
-            $errors['answer[0]'] = get_string('fractionsnomax', 'question');
-        }
+//        $answers = $data['answer'];
+//        $answercount = 0;
+//        $maxgrade = false;
+//        foreach ($answers as $key => $answer) {
+//            $trimmedanswer = trim($answer);
+//            if ($trimmedanswer !== '') {
+//                $answercount++;
+//                if ($data['fraction'][$key] == 1) {
+//                    $maxgrade = true;
+//                }
+//            } else if ($data['fraction'][$key] != 0 ||
+//                !html_is_blank($data['feedback'][$key]['text'])) {
+//                $errors["answer[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
+//                $answercount++;
+//            }
+//        }
+//        if ($answercount==0) {
+//            $errors['answer[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
+//        }
+//        if ($maxgrade == false) {
+//            $errors['answer[0]'] = get_string('fractionsnomax', 'question');
+//        }
 
         $strings = $data['wre_regexp_ts_answer'];
         $answercount = 0;
@@ -279,18 +279,32 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     private function  get_per_answer_fields_regexp($mform, $label, $gradeoptions,
                                                    &$repeatedoptions, &$answersoption) {
-        $repeated = array();
+//        $repeated = array();
+//
+//        $repeated[] = $mform->createElement('textarea', 'answer',
+//            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"');
+//        $repeated[] = $mform->createElement('select', 'fraction',
+//            get_string('grade'), $gradeoptions);
+//        $repeated[] = $mform->createElement('editor', 'feedback',
+//            get_string('feedback', 'question'), array('rows' => 5), $this->editoroptions);
+//        $repeatedoptions['answer']['type'] = PARAM_RAW;
+//        $repeatedoptions['fraction']['default'] = 0;
+//        $answersoption = 'answers';
 
+        $repeated = array();
+        $answeroptions = array();
+        $repeated[] = $mform->createElement('group', 'answeroptions',
+            get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
         $repeated[] = $mform->createElement('textarea', 'answer',
-            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"');
+            '', 'wrap="virtual" rows="4" cols="80"');
         $repeated[] = $mform->createElement('select', 'fraction',
             get_string('grade'), $gradeoptions);
         $repeated[] = $mform->createElement('editor', 'feedback',
-            get_string('feedback', 'question'), array('rows' => 5), $this->editoroptions);
+            get_string('feedback', 'question'), array('rows' => 8, 'cols' => 80), $this->editoroptions);
+        $repeated[] = $mform->addElement('html', '<hr />');
         $repeatedoptions['answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = 'answers';
-
         return $repeated;
 
     }
@@ -312,6 +326,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"', $this->editoroptions);
 
         $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
+
+        $repeated[] = $mform->addElement('html', '<hr />');
 
         $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
         $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
@@ -397,65 +413,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         return get_string('addmorechoiceblanks', 'question');
     }
 
-//    protected function add_interactive_settings($withclearwrong = false,
-//                                                $withshownumpartscorrect = false) {
-//        $mform = $this->_form;
-//
-//        $mform->addElement('header', 'multitriesheader',
-//            get_string('settingsformultipletries', 'question'));
-//
-//        $penalties = array(
-//            1.0000000,
-//            0.5000000,
-//            0.3333333,
-//            0.2500000,
-//            0.2000000,
-//            0.1000000,
-//            0.0000000
-//        );
-//        if (!empty($this->question->penalty) && !in_array($this->question->penalty, $penalties)) {
-//            $penalties[] = $this->question->penalty;
-//            sort($penalties);
-//        }
-//        $penaltyoptions = array();
-//        foreach ($penalties as $penalty) {
-//            $penaltyoptions["$penalty"] = (100 * $penalty) . '%';
-//        }
-//
-//        $mform->addElement('select', 'penalty',
-//            get_string('penaltyforeachincorrecttry', 'question'), $penaltyoptions);
-//        $mform->addHelpButton('penalty', 'penaltyforeachincorrecttry', 'question');
-//        $mform->setDefault('penalty', 0.3333333);
-//
-//
-//        // add syntax tree options
-//        $mform->addElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
-//            $this->hintsoptions);
-//
-//        // add explaining graph options
-//        $mform->addElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
-//            $this->hintsoptions);
-//
-//
-//        // add description options
-//        $mform->addElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
-//            $this->hintsoptions);
-//
-//
-//        // add test string option
-//        $mform->addElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
-//            $this->hintsoptions);
-//
-//    }
-
     protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
         $repeated = array();
 
         $parentresult = parent::get_hint_fields($withclearwrong, $withshownumpartscorrect);
-
-//        echo '<pre>';
-//        print_r($parentresult[0]);
-//        echo '</pre>';
 
         // add our inputs
         $mform = $this->_form;
