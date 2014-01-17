@@ -233,15 +233,39 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $errors['wre_regexp_ts_answer[0]'] = get_string('fractionsnomax', 'question');
         }
 
+        $this->is_valid_compare_values($data, $errors);
+
+        return $errors;
+    }
+
+    /**
+     * Validation values of compare values.
+     * @param $data Data from form.
+     * @param $errors Errors array.
+     */
+    private function is_valid_compare_values ($data, &$errors) {
+
         $regex = $data['compareregexpercentage'];
         $automata = $data['compareautomatapercentage'];
         $test = $data['compareregexpteststrings'];
+        $flag = false;
 
-        if ($regex + $automata + $test != 100) {
-            $errors['compareregexpercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        if ($regex < 0 || $regex > 100) {
+            $errors['compareregexpercentage'] = get_string('compareinvalidvalue', 'qtype_writeregex');
+            $flag = true;
         }
 
-        return $errors;
+        if ($automata < 0 || $automata > 100) {
+            $errors['compareautomatapercentage'] = get_string('compareinvalidvalue', 'qtype_writeregex');
+        }
+
+        if ($test < 0 || $test > 100) {
+            $errors['compareregexpteststrings'] = get_string('compareinvalidvalue', 'qtype_writeregex');
+        }
+
+        if ($regex + $automata + $test != 100 and !$flag) {
+            $errors['compareregexpercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        }
     }
 
     /**

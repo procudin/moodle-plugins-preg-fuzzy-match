@@ -113,3 +113,5 @@ $string['compare'] = 'You can specify a weight check in regexps and automata';
 $string['compare_title'] = 'You can specify a weight check in regexps and automata';
 $string['compare_help'] = 'Comparison is carried out directly in regexps and automata. If you specify a value for
 regexps 1, the value for automatic turn 0 (total value = comparison of regexp + comparison of engines).';
+
+$string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
