@@ -50,7 +50,15 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @param MoodleQuickForm $mform the form being built.
      */
     protected function definition_inner($mform) {
+
         global $CFG;
+
+        $menu = array(
+            get_string('caseno', 'qtype_shortanswer'),
+            get_string('caseyes', 'qtype_shortanswer')
+        );
+        $mform->addElement('select', 'usecase',
+            get_string('casesensitive', 'qtype_shortanswer'), $menu);
 
         // init hints options
         $this->hintsoptions = array(
@@ -64,10 +72,17 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $pregclass = 'qtype_preg';
         $preg = new $pregclass;
 
+        // add engines
+        $engines = $preg->available_engines();
+        $mform->addElement('select', 'engine', get_string('engine', 'qtype_preg'), $engines);
+        $mform->setDefault('engine', $CFG->qtype_preg_defaultengine);
+        $mform->addHelpButton('engine', 'engine', 'qtype_preg');
+
         // add notations
         $notations = $preg->available_notations();
         $mform->addElement('select', 'notation', get_string('notation', 'qtype_preg'), $notations);
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
+        $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
         // add syntax tree options
         $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
