@@ -26,12 +26,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_writeregex';
-$plugin->version   = 2013102500;
+$plugin->version   = 2013022500;
 
 $plugin->requires  = 2013050100;
 
 $plugin->maturity  = MATURITY_STABLE;
 
 $plugin->dependencies = array(
+    'qtype_shortanswer' => 2013050100,
     'qtype_preg' => 2013100500
 );
