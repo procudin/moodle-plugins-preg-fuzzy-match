@@ -115,3 +115,5 @@ $string['compare_help'] = 'Comparison is carried out directly in regexps and aut
 regexps 1, the value for automatic turn 0 (total value = comparison of regexp + comparison of engines).';
 
 $string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
+$string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
+$string['invalidcomparets'] = 'Check value for the test string is set to 0, remove the test strings';

@@ -209,33 +209,39 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
+        $this->is_valid_compare_values($data, $errors);
+
+        $this->is_valid_test_strings($data, $errors, $data['compareregexpteststrings']);
+
+        return $errors;
+    }
+
+    /**
+     * Validation test string answer.
+     * @param $data Data from form.
+     * @param $errors Errors array.
+     * @param $test Value of compare by test strings.
+     */
+    private function is_valid_test_strings ($data, &$errors, $test) {
         $strings = $data['wre_regexp_ts_answer'];
         $answercount = 0;
-        $maxgrade = false;
+        $maxgrade = 0;
 
         foreach ($strings as $key => $item) {
-            $trimmeditem = trim($item);
-            if ($trimmeditem != '') {
+            $trimdata = trim($item);
+            if ($trimdata !== '') {
                 $answercount++;
-                if ($data['wre_regexp_ts_fraction'][$key] == 1) {
-                    $maxgrade = true;
-                }
-            } else if ($data['wre_regexp_ts_fraction'][$key] != 0) {
-                $errors["wre_regexp_ts_answer[$key]"] = get_string('answermustbegiven', 'qtype_shortanswer');
-                $answercount++;
+                $maxgrade = $maxgrade + $data['wre_regexp_ts_fraction'][$key];
             }
         }
 
-        if ($answercount==0) {
-            $errors['wre_regexp_ts_answer[0]'] = get_string('notenoughanswers', 'qtype_shortanswer', 1);
-        }
-        if ($maxgrade == false) {
-            $errors['wre_regexp_ts_answer[0]'] = get_string('fractionsnomax', 'question');
+        if ($maxgrade != 1 and $test > 0) {
+            $errors["wre_regexp_ts_answer[0]"] = get_string('invalidtssumvalue', 'qtype_writeregex');
         }
 
-        $this->is_valid_compare_values($data, $errors);
-
-        return $errors;
+        if ($answercount > 0 and $test == 0) {
+            $errors['compareregexpteststrings'] = get_string('invalidcomparets', 'qtype_writeregex');
+        }
     }
 
     /**
