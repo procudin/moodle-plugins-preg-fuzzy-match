@@ -111,10 +111,6 @@ class qtype_writeregex extends qtype_shortanswer {
         // remove all answers
         $DB->delete_records('question_answers', array('question' => $question->id));
 
-//        echo '<pre>';
-//        print_r($question);
-//        echo '</pre>';
-
         if (!isset($question->wre_regexp_ts_answer)) {
 
             $answers = array();
@@ -228,9 +224,9 @@ class qtype_writeregex extends qtype_shortanswer {
     public function extra_question_fields() {
 
         return array('qtype_writeregex_options',
-            'notation', 'syntaxtreehinttype', 'syntaxtreehintpenalty', 'explgraphhinttype', 'explgraphhintpenalty',
-            'descriptionhinttype', 'descriptionhintpenalty', 'teststringshinttype', 'teststringshintpenalty',
-            'compareregexpercentage', 'compareautomatapercentage', 'compareregexpteststrings'
+            'usecase', 'engine', 'notation', 'syntaxtreehinttype', 'syntaxtreehintpenalty', 'explgraphhinttype',
+            'explgraphhintpenalty', 'descriptionhinttype', 'descriptionhintpenalty', 'teststringshinttype',
+            'teststringshintpenalty', 'compareregexpercentage'
         );
     }
 
