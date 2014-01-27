@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_writeregex';
-$plugin->version   = 2013022500;
+$plugin->version   = 2014011700;
 
 $plugin->requires  = 2013050100;
 

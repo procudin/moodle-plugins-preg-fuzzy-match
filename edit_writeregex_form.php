@@ -213,7 +213,42 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $this->is_valid_test_strings($data, $errors, $data['compareregexpteststrings']);
 
+        $this->is_valid_regexp($data, $errors);
+
         return $errors;
+    }
+
+    /**
+     * Функция проверки корректности регулярного выражения (ответа).
+     * @param $data array Данные с формы.
+     * @param $errors array Массив ошибок.
+     */
+    private function is_valid_regexp ($data, &$errors) {
+
+        $test = $data['compareregexpteststrings'];
+
+        if ($test > 0 && $test <= 100) {
+
+            $questionobj = new qtype_preg_question();
+            $answers = $data['answer'];
+            $i = 0;
+
+            foreach ($answers as $key => $answer) {
+                $trimmedanswer = trim($answer);
+                if ($trimmedanswer !== '') {
+                    $matcher = $questionobj->get_matcher($data['engine'], $trimmedanswer, false,
+                        $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation']);
+   
+                    if ($matcher->errors_exist()) {
+                        $regexerrors = $matcher->get_error_messages(true);
+                        $errors['answer['.$key.']'] = '';
+                        foreach ($regexerrors as $item) {
+                            $errors['answer['.$key.']'] .= $item . '<br />';
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
