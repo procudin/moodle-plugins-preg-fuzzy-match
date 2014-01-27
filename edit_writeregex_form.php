@@ -87,52 +87,63 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         // add syntax tree options
         $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
             $this->hintsoptions);
+        $mform->addHelpButton('syntaxtreehinttype', 'syntaxtreehinttype', 'qtype_writeregex');
         $mform->addElement('text', 'syntaxtreehintpenalty',
             get_string('penalty', 'qtype_writeregex'));
         $mform->setType('syntaxtreehintpenalty', PARAM_FLOAT);
         $mform->setDefault('syntaxtreehintpenalty', '0.0000000');
+        $mform->addHelpButton('syntaxtreehintpenalty', 'syntaxtreehintpenalty', 'qtype_writeregex');
 
         // add explaining graph options
         $mform->addElement('select', 'explgraphhinttype', get_string('wre_eg', 'qtype_writeregex'),
             $this->hintsoptions);
+        $mform->addHelpButton('explgraphhinttype', 'explgraphhinttype', 'qtype_writeregex');
         $mform->addElement('text', 'explgraphhintpenalty',
             get_string('penalty', 'qtype_writeregex'));
+        $mform->addHelpButton('explgraphhintpenalty', 'explgraphhintpenalty', 'qtype_writeregex');
         $mform->setType('explgraphhintpenalty', PARAM_FLOAT);
         $mform->setDefault('explgraphhintpenalty', '0.0000000');
 
         // add description options
         $mform->addElement('select', 'descriptionhinttype', get_string('wre_d', 'qtype_writeregex'),
             $this->hintsoptions);
+        $mform->addHelpButton('descriptionhinttype', 'descriptionhinttype', 'qtype_writeregex');
         $mform->addElement('text', 'descriptionhintpenalty',
             get_string('penalty', 'qtype_writeregex'));
         $mform->setType('descriptionhintpenalty', PARAM_FLOAT);
         $mform->setDefault('descriptionhintpenalty', '0.0000000');
+        $mform->addHelpButton('descriptionhintpenalty', 'descriptionhintpenalty', 'qtype_writeregex');
 
         // add test string option
         $mform->addElement('select', 'teststringshinttype', get_string('teststrings', 'qtype_writeregex'),
             $this->hintsoptions);
+        $mform->addHelpButton('teststringshinttype', 'teststringshinttype', 'qtype_writeregex');
         $mform->addElement('text', 'teststringshintpenalty',
             get_string('penalty', 'qtype_writeregex'));
         $mform->setType('teststringshintpenalty', PARAM_FLOAT);
         $mform->setDefault('teststringshintpenalty', '0.0000000');
+        $mform->addHelpButton('teststringshintpenalty', 'teststringshintpenalty', 'qtype_writeregex');
 
         // add compare regex percentage
         $mform->addElement('text', 'compareregexpercentage',
             get_string('wre_cre_percentage', 'qtype_writeregex'));
         $mform->setType('compareregexpercentage', PARAM_FLOAT);
         $mform->setDefault('compareregexpercentage', '34');
+        $mform->addHelpButton('compareregexpercentage', 'compareregexpercentage', 'qtype_writeregex');
 
         // add compare regexps automata percentage
         $mform->addElement('text', 'compareautomatapercentage',
             get_string('compareautomatapercentage', 'qtype_writeregex'));
         $mform->setType('compareautomatapercentage', PARAM_FLOAT);
         $mform->setDefault('compareautomatapercentage', '33');
+        $mform->addHelpButton('compareautomatapercentage', 'compareautomatapercentage', 'qtype_writeregex');
 
         // add compare regexp by test strings
         $mform->addElement('text', 'compareregexpteststrings',
             get_string('compareregexpteststrings', 'qtype_writeregex'));
         $mform->setType('compareregexpteststrings', PARAM_FLOAT);
         $mform->setDefault('compareregexpteststrings', '33');
+        $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
 
         // add asnwers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
@@ -238,7 +249,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                 if ($trimmedanswer !== '') {
                     $matcher = $questionobj->get_matcher($data['engine'], $trimmedanswer, false,
                         $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation']);
-   
+
                     if ($matcher->errors_exist()) {
                         $regexerrors = $matcher->get_error_messages(true);
                         $errors['answer['.$key.']'] = '';

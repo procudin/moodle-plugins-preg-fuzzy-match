@@ -40,7 +40,7 @@ $string['pluginname_help'] = 'In response to a question (that may include a imag
 $string['pluginname_link'] = 'question/type/writeregex';
 $string['pluginnameadding'] = 'Добавить вопрос Write RegEx';
 $string['pluginnameediting'] = 'Изменение вопроса Write RegEx';
-$string['pluginnamesummary'] = 'Allows a response of one or a few words that is graded by comparing against various model answers, which may contain wildcards.';
+$string['pluginnamesummary'] = 'Вопрос для контроля знаний студентов по составлению регулярных выражений (regexp).';
 $string['wre_notation'] = 'Нотация';
 
 /* Notation of regexp. */
@@ -117,3 +117,47 @@ $string['compare_help'] = '<p>Сравнение осуществляется н
 $string['compareinvalidvalue'] = 'Значение должно быть в диапазоне от 0 до 100';
 $string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
 $string['invalidcomparets'] = 'Значение проверки по тестовым строкам выставлена в 0, удалите тестовые строки';
+
+$string['syntaxtreehinttype_title'] = 'Синтаксическое дерево';
+$string['syntaxtreehinttype'] = 'Синтаксическое дерево';
+$string['syntaxtreehinttype_help'] = "<p>Значение отображения подсказки в виде синтаксического дерева</p>";
+
+$string['syntaxtreehintpenalty_title'] = 'Синтаксическое дерево: штраф';
+$string['syntaxtreehintpenalty'] = 'Синтаксическое дерево: штраф';
+$string['syntaxtreehintpenalty_help'] = "<p>Значение штрафа за использование подсказки в виде синтаксического дерева</p>";
+
+$string['explgraphhinttype_title'] = 'Граф объяснения';
+$string['explgraphhinttype'] = 'Граф объяснения';
+$string['explgraphhinttype_help'] = "<p>Значение отображения подсказки в виде графа объяснения.</p>";
+
+$string['explgraphhintpenalty_title'] = 'Граф объяснения: штраф';
+$string['explgraphhintpenalty'] = 'Граф объяснения: штраф';
+$string['explgraphhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде графа объяснения.</p>";
+
+$string['descriptionhinttype_title'] = 'Объяснение выражения';
+$string['descriptionhinttype'] = 'Объяснение выражения';
+$string['descriptionhinttype_help'] = "<p>Значение отображения подсказки в виде объяснения выражения.</p>";
+
+$string['descriptionhintpenalty_title'] = 'Объяснение выражения: штраф';
+$string['descriptionhintpenalty'] = 'Объяснение выражения: штраф';
+$string['descriptionhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде объяснения выражения.</p>";
+
+$string['teststringshinttype_title'] = 'Тестовые строки';
+$string['teststringshinttype'] = 'Тестовые строки';
+$string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
+
+$string['teststringshintpenalty_title'] = 'Тестовые строки: штраф';
+$string['teststringshintpenalty'] = 'Тестовые строки: штраф';
+$string['teststringshintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде тестовых строк.</p>";
+
+$string['compareregexpercentage_title'] = 'Оценка по совпадению регулярных выражений';
+$string['compareregexpercentage'] = 'Оценка по свопадению регулярных выражений';
+$string['compareregexpercentage_help'] = "<p>Значение (в %) доли оценки по совпадению регулярных выражений .</p>";
+
+$string['compareautomatapercentage_title'] = 'Оценка по совпадению автоматов регулярных выражений';
+$string['compareautomatapercentage'] = 'Оценка по свопадению автоматов регулярных выражений';
+$string['compareautomatapercentage_help'] = "<p>Значение (в %) доли оценки по совпадению автоматов регулярных выражений .</p>";
+
+$string['compareregexpteststrings_title'] = 'Оценка по проверке на тестовых строках регулярных выражений';
+$string['compareregexpteststrings'] = 'Оценка по проверке на тестовых строках регулярных выражений';
+$string['compareregexpteststrings_help'] = "<p>Значение (в %) доли оценки по проверке на тестовых строках регулярных выражений .</p>";
