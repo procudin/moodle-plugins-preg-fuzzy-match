@@ -174,23 +174,17 @@ class qtype_writeregex extends qtype_shortanswer {
      */
     protected function save_hint_options($formdata, $number, $withparts) {
 
-//        echo '<pre>';
-//        print_r($number);
-//        echo '</pre>';
-
-        $result = "\n";
-
         // add syntaxtreehint
-        $result = $result . "syntaxtreehint#" . $formdata->syntaxtreehint[$number] . "\n";
+        $result = $formdata->syntaxtreehint[$number];
 
         // add explgraphhint
-        $result = $result . "explgraphhint#" . $formdata->explgraphhint[$number] . "\n";
+        $result .= '\n' . $formdata->explgraphhint[$number];
 
         // add descriptionhint
-        $result = $result . "descriptionhint#" . $formdata->descriptionhint[$number] . "\n";
+        $result .= '\n' . $formdata->descriptionhint[$number];
 
-        //add teststringshint
-        $result = $result . "teststringshint#" . $formdata->teststringshint[$number] . "\n";
+        // add teststringshint
+        $result .= '\n' . $formdata->teststringshint[$number];
 
         return $result;
     }
