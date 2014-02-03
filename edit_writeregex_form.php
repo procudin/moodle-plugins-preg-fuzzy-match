@@ -488,6 +488,42 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
+     * Function which create hints array for form
+     * @param object $question Question object.
+     * @param bool $withclearwrong (do not use)
+     * @param bool $withshownumpartscorrect (do not use)
+     * @return object Question object.
+     */
+    protected function data_preprocessing_hints($question, $withclearwrong = false,
+                                                $withshownumpartscorrect = false) {
+        if (empty($question->hints)) {
+            return $question;
+        }
+
+        $question = parent::data_preprocessing_hints($question, $withclearwrong, $withshownumpartscorrect);
+
+        foreach ($question->hints as $hint) {
+
+            $options = explode('\n', $hint->options);
+
+            if (count($options) == 4) {
+
+                $question->syntaxtreehint[] = $options[0];
+                $question->explgraphhint[] = $options[1];
+                $question->descriptionhint[] = $options[2];
+                $question->teststringshint[] = $options[3];
+            } else {
+                $question->syntaxtreehint[] = 0;
+                $question->explgraphhint[] = 0;
+                $question->descriptionhint[] = 0;
+                $question->teststringshint[] = 0;
+            }
+        }
+
+        return $question;
+    }
+
+    /**
      * Метод подготовки данных для отображения.
      * @param object $question Вопрос.
      * @return object Вопрос с данными.
