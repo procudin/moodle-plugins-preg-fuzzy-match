@@ -12,18 +12,51 @@ class qtype_writeregex_question extends question_graded_automatically
     implements question_automatically_gradable, question_with_qtype_specific_hints {
 
 
+    /** @var array Answers. */
     public $answers = array();
-    //public $correctanswer;
 
-    /** @var number only answers with fraction >= hintgradeborder would be used for hinting. */
-    public $hintgradeborder;
-    public $codedescription;
-    public $graderanalyzertype;
-    public $graderanalyzerpenalty;
-    public $stackhintanalyzertype;
-    public $stackhintanalyzerpenalty;
-    public $algebrahintanalyzertype;
-    public $algebrahintanalyzerpenalty;
+    /** @var string Value of using case. */
+    public $usecase;
+
+    /** @var string Value of matcher engine. */
+    public $engine;
+
+    /** @var string Notation of regex. */
+    public $notation;
+
+    /** @var int Value of syntax tree type. */
+    public $syntaxtreehinttype;
+
+    /** @var  float Value of penalty for using syntax tree adaptive hint. */
+    public $syntaxtreehintpenalty;
+
+    /** @var  int Value of explanation graph type. */
+    public $explgraphhinttype;
+
+    /** @var  float Value of penalty for using explanation graph adaptive hint. */
+    public $explgraphhintpenalty;
+
+    /** @var  int Value of description text hint type. */
+    public $descriptionhinttype;
+
+    /** @var  float Value of penalty for using description text adaptive hint. */
+    public $descriptionhintpenalty;
+
+    /** @var  int Value of test string hint type. */
+    public $teststringshinttype;
+
+    /** @var  float Value of penalty for using test string adaptive hint. */
+    public $teststringshintpenalty;
+
+    // types of compare
+    /** @var  float Value of compare regexps in %. */
+    public $compareregexpercentage;
+
+    /** @var  float Value of compare by automates in %. */
+    public  $compareautomatapercentage;
+
+    /** @var  float Value of compare by test strings in %. */
+    public $compareregexpteststrings;
 
     /*private $graderanalyzer;
     private $stackhintanalyzer;
