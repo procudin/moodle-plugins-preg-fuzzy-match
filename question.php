@@ -142,17 +142,35 @@ class qtype_writeregex_question extends question_graded_automatically
         return array($grade, $state);
     }
 
+    /**
+     * Get available specific hints array.
+     * @param null $response
+     * @return array of available specific hints
+     */
     public function available_specific_hints($response = null) {
+
         $hinttypes = array();
+
         if (count($this->hints) > 0) {
             $hinttypes[] = 'hintmoodle#';
         }
-        if ($this->stackhintanalyzertype > 0) {
-            $hinttypes[] = 'stackanalyzerhint';
+
+        if ($this->syntaxtreehinttype > 0) {
+            $hinttypes[] = 'syntaxtreehinttype';
         }
-        if ($this->algebrahintanalyzertype > 0) {
-            $hinttypes[] = 'algebraanalyzerhint';
+
+        if ($this->explgraphhinttype > 0) {
+            $hinttypes[] = 'explgraphhinttype';
         }
+
+        if ($this->descriptionhinttype > 0) {
+            $hinttypes[] = 'descriptionhinttype';
+        }
+
+        if ($this->teststringshinttype > 0) {
+            $hinttypes[] = '$teststringshinttype';
+        }
+
         return $hinttypes;
     }
 

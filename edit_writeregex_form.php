@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Опреление формы изменения вопроса типа Write Regex.
+ * Edited form for question type Write Regex.
  *
  * @package    qtype
  * @subpackage writeregex
@@ -32,7 +32,7 @@ require_once($CFG->dirroot . '/question/type/preg/questiontype.php');
 require_once($CFG->dirroot . '/question/type/writeregex/questiontype.php');
 
 /**
- * Опреление формы изменения вопроса типа Write Regex.
+ * Edited form for question type Write Regex.
  *
  * @package    qtype
  * @subpackage writeregex
