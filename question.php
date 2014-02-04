@@ -156,19 +156,19 @@ class qtype_writeregex_question extends question_graded_automatically
         }
 
         if ($this->syntaxtreehinttype > 0) {
-            $hinttypes[] = 'syntaxtreehinttype';
+            $hinttypes[] = 'syntaxtreehint';
         }
 
         if ($this->explgraphhinttype > 0) {
-            $hinttypes[] = 'explgraphhinttype';
+            $hinttypes[] = 'explgraphhint';
         }
 
         if ($this->descriptionhinttype > 0) {
-            $hinttypes[] = 'descriptionhinttype';
+            $hinttypes[] = 'descriptionhint';
         }
 
         if ($this->teststringshinttype > 0) {
-            $hinttypes[] = '$teststringshinttype';
+            $hinttypes[] = '$teststringshint';
         }
 
         return $hinttypes;
@@ -180,20 +180,32 @@ class qtype_writeregex_question extends question_graded_automatically
      * Returns a hint object for given type.
      */
     public function hint_object($hintkey, $response = null) {
+
         // Moodle-specific hints
         if (substr($hintkey, 0, 11) == 'hintmoodle#') {
             return new qtype_poasquestion_hintmoodle($this, $hintkey);
         }
 
-        $hintclass = 'qtype_cppexpr_'.$hintkey;
+        $hintclass = 'qtype_writeregex_' . $hintkey;
 
         $analysermode = 0;
-        if($hintkey == 'stackanalyzerhint'){
-            $analysermode = $this->stackhintanalyzertype;
+
+        if ($hintkey == 'syntaxtreehint') {
+            $analysermode = $this->syntaxtreehinttype;
         }
-        if($hintkey == 'algebraanalyzerhint'){
-            $analysermode = $this->algebrahintanalyzertype;
+
+        if ($hintkey == 'explgraphhint') {
+            $analysermode = $this->explgraphhinttype;
         }
+
+        if ($hintkey == 'descriptionhint') {
+            $analysermode = $this->descriptionhinttype;
+        }
+
+        if ($hintkey == '$teststringshint') {
+            $analysermode = $this->$teststringshinttype;
+        }
+
         return new $hintclass($this, $hintkey, $analysermode);
     }
 
