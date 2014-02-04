@@ -29,6 +29,11 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
 
+function debug_print ($value) {
+    echo '<pre>';
+    print_r($value);
+    echo '</pre>';
+}
 
 /**
  * Тип вопроса Write Regex - написание регулярного выражения
@@ -58,44 +63,6 @@ class qtype_writeregex extends qtype_shortanswer {
         $question->descriptionhint = array();
         $question->teststringshint = array();
 
-        foreach ($question->hints as $key => $hint) {
-            // get syntaxtreehint
-            if (preg_match("/^\\nsyntaxtreehint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
-
-                $syntaxtreehint = preg_replace('/^\\nsyntaxtreehint#/', '', $value);
-                $syntaxtreehint = preg_replace('/\\n$/', '', $syntaxtreehint);
-
-                $question->syntaxtreehint[] = $syntaxtreehint[0];
-            }
-
-            // get explgraphhint
-            if (preg_match("/\\nexplgraphhint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
-
-                $explgraphhint = preg_replace('/^\\nexplgraphhint#/', '', $value);
-                $explgraphhint = preg_replace('/\\n$/', '', $explgraphhint);
-
-                $question->explgraphhint[] = $explgraphhint[0];
-            }
-
-            // get descriptionhint
-            if (preg_match("/\\ndescriptionhint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
-
-                $descriptionhint = preg_replace('/^\\ndescriptionhint#/', '', $value);
-                $descriptionhint = preg_replace('/\\n$/', '', $descriptionhint);
-
-                $question->descriptionhint[] = $descriptionhint[0];
-            }
-
-            // get teststringshint
-            if (preg_match("/\\nteststringshint#[0-3]\\n/", $question->hints[$key]->options, $value) == 1) {
-
-                $teststringshint = preg_replace('/^\\nteststringshint#/', '', $value);
-                $teststringshint = preg_replace('/\\n$/', '', $teststringshint);
-
-                $question->teststringshint[] = $teststringshint[0];
-            }
-        }
-
         return $result;
     }
 
@@ -107,6 +74,8 @@ class qtype_writeregex extends qtype_shortanswer {
     public function save_question_options($question) {
         global $DB;
         $result = new stdClass();
+
+//        debug_print($question);
 
         // remove all answers
         $DB->delete_records('question_answers', array('question' => $question->id));
@@ -271,6 +240,27 @@ class qtype_writeregex extends qtype_shortanswer {
 
         foreach ($extraquestionfields as $field) {
             $qo->$field = $format->getpath($data, array('#', $field, 0, '#'), '');
+        }
+
+        // import hints
+        $hints = $data['#']['hint'];
+        $h_count = 0;
+        foreach ($hints as $hint) {
+            $qo->hint[$h_count]['format'] = 1; // TODO Поправить
+            $qo->hint[$h_count]['text'] = $hint['#']['text']['0']['#'];
+            $hint_options = explode('\n', $hint['#']['options']['0']['#']);
+            if (count($hint_options) == 4) {
+
+                $qo->syntaxtreehint[] = $hint_options[0];
+                $qo->explgraphhint[] = $hint_options[1];
+                $qo->descriptionhint[] = $hint_options[2];
+                $qo->teststringshint[] = $hint_options[3];
+            } else {
+                $qo->syntaxtreehint[] = 0;
+                $qo->explgraphhint[] = 0;
+                $qo->descriptionhint[] = 0;
+                $qo->teststringshint[] = 0;
+            }
         }
 
         // Run through the answers.
