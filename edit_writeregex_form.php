@@ -172,10 +172,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
-     * Подготовка ответов.
-     * @param object $question Вопрос.
-     * @param bool $withanswerfiles Наличие файлов.
-     * @return object Объект вопроса.
+     * Prepare answers data.
+     * @param object $question Question's object.
+     * @param bool $withanswerfiles If question has answers files.
+     * @return object Question's object.
      */
     protected function data_preprocessing_answers($question, $withanswerfiles = false) {
 

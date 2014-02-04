@@ -6,6 +6,7 @@ global $CFG;
 
 require_once($CFG->dirroot . '/question/type/questionbase.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
+require_once($CFG->dirroot . '/question/type/writeregex/writeregex_hints.php');
 
 
 class qtype_writeregex_question extends question_graded_automatically
@@ -168,7 +169,7 @@ class qtype_writeregex_question extends question_graded_automatically
         }
 
         if ($this->teststringshinttype > 0) {
-            $hinttypes[] = '$teststringshint';
+            $hinttypes[] = 'teststringshint';
         }
 
         return $hinttypes;
@@ -202,8 +203,8 @@ class qtype_writeregex_question extends question_graded_automatically
             $analysermode = $this->descriptionhinttype;
         }
 
-        if ($hintkey == '$teststringshint') {
-            $analysermode = $this->$teststringshinttype;
+        if ($hintkey == 'teststringshint') {
+            $analysermode = $this->teststringshinttype;
         }
 
         return new $hintclass($this, $hintkey, $analysermode);
