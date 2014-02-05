@@ -338,6 +338,27 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
     }
 
     /**
+     * Get hint available.
+     * @param null $response Response.
+     * @return bool Hint available.
+     */
+    public function hint_available ($response = null) {
+
+        if ($this->question->descriptionhinttype > 0) {
+            return true;
+        }
+
+        if ($response !== null) {
+            $bestfit = $this->question->get_best_fit_answer($response);
+            $isavailableforanswer = $this->can_available_hint_for_answer($bestfit);
+            $isavailableforresponse = $this->can_available_hint_for_answer($response);
+            return ($isavailableforanswer && $isavailableforresponse);
+        }
+
+        return true;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
