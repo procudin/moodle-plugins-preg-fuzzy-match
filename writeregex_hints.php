@@ -141,7 +141,26 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
     /** @var  string Hint key. */
     protected $hintkey;
     /** @var array Options of syntax tree hint. */
-    protected $syntaxtreehintoptions = array();
+    protected $explgraphhintoptions = array();
+
+    /**
+     * Init all fields.
+     * @param $question object Object of question's class.
+     * @param $hintkey string Hint key.
+     * @param $mode int Mode of current hint.
+     */
+    public function __construct ($question, $hintkey, $mode) {
+
+        $this->question = $question;
+        $this->hintkey = $hintkey;
+        $this->mode = $mode;
+        $this->explgraphhintoptions = array(
+            '0' => get_string('none', 'qtype_writeregex'),
+            '1' => get_string('student', 'qtype_writeregex'),
+            '2' => get_string('answer', 'qtype_writeregex'),
+            '3' => get_string('both', 'qtype_writeregex')
+        );
+    }
 
     /**
      * Render hint function.
