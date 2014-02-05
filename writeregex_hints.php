@@ -79,6 +79,16 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
         return $this->question->syntaxtreehintpenalty;
     }
 
+    public function can_available_hint_for_answer($answer) {
+        // TODO: template code
+
+        if ($this->mode == 3) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     /**
      * Render hint function.
      * @param question $renderer
