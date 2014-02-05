@@ -171,6 +171,14 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
     }
 
     /**
+     * Get hint type.
+     * @return int Hint type.
+     */
+    public function hint_type() {
+        return qtype_specific_hint::SINGLE_INSTANCE_HINT;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
