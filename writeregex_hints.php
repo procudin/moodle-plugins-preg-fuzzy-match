@@ -55,6 +55,14 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
     }
 
     /**
+     * Get hint description.
+     * @return string hint description.
+     */
+    public function hint_description() {
+        return get_string('wre_st', 'qtype_writeregex');
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
