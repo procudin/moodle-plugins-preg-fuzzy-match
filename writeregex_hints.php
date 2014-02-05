@@ -111,6 +111,12 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
 
     /** @var  int Mode of hint. */
     protected $mode;
+    /** @var  object Object on question. */
+    protected $question;
+    /** @var  string Hint key. */
+    protected $hintkey;
+    /** @var array Options of syntax tree hint. */
+    protected $syntaxtreehintoptions = array();
 
     /**
      * Render hint function.
