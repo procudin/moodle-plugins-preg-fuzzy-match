@@ -287,6 +287,14 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
     }
 
     /**
+     * Get options of text description hint.
+     * @return array Options of text description hint.
+     */
+    public function descriptionhintoptions() {
+        return $this->descriptionhintoptions;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
