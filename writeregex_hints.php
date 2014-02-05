@@ -427,6 +427,14 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
     }
 
     /**
+     * Get hint description.
+     * @return string hint description.
+     */
+    public function hint_description() {
+        return get_string('teststrings', 'qtype_writeregex');
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
