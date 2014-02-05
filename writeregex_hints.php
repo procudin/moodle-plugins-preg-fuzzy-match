@@ -195,6 +195,15 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
     }
 
     /**
+     * Get penalty value.
+     * @param null $response object Response.
+     * @return float Value of current hint penalty.
+     */
+    public function penalty_for_specific_hint ($response = null) {
+        return $this->question->explgraphhintpenalty;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
