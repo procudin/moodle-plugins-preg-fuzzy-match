@@ -25,7 +25,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
      * @param $hintkey string Hint key.
      * @param $mode int Mode of current hint.
      */
-    public function __construct($question, $hintkey, $mode) {
+    public function __construct ($question, $hintkey, $mode) {
 
         $this->question = $question;
         $this->hintkey = $hintkey;
@@ -75,11 +75,11 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
      * @param null $response object Response.
      * @return float Value of current hint penalty.
      */
-    public function penalty_for_specific_hint($response = null) {
+    public function penalty_for_specific_hint ($response = null) {
         return $this->question->syntaxtreehintpenalty;
     }
 
-    public function can_available_hint_for_answer($answer) {
+    public function can_available_hint_for_answer ($answer) {
         // TODO: template code
 
         if ($this->mode == 3) {
@@ -90,6 +90,27 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
     }
 
     /**
+     * Get hint available.
+     * @param null $response Response.
+     * @return bool Hint available.
+     */
+    public function hint_available ($response = null) {
+
+        if ($this->question->syntaxtreehinttype > 0) {
+            return true;
+        }
+
+        if ($response !== null) {
+            $bestfit = $this->question->get_best_fit_answer($response);
+            $isavailableforanswer = $this->can_available_hint_for_answer($bestfit);
+            $isavailableforresponse = $this->can_available_hint_for_answer($response);
+            return ($isavailableforanswer && $isavailableforresponse);
+        }
+
+        return true;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
@@ -97,7 +118,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
      * @param null $response
      * @return string Template code value.
      */
-    public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
+    public function render_hint ($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
         switch($this->mode){
             case 1: return 'Hint stack analyzer: the student\'s answer';
