@@ -17,7 +17,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
     /** @var  string Hint key. */
     protected $hintkey;
     /** @var array Options of syntax tree hint. */
-    protected $syntaxtreehintoptions = array();
+    protected $syntaxtreeoptions = array();
 
     /**
      * Init all fields.
@@ -30,12 +30,20 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
         $this->question = $question;
         $this->hintkey = $hintkey;
         $this->mode = $mode;
-        $this->syntaxtreehintoptions = array(
+        $this->syntaxtreeoptions = array(
             '0' => get_string('none', 'qtype_writeregex'),
             '1' => get_string('student', 'qtype_writeregex'),
             '2' => get_string('answer', 'qtype_writeregex'),
             '3' => get_string('both', 'qtype_writeregex')
         );
+    }
+
+    /**
+     * Get options of syntax tree hint.
+     * @return array Options of syntax tree hint.
+     */
+    public function syntaxtreeoptions() {
+        return $this->syntaxtreeoptions;
     }
 
     /**
