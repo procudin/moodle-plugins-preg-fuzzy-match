@@ -411,6 +411,14 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
     }
 
     /**
+     * Get options of test strings hint.
+     * @return array Options of test strings hint.
+     */
+    public function teststringshintoptions() {
+        return $this->teststringshintoptions;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
