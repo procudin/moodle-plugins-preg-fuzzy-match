@@ -163,6 +163,14 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
     }
 
     /**
+     * Get options of explanation graph.
+     * @return array Options of explanation graph.
+     */
+    public function explgraphhintoptions() {
+        return $this->explgraphhintoptions;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
