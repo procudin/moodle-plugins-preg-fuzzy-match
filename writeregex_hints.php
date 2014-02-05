@@ -303,6 +303,14 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
     }
 
     /**
+     * Get hint description.
+     * @return string hint description.
+     */
+    public function hint_description() {
+        return get_string('wre_d', 'qtype_writeregex');
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
