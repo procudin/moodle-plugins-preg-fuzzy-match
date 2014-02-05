@@ -187,6 +187,14 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
     }
 
     /**
+     * Get value of hint response based or not.
+     * @return bool hint response based.
+     */
+    public function hint_response_based() {
+        return true;
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
