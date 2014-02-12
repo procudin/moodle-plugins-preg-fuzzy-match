@@ -49,4 +49,17 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
 
         return $result;
     }
+
+    public function correct_response (question_attempt $qa) {
+
+        $question = $qa->get_question();
+
+        $answer = $question->get_correct_response();
+
+        if (!$answer) {
+            return '';
+        }
+
+        return get_string('correctansweris', 'qtype_shortanswer', $answer);
+    }
 }
