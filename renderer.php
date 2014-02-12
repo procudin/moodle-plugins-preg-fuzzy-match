@@ -62,4 +62,17 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
 
         return get_string('correctansweris', 'qtype_shortanswer', $answer);
     }
+
+    public function specific_feedback(question_attempt $qa) {
+
+        $question = $qa->get_question();
+        $currentanswer = $qa->get_last_qt_var('answer');
+
+        if (!$currentanswer) {
+            return '';
+        }
+
+        // use hint
+        return $question->get_feedback_for_response(array('answer' => $currentanswer), $qa);
+    }
 }
