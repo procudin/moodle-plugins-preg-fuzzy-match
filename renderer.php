@@ -75,4 +75,35 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
         // use hint
         return $question->get_feedback_for_response(array('answer' => $currentanswer), $qa);
     }
+
+    public function feedback(question_attempt $qa, question_display_options $options){
+
+        $feedback = '';
+
+        $question = $qa->get_question();
+        $behaviour = $qa->get_behaviour();
+        $currentanswer = $qa->get_last_qt_var('answer');
+
+        if (!$currentanswer) {
+            $currentanswer = '';
+        }
+
+        $br = html_writer::empty_tag('br');
+
+        if (is_a($behaviour, 'behaviour_with_hints')) {
+            $hints = $question->available_specific_hints();
+            $hints = $behaviour->adjust_hints($hints);
+
+            foreach ($hints as $hintkey) {
+                if ($qa->get_last_step()->has_behaviour_var('_render_' . $hintkey)) {
+                    $hintobj = $question->hint_object($hintkey);
+                    $feedback .= $hintobj->render_hint($this, $qa, $options, array('answer' => $currentanswer)) . $br;
+                }
+            }
+        }
+
+        $output = parent::feedback($qa, $options);
+
+        return $feedback . $output;
+    }
 }
