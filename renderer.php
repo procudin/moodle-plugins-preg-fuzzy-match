@@ -38,5 +38,15 @@ require_once($CFG->dirroot . '/question/type/shortanswer/renderer.php');
 */
 class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
 
-    // Some code here...
+    /**
+     * @param question_attempt $qa
+     * @param question_display_options $options
+     * @return string
+     */
+    public function formulation_and_controls (question_attempt $qa, question_display_options $options) {
+
+        $result = parent::formulation_and_controls($qa, $options);
+
+        return $result;
+    }
 }
