@@ -59,6 +59,15 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var  float Value of compare by test strings in %. */
     public $compareregexpteststrings;
 
+    /** @var number only answers with fraction >= hintgradeborder would be used for hinting. */
+    public $hintgradeborder;
+
+    /** @var  int Value of grader analyzer type. */
+    public $graderanalyzertype;
+
+    /** @var  float Value of penalty for grader analyzer type. */
+    public $graderanalyzerpenalty;
+
     public function get_expected_data() {
         return array('answer' => PARAM_RAW);
     }
@@ -173,6 +182,33 @@ class qtype_writeregex_question extends question_graded_automatically
         }
 
         return $feedback;
+    }
+
+    public function get_best_fit_answer (array $response, $gradeborder = null) {
+        $graderanalyzer = new graderaanalyser($this->graderanalyzerpenalty);
+
+        $equality_answers_arr = array();
+        foreach( $this->answers as $answer){
+            if($this->graderanalyzerpenalty < $answer->fraction){
+                $equality = $graderanalyzer->get_equality($answer->answer, $response['answer']);
+                $equality_answers_arr[$equality] = $answer;
+            }
+        }
+
+        $bestfit = array();
+        if(count($equality_answers_arr) > 0){
+            krsort($equality_answers_arr);
+            foreach($equality_answers_arr as $key => $val){
+                $bestfit['answer'] = $val;
+                $bestfit['match'] = $key/10;
+                break;
+            }
+        }
+        else{
+            $bestfit['answer'] = array();
+            $bestfit['match'] = 0;
+        }
+        return $bestfit;
     }
 
 }
