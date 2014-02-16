@@ -63,5 +63,21 @@ class qtype_writeregex_question extends question_graded_automatically
         return array('answer' => PARAM_RAW);
     }
 
+    public function get_correct_response() {
+        $response = array('answer' => '');
+        $correctanswer = '';
+
+        if (trim($correctanswer) == '') {
+            $bestfit = $this->get_best_fit_answer($response, 1);
+            $matchresult = $bestfit['match'];
+
+            if ($matchresult == 1) {
+                $correctanswer = $bestfit['answer'];
+            }
+        }
+
+        return array('answer' => $correctanswer);
+    }
+
 }
 
