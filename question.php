@@ -89,5 +89,10 @@ class qtype_writeregex_question extends question_graded_automatically
         return array();
     }
 
+    public function is_complete_response (array $response) {
+
+        return array_key_exists('answer', $response) && ($response['answer'] || $response['answer'] === '0');
+    }
+
 }
 
