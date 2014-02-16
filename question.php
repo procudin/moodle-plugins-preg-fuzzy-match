@@ -250,5 +250,31 @@ class qtype_writeregex_question extends question_graded_automatically
         return new $hintclass($this, $hintkey, $analysermode);
     }
 
+    public function available_specific_hints ($response = null) {
+        $hinttypes = array();
+
+        if (count($this->hints) < 0) {
+            $hinttypes[] = 'hintmoodle#';
+        }
+
+        if ($this->syntaxtreehinttype > 0) {
+            $hinttypes[] = 'syntaxtreehint';
+        }
+
+        if ($this->explgraphhinttype > 0) {
+            $hinttypes[] = 'explgraphhint';
+        }
+
+        if ($this->descriptionhinttype > 0) {
+            $hinttypes[] = 'descriptionhint';
+        }
+
+        if ($this->teststringshinttype > 0) {
+            $hinttypes[] = 'teststringshint';
+        }
+
+        return $hinttypes;
+    }
+
 }
 
