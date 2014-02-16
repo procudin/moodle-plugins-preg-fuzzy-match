@@ -88,8 +88,8 @@ class qtype_writeregex_question extends question_graded_automatically
         return array('answer' => $correctanswer);
     }
 
-    public function get_matching_answer() {
-        $bestfit = $this->get_best_fit_answer();
+    public function get_matching_answer(array $response) {
+        $bestfit = $this->get_best_fit_answer($response);
 
         if ($bestfit['match'] == 1) {
             return $bestfit['answer'];
@@ -209,6 +209,45 @@ class qtype_writeregex_question extends question_graded_automatically
             $bestfit['match'] = 0;
         }
         return $bestfit;
+    }
+
+    /**
+     * Hint object factory.
+     *
+     * Returns a hint object for given type.
+     */
+    /**
+     * Hint object factory.
+     * @param $hintkey Hint key.
+     * @param null $response Response
+     * @return qtype_poasquestion_hintmoodle A Hint object for given type.
+     */
+    public function hint_object($hintkey, $response = null) {
+        // Moodle-specific hints
+        if (substr($hintkey, 0, 11) == 'hintmoodle#') {
+            return new qtype_poasquestion_hintmoodle($this, $hintkey);
+        }
+
+        $hintclass = 'qtype_writeregex_'.$hintkey;
+
+        $analysermode = 0;
+        if ($hintkey == 'syntaxtreehint') {
+            $analysermode = $this->syntaxtreehinttype;
+        }
+
+        if ($hintkey == 'explgraphhint') {
+            $analysermode = $this->explgraphhinttype;
+        }
+
+        if ($hintkey == 'descriptionhint') {
+            $analysermode = $this->descriptionhinttype;
+        }
+
+        if ($hintkey == 'teststringshint') {
+            $analysermode = $this->teststringshinttype;
+        }
+
+        return new $hintclass($this, $hintkey, $analysermode);
     }
 
 }
