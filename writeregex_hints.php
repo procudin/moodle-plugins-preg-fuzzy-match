@@ -500,3 +500,23 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
         }
     }
 }
+
+class graderaanalyser {
+
+    protected $mode;
+
+    public function __construct($mode) {
+        $this->mode = $mode;
+    }
+
+    public function get_equality($answer, $response) {
+
+        if(strpos($answer, '100')) {  return '999';   }
+        if(strpos($answer, '80')) {  return '8';   }
+        if(strpos($answer, '60')) {  return '6';   }
+        if(strpos($answer, '40')) {  return '4';   }
+        if(strpos($answer, '20')) {  return '2';   }
+        return  '0';
+    }
+
+}
