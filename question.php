@@ -91,7 +91,12 @@ class qtype_writeregex_question extends question_graded_automatically
 
     public function is_complete_response (array $response) {
 
-        return array_key_exists('answer', $response) && ($response['answer'] || $response['answer'] === '0');
+        return array_key_exists('answer', $response) &&
+            ($response['answer'] || $response['answer'] === '0');
+    }
+
+    public function is_gradable_response (array $response) {
+        return $this->is_complete_response($response);
     }
 
 }
