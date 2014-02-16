@@ -113,5 +113,13 @@ class qtype_writeregex_question extends question_graded_automatically
         return $resp;
     }
 
+    public function get_validation_error (array $response) {
+        if ($this->is_gradable_response($response)) {
+            return '';
+        }
+
+        return get_string('pleaseenterananswer', 'qtype_shortanswer');
+    }
+
 }
 
