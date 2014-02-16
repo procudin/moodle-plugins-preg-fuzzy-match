@@ -103,5 +103,15 @@ class qtype_writeregex_question extends question_graded_automatically
         return question_utils::arrays_have_same_keys_and_values($prevresponse, $newresponse);
     }
 
+    public function summarise_response (array $response) {
+        if (isset($response['answer'])) {
+            $resp = $response['answer'];
+        } else {
+            $resp = null;
+        }
+
+        return $resp;
+    }
+
 }
 
