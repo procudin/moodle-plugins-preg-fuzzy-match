@@ -121,5 +121,17 @@ class qtype_writeregex_question extends question_graded_automatically
         return get_string('pleaseenterananswer', 'qtype_shortanswer');
     }
 
+    public function grade_response (array $response) {
+        $bestfitanswer = $this->get_best_fit_answer($response);
+        $grade = 0;
+        $state = question_sate::$gradedwrong;
+        if ($bestfitanswer['match'] == 1) {
+            $grade = $bestfitanswer['answer']->fraction;
+            $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction);
+        }
+
+        return array($grade, $state);
+    }
+
 }
 
