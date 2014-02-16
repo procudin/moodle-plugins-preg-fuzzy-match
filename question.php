@@ -99,5 +99,9 @@ class qtype_writeregex_question extends question_graded_automatically
         return $this->is_complete_response($response);
     }
 
+    public function is_same_response (array $prevresponse, array $newresponse) {
+        return question_utils::arrays_have_same_keys_and_values($prevresponse, $newresponse);
+    }
+
 }
 
