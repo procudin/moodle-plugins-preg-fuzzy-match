@@ -157,5 +157,23 @@ class qtype_writeregex_question extends question_graded_automatically
         return parent::make_behaviour($qa, $preferredbehaviour);
     }
 
+    public function get_feedback_for_response ($response, $qa) {
+        $besftfit = $this->get_best_fit_answer($response);
+        $feedback = '';
+        $boardermatch = 0.7;
+        $state = $qa->get_state();
+
+        if (isset($besftfit['answer']) &&
+            ($besftfit['match'] == 1 || $besftfit['match'] > $boardermatch && $state->is_finished())) {
+            $answer = $besftfit['answer'];
+
+            if ($answer->feedback) {
+                $feedback = 'get_feedback_for_response';
+            }
+        }
+
+        return $feedback;
+    }
+
 }
 
