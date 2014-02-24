@@ -4,6 +4,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/type/poasquestion/hints.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_description_tool.php');
 
 /**
  * Class qtype_writeregex_syntaxtreehint Class of syntax tree hint.
@@ -118,7 +119,17 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
      * @param null $response
      * @return string Template code value.
      */
-    public function render_hint ($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
+    public function render_hint ($renderer, question_attempt $qa = null,
+                                 question_display_options $options = null, $response = null) {
+
+        $tree = new qtype_preg_syntax_tree_tool('a{2,3}?');
+        $json = array();
+
+        $tree->generate_json($json);
+
+        echo '<pre>';
+        print_r($json);
+        echo '</pre>';
 
         switch($this->mode){
             case 1: return 'Hint stack analyzer: the student\'s answer';
@@ -244,6 +255,8 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
      */
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
+
+
         switch($this->mode){
             case 1: return 'Hint stack analyzer: the student\'s answer';
             case 2: return 'Hint stack analyzer: the correct answer';
@@ -368,10 +381,30 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
      */
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
+        $json = array();
+        $descriptionoption = new qtype_preg_authoring_tools_options();
+        $descriptionoption->engine = $this->question->engine;
+        $descriptionoption->notation = $this->question->notation;
+
         switch($this->mode){
-            case 1: return 'Hint stack analyzer: the student\'s answer';
-            case 2: return 'Hint stack analyzer: the correct answer';
-            case 3: return 'Hint stack analyzer: the student\'s answer and the correct answer (both)';
+            case 1:
+                $description = new qtype_preg_description_tool($response['answer']);
+                $description->generate_json($json);
+                return $json['description'];
+            case 2:
+                $answer = $this->question->get_best_fit_answer($response);
+                $description = new qtype_preg_description_tool($answer['answer']->answer);
+                $description->generate_json($json);
+                return $json['description'];
+            case 3:
+
+                $json2 = array();
+                $description = new qtype_preg_description_tool($response['answer']);
+                $description->generate_json($json);
+                $answer = $this->question->get_best_fit_answer($response);
+                $description2 = new qtype_preg_description_tool($answer['answer']->answer);
+                $description2->generate_json($json2);
+                return 'student: ' . $json['description'] . "\nteacher: " . $json2['description'];
             default: return 'defstack';
         }
     }

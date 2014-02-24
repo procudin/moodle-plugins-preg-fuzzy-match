@@ -185,6 +185,7 @@ class qtype_writeregex_question extends question_graded_automatically
     }
 
     public function get_best_fit_answer (array $response, $gradeborder = null) {
+
         $graderanalyzer = new graderaanalyser($this->graderanalyzerpenalty);
 
         $equality_answers_arr = array();
