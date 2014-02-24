@@ -5,6 +5,8 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/type/poasquestion/hints.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_description_tool.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_regex_testing_tool.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_syntax_tree_tool.php');
 
 /**
  * Class qtype_writeregex_syntaxtreehint Class of syntax tree hint.
@@ -122,19 +124,30 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
     public function render_hint ($renderer, question_attempt $qa = null,
                                  question_display_options $options = null, $response = null) {
 
-        $tree = new qtype_preg_syntax_tree_tool('a{2,3}?');
+//        $tree = new qtype_preg_syntax_tree_tool('a{2,3}?');
         $json = array();
+//
+//        $tree->generate_json($json);
 
-        $tree->generate_json($json);
-
-        echo '<pre>';
-        print_r($json);
-        echo '</pre>';
+//        return '<img src="' . $json['tree']['img'] . '" />';
 
         switch($this->mode){
-            case 1: return 'Hint stack analyzer: the student\'s answer';
-            case 2: return 'Hint stack analyzer: the correct answer';
-            case 3: return 'Hint stack analyzer: the student\'s answer and the correct answer (both)';
+            case 1:
+                $tree = new qtype_preg_syntax_tree_tool($response['answer']);
+                $tree->generate_json($json);
+                return '<img src="' . $json['tree']['img'] . '" />';
+            case 2:
+                $answer = $this->question->get_best_fit_answer($response);
+                $tree = new qtype_preg_syntax_tree_tool($answer['answer']->answer);
+                $tree->generate_json($json);
+                return '<img src="' . $json['tree']['img'] . '" />';
+            case 3:
+                $tree = new qtype_preg_syntax_tree_tool($response['answer']);
+                $tree->generate_json($json);
+                $answer = $this->question->get_best_fit_answer($response);
+                $tree2 = new qtype_preg_syntax_tree_tool($answer['answer']->answer);
+                $tree2->generate_json($json2);
+                return '<img src="' . $json['tree']['img'] . '" /><br /><img src="' . $json2['tree']['img'] . '" />';
             default: return 'defstack';
         }
     }
@@ -524,6 +537,12 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
      * @return string Template code value.
      */
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
+
+//        $ts = new qtype_preg_regex_testing_tool($renderer, $this->question->answers,
+//            $this->question->usecase, '', $this->question->engine, $this->question->notation, '');
+//        $json = array();
+//
+//        $ts->generate_json($json);
 
         switch($this->mode){
             case 1: return 'Hint stack analyzer: the student\'s answer';

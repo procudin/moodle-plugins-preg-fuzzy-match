@@ -8,7 +8,7 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0)
     global $CFG, $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2014011700) {
+    if ($oldversion < 2014022400) {
 
         $table = new xmldb_table(('qtype_writeregex_options'));
         $usecase = new xmldb_field('usecase', XMLDB_TYPE_INTEGER, '2', '0', XMLDB_NOTNULL, null, '0', 'questionid');
@@ -24,7 +24,7 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0)
             $dbman->add_field($table, $engine);
         }
 
-        upgrade_plugin_savepoint(true, 2014011700, 'qtype', 'writeregex');
+        upgrade_plugin_savepoint(true, 2014022400, 'qtype', 'writeregex');
     }
 
     return true;
