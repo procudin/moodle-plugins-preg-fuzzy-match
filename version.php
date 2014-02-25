@@ -34,6 +34,6 @@ $plugin->maturity  = MATURITY_STABLE;
 
 $plugin->dependencies = array(
     'qtype_shortanswer' => 2013050100,
-    'qtype_preg' => 2013100500,
-    'qtype_poasquestion' => 2013102900
+    'qtype_preg' => 2013011800,
+    'qtype_poasquestion' => 2013011800
 );

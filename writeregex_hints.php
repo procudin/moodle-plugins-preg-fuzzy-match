@@ -124,27 +124,22 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
      */
     public function render_hint ($renderer, question_attempt $qa = null,
                                  question_display_options $options = null, $response = null) {
-
-//        $tree = new qtype_preg_syntax_tree_tool('a{2,3}?');
         $json = array();
-//
-//        $tree->generate_json($json);
-
-//        return '<img src="' . $json['tree']['img'] . '" />';
 
         switch($this->mode){
             case 1:
                 $tree = new qtype_preg_syntax_tree_tool($response['answer']);
-                $tree->generate_json($json);
-                return '<img src="' . $json['tree']['img'] . '" />';
+                $html = $tree->generate_html();
+                return $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree = new qtype_preg_syntax_tree_tool($answer['answer']->answer);
-                $tree->generate_json($json);
-                return '<img src="' . $json['tree']['img'] . '" />';
+                $html = $tree->generate_html();
+                return $html;
             case 3:
                 $tree = new qtype_preg_syntax_tree_tool($response['answer']);
                 $tree->generate_json($json);
+                $json2 = array();
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree2 = new qtype_preg_syntax_tree_tool($answer['answer']->answer);
                 $tree2->generate_json($json2);
@@ -274,17 +269,18 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
         switch($this->mode){
             case 1:
                 $tree = new qtype_preg_explaining_graph_tool($response['answer']);
-                $tree->generate_json($json);
-                return '<img src="' . $json['graph'] . '" />';
+                $html = $tree->generate_html();
+                return $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree = new qtype_preg_explaining_graph_tool($answer['answer']->answer);
-                $tree->generate_json($json);
-                return '<img src="' . $json['graph'] . '" />';
+                $html = $tree->generate_html();
+                return $html;
             case 3:
                 $tree = new qtype_preg_explaining_graph_tool($response['answer']);
                 $tree->generate_json($json);
                 $answer = $this->question->get_best_fit_answer($response);
+                $json2 = array();
                 $tree2 = new qtype_preg_explaining_graph_tool($answer['answer']->answer);
                 $tree2->generate_json($json2);
                 return '<img src="' . $json['graph'] . '" /><br /><img src="' . $json2['graph'] . '" />';
@@ -416,15 +412,14 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
         switch($this->mode){
             case 1:
                 $description = new qtype_preg_description_tool($response['answer']);
-                $description->generate_json($json);
-                return $json['description'];
+                $html = $description->generate_html();
+                return $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $description = new qtype_preg_description_tool($answer['answer']->answer);
-                $description->generate_json($json);
-                return $json['description'];
+                $html = $description->generate_html();
+                return $html;
             case 3:
-
                 $json2 = array();
                 $description = new qtype_preg_description_tool($response['answer']);
                 $description->generate_json($json);
