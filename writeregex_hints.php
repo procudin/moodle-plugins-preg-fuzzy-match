@@ -125,23 +125,27 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
     public function render_hint ($renderer, question_attempt $qa = null,
                                  question_display_options $options = null, $response = null) {
         $json = array();
+        $regexoptions = new qtype_preg_authoring_tools_options();
+        $regexoptions->engine = $this->question->engine;
+        $regexoptions->usecase = $this->question->usecase;
+        $regexoptions->notation = $this->question->notation;
 
         switch($this->mode){
             case 1:
-                $tree = new qtype_preg_syntax_tree_tool($response['answer']);
+                $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
                 $html = $tree->generate_html();
                 return $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
-                $tree = new qtype_preg_syntax_tree_tool($answer['answer']->answer);
+                $tree = new qtype_preg_syntax_tree_tool($answer['answer']->answer, $regexoptions);
                 $html = $tree->generate_html();
                 return $html;
             case 3:
-                $tree = new qtype_preg_syntax_tree_tool($response['answer']);
+                $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
                 $tree->generate_json($json);
                 $json2 = array();
                 $answer = $this->question->get_best_fit_answer($response);
-                $tree2 = new qtype_preg_syntax_tree_tool($answer['answer']->answer);
+                $tree2 = new qtype_preg_syntax_tree_tool($answer['answer']->answer, $regexoptions);
                 $tree2->generate_json($json2);
                 return '<img src="' . $json['tree']['img'] . '" /><br /><img src="' . $json2['tree']['img'] . '" />';
             default: return 'defstack';
@@ -265,23 +269,27 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
         $json = array();
+        $regexoptions = new qtype_preg_authoring_tools_options();
+        $regexoptions->engine = $this->question->engine;
+        $regexoptions->usecase = $this->question->usecase;
+        $regexoptions->notation = $this->question->notation;
 
         switch($this->mode){
             case 1:
-                $tree = new qtype_preg_explaining_graph_tool($response['answer']);
+                $tree = new qtype_preg_explaining_graph_tool($response['answer'], $regexoptions);
                 $html = $tree->generate_html();
                 return $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
-                $tree = new qtype_preg_explaining_graph_tool($answer['answer']->answer);
+                $tree = new qtype_preg_explaining_graph_tool($answer['answer']->answer, $regexoptions);
                 $html = $tree->generate_html();
                 return $html;
             case 3:
-                $tree = new qtype_preg_explaining_graph_tool($response['answer']);
+                $tree = new qtype_preg_explaining_graph_tool($response['answer'], $regexoptions);
                 $tree->generate_json($json);
                 $answer = $this->question->get_best_fit_answer($response);
                 $json2 = array();
-                $tree2 = new qtype_preg_explaining_graph_tool($answer['answer']->answer);
+                $tree2 = new qtype_preg_explaining_graph_tool($answer['answer']->answer, $regexoptions);
                 $tree2->generate_json($json2);
                 return '<img src="' . $json['graph'] . '" /><br /><img src="' . $json2['graph'] . '" />';
             default: return 'defstack';
@@ -405,26 +413,27 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
         $json = array();
-        $descriptionoption = new qtype_preg_authoring_tools_options();
-        $descriptionoption->engine = $this->question->engine;
-        $descriptionoption->notation = $this->question->notation;
+        $regexoptions = new qtype_preg_authoring_tools_options();
+        $regexoptions->engine = $this->question->engine;
+        $regexoptions->usecase = $this->question->usecase;
+        $regexoptions->notation = $this->question->notation;
 
         switch($this->mode){
             case 1:
-                $description = new qtype_preg_description_tool($response['answer']);
+                $description = new qtype_preg_description_tool($response['answer'], $regexoptions);
                 $html = $description->generate_html();
                 return $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
-                $description = new qtype_preg_description_tool($answer['answer']->answer);
+                $description = new qtype_preg_description_tool($answer['answer']->answer, $regexoptions);
                 $html = $description->generate_html();
                 return $html;
             case 3:
                 $json2 = array();
-                $description = new qtype_preg_description_tool($response['answer']);
+                $description = new qtype_preg_description_tool($response['answer'], $regexoptions);
                 $description->generate_json($json);
                 $answer = $this->question->get_best_fit_answer($response);
-                $description2 = new qtype_preg_description_tool($answer['answer']->answer);
+                $description2 = new qtype_preg_description_tool($answer['answer']->answer, $regexoptions);
                 $description2->generate_json($json2);
                 return 'student: ' . $json['description'] . "\nteacher: " . $json2['description'];
             default: return 'defstack';
