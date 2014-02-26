@@ -8,6 +8,7 @@ require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_descripti
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_regex_testing_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_syntax_tree_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_explaining_graph_tool.php');
+require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 
 /**
  * Class qtype_writeregex_syntaxtreehint Class of syntax tree hint.
@@ -594,22 +595,40 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
     }
 }
 
-class graderaanalyser {
+class grader_analyser {
 
-    protected $mode;
+    protected $question;
 
-    public function __construct($mode) {
-        $this->mode = $mode;
+    public function __construct($question) {
+        $this->question = $question;
     }
 
     public function get_equality($answer, $response) {
 
-        if(strpos($answer, '100')) {  return '999';   }
-        if(strpos($answer, '80')) {  return '8';   }
-        if(strpos($answer, '60')) {  return '6';   }
-        if(strpos($answer, '40')) {  return '4';   }
-        if(strpos($answer, '20')) {  return '2';   }
-        return  '0';
+        $totalfraction = 0;
+
+        $pregquestionstd = new qtype_preg_question();
+        $matcherstd = $pregquestionstd->get_matcher($this->question->engine, $answer, false,
+            $pregquestionstd->get_modifiers($this->question->usecase), 0, $this->question->notation);
+
+        $pregquestiont = new qtype_preg_question();
+        $matchert = $pregquestiont->get_matcher($this->question->engine, $response, false,
+            $pregquestiont->get_modifiers($this->question->usecase), 0, $this->question->notation);
+
+        foreach ($this->question->answers as $item) {
+
+            if (!$matcherstd->errors_exist() and !$matchert->errors_exist() and $item->feedbackformat == 0) {
+                $resulltstd = $matcherstd->match($item->answer);
+                $resulltt = $matchert->match($item->answer);
+
+                if ($resulltstd->indexfirst == $resulltt->indexfirst and
+                    $resulltstd->length == $resulltt->length) {
+                    $totalfraction += $item->fraction;
+                }
+            }
+        }
+
+        return $totalfraction;
     }
 
 }

@@ -6,6 +6,7 @@ global $CFG;
 
 require_once($CFG->dirroot . '/question/type/questionbase.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
+require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 require_once($CFG->dirroot . '/question/type/writeregex/writeregex_hints.php');
 
 
@@ -182,42 +183,48 @@ class qtype_writeregex_question extends question_graded_automatically
         return $feedback;
     }
 
-    protected function get_best_fit_regex_answer (array $response) {
-
-        foreach ($this->answers as $anaswer) {
-            if ($anaswer->feedbackformat == 1) {
-
-            }
-        }
-    }
-
     public function get_best_fit_answer (array $response, $gradeborder = null) {
 
-        $graderanalyzer = new graderaanalyser($this->graderanalyzerpenalty);
+        $graderanalyzer = new grader_analyser($this);
 
-        $this->get_best_fit_regex_answer($response);
-
-        $equality_answers_arr = array();
-        foreach( $this->answers as $answer){
-            if($this->graderanalyzerpenalty < $answer->fraction){
-                $equality = $graderanalyzer->get_equality($answer->answer, $response['answer']);
-                $equality_answers_arr[$equality] = $answer;
+        $fractions = array();
+        foreach ($this->answers  as $answer) {
+            if ($answer->feedbackformat == 1) {
+                $fractions[] = $graderanalyzer->get_equality($answer->answer, $response['answer']);
             }
         }
 
-        $bestfit = array();
-        if(count($equality_answers_arr) > 0){
-            krsort($equality_answers_arr);
-            foreach($equality_answers_arr as $key => $val){
-                $bestfit['answer'] = $val;
-                $bestfit['match'] = $key/10;
-                break;
+        $beftfraction = 0;
+        foreach ($fractions as $fraction) {
+
+            if ($fraction > $beftfraction) {
+                $beftfraction = $fraction;
             }
         }
-        else{
-            $bestfit['answer'] = array();
-            $bestfit['match'] = 0;
-        }
+
+//        $this->get_best_fit_strings_answer($response);
+//
+//        $equality_answers_arr = array();
+//        foreach( $this->answers as $answer){
+//            if($this->graderanalyzerpenalty < $answer->fraction){
+//                $equality = $graderanalyzer->get_equality($answer->answer, $response['answer']);
+//                $equality_answers_arr[$equality] = $answer;
+//            }
+//        }
+//
+        $bestfit = array('answer' => $response['answer'], 'match' => $beftfraction * $this->compareregexpteststrings);
+//        if(count($equality_answers_arr) > 0){
+//            krsort($equality_answers_arr);
+//            foreach($equality_answers_arr as $key => $val){
+//                $bestfit['answer'] = $val;
+//                $bestfit['match'] = $key/10;
+//                break;
+//            }
+//        }
+//        else{
+//            $bestfit['answer'] = array();
+//            $bestfit['match'] = 0;
+//        }
         return $bestfit;
     }
 
