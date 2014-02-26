@@ -556,15 +556,38 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
      */
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
-//        $ts = new qtype_preg_regex_testing_tool($renderer, $this->question->answers,
-//            $this->question->usecase, '', $this->question->engine, $this->question->notation, '');
-//        $json = array();
-//
-//        $ts->generate_json($json);
+        $strings = '';
+        foreach ($this->question->answers as $key => $item) {
+
+            if ($item->feedbackformat == 0) {
+
+                if ($key == count($this->question->answers) - 1) {
+                    $strings .= $item->answer;
+                } else {
+                    $strings .= $item->answer . "\n";
+                }
+            }
+        }
+
+        $usecase = $this->question->usecase;
+        $exactmatch = false;
+        $engine = $this->question->engine;
+        $notation = $this->question->notation;
 
         switch($this->mode){
-            case 1: return 'Hint stack analyzer: the student\'s answer';
-            case 2: return 'Hint stack analyzer: the correct answer';
+            case 1:
+                $regex = $response['answer'];
+                $tool = new qtype_preg_regex_testing_tool($regex, $strings, $usecase, $exactmatch, $engine,
+                    $notation, new qtype_preg_position());
+                $json = $tool->generate_json();
+                return $json['regex_test'];
+            case 2:
+                $answer = $this->question->get_best_fit_answer($response);
+                $regex = $answer['answer']->answer;
+                $tool = new qtype_preg_regex_testing_tool($regex, $strings, $usecase, $exactmatch, $engine,
+                    $notation, new qtype_preg_position());
+                $json = $tool->generate_json();
+                return $json['regex_test'];
             case 3: return 'Hint stack analyzer: the student\'s answer and the correct answer (both)';
             default: return 'defstack';
         }

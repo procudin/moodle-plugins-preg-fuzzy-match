@@ -76,12 +76,10 @@ class qtype_writeregex_question extends question_graded_automatically
         $response = array('answer' => '');
         $correctanswer = '';
 
-        if (trim($correctanswer) == '') {
-            $bestfit = $this->get_best_fit_answer($response, 1);
-            $matchresult = $bestfit['match'];
-
-            if ($matchresult == 1) {
-                $correctanswer = $bestfit['answer'];
+        foreach ($this->answers as $item) {
+            if ($item->feedbackformat == 1 and $item->fraction == 1.0000000) {
+                $correctanswer = $item->answer;
+                break;
             }
         }
 
@@ -184,9 +182,20 @@ class qtype_writeregex_question extends question_graded_automatically
         return $feedback;
     }
 
+    protected function get_best_fit_regex_answer (array $response) {
+
+        foreach ($this->answers as $anaswer) {
+            if ($anaswer->feedbackformat == 1) {
+
+            }
+        }
+    }
+
     public function get_best_fit_answer (array $response, $gradeborder = null) {
 
         $graderanalyzer = new graderaanalyser($this->graderanalyzerpenalty);
+
+        $this->get_best_fit_regex_answer($response);
 
         $equality_answers_arr = array();
         foreach( $this->answers as $answer){
