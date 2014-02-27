@@ -61,7 +61,7 @@ class qtype_writeregex_question extends question_graded_automatically
     public $compareregexpteststrings;
 
     /** @var number only answers with fraction >= hintgradeborder would be used for hinting. */
-    public $hintgradeborder;
+    public $hintgradeborder = 0.1;
 
     /** @var  int Value of grader analyzer type. */
     public $graderanalyzertype;
@@ -90,8 +90,8 @@ class qtype_writeregex_question extends question_graded_automatically
     public function get_matching_answer(array $response) {
         $bestfit = $this->get_best_fit_answer($response);
 
-        if ($bestfit['match'] == 1) {
-            return $bestfit['answer'];
+        if ($bestfit['match'] >= $this->hintgradeborder) {
+            return $bestfit['answer']->answer;
         }
 
         return array();
@@ -131,9 +131,10 @@ class qtype_writeregex_question extends question_graded_automatically
 
     public function grade_response (array $response) {
         $bestfitanswer = $this->get_best_fit_answer($response);
-        $grade = 0;
+        $grade = $bestfitanswer['match'];
+        question_state::graded_state_for_fraction($bestfitanswer['match']);
         $state = question_state::$gradedwrong;
-        if ($bestfitanswer['match'] == 1) {
+        if ($bestfitanswer['match'] >= $this->hintgradeborder) {
             $grade = $bestfitanswer['answer']->fraction;
             $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction);
         }
@@ -188,17 +189,19 @@ class qtype_writeregex_question extends question_graded_automatically
         $graderanalyzer = new grader_analyser($this);
 
         $fractions = array();
-        foreach ($this->answers  as $answer) {
+        foreach ($this->answers  as $index => $answer) {
             if ($answer->feedbackformat == 1) {
-                $fractions[] = $graderanalyzer->get_equality($answer->answer, $response['answer']);
+                $fractions[$index] = $graderanalyzer->get_equality($answer->answer, $response['answer']);
             }
         }
 
         $beftfraction = 0;
-        foreach ($fractions as $fraction) {
+        $bestfitanswer = null;
+        foreach ($fractions as $key => $fraction) {
 
             if ($fraction > $beftfraction) {
                 $beftfraction = $fraction;
+                $bestfitanswer = $this->answers[$key];
             }
         }
 
@@ -212,7 +215,7 @@ class qtype_writeregex_question extends question_graded_automatically
 //            }
 //        }
 //
-        $bestfit = array('answer' => $response['answer'], 'match' => $beftfraction * $this->compareregexpteststrings);
+        $bestfit = array('answer' => $bestfitanswer, 'match' => $beftfraction * $this->compareregexpteststrings / 100);
 //        if(count($equality_answers_arr) > 0){
 //            krsort($equality_answers_arr);
 //            foreach($equality_answers_arr as $key => $val){
@@ -225,6 +228,7 @@ class qtype_writeregex_question extends question_graded_automatically
 //            $bestfit['answer'] = array();
 //            $bestfit['match'] = 0;
 //        }
+
         return $bestfit;
     }
 

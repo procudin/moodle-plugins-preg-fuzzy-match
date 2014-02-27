@@ -60,7 +60,7 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
             return '';
         }
 
-        return get_string('correctansweris', 'qtype_shortanswer', $answer);
+        return get_string('correctansweris', 'qtype_shortanswer', $answer['answer']);
     }
 
     public function specific_feedback(question_attempt $qa) {
