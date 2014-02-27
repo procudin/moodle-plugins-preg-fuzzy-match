@@ -186,12 +186,17 @@ class qtype_writeregex_question extends question_graded_automatically
 
     public function get_best_fit_answer (array $response, $gradeborder = null) {
 
-        $graderanalyzer = new grader_analyser($this);
-
+        $graderanalyzer = new test_strings_analyser($this);
+        $compregex = new compare_regex_analyzer($this);
+        $compregexa = new compare_regex_automata_analyzer($this);
+        $fractions2 = array();
         $fractions = array();
+        $fractions3 = array();
         foreach ($this->answers  as $index => $answer) {
             if ($answer->feedbackformat == 1) {
                 $fractions[$index] = $graderanalyzer->get_equality($answer->answer, $response['answer']);
+                $fractions2[$index] = $compregex->get_equality($answer->answer, $response['answer']);
+                $fractions3[$index] = $compregexa->get_equality($answer->answer, $response['answer']);
             }
         }
 
@@ -205,29 +210,29 @@ class qtype_writeregex_question extends question_graded_automatically
             }
         }
 
-//        $this->get_best_fit_strings_answer($response);
-//
-//        $equality_answers_arr = array();
-//        foreach( $this->answers as $answer){
-//            if($this->graderanalyzerpenalty < $answer->fraction){
-//                $equality = $graderanalyzer->get_equality($answer->answer, $response['answer']);
-//                $equality_answers_arr[$equality] = $answer;
-//            }
-//        }
-//
-        $bestfit = array('answer' => $bestfitanswer, 'match' => $beftfraction * $this->compareregexpteststrings / 100);
-//        if(count($equality_answers_arr) > 0){
-//            krsort($equality_answers_arr);
-//            foreach($equality_answers_arr as $key => $val){
-//                $bestfit['answer'] = $val;
-//                $bestfit['match'] = $key/10;
-//                break;
-//            }
-//        }
-//        else{
-//            $bestfit['answer'] = array();
-//            $bestfit['match'] = 0;
-//        }
+        $beftfraction2 = 0;
+        $bestfitanswer2 = null;
+        foreach ($fractions2 as $key => $fraction) {
+
+            if ($fraction > $beftfraction2) {
+                $beftfraction2 = $fraction;
+                $bestfitanswer2 = $this->answers[$key];
+            }
+        }
+
+        $beftfraction3 = 0;
+        $bestfitanswer3 = null;
+        foreach ($fractions3 as $key => $fraction) {
+
+            if ($fraction > $beftfraction3) {
+                $beftfraction3 = $fraction;
+                $bestfitanswer3 = $this->answers[$key];
+            }
+        }
+
+        $bestfit = array('answer' => $bestfitanswer, 'match' => $beftfraction * $this->compareregexpteststrings / 100
+            + $this->compareregexpercentage * $beftfraction2 / 100
+            + $this->compareautomatapercentage * $beftfraction3 / 100);
 
         return $bestfit;
     }

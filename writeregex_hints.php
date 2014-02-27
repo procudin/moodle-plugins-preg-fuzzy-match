@@ -595,7 +595,7 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
     }
 }
 
-class grader_analyser {
+class test_strings_analyser {
 
     protected $question;
 
@@ -631,4 +631,22 @@ class grader_analyser {
         return $totalfraction;
     }
 
+}
+
+class compare_regex_analyzer {
+
+    public function __construct($question){}
+
+    public function get_equality ($answer, $respose) {
+        return 0;
+    }
+}
+
+class compare_regex_automata_analyzer {
+
+    public function __construct($question){}
+
+    public function get_equality ($answer, $respose) {
+        return 0;
+    }
 }
