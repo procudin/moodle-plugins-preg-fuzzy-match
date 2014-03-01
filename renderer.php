@@ -102,6 +102,16 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
             }
         }
 
+        if(get_class($behaviour) == 'qbehaviour_interactivehints') {
+            $hints = $question->available_specific_hints();
+            $hints = $behaviour->adjust_hints($hints);
+
+            foreach ($hints as $hintkey) {
+                $hintobj = $question->hint_object($hintkey);
+                $feedback .= $hintobj->render_hint($this, $qa, $options, array('answer' => $currentanswer)) . $br;
+            }
+        }
+
         $output = parent::feedback($qa, $options);
 
         return $feedback . $output;

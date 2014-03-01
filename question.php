@@ -239,16 +239,12 @@ class qtype_writeregex_question extends question_graded_automatically
 
     /**
      * Hint object factory.
-     *
-     * Returns a hint object for given type.
-     */
-    /**
-     * Hint object factory.
      * @param $hintkey Hint key.
      * @param null $response Response
      * @return qtype_poasquestion_hintmoodle A Hint object for given type.
      */
     public function hint_object($hintkey, $response = null) {
+
         // Moodle-specific hints
         if (substr($hintkey, 0, 11) == 'hintmoodle#') {
             return new qtype_poasquestion_hintmoodle($this, $hintkey);

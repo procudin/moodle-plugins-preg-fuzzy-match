@@ -302,4 +302,10 @@ class qtype_writeregex extends qtype_shortanswer {
         return parent::export_to_xml($question, $format, $extra);
     }
 
+    /** Overload hints functions to be able to work with interactivehints*/
+    protected function make_hint($hint) {
+        return qtype_poasquestion_moodlehint_adapter::load_from_record($hint);
+    }
+
+
 }

@@ -24,6 +24,10 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
     /** @var array Options of syntax tree hint. */
     protected $syntaxtreeoptions = array();
 
+    public function  set_mode ($value) {
+        $this->mode = $value;
+    }
+
     /**
      * Init all fields.
      * @param $question object Object of question's class.
@@ -167,6 +171,10 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
     protected $hintkey;
     /** @var array Options of explanation graph hint. */
     protected $explgraphhintoptions = array();
+
+    public function  set_mode ($value) {
+        $this->mode = $value;
+    }
 
     /**
      * Init all fields.
@@ -312,6 +320,10 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
     /** @var array Options of text description hint. */
     protected $descriptionhintoptions = array();
 
+    public function  set_mode ($value) {
+        $this->mode = $value;
+    }
+
     /**
      * Init all fields.
      * @param $question object Object of question's class.
@@ -455,6 +467,10 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
     protected $hintkey;
     /** @var array Options of syntax tree hint. */
     protected $teststringshintoptions = array();
+
+    public function  set_mode ($value) {
+        $this->mode = $value;
+    }
 
     /**
      * Init all fields.
