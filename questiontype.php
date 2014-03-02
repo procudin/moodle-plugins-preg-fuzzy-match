@@ -131,17 +131,6 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Save hints
-     * @param $formdata array Data from edited form.
-     * @param bool $withparts Flag which showing parts.
-     */
-    public function save_hints($formdata, $withparts = false) {
-
-        parent::save_hints($formdata, $withparts);
-
-    }
-
-    /**
      * Save additional question type data into the hint optional field.
      * @param object $formdata the data from the form.
      * @param int $number number of hint to get options from.
@@ -197,26 +186,6 @@ class qtype_writeregex extends qtype_shortanswer {
             'explgraphhintpenalty', 'descriptionhinttype', 'descriptionhintpenalty', 'teststringshinttype',
             'teststringshintpenalty', 'compareregexpercentage', 'compareautomatapercentage', 'compareregexpteststrings'
         );
-    }
-
-    /**
-     * Initialise question instance.
-     * @param question_definition $question Question definition.
-     * @param object $questiondata Question data.
-     */
-    protected function initialise_question_instance(question_definition $question, $questiondata) {
-
-        parent::initialise_question_instance($question, $questiondata);
-    }
-
-    /**
-     * Delete question.
-     * @param $questionid int Question id
-     * @param int $contextid Context id.
-     */
-    public function delete_question($questionid, $contextid){
-
-        parent::delete_question($questionid, $contextid);
     }
 
     /**
@@ -295,17 +264,6 @@ class qtype_writeregex extends qtype_shortanswer {
             ++$a_count;
         }
         return $qo;
-    }
-
-    /**
-     * Export to xml
-     * @param $question object Question objects.
-     * @param qformat_xml $format Format of xml file.
-     * @param null $extra Extra options.
-     * @return bool|string Question xml data.
-     */
-    public function export_to_xml($question, qformat_xml $format, $extra=null){
-        return parent::export_to_xml($question, $format, $extra);
     }
 
     /** Overload hints functions to be able to work with interactivehints*/

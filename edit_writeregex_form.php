@@ -172,21 +172,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
-     * Get the list of form elements to repeat, one for each answer.
-     * @param object $mform the form being built.
-     * @param $label the label to use for each option.
-     * @param $gradeoptions the possible grades for each answer.
-     * @param $repeatedoptions reference to array of repeated options to fill
-     * @param $answersoption reference to return the name of $question->options
-     *      field holding an array of answers
-     * @return array of form fields.
-     */
-    protected function get_per_answer_fields($mform, $label, $gradeoptions,
-                                             &$repeatedoptions, &$answersoption) {
-        return parent::get_per_answer_fields($mform, $label, $gradeoptions, $repeatedoptions, $answersoption);
-    }
-
-    /**
      * Prepare answers data.
      * @param object $question Question's object.
      * @param bool $withanswerfiles If question has answers files.
@@ -545,18 +530,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                 $question->teststringshint[] = 0;
             }
         }
-
-        return $question;
-    }
-
-    /**
-     * Perform an preprocessing needed on the data passed to {@link set_data()}
-     * before it is used to initialise the form.
-     * @param object $question the data being passed to the form.
-     * @return object $question the modified data.
-     */
-    protected function data_preprocessing($question) {
-        $question = parent::data_preprocessing($question);
 
         return $question;
     }
