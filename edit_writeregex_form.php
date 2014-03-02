@@ -85,16 +85,16 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         // include preg
         $pregclass = 'qtype_preg';
-        $preg = new $pregclass;
+        $pregquestionobj = new $pregclass;
 
         // add engines
-        $engines = $preg->available_engines();
+        $engines = $pregquestionobj->available_engines();
         $mform->addElement('select', 'engine', get_string('engine', 'qtype_preg'), $engines);
         $mform->setDefault('engine', $CFG->qtype_preg_defaultengine);
         $mform->addHelpButton('engine', 'engine', 'qtype_preg');
 
         // add notations
-        $notations = $preg->available_notations();
+        $notations = $pregquestionobj->available_notations();
         $mform->addElement('select', 'notation', get_string('notation', 'qtype_preg'), $notations);
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
@@ -241,15 +241,15 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         if ($test > 0 && $test <= 100) {
 
-            $questionobj = new qtype_preg_question();
+            $pregquestionobj = new qtype_preg_question();
             $answers = $data['answer'];
             $i = 0;
 
             foreach ($answers as $key => $answer) {
                 $trimmedanswer = trim($answer);
                 if ($trimmedanswer !== '') {
-                    $matcher = $questionobj->get_matcher($data['engine'], $trimmedanswer, false,
-                        $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation']);
+                    $matcher = $pregquestionobj->get_matcher($data['engine'], $trimmedanswer, false,
+                        $pregquestionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation']);
 
                     if ($matcher->errors_exist()) {
                         $regexerrors = $matcher->get_error_messages(true);
