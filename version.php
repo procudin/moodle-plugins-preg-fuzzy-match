@@ -35,5 +35,8 @@ $plugin->maturity  = MATURITY_STABLE;
 $plugin->dependencies = array(
     'qtype_shortanswer' => 2013050100,
     'qtype_preg' => 2013011800,
-    'qtype_poasquestion' => 2013011800
+    'qtype_poasquestion' => 2013011800,
+    'qbehaviour_adaptivehints' => 2013052500,
+    'qbehaviour_adaptivehintsnopenalties' => 2013052500,
+    'qbehaviour_interactivehints' => 2013060200
 );
