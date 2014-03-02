@@ -275,17 +275,17 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     private function validate_test_strings ($data, $errors, $test) {
         $strings = $data['wre_regexp_ts_answer'];
         $answercount = 0;
-        $maxgrade = 0;
+        $sumgrade = 0;
 
         foreach ($strings as $key => $item) {
             $trimdata = trim($item);
             if ($trimdata !== '') {
                 $answercount++;
-                $maxgrade = $maxgrade + $data['wre_regexp_ts_fraction'][$key];
+                $sumgrade = $sumgrade + $data['wre_regexp_ts_fraction'][$key];
             }
         }
 
-        if ($maxgrade != 1 and $test > 0) {
+        if ($sumgrade != 1 and $test > 0) {
             $errors["wre_regexp_ts_answer[0]"] = get_string('invalidtssumvalue', 'qtype_writeregex');
         }
 
