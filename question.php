@@ -36,6 +36,9 @@ require_once($CFG->dirroot . '/question/type/questionbase.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 require_once($CFG->dirroot . '/question/type/writeregex/writeregex_hints.php');
+require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex_automata_analyzer.php');
+require_once($CFG->dirroot . '/question/type/writeregex/writeregex_test_strings_analyser.php');
+require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex_analyzer.php');
 
 /**
  * Represents a write regex question.
