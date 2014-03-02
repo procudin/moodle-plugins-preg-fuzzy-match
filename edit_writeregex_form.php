@@ -220,11 +220,11 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        $this->is_valid_compare_values($data, $errors);
+        $errors = $this->validate_compare_values($data, $errors);
 
-        $this->is_valid_test_strings($data, $errors, $data['compareregexpteststrings']);
+        $errors = $this->validate_test_strings($data, $errors, $data['compareregexpteststrings']);
 
-        $this->is_valid_regexp($data, $errors);
+        $errors = $this->validate_regexp($data, $errors);
 
         return $errors;
     }
@@ -233,8 +233,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * Validate regexp answers.
      * @param $data array Forms data.
      * @param $errors array Errors array.
+     * @return array Errors array.
      */
-    private function is_valid_regexp ($data, &$errors) {
+    private function validate_regexp ($data, $errors) {
 
         $test = $data['compareregexpteststrings'];
 
@@ -260,6 +261,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                 }
             }
         }
+
+        return $errors;
     }
 
     /**
@@ -267,8 +270,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @param $data array Data from form.
      * @param $errors array Errors array.
      * @param $test string Value of compare by test strings.
+     * @return array Errors array.
      */
-    private function is_valid_test_strings ($data, &$errors, $test) {
+    private function validate_test_strings ($data, $errors, $test) {
         $strings = $data['wre_regexp_ts_answer'];
         $answercount = 0;
         $maxgrade = 0;
@@ -288,14 +292,17 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         if ($answercount > 0 and $test == 0) {
             $errors['compareregexpteststrings'] = get_string('invalidcomparets', 'qtype_writeregex');
         }
+
+        return $errors;
     }
 
     /**
      * Validation values of compare values.
      * @param $data array Data from form.
      * @param $errors array Errors array.
+     * @return array Errors array.
      */
-    private function is_valid_compare_values ($data, &$errors) {
+    private function validate_compare_values ($data, $errors) {
 
         $regex = $data['compareregexpercentage'];
         $automata = $data['compareautomatapercentage'];
@@ -318,6 +325,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         if ($regex + $automata + $test != 100 and !$flag) {
             $errors['compareregexpercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
         }
+
+        return $errors;
     }
 
     /**
