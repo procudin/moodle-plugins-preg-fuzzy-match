@@ -154,6 +154,23 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
+     * Determine if the hint with specified number is not empty and should be saved.
+     * @param object $formdata the data from the form.
+     * @param int $number number of hint under question.
+     * @param bool $withparts whether to take into account clearwrong and shownumcorrect options.
+     * @return bool is this particular hint data empty.
+     */
+    protected function is_hint_empty_in_form_data($formdata, $number, $withparts) {
+        $result = parent::is_hint_empty_in_form_data($formdata, $number, $withparts);
+
+        if ($result and $formdata->syntaxtreehint[$number] == 0 and $formdata->explgraphhint[$number] == 0
+            and $formdata->descriptionhint[$number] == 0 and $formdata->teststringshint[$number] == 0)
+            return true;
+        else
+            return false;
+    }
+
+    /**
      * Get test string answer object.
      * @param $answer stdClass Test string.
      * @param $fraction float Fraction value.

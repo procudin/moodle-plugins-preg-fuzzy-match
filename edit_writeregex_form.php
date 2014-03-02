@@ -190,7 +190,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $index = 0;
         foreach ($question->options->answers as $answer) {
 
-            if ($answer->answerformat != $questiontypeclass->test_string_answer_format_value()) {
+            if ($answer->answerformat != qtype_writeregex::TEST_STRING_ANSWER_FORMAT_VALUE) {
                 $question->answer[$key] = $answer->answer;
                 unset($this->_form->_defaultValues["fraction[$key]"]);
                 $question->fraction[$key] = $answer->fraction;
@@ -198,7 +198,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                 $question->feedback[$key]['text'] = $answer->feedback;
                 $question->feedback[$key]['format'] = $answer->feedbackformat;
                 $key++;
-            } else if ($answer->answerformat == $questiontypeclass->test_string_answer_format_value()) {
+            } else if ($answer->answerformat == qtype_writeregex::TEST_STRING_ANSWER_FORMAT_VALUE) {
 
                 $question->wre_regexp_ts_answer[$index] = $answer->answer;
                 $question->wre_regexp_ts_fraction[$index] = $answer->fraction;
