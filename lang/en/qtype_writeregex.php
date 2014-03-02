@@ -1,25 +1,39 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+
 //
-// Moodle is free software: you can redistribute it and/or modify
+
+// WriteRegex is free software: you can redistribute it and/or modify
+
 // it under the terms of the GNU General Public License as published by
+
 // the Free Software Foundation, either version 3 of the License, or
+
 // (at your option) any later version.
+
 //
-// Moodle is distributed in the hope that it will be useful,
+
+// WriteRegex is distributed in the hope that it will be useful,
+
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
+
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
 // GNU General Public License for more details.
+
 //
+
 // You should have received a copy of the GNU General Public License
+
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'qtype_shortanswer', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'qtype_writeregex', language 'en'
  *
- * @package    qtype
- * @subpackage shortanswer
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @package qtype
+ * @subpackage writeregex
+ * @copyright  2014 onwards Oleg Sychev, Volgograd State Technical University.
+ * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -43,12 +57,10 @@ $string['pluginnameediting'] = 'Editing a Write RegEx question';
 $string['pluginnamesummary'] = 'Question to monitor student\'s knowledge of compiling regular expressions (regexp).';
 $string['wre_notation'] = 'Notation';
 
-/* Notation of regexp. */
 $string['wre_notation_simple'] = 'Simple';
 $string['wre_notation_extended'] = 'Extended';
 $string['wre_notation_moodle'] = 'Moodle Short Answer';
 
-/* Syntax tree hint. */
 $string['wre_st'] = 'Syntax tree hint';
 $string['wre_st_penalty'] = 'Penalty';
 $string['wre_st_none'] = 'None';
@@ -56,7 +68,6 @@ $string['wre_st_student'] = 'Show the student\'s answer';
 $string['wre_st_answer'] = 'Show the correct answer';
 $string['wre_st_both'] = 'Show the student\'s answer and the correct answer (both)';
 
-/* Explaining graph hint. */
 $string['wre_eg'] = 'Explaining graph hint';
 $string['wre_eg_penalty'] = 'Penalty';
 $string['wre_eg_none'] = 'None';
@@ -64,7 +75,6 @@ $string['wre_eg_student'] = 'Show the student\'s answer';
 $string['wre_eg_answer'] = 'Show the correct answer';
 $string['wre_eg_both'] = 'Show the student\'s answer and the correct answer (both)';
 
-/* Description hint. */
 $string['wre_d'] = 'Description hint';
 $string['wre_d_penalty'] = 'Penalty';
 $string['wre_d_none'] = 'None';
@@ -72,7 +82,6 @@ $string['wre_d_student'] = 'Show the student\'s answer';
 $string['wre_d_answer'] = 'Show the correct answer';
 $string['wre_d_both'] = 'Show the student\'s answer and the correct answer (both)';
 
-/* Test string hint. */
 $string['teststrings'] = 'Test string hint';
 $string['penalty'] = 'Penalty';
 $string['none'] = 'None';
@@ -80,35 +89,28 @@ $string['student'] = 'Show the student\'s answer';
 $string['answer'] = 'Show the correct answer';
 $string['both'] = 'Show the student\'s answer and the correct answer (both)';
 
-/* Compare regex. */
 $string['wre_cre'] = 'Compare regexp';
 $string['wre_cre_no'] = 'No';
 $string['wre_cre_yes'] = 'Yes';
 $string['wre_cre_percentage'] = 'Percentage';
 
-/* Compare regexp's automats */
 $string['wre_acre'] = 'Compare regexp\'s automats';
 $string['wre_acre_percentage'] = 'Percentage';
 $string['compareautomatapercentage'] = 'Checking regular expression matching (in %) for automata';
 
-/* Compare regexps by test strings */
 $string['compareregexpteststrings'] = 'Checking regular expression matching (in %) in test strings';
 
 $string['wre_regexp_answers'] = 'Regular expression';
 $string['wre_regexp_ts'] = 'Test string';
 
-/* Ошибка суммы типов проверок. */
 $string['wre_error_matching'] = 'Sum of all matching type is not equal 100%';
 
-/* Ошибки ответов regexp. */
 $string['wre_regexp_answers_count'] = 'Must be at least one answer';
 $string['wre_regexp_fractions_count'] = 'At least one of the answers must have a fraction 100%';
 
-/* Ошибки ответов тестовых строк. */
 $string['wre_ts_answers_count'] = 'Must be at least one answer';
 $string['wre_ts_fractions_count'] = 'At least one of the answers must have a fraction 100%';
 
-/* Справочные кнопки. */
 $string['compare'] = 'You can specify a weight check in regexps and automata';
 $string['compare_title'] = 'You can specify a weight check in regexps and automata';
 $string['compare_help'] = 'Comparison is carried out directly in regexps and automata. If you specify a value for

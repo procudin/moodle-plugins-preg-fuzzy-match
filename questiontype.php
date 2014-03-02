@@ -1,25 +1,39 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+
 //
-// Moodle is free software: you can redistribute it and/or modify
+
+// WriteRegex is free software: you can redistribute it and/or modify
+
 // it under the terms of the GNU General Public License as published by
+
 // the Free Software Foundation, either version 3 of the License, or
+
 // (at your option) any later version.
+
 //
-// Moodle is distributed in the hope that it will be useful,
+
+// WriteRegex is distributed in the hope that it will be useful,
+
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
+
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
 // GNU General Public License for more details.
+
 //
+
 // You should have received a copy of the GNU General Public License
+
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Тип вопроса Write Regex - написание регулярного выражения
+ * Question type class for the write regex question type.
  *
- * @package    qtype
+ * @package qtype
  * @subpackage writeregex
- * @copyright  2013 M. Navrotskiy <m.navrotskiy@gmail.com>
+ * @copyright  2014 onwards Oleg Sychev, Volgograd State Technical University.
+ * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,18 +43,13 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
 
-function debug_print ($value) {
-    echo '<pre>';
-    print_r($value);
-    echo '</pre>';
-}
-
 /**
- * Тип вопроса Write Regex - написание регулярного выражения
+ * Question type class for the write regex question type.
  *
- * @package    qtype
+ * @package qtype
  * @subpackage writeregex
- * @copyright  2013 M. Navrotskiy <m.navrotskiy@gmail.com>
+ * @copyright  2014 onwards Oleg Sychev, Volgograd State Technical University.
+ * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_writeregex extends qtype_shortanswer {
@@ -50,9 +59,9 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод получения свойств вопроса.
-     * @param object $question Вопрос.
-     * @return bool
+     * Get question options.
+     * @param object $question Question object.
+     * @return bool Indicates success or failure.
      */
     public function get_question_options($question){
 
@@ -67,15 +76,13 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод сохранения свойств вопроса.
-     * @param object $question Вопрос со свойствами с формы.
-     * @return object|stdClass
+     * Save question options.
+     * @param object $question Question object.
+     * @return object $result->error or $result->noticeyesno or $result->notice
      */
     public function save_question_options($question) {
         global $DB;
         $result = new stdClass();
-
-//        debug_print($question);
 
         // remove all answers
         $DB->delete_records('question_answers', array('question' => $question->id));
@@ -124,9 +131,9 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Функция сохранения подсказок в бд.
-     * @param $formdata
-     * @param bool $withparts
+     * Save hints
+     * @param $formdata array Data from edited form.
+     * @param bool $withparts Flag which showing parts.
      */
     public function save_hints($formdata, $withparts = false) {
 
@@ -159,11 +166,11 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод формирования stdClass ответа (тестовые строки).
-     * @param $answer Тестовая строка.
-     * @param $fraction Оценка.
-     * @param $questionid Идентифкатор ответа.
-     * @return stdClass Ответ.
+     * Get test string answer object.
+     * @param $answer stdClass Test string.
+     * @param $fraction float Fraction value.
+     * @param $questionid int Questions id.
+     * @return stdClass stdClass of answer.
      */
     private function get_test_string_answer_object ($answer, $fraction, $questionid) {
 
@@ -180,9 +187,8 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод для выполнения сохранения дополнительных свойств вопроса методами суперкласса вопроса.
-     * @return array Массив, состоящий из имени таблицы опций типа вопроса WriteRegEx,
-     * и ее столбцов для сохранения данных.
+     * Get extra question fields.
+     * @return array Array of tables columns.
      */
     public function extra_question_fields() {
 
@@ -194,9 +200,9 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод инициализации экземпляра вопроса.
-     * @param question_definition $question Описание вопроса.
-     * @param object $questiondata Данные вопроса.
+     * Initialise question instance.
+     * @param question_definition $question Question definition.
+     * @param object $questiondata Question data.
      */
     protected function initialise_question_instance(question_definition $question, $questiondata) {
 
@@ -204,9 +210,9 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод удаления вопроса.
-     * @param $questionid Идентификатор вопроса.
-     * @param int $contextid Идентифактор контекста.
+     * Delete question.
+     * @param $questionid int Question id
+     * @param int $contextid Context id.
      */
     public function delete_question($questionid, $contextid){
 
@@ -214,12 +220,12 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод импорта вопроса из xml
-     * @param $data Данные.
-     * @param $question Вопрос.
-     * @param qformat_xml $format xml формат.
-     * @param null $extra Дополнительные параметры.
-     * @return bool|object РЕзультат.
+     * Import from xml
+     * @param $data array Data from file.
+     * @param $question object Question object.
+     * @param qformat_xml $format xml Format.
+     * @param null $extra Extra options.
+     * @return bool|object Question objects.
      */
     public function import_from_xml($data, $question, qformat_xml $format, $extra=null){
 
@@ -292,11 +298,11 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Метод импорта вопроса в xml.
-     * @param $question Вопрос.
-     * @param qformat_xml $format Формат xml.
-     * @param null $extra Дополнительные параметры.
-     * @return bool|string Результат.
+     * Export to xml
+     * @param $question object Question objects.
+     * @param qformat_xml $format Format of xml file.
+     * @param null $extra Extra options.
+     * @return bool|string Question xml data.
      */
     public function export_to_xml($question, qformat_xml $format, $extra=null){
         return parent::export_to_xml($question, $format, $extra);

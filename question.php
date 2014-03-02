@@ -1,5 +1,33 @@
 <?php
 
+// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+
+//
+
+// WriteRegex is free software: you can redistribute it and/or modify
+
+// it under the terms of the GNU General Public License as published by
+
+// the Free Software Foundation, either version 3 of the License, or
+
+// (at your option) any later version.
+
+//
+
+// WriteRegex is distributed in the hope that it will be useful,
+
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
+// GNU General Public License for more details.
+
+//
+
+// You should have received a copy of the GNU General Public License
+
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -9,7 +37,15 @@ require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 require_once($CFG->dirroot . '/question/type/writeregex/writeregex_hints.php');
 
-
+/**
+ * Represents a write regex question.
+ *
+ * @package qtype
+ * @subpackage writeregex
+ * @copyright  2014 onwards Oleg Sychev, Volgograd State Technical University.
+ * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class qtype_writeregex_question extends question_graded_automatically
     implements question_automatically_gradable, question_with_qtype_specific_hints {
 
@@ -69,10 +105,18 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var  float Value of penalty for grader analyzer type. */
     public $graderanalyzerpenalty;
 
+    /**
+     * Get type of expected data.
+     * @return array|string Type of expected data.
+     */
     public function get_expected_data() {
         return array('answer' => PARAM_RAW);
     }
 
+    /**
+     * Get correct response value.
+     * @return array|null
+     */
     public function get_correct_response() {
         $response = array('answer' => '');
         $correctanswer = '';
@@ -87,6 +131,11 @@ class qtype_writeregex_question extends question_graded_automatically
         return array('answer' => $correctanswer);
     }
 
+    /**
+     * Get matching answer value.
+     * @param array $response Users response.
+     * @return array answer value.
+     */
     public function get_matching_answer(array $response) {
         $bestfit = $this->get_best_fit_answer($response);
 
@@ -97,12 +146,22 @@ class qtype_writeregex_question extends question_graded_automatically
         return array();
     }
 
+    /**
+     * Return true if response is complete.
+     * @param array $response Users response.
+     * @return bool Is response complete?
+     */
     public function is_complete_response (array $response) {
 
         return array_key_exists('answer', $response) &&
             ($response['answer'] || $response['answer'] === '0');
     }
 
+    /**
+     * Return true if response is gradable.
+     * @param array $response Users response.
+     * @return bool Is response gradable?
+     */
     public function is_gradable_response (array $response) {
         return $this->is_complete_response($response);
     }
@@ -121,6 +180,11 @@ class qtype_writeregex_question extends question_graded_automatically
         return $resp;
     }
 
+    /**
+     * Get validation error.
+     * @param array $response Users response.
+     * @return string Validation error.
+     */
     public function get_validation_error (array $response) {
         if ($this->is_gradable_response($response)) {
             return '';
@@ -129,6 +193,11 @@ class qtype_writeregex_question extends question_graded_automatically
         return get_string('pleaseenterananswer', 'qtype_shortanswer');
     }
 
+    /**
+     * Do grade response.
+     * @param array $response Users response.
+     * @return array Grade and state of users response.
+     */
     public function grade_response (array $response) {
         $bestfitanswer = $this->get_best_fit_answer($response);
         $grade = $bestfitanswer['match'];
@@ -142,6 +211,12 @@ class qtype_writeregex_question extends question_graded_automatically
         return array($grade, $state);
     }
 
+    /**
+     * Make behaviour.
+     * @param question_attempt $qa Question attempt.
+     * @param string $preferredbehaviour Preferred behaviour.
+     * @return qbehaviour_adaptivehints|qbehaviour_adaptivehintsnopenalties|qbehaviour_interactivehints|question_behaviour Behaviour object.
+     */
     public function make_behaviour (question_attempt $qa, $preferredbehaviour) {
         global $CFG;
 
@@ -166,6 +241,12 @@ class qtype_writeregex_question extends question_graded_automatically
         return parent::make_behaviour($qa, $preferredbehaviour);
     }
 
+    /**
+     * Get feedback for response.
+     * @param $response array User response.
+     * @param $qa question_attempt Question attempt.
+     * @return string Feedback value.
+     */
     public function get_feedback_for_response ($response, $qa) {
         $besftfit = $this->get_best_fit_answer($response);
         $feedback = '';
@@ -184,6 +265,12 @@ class qtype_writeregex_question extends question_graded_automatically
         return $feedback;
     }
 
+    /**
+     * Get best fit answer.
+     * @param array $response Users response.
+     * @param null $gradeborder Gradeborder value.
+     * @return array Answer array.
+     */
     public function get_best_fit_answer (array $response, $gradeborder = null) {
 
         $graderanalyzer = new test_strings_analyser($this);
@@ -272,6 +359,11 @@ class qtype_writeregex_question extends question_graded_automatically
         return new $hintclass($this, $hintkey, $analysermode);
     }
 
+    /**
+     * Get specific hints.
+     * @param null $response User response.
+     * @return array Array of hints types.
+     */
     public function available_specific_hints ($response = null) {
         $hinttypes = array();
 
