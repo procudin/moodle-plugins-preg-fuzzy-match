@@ -237,6 +237,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     private function validate_regexp ($data, $errors) {
 
+        global $CFG;
         $test = $data['compareregexpteststrings'];
 
         if ($test > 0 && $test <= 100) {
@@ -254,8 +255,12 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                     if ($matcher->errors_exist()) {
                         $regexerrors = $matcher->get_error_messages(true);
                         $errors['answer['.$key.']'] = '';
+                        $errorscount = 0;
                         foreach ($regexerrors as $item) {
-                            $errors['answer['.$key.']'] .= $item . '<br />';
+                            if ($errorscount < $CFG->qtype_writregex_maxerrorsshown) {
+                                $errors['answer['.$key.']'] .= $item . '<br />';
+                                $errorscount++;
+                            }
                         }
                     }
                 }
