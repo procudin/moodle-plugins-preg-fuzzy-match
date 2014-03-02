@@ -54,9 +54,8 @@ require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
  */
 class qtype_writeregex extends qtype_shortanswer {
 
-    public function test_string_answer_format_value() {
-        return 1;
-    }
+    /** Format value of test string answers. */
+    const TEST_STRING_ANSWER_FORMAT_VALUE = 1;
 
     /**
      * Get question options.
@@ -95,7 +94,7 @@ class qtype_writeregex extends qtype_shortanswer {
             $fractionstrings = array();
 
             foreach ($question->answer as $index => $item) {
-                if ($question->answerformat[$index] == $this->test_string_answer_format_value()) {
+                if ($question->answerformat[$index] == qtype_writeregex::TEST_STRING_ANSWER_FORMAT_VALUE) {
                     $answersstrings[] = $item;
                     $fractionstrings[] = $question->fraction[$index];
                 } else {
@@ -167,7 +166,7 @@ class qtype_writeregex extends qtype_shortanswer {
 
         $result->answer = $answer;
         $result->question = $questionid;
-        $result->answerformat = $this->test_string_answer_format_value();
+        $result->answerformat = qtype_writeregex::TEST_STRING_ANSWER_FORMAT_VALUE;
         $result->fraction = $fraction;
         $result->feedback = '';
         $result->feedbackformat = 0;
