@@ -139,7 +139,7 @@ class qtype_writeregex_question extends question_graded_automatically
     public function get_matching_answer(array $response) {
         $bestfit = $this->get_best_fit_answer($response);
 
-        if ($bestfit['match'] >= $this->hintgradeborder) {
+        if ($bestfit['fitness'] >= $this->hintgradeborder) {
             return $bestfit['answer']->answer;
         }
 
@@ -199,14 +199,11 @@ class qtype_writeregex_question extends question_graded_automatically
      * @return array Grade and state of users response.
      */
     public function grade_response (array $response) {
+
         $bestfitanswer = $this->get_best_fit_answer($response);
-        $grade = $bestfitanswer['match'];
-        question_state::graded_state_for_fraction($bestfitanswer['match']);
+        $grade = $bestfitanswer['fitness'];
+        question_state::graded_state_for_fraction($bestfitanswer['fitness']);
         $state = question_state::$gradedwrong;
-        if ($bestfitanswer['match'] >= $this->hintgradeborder) {
-            $grade = $bestfitanswer['answer']->fraction;
-            $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction);
-        }
 
         return array($grade, $state);
     }
@@ -254,12 +251,9 @@ class qtype_writeregex_question extends question_graded_automatically
         $state = $qa->get_state();
 
         if (isset($besftfit['answer']) &&
-            ($besftfit['match'] == 1 || $besftfit['match'] > $boardermatch && $state->is_finished())) {
+            ($besftfit['fitness'] == 1 || $besftfit['fitness'] > $boardermatch && $state->is_finished())) {
             $answer = $besftfit['answer'];
-
-            if ($answer->feedback) {
-                $feedback = 'get_feedback_for_response';
-            }
+            $feedback = $answer->feedback;
         }
 
         return $feedback;
@@ -291,7 +285,7 @@ class qtype_writeregex_question extends question_graded_automatically
         $bestfitanswer = null;
         foreach ($fractions as $key => $fraction) {
 
-            if ($fraction > $beftfraction) {
+            if ($fraction > $beftfraction and $fraction > $this->hintgradeborder) {
                 $beftfraction = $fraction;
                 $bestfitanswer = $this->answers[$key];
             }
@@ -317,7 +311,7 @@ class qtype_writeregex_question extends question_graded_automatically
             }
         }
 
-        $bestfit = array('answer' => $bestfitanswer, 'match' => $beftfraction * $this->compareregexpteststrings / 100
+        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $beftfraction * $this->compareregexpteststrings / 100
             + $this->compareregexpercentage * $beftfraction2 / 100
             + $this->compareautomatapercentage * $beftfraction3 / 100);
 
