@@ -105,6 +105,12 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var  float Value of penalty for grader analyzer type. */
     public $graderanalyzerpenalty;
 
+    /** @var  array Best fit answer value. */
+    public $bestfitanswer;
+
+    /** @var  string Value of best fit answers response. */
+    public $responseforbestfit;
+
     /**
      * Get type of expected data.
      * @return array|string Type of expected data.
@@ -267,6 +273,11 @@ class qtype_writeregex_question extends question_graded_automatically
      */
     public function get_best_fit_answer (array $response, $gradeborder = null) {
 
+        // Check cache for valid results.
+        if ($response['answer'] == $this->responseforbestfit && $this->bestfitanswer !== array()) {
+            return $this->bestfitanswer;
+        }
+
         $graderanalyzer = new test_strings_analyser($this);
         $compregex = new compare_regex_analyzer($this);
         $compregexa = new compare_regex_automata_analyzer($this);
@@ -314,6 +325,9 @@ class qtype_writeregex_question extends question_graded_automatically
         $bestfit = array('answer' => $bestfitanswer, 'fitness' => $beftfraction * $this->compareregexpteststrings / 100
             + $this->compareregexpercentage * $beftfraction2 / 100
             + $this->compareautomatapercentage * $beftfraction3 / 100);
+
+        $this->bestfitanswer = $bestfit;
+        $this->responseforbestfit = $response['answer'];
 
         return $bestfit;
     }
