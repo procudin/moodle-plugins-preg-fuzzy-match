@@ -62,7 +62,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addElement('select', 'usecase',
             get_string('casesensitive', 'qtype_shortanswer'), $menu);
 
-        // init hints options
+        // Init hints options.
         $this->hintsoptions = array(
             '0' => get_string('none', 'qtype_writeregex'),
             '1' => get_string('student', 'qtype_writeregex'),
@@ -70,23 +70,23 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             '3' => get_string('both', 'qtype_writeregex')
         );
 
-        // include preg
+        // Include preg.
         $pregclass = 'qtype_preg';
         $pregquestionobj = new $pregclass;
 
-        // add engines
+        // Add engines.
         $engines = $pregquestionobj->available_engines();
         $mform->addElement('select', 'engine', get_string('engine', 'qtype_preg'), $engines);
         $mform->setDefault('engine', $CFG->qtype_preg_defaultengine);
         $mform->addHelpButton('engine', 'engine', 'qtype_preg');
 
-        // add notations
+        // Add notations.
         $notations = $pregquestionobj->available_notations();
         $mform->addElement('select', 'notation', get_string('notation', 'qtype_preg'), $notations);
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
-        // add syntax tree options
+        // Add syntax tree options.
         $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('syntaxtreehinttype', 'syntaxtreehinttype', 'qtype_writeregex');
@@ -96,7 +96,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('syntaxtreehintpenalty', '0.0000000');
         $mform->addHelpButton('syntaxtreehintpenalty', 'syntaxtreehintpenalty', 'qtype_writeregex');
 
-        // add explaining graph options
+        // Add explaining graph options.
         $mform->addElement('select', 'explgraphhinttype', get_string('wre_eg', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('explgraphhinttype', 'explgraphhinttype', 'qtype_writeregex');
@@ -106,7 +106,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setType('explgraphhintpenalty', PARAM_FLOAT);
         $mform->setDefault('explgraphhintpenalty', '0.0000000');
 
-        // add description options
+        // Add description options.
         $mform->addElement('select', 'descriptionhinttype', get_string('wre_d', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('descriptionhinttype', 'descriptionhinttype', 'qtype_writeregex');
@@ -116,7 +116,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('descriptionhintpenalty', '0.0000000');
         $mform->addHelpButton('descriptionhintpenalty', 'descriptionhintpenalty', 'qtype_writeregex');
 
-        // add test string option
+        // Add test string option.
         $mform->addElement('select', 'teststringshinttype', get_string('teststrings', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('teststringshinttype', 'teststringshinttype', 'qtype_writeregex');
@@ -126,34 +126,33 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('teststringshintpenalty', '0.0000000');
         $mform->addHelpButton('teststringshintpenalty', 'teststringshintpenalty', 'qtype_writeregex');
 
-        // add compare regex percentage
+        // Add compare regex percentage.
         $mform->addElement('text', 'compareregexpercentage',
             get_string('wre_cre_percentage', 'qtype_writeregex'));
         $mform->setType('compareregexpercentage', PARAM_FLOAT);
         $mform->setDefault('compareregexpercentage', '34');
         $mform->addHelpButton('compareregexpercentage', 'compareregexpercentage', 'qtype_writeregex');
 
-        // add compare regexps automata percentage
+        // Add compare regexps automata percentage.
         $mform->addElement('text', 'compareautomatapercentage',
             get_string('compareautomatapercentage', 'qtype_writeregex'));
         $mform->setType('compareautomatapercentage', PARAM_FLOAT);
         $mform->setDefault('compareautomatapercentage', '33');
         $mform->addHelpButton('compareautomatapercentage', 'compareautomatapercentage', 'qtype_writeregex');
 
-        // add compare regexp by test strings
+        // Add compare regexp by test strings.
         $mform->addElement('text', 'compareregexpteststrings',
             get_string('compareregexpteststrings', 'qtype_writeregex'));
         $mform->setType('compareregexpteststrings', PARAM_FLOAT);
         $mform->setDefault('compareregexpteststrings', '33');
         $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
 
-        // add asnwers fields.
+        // Add asnwers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
             question_bank::fraction_options());
 
         $this->add_per_answer_fields($mform, 'wre_regexp_ts',
             question_bank::fraction_options());
-
 
         $this->add_interactive_settings();
     }
@@ -237,7 +236,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                 $trimmedanswer = trim($answer);
                 if ($trimmedanswer !== '') {
                     $matcher = $pregquestionobj->get_matcher($data['engine'], $trimmedanswer, false,
-                        $pregquestionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation']);
+                        $pregquestionobj->get_modifiers($data['usecase']), (-1) * $i, $data['notation']);
 
                     if ($matcher->errors_exist()) {
                         $regexerrors = $matcher->get_error_messages(true);
@@ -335,7 +334,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $repeated = array();
         $answeroptions = array();
-        $answeroptions[] = $mform->CreateElement('hidden', 'freply', 'yes'); // fake element
+        $answeroptions[] = $mform->CreateElement('hidden', 'freply', 'yes');
         $repeated[] = $mform->createElement('group', 'answeroptions',
             get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
         $repeated[] = $mform->createElement('textarea', 'answer',
@@ -445,7 +444,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
                                              $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        // Select type of answers fields
+        // Select type of answers fields.
         if ($label == 'wre_regexp_ts') {
             $this->add_test_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
         } else {
@@ -472,25 +471,23 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $parentresult = parent::get_hint_fields($withclearwrong, $withshownumpartscorrect);
 
-        // add our inputs
+        // Add our inputs.
         $mform = $this->_form;
         $count = count($parentresult[0]);
 
-        // add syntax tree options
+        // Add syntax tree options.
         $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
             $this->hintsoptions);
 
-        // add explaining graph options
+        // Add explaining graph options.
         $repeated[$count++] = $mform->createElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
             $this->hintsoptions);
 
-
-        // add description options
+        // Add description options.
         $repeated[$count++] = $mform->createElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
             $this->hintsoptions);
 
-
-        // add test string option
+        // Add test string option.
         $repeated[$count] = $mform->createElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
             $this->hintsoptions);
 

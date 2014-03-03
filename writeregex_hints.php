@@ -113,7 +113,6 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
      * @return bool Can available hint for answer?
      */
     public function can_available_hint_for_answer ($answer) {
-        // TODO: template code
 
         if ($this->mode == 3) {
             return false;
@@ -177,7 +176,8 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
                 $tree2 = new qtype_preg_syntax_tree_tool($answer['answer']->answer, $regexoptions);
                 $tree2->generate_json($json2);
                 return '<img src="' . $json['tree']['img'] . '" /><br /><img src="' . $json2['tree']['img'] . '" />';
-            default: return '';
+            default:
+                return '';
         }
     }
 }
@@ -266,7 +266,6 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
      * @return bool Can available hint for answer?
      */
     public function can_available_hint_for_answer ($answer) {
-        // TODO: template code
 
         if ($this->mode == 3) {
             return false;
@@ -330,7 +329,8 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
                 $tree2 = new qtype_preg_explaining_graph_tool($answer['answer']->answer, $regexoptions);
                 $tree2->generate_json($json2);
                 return '<img src="' . $json['graph'] . '" /><br /><img src="' . $json2['graph'] . '" />';
-            default: return '';
+            default:
+                return '';
         }
     }
 }
@@ -419,7 +419,6 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
      * @return bool Can available hint for answer?
      */
     public function can_available_hint_for_answer ($answer) {
-        // TODO: template code
 
         if ($this->mode == 3) {
             return false;
@@ -483,7 +482,8 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
                 $description2 = new qtype_preg_description_tool($answer['answer']->answer, $regexoptions);
                 $description2->generate_json($json2);
                 return 'student: ' . $json['description'] . "\nteacher: " . $json2['description'];
-            default: return '';
+            default:
+                return '';
         }
     }
 }
@@ -572,7 +572,6 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
      * @return bool Can available hint for answer?
      */
     public function can_available_hint_for_answer ($answer) {
-        // TODO: template code
 
         if ($this->mode == 3) {
             return false;
@@ -646,8 +645,10 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
                     $notation, new qtype_preg_position());
                 $json = $tool->generate_json();
                 return $json['regex_test'];
-            case 3: return 'Hint stack analyzer: the student\'s answer and the correct answer (both)';
-            default: return '';
+            case 3:
+                return 'Hint stack analyzer: the student\'s answer and the correct answer (both)';
+            default:
+                return '';
         }
     }
 }

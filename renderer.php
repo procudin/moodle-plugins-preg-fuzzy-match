@@ -37,7 +37,7 @@ require_once($CFG->dirroot . '/question/type/shortanswer/renderer.php');
  * @copyright  2014 onwards Oleg Sychev, Volgograd State Technical University.
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
 
     /**
@@ -72,7 +72,7 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
             return '';
         }
 
-        // use hint
+        // Use hint.
         return $question->get_feedback_for_response(array('answer' => $currentanswer), $qa);
     }
 
@@ -82,7 +82,7 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
      * @param question_display_options $options Question display options.
      * @return string Feedback value.
      */
-    public function feedback(question_attempt $qa, question_display_options $options){
+    public function feedback(question_attempt $qa, question_display_options $options) {
 
         $feedback = '';
 
@@ -108,7 +108,7 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
             }
         }
 
-        if(get_class($behaviour) == 'qbehaviour_interactivehints') {
+        if (get_class($behaviour) == 'qbehaviour_interactivehints') {
             $hints = $question->available_specific_hints();
             $hints = $behaviour->adjust_hints($hints);
             $hintoptions = explode('\n', $qa->get_applicable_hint()->options);

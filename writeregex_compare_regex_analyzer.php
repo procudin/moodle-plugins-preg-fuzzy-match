@@ -32,7 +32,9 @@ class compare_regex_analyzer {
      * Init analyzer object.
      * @param $question object Question object.
      */
-    public function __construct($question){}
+    public function __construct($question) {
+
+    }
 
     /**
      * Get equality for user response.

@@ -75,12 +75,12 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var  float Value of penalty for using test string adaptive hint. */
     public $teststringshintpenalty;
 
-    // types of compare
+    // Types of compare.
     /** @var  float Value of compare regexps in %. */
     public $compareregexpercentage;
 
     /** @var  float Value of compare by automates in %. */
-    public  $compareautomatapercentage;
+    public $compareautomatapercentage;
 
     /** @var  float Value of compare by test strings in %. */
     public $compareregexpteststrings;
@@ -207,7 +207,7 @@ class qtype_writeregex_question extends question_graded_automatically
      * Make behaviour.
      * @param question_attempt $qa Question attempt.
      * @param string $preferredbehaviour Preferred behaviour.
-     * @return qbehaviour_adaptivehints|qbehaviour_adaptivehintsnopenalties|qbehaviour_interactivehints|question_behaviour Behaviour object.
+     * @return object Behaviour object.
      */
     public function make_behaviour (question_attempt $qa, $preferredbehaviour) {
         global $CFG;
@@ -275,6 +275,7 @@ class qtype_writeregex_question extends question_graded_automatically
         $bestfraction1 = 0.0;
         $bestfraction2 = 0.0;
         $bestfraction3 = 0.0;
+        
         foreach ($this->answers as $answer) {
             if ($answer->feedbackformat == 1) {
                 $fraction1 = $graderanalyzer->get_equality($answer->answer, $response['answer']);
@@ -285,14 +286,21 @@ class qtype_writeregex_question extends question_graded_automatically
                     $bestfraction1 = $fraction1;
                     $bestfitanswer = $answer;
                 }
-                if ($fraction2 > $bestfraction2 and $fraction2 > $this->hintgradeborder) {$bestfraction2 = $fraction2;}
-                if ($fraction3 > $bestfraction3 and $fraction3 > $this->hintgradeborder) {$bestfraction3 = $fraction3;}
+
+                if ($fraction2 > $bestfraction2 and $fraction2 > $this->hintgradeborder) {
+                    $bestfraction2 = $fraction2;
+                }
+
+                if ($fraction3 > $bestfraction3 and $fraction3 > $this->hintgradeborder) {
+                    $bestfraction3 = $fraction3;
+                }
             }
         }
 
-        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfraction1 * $this->compareregexpteststrings / 100
-            + $this->compareregexpercentage * $bestfraction2 / 100
-            + $this->compareautomatapercentage * $bestfraction3 / 100);
+        $teststringfiness = $bestfraction1 * $this->compareregexpteststrings / 100;
+        $compregexfitness = $this->compareregexpercentage * $bestfraction2 / 100;
+        $compregexafitness = $this->compareautomatapercentage * $bestfraction3 / 100;
+        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $teststringfiness + $compregexfitness + $compregexafitness);
 
         $this->bestfitanswer = $bestfit;
         $this->responseforbestfit = $response['answer'];
@@ -308,7 +316,7 @@ class qtype_writeregex_question extends question_graded_automatically
      */
     public function hint_object($hintkey, $response = null) {
 
-        // Moodle-specific hints
+        // Moodle-specific hints.
         if (substr($hintkey, 0, 11) == 'hintmoodle#') {
             return new qtype_poasquestion_hintmoodle($this, $hintkey);
         }
