@@ -85,7 +85,7 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var  float Value of compare by test strings in %. */
     public $compareregexpteststrings;
 
-    /** @var number only answers with fraction >= hintgradeborder would be used for hinting. */
+    /** @var number Only answers with fraction >= hintgradeborder would be used for hinting. */
     public $hintgradeborder = 0.1;
 
     /** @var  int Value of grader analyzer type. */
@@ -275,7 +275,7 @@ class qtype_writeregex_question extends question_graded_automatically
         $bestfraction1 = 0.0;
         $bestfraction2 = 0.0;
         $bestfraction3 = 0.0;
-        
+
         foreach ($this->answers as $answer) {
             if ($answer->feedbackformat == 1) {
                 $fraction1 = $graderanalyzer->get_equality($answer->answer, $response['answer']);

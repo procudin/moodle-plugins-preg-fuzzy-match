@@ -26,10 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-global $CFG;
-require_once($CFG->dirroot.'/question/type/preg/questiontype.php');
-require_once($CFG->dirroot.'/blocks/formal_langs/settingslib.php');
-
 if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configtext('qtype_writregex_maxerrorsshown', get_string('maxerrorsshownlabel', 'qtype_preg'),

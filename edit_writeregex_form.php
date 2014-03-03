@@ -43,7 +43,7 @@ require_once($CFG->dirroot . '/question/type/writeregex/questiontype.php');
  */
 class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
-    /* Class fields. */
+    /** @var array Array of hints types. */
     private $hintsoptions = array();
 
     /**
@@ -147,7 +147,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('compareregexpteststrings', '33');
         $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
 
-        // Add asnwers fields.
+        // Add answers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers',
             question_bank::fraction_options());
 
@@ -169,9 +169,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             return $question;
         }
 
-        $questiontype = 'qtype_writeregex';
-        $questiontypeclass = new $questiontype;
-
+        // Separate answers to regexes and test strings.
         $key = 0;
         $index = 0;
         foreach ($question->options->answers as $answer) {

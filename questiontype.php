@@ -185,20 +185,20 @@ class qtype_writeregex extends qtype_shortanswer {
     public function extra_question_fields() {
 
         return array('qtype_writeregex_options',
-            'usecase',                   // Regex use case.
+            'usecase',                   // Case sensitivity of regex.
             'engine',                    // Regex engine.
             'notation',                  // Regex notation.
-            'syntaxtreehinttype',        // Value of syntax tree hint type.
-            'syntaxtreehintpenalty',     // Value of syntax tree hint penalty.
-            'explgraphhinttype',         // Value of explain graph hint type.
-            'explgraphhintpenalty',      // Value of explain graph hint penalty.
-            'descriptionhinttype',       // Value of description hint type.
-            'descriptionhintpenalty',    // Value of description hint penalty.
-            'teststringshinttype',       // Value of test strings hint type.
-            'teststringshintpenalty',    // Value of test strings hint penalty.
-            'compareregexpercentage',    // Percentage value of compare regex.
-            'compareautomatapercentage', // Percentage value of compare regex by automata.
-            'compareregexpteststrings'   // Percentage value of compare regex by testing strings.
+            'syntaxtreehinttype',        // Syntax tree hint type.
+            'syntaxtreehintpenalty',     // Syntax tree hint penalty.
+            'explgraphhinttype',         // Explain graph hint type.
+            'explgraphhintpenalty',      // Explain graph hint penalty.
+            'descriptionhinttype',       // Description hint type.
+            'descriptionhintpenalty',    // Description hint penalty.
+            'teststringshinttype',       // Test strings hint type.
+            'teststringshintpenalty',    // Test strings hint penalty.
+            'compareregexpercentage',    // Percentage value of compare regex (0-100).
+            'compareautomatapercentage', // Percentage value of compare regex by automata (0-100).
+            'compareregexpteststrings'   // Percentage value of compare regex by testing strings (0-100).
         );
     }
 
