@@ -1,31 +1,17 @@
 <?php
-
 // This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
-
 //
-
 // WriteRegex is free software: you can redistribute it and/or modify
-
 // it under the terms of the GNU General Public License as published by
-
 // the Free Software Foundation, either version 3 of the License, or
-
 // (at your option) any later version.
-
 //
-
 // WriteRegex is distributed in the hope that it will be useful,
-
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-
 // GNU General Public License for more details.
-
 //
-
 // You should have received a copy of the GNU General Public License
-
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
@@ -203,7 +189,7 @@ class qtype_writeregex_question extends question_graded_automatically
     }
 
     /**
-     * Do grade response.
+     * Doing grade response.
      * @param array $response Users response.
      * @return array Grade and state of users response.
      */
@@ -284,50 +270,29 @@ class qtype_writeregex_question extends question_graded_automatically
         $graderanalyzer = new test_strings_analyser($this);
         $compregex = new compare_regex_analyzer($this);
         $compregexa = new compare_regex_automata_analyzer($this);
-        $fractions2 = array();
-        $fractions = array();
-        $fractions3 = array();
-        foreach ($this->answers  as $index => $answer) {
-            if ($answer->feedbackformat == 1) {
-                $fractions[$index] = $graderanalyzer->get_equality($answer->answer, $response['answer']);
-                $fractions2[$index] = $compregex->get_equality($answer->answer, $response['answer']);
-                $fractions3[$index] = $compregexa->get_equality($answer->answer, $response['answer']);
-            }
-        }
 
-        $beftfraction = 0;
         $bestfitanswer = null;
-        foreach ($fractions as $key => $fraction) {
+        $bestfraction1 = 0.0;
+        $bestfraction2 = 0.0;
+        $bestfraction3 = 0.0;
+        foreach ($this->answers as $answer) {
+            if ($answer->feedbackformat == 1) {
+                $fraction1 = $graderanalyzer->get_equality($answer->answer, $response['answer']);
+                $fraction2 = $compregex->get_equality($answer->answer, $response['answer']);
+                $fraction3 = $compregexa->get_equality($answer->answer, $response['answer']);
 
-            if ($fraction > $beftfraction and $fraction > $this->hintgradeborder) {
-                $beftfraction = $fraction;
-                $bestfitanswer = $this->answers[$key];
+                if ($fraction1 > $bestfraction1 and $fraction1 > $this->hintgradeborder) {
+                    $bestfraction1 = $fraction1;
+                    $bestfitanswer = $answer;
+                }
+                if ($fraction2 > $bestfraction2 and $fraction2 > $this->hintgradeborder) {$bestfraction2 = $fraction2;}
+                if ($fraction3 > $bestfraction3 and $fraction3 > $this->hintgradeborder) {$bestfraction3 = $fraction3;}
             }
         }
 
-        $beftfraction2 = 0;
-        $bestfitanswer2 = null;
-        foreach ($fractions2 as $key => $fraction) {
-
-            if ($fraction > $beftfraction2) {
-                $beftfraction2 = $fraction;
-                $bestfitanswer2 = $this->answers[$key];
-            }
-        }
-
-        $beftfraction3 = 0;
-        $bestfitanswer3 = null;
-        foreach ($fractions3 as $key => $fraction) {
-
-            if ($fraction > $beftfraction3) {
-                $beftfraction3 = $fraction;
-                $bestfitanswer3 = $this->answers[$key];
-            }
-        }
-
-        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $beftfraction * $this->compareregexpteststrings / 100
-            + $this->compareregexpercentage * $beftfraction2 / 100
-            + $this->compareautomatapercentage * $beftfraction3 / 100);
+        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfraction1 * $this->compareregexpteststrings / 100
+            + $this->compareregexpercentage * $bestfraction2 / 100
+            + $this->compareautomatapercentage * $bestfraction3 / 100);
 
         $this->bestfitanswer = $bestfit;
         $this->responseforbestfit = $response['answer'];

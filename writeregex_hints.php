@@ -1,31 +1,17 @@
 <?php
-
 // This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
-
 //
-
 // WriteRegex is free software: you can redistribute it and/or modify
-
 // it under the terms of the GNU General Public License as published by
-
 // the Free Software Foundation, either version 3 of the License, or
-
 // (at your option) any later version.
-
 //
-
 // WriteRegex is distributed in the hope that it will be useful,
-
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-
 // GNU General Public License for more details.
-
 //
-
 // You should have received a copy of the GNU General Public License
-
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
@@ -627,12 +613,14 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
         $strings = '';
-        foreach ($this->question->answers as $key => $item) {
+        $key = 0;
+        foreach ($this->question->answers as $item) {
 
             if ($item->feedbackformat == 0) {
 
                 if ($key == count($this->question->answers) - 1) {
                     $strings .= $item->answer;
+                    $key++;
                 } else {
                     $strings .= $item->answer . "\n";
                 }
