@@ -272,9 +272,7 @@ class qtype_writeregex_question extends question_graded_automatically
         $compregexa = new compare_regex_automata_analyzer($this);
 
         $bestfitanswer = null;
-        $bestfraction1 = 0.0;
-        $bestfraction2 = 0.0;
-        $bestfraction3 = 0.0;
+        $bestfraction = 0.0;
 
         foreach ($this->answers as $answer) {
             if ($answer->feedbackformat == 1) {
@@ -282,25 +280,18 @@ class qtype_writeregex_question extends question_graded_automatically
                 $fraction2 = $compregex->get_equality($answer->answer, $response['answer']);
                 $fraction3 = $compregexa->get_equality($answer->answer, $response['answer']);
 
-                if ($fraction1 > $bestfraction1 and $fraction1 > $this->hintgradeborder) {
-                    $bestfraction1 = $fraction1;
+                $teststringfiness = $fraction1 * $this->compareregexpteststrings / 100;
+                $compregexfitness = $fraction2 * $this->compareregexpercentage / 100;
+                $compregexafitness = $fraction3 * $this->compareautomatapercentage / 100;
+
+                if ($teststringfiness + $compregexfitness + $compregexafitness > $bestfraction) {
+                    $bestfraction = $teststringfiness + $compregexfitness + $compregexafitness;
                     $bestfitanswer = $answer;
-                }
-
-                if ($fraction2 > $bestfraction2 and $fraction2 > $this->hintgradeborder) {
-                    $bestfraction2 = $fraction2;
-                }
-
-                if ($fraction3 > $bestfraction3 and $fraction3 > $this->hintgradeborder) {
-                    $bestfraction3 = $fraction3;
                 }
             }
         }
 
-        $teststringfiness = $bestfraction1 * $this->compareregexpteststrings / 100;
-        $compregexfitness = $this->compareregexpercentage * $bestfraction2 / 100;
-        $compregexafitness = $this->compareautomatapercentage * $bestfraction3 / 100;
-        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $teststringfiness + $compregexfitness + $compregexafitness);
+        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfraction);
 
         $this->bestfitanswer = $bestfit;
         $this->responseforbestfit = $response['answer'];
