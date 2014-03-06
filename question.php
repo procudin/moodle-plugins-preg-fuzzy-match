@@ -272,28 +272,28 @@ class qtype_writeregex_question extends question_graded_automatically
         $compregexa = new compare_regex_automata_analyzer($this);
 
         $bestfitanswer = null;
-        $bestfraction = 0.0;
+        $bestfitness = 0.0;
 
         foreach ($this->answers as $answer) {
             if ($answer->feedbackformat == 1) {
-                $fraction1 = $graderanalyzer->get_equality($answer->answer, $response['answer']);
-                $fraction2 = $compregex->get_equality($answer->answer, $response['answer']);
-                $fraction3 = $compregexa->get_equality($answer->answer, $response['answer']);
+                $fitness1 = $graderanalyzer->get_equality($answer->answer, $response['answer']);
+                $fitness2 = $compregex->get_equality($answer->answer, $response['answer']);
+                $fitness3 = $compregexa->get_equality($answer->answer, $response['answer']);
 
-                $teststringfiness = $fraction1 * $this->compareregexpteststrings / 100;
-                $compregexfitness = $fraction2 * $this->compareregexpercentage / 100;
-                $compregexafitness = $fraction3 * $this->compareautomatapercentage / 100;
+                $teststringfiness = $fitness1 * $this->compareregexpteststrings / 100;
+                $compregexfitness = $fitness2 * $this->compareregexpercentage / 100;
+                $compregexafitness = $fitness3 * $this->compareautomatapercentage / 100;
 
                 $fraction = $teststringfiness + $compregexfitness + $compregexafitness;
 
-                if ( $fraction > $bestfraction and $fraction > $this->hintgradeborder ) {
-                    $bestfraction = $teststringfiness + $compregexfitness + $compregexafitness;
+                if ( $fraction > $bestfitness and $fraction > $this->hintgradeborder ) {
+                    $bestfitness = $teststringfiness + $compregexfitness + $compregexafitness;
                     $bestfitanswer = $answer;
                 }
             }
         }
 
-        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfraction);
+        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfitness);
 
         $this->bestfitanswer = $bestfit;
         $this->responseforbestfit = $response['answer'];
