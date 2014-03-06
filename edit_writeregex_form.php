@@ -237,14 +237,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                         $pregquestionobj->get_modifiers($data['usecase']), (-1) * $i, $data['notation']);
 
                     if ($matcher->errors_exist()) {
-                        $regexerrors = $matcher->get_error_messages(true);
+                        $regexerrors = $matcher->get_error_messages($CFG->qtype_writregex_maxerrorsshown);
                         $errors['answer['.$key.']'] = '';
-                        $errorscount = 0;
                         foreach ($regexerrors as $item) {
-                            if ($errorscount < $CFG->qtype_writregex_maxerrorsshown) {
-                                $errors['answer['.$key.']'] .= $item . '<br />';
-                                $errorscount++;
-                            }
+                            $errors['answer['.$key.']'] .= $item . '<br />';
                         }
                     }
                 }
