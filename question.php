@@ -284,7 +284,9 @@ class qtype_writeregex_question extends question_graded_automatically
                 $compregexfitness = $fraction2 * $this->compareregexpercentage / 100;
                 $compregexafitness = $fraction3 * $this->compareautomatapercentage / 100;
 
-                if ($teststringfiness + $compregexfitness + $compregexafitness > $bestfraction) {
+                $fraction = $teststringfiness + $compregexfitness + $compregexafitness;
+
+                if ( $fraction > $bestfraction and $fraction > $this->hintgradeborder ) {
                     $bestfraction = $teststringfiness + $compregexfitness + $compregexafitness;
                     $bestfitanswer = $answer;
                 }
