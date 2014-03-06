@@ -334,14 +334,13 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $answeroptions = array();
         $answeroptions[] = $mform->CreateElement('hidden', 'freply', 'yes');
         $repeated[] = $mform->createElement('group', 'answeroptions',
-            get_string($label, 'qtype_writeregex'), $answeroptions, null, false);
+            '', $answeroptions, null, false);
         $repeated[] = $mform->createElement('textarea', 'answer',
-            '', 'wrap="virtual" rows="4" cols="80"');
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="4" cols="80"');
         $repeated[] = $mform->createElement('select', 'fraction',
             get_string('grade'), $gradeoptions);
         $repeated[] = $mform->createElement('editor', 'feedback',
             get_string('feedback', 'question'), array('rows' => 8, 'cols' => 80), $this->editoroptions);
-        $repeated[] = $mform->addElement('html', '<hr />');
         $repeatedoptions['freply']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = 'answers';
@@ -366,8 +365,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"', $this->editoroptions);
 
         $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
-
-        $repeated[] = $mform->addElement('html', '<hr />');
 
         $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
         $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
