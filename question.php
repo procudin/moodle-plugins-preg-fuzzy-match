@@ -367,5 +367,11 @@ class qtype_writeregex_question extends question_graded_automatically
         return $hinttypes;
     }
 
+    public function hints_available_for_student($response = null) {
+        $result = $this->available_specific_hints($response);
+
+        return $result;
+    }
+
 }
 
