@@ -72,6 +72,14 @@ $string['subexpression'] = 'Подвыражение';
 $string['syntax_tree_tool'] = 'Синтаксическое дерево';
 $string['syntax_tree_tool_collapsing_mode'] = 'Режим свёртки';
 $string['syntax_tree_tool_help'] = 'Здесь вы можете видеть синтаксическое дерево. При нажатии на узел дерева выделится соответствующее поддерево, подграф и часть в словесном описании. Вы так же можете сворачивать/разворачивать узлы, включив режим свёртки.';
+// TODO: check strings from another moodle lang files for simplification_tool key
+$string['simplification_tool'] = 'Упрощение регулярного выражения';
+$string['simplification_tool_help'] = 'Здесь вы можете увидеть подсказки для упрощения регулярного выражения, если они нужны. Подсказки бывают трех типов: эквивалентность (замена части выражения на более оптимальное, эквивалентное выражение), советы (предусматривают случаи, которые могли быть упущены) и ошибки (случаи, в которых регулярное выражение совпадает с любой строкой или не совпадает ни с чем).';
+$string['simplification_tool_apply'] = 'Применить и следующая подсказка';
+$string['simplification_tool_cancel'] = 'Отмена и следующая подсказка';
+$string['simplification_tool_error'] = 'Ошибок: ';
+$string['simplification_tool_tip'] = 'Советов: ';
+$string['simplification_tool_equivalence'] = 'Эквивалентность: ';
 $string['tobecontinued'] = '...';
 $string['toolargequant'] = 'Слишком большой квантификатор';
 $string['toomanyerrors'] = '.......и ещё {$a} ошибки(ошибок)';
