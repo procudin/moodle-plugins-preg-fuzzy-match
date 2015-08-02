@@ -14,6 +14,7 @@ require_once(dirname(__FILE__) . '/../../../../config.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_description_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_explaining_graph_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_syntax_tree_tool.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_simplification_tool.php');
 
 /**
  * Generates json array which stores authoring tools' content.
@@ -55,7 +56,8 @@ function qtype_preg_get_json_array() {
     $tools = array(
         'tree' => new qtype_preg_syntax_tree_tool($regex, $options),
         'graph' => new qtype_preg_explaining_graph_tool($regex, $options),
-        'description' => new qtype_preg_description_tool($regex, $options)
+        'description' => new qtype_preg_description_tool($regex, $options),
+        'simplification' => new qtype_preg_simplification_tool($regex, $options)
     );
 
     // Fill the json array.

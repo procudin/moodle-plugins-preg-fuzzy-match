@@ -23,6 +23,8 @@ M.preg_authoring_tools_script = (function ($) {
 
     DESCRIPTION_KEY : 'description',
 
+    SIMPLIFICATION_KEY : 'simplification',
+
     STRINGS_KEY : 'regex_test',
 
     TREE_MAP_ID : '#qtype_preg_tree',
@@ -65,6 +67,7 @@ M.preg_authoring_tools_script = (function ($) {
         this.setup_parent_object();
     },
 
+    simplification_hints: function() { return $('#simplification_tool_hints > tbody > tr > td'); },
     tree_err : function () { return $('#tree_err'); },
     tree_img: function () { return $('#tree_img'); },
     graph_err: function () { return $('#graph_err'); },
@@ -261,6 +264,11 @@ M.preg_authoring_tools_script = (function ($) {
         self.regex_input.textareaHighlighter('updateMatches', []);
     },
 
+    simplification_hints_clicked : function (e) {
+        e.preventDefault();
+        $('#simplification_tool_hint_text').text(e.currentTarget.children[1].value);
+    },
+
     tree_node_clicked : function (e) {
         e.preventDefault();
 
@@ -387,15 +395,17 @@ M.preg_authoring_tools_script = (function ($) {
             t = json[self.TREE_KEY],
             g = json[self.GRAPH_KEY],
             d = json[self.DESCRIPTION_KEY],
+            si = json[self.SIMPLIFICATION_KEY],
             k = '' + regex + notation + exactmatch + usecase + treeorientation + displayas + indfirst + ',' + indlast;
 
         // Cache the content.
         self.cache[self.TREE_KEY][k] = t;
         self.cache[self.GRAPH_KEY][k] = g;
         self.cache[self.DESCRIPTION_KEY][k] = d;
+        //self.cache[self.SIMPLIFICATION_KEY][k] = si;
 
         // Display the content.
-        self.display_content(t, g, d, indfirst, indlast, indfirstorig, indlastorig);
+        self.display_content(t, g, d, si, indfirst, indlast, indfirstorig, indlastorig);
     },
 
     upd_strings_success : function (data, textStatus, jqXHR) {
@@ -432,7 +442,7 @@ M.preg_authoring_tools_script = (function ($) {
     },
 
     // Displays given images and description
-    display_content : function (t, g, d, indfirst, indlast, indfirstorig, indlastorig) {
+    display_content : function (t, g, d, si, indfirst, indlast, indfirstorig, indlastorig) {
         var scroll = $(window).scrollTop();
 
         self.invalidate_content();
@@ -520,6 +530,64 @@ M.preg_authoring_tools_script = (function ($) {
             });
         } else if (typeof g != 'undefined') {
             self.graph_err().html(g);
+        }
+
+        if (typeof si != 'undefined') {
+
+            var get_error_row = function(problem, solve) {
+                return  '<tr class=\"error\"  style=\"color: #222222;\">' +
+                    '<td>' +
+                    '<span>' + problem + '</span>' +
+                    '<input type=\"hidden\" value=\"' + solve + '\">' +
+                    '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-remove\"></i></button>' +
+                    '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-ok\"></i></button>' +
+                    '</td>' +
+                    '</tr>';
+            };
+
+            var get_tip_row = function(problem, solve) {
+                return  '<tr class=\"warning\"  style=\"font-weight: normal\">' +
+                    '<td>' +
+                    '<span>' + problem + '</span>' +
+                    '<input type=\"hidden\" value=\"' + solve + '\">' +
+                    '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-remove\"></i></button>' +
+                    '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-ok\"></i></button>' +
+                    '</td>' +
+                    '</tr>';
+            };
+
+            var get_equivalence_row = function(problem, solve) {
+                return  '<tr class=\"info\">' +
+                    '<td>' +
+                    '<span>' + problem + '</span>' +
+                    '<input type=\"hidden\" value=\"' + solve + '\">' +
+                    '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-remove\"></i></button>' +
+                    '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-ok\"></i></button>' +
+                    '</td>' +
+                    '</tr>';
+            };
+
+            // Set count of any hints
+            $('#simplification_tool_errors_count').text(si.errors.length);
+            $('#simplification_tool_tips_count').text(si.tips.length);
+            $('#simplification_tool_equivalences_count').text(si.equivalences.length);
+
+            // Set some hints to form
+            var hints_table = $('#simplification_tool_hints > tbody');
+            // Set errors
+            for (var i = 0; i < si.errors.length; ++i) {
+                hints_table.append(get_error_row(si.errors[i].problem, si.errors[i].solve));
+            }
+            // Set tips
+            for (var i = 0; i < si.tips.length; ++i) {
+                hints_table.append(get_tip_row(si.tips[i].problem, si.tips[i].solve));
+            }
+            // Set equivalences
+            for (var i = 0; i < si.equivalences.length; ++i) {
+                hints_table.append(get_equivalence_row(si.equivalences[i].problem, si.equivalences[i].solve));
+            }
+
+            self.simplification_hints().click(self.simplification_hints_clicked);
         }
 
         if (typeof d != 'undefined') {
