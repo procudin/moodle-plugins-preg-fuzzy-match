@@ -575,6 +575,7 @@ M.preg_authoring_tools_script = (function ($) {
             // Set some hints to form
             var hints_table = $('#simplification_tool_hints > tbody');
             hints_table.empty();
+            $('#simplification_tool_hint_text').empty();
             // Set errors
             for (var i = 0; i < si.errors.length; ++i) {
                 hints_table.append(get_error_row(si.errors[i].problem, si.errors[i].solve));
