@@ -78,33 +78,66 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     protected function get_errors_description() {
-        /*$errors = array();
-        if ($this->options->is_check_errors == true) {
-            //to do something
-        }
-        return $errors;*/
+        $errors = array();
+//        if ($this->options->is_check_errors == true) {
+//            //to do something
+//        }
+        return $errors;
 
-        return array(array('problem' => 'Описание ошибки', 'solve' => 'Подробное описание информации'));
+//        return array(array('problem' => 'Описание ошибки', 'solve' => 'Подробное описание информации'));
     }
 
     protected function get_tips_description() {
-        /*$tips = array();
-        if ($this->options->is_check_tips == true) {
-            //to do something
-        }
-        return $tips;*/
+        $tips = array();
+//        if ($this->options->is_check_tips == true) {
+//            //to do something
+//        }
+        return $tips;
 
-        return array(array('problem' => 'Описание совета', 'solve' => 'Подробное описание совета'),
-                     array('problem' => 'А вот тут ещё совет', 'solve' => 'И ещё описание совета'));
+//        return array(array('problem' => 'Описание совета', 'solve' => 'Подробное описание совета'),
+//                     array('problem' => 'А вот тут ещё совет', 'solve' => 'И ещё описание совета'));
     }
 
     protected function get_equivalences_description() {
-        /*$equivalences = array();
-        if ($this->options->is_check_equivalences == true) {
-            //to do something
-        }
-        return $equivalences;*/
+        $equivalences = array();
 
-        return array(array('problem' => 'Описание эквивалентной замены', 'solve' => 'Подробное описание эквивалентной замены'));
+        if ($this->options->is_check_equivalences == true) {
+            $result = $this->remove_grouping_node();
+            if ($result != array()) {
+                $equivalences[0] = array();
+                $equivalences[0] += $result;
+            }
+        }
+
+        return $equivalences;
+    }
+
+    protected function remove_grouping_node() {
+        $equivalences = array();
+
+        if ($this->check_is_remove_grouping_node()) {
+            $equivalences['problem'] = 'Пустая группировка "(?:)"';
+            $equivalences['solve'] = 'Пустые скобки не влияют на работу регулярного выражения, их можно удалить';
+        }
+
+        return $equivalences;
+    }
+
+    private function check_is_remove_grouping_node() {
+        return $this->delete_grouping_node($this->get_dst_root());
+    }
+
+    private function delete_grouping_node($node) {
+        if ($node->type == 'node_subexpr' && $node->subtype == 'grouping_node_subexpr') {
+            if ($node->operands[0]->type == 'leaf_meta' && $node->operands[0]->subtype == 'empty_leaf_meta') {
+                return true;
+            }
+        }
+        foreach($node->operands as $operand) {
+            if ($this->delete_grouping_node($operand)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
