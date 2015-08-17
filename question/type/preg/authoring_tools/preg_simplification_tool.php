@@ -102,20 +102,31 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $equivalences = array();
 
         if ($this->options->is_check_equivalences == true) {
-            $result = $this->remove_grouping_node();
+            $i = 0;
+            $result = $this->grouping_node();
             if ($result != array()) {
-                $equivalences[0] = array();
-                $equivalences[0] += $result;
+                $equivalences[$i] = array();
+                $equivalences[$i] += $result;
+                ++$i;
+            }
+
+            $result = $this->subpattern_node();
+            if ($result != array()) {
+                $equivalences[$i] = array();
+                $equivalences[$i] += $result;
+                ++$i;
             }
         }
 
         return $equivalences;
     }
 
-    protected function remove_grouping_node() {
+
+    /* The 2th rule */
+    protected function grouping_node() {
         $equivalences = array();
 
-        if ($this->check_is_remove_grouping_node()) {
+        if ($this->search_grouping_node($this->get_dst_root())) {
             $equivalences['problem'] = 'Пустая группировка "(?:)"';
             $equivalences['solve'] = 'Пустые скобки не влияют на работу регулярного выражения, их можно удалить';
         }
@@ -123,18 +134,53 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
-    private function check_is_remove_grouping_node() {
-        return $this->delete_grouping_node($this->get_dst_root());
-    }
-
-    private function delete_grouping_node($node) {
+    private function search_grouping_node($node) {
         if ($node->type == 'node_subexpr' && $node->subtype == 'grouping_node_subexpr') {
             if ($node->operands[0]->type == 'leaf_meta' && $node->operands[0]->subtype == 'empty_leaf_meta') {
                 return true;
             }
         }
         foreach($node->operands as $operand) {
-            if ($this->delete_grouping_node($operand)) {
+            if ($this->search_grouping_node($operand)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /* The 3th rule */
+    protected function subpattern_node() {
+        $equivalences = array();
+
+        if ($this->search_subpattern_node($this->get_dst_root())) {
+            $equivalences['problem'] = 'Пустая подмаска "()"';
+            $equivalences['solve'] = 'Пустые скобки не влияют на работу регулярного выражения, т.к. на них нет обратных ссылок или условных подмасок, их можно удалить';
+        }
+
+        return $equivalences;
+    }
+
+    private function search_subpattern_node($node) {
+        if ($node->type == 'node_subexpr' && $node->subtype == 'subexpr_node_subexpr') {
+            if ($node->operands[0]->type == 'leaf_meta' && $node->operands[0]->subtype == 'empty_leaf_meta') {
+                return !$this->check_backref_to_subexpr($this->get_dst_root(), $node->number);
+            }
+        }
+        foreach($node->operands as $operand) {
+            if ($this->search_subpattern_node($operand)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function check_backref_to_subexpr($node, $number) {
+        if ($node->type == 'leaf_backref' && $node->subtype == 'leaf_backref' && $node->number == $number) {
+            return true;
+        }
+        foreach($node->operands as $operand) {
+            if ($this->check_backref_to_subexpr($operand, $number)) {
                 return true;
             }
         }
