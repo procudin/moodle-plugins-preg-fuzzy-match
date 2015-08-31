@@ -75,10 +75,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Overloaded from qtype_preg_authoring_tool.
      */
     public function data_for_accepted_regex() {
-//        if ($this->options->problem_id != -2 && $this->options->problem_type != -2) {
-//            $this->optimization();
-//        }
-
         $data = array();
         $data['errors'] = $this->get_errors_description();
         $data['tips'] = $this->get_tips_description();
@@ -87,45 +83,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
-    //--- OPTIMIZATION ---
-    public function optimization() {
-        if ($this->options->problem_type == 2) {
-            return $this->optimize_2($this->get_dst_root());
-        } else if ($this->options->problem_type == 3) {
-            return $this->optimize_3();
-        }
-        return false;
-    }
-
-
-    // The 2th rule
-    protected function optimize_2($node) {
-//        print('1--------------');
-
-        if ($node->id == $this->options->problem_id) {
-            return true;
-        }
-
-        foreach($node->operands as $i => $operand) {
-
-            if ($this->optimize_2($operand)) {
-                // TODO: delete subtree
-//                var_dump($i);
-//                var_dump($node->operands);
-                array_splice($node->operands, $i, 1);
-//                var_dump($node->operands);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    // The 3th rule
-    protected function optimize_3() {
-        return true;
-    }
-
+    //--- CHECK ALL RULES ---
     protected function get_errors_description() {
         $errors = array();
 //        if ($this->options->is_check_errors == true) {
@@ -168,6 +126,44 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return $equivalences;
+    }
+
+
+
+    //--- OPTIMIZATION ---
+    public function optimization() {
+        if ($this->options->problem_type == 2) {
+            return $this->optimize_2($this->get_dst_root());
+        } else if ($this->options->problem_type == 3) {
+            return $this->optimize_3();
+        }
+        return false;
+    }
+
+
+    // The 2th rule
+    protected function optimize_2($node) {
+        return remove_subtree($node, $this->options->problem_id);
+    }
+
+    // The 3th rule
+    protected function optimize_3($node) {
+        return remove_subtree($node, $this->options->problem_id);
+    }
+
+    private function remove_subtree($node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            return true;
+        }
+
+        foreach($node->operands as $i => $operand) {
+            if ($this->remove_subtree($operand, $remove_node_id)) {
+                array_splice($node->operands, $i, 1);
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
