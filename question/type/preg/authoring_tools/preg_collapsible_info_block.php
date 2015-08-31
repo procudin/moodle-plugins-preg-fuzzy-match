@@ -90,11 +90,11 @@ class qtype_preg_collapsible_info_block extends MoodleQuickForm_textarea {
     public function toHtml() {
         global $PAGE;
 
-        return '<div class="accordion" id="healp_accordion" style="margin-top: -20px; overflow: hidden; position: relative; width: 80%; top: auto; padding-right: 7px;">
+        return '<div class="accordion" id="healp_accordion" style="overflow: hidden; position: relative; width: 80%; top: auto; padding-right: 7px;">
                   <div class="accordion-group">
                     <div class="accordion-heading">
 
-                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#healp_accordion" href="#healpAccordion" style="display:inline-block;">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#healp_accordion" href="#healpAccordion" style="display:inline-block;" id="simplification_tool_collapse_btn">
                         <strong>' . get_string('simplification_tool', 'qtype_preg') . '</strong>
                       </a>
 
@@ -114,8 +114,9 @@ class qtype_preg_collapsible_info_block extends MoodleQuickForm_textarea {
 
                         <div class="fitem">
                             <div class="felement" style="margin-left: 155px;">
-                                <p><span id="simplification_tool_hint_text">
-                                </span></p>
+                                <p><span id="simplification_tool_hint_text"></span></p>
+                                <input type="hidden" id="problem_id"/>
+                                <input type="hidden" id="problem_type"/>
                                 <button class="btn btn-primary" id="simplification_tool_apply_btn">' . get_string('simplification_tool_apply', 'qtype_preg') . '</button>
                                 <button class="btn btn-default" id="simplification_tool_cancel_btn">' . get_string('simplification_tool_cancel', 'qtype_preg') . '</button>
                             </div>

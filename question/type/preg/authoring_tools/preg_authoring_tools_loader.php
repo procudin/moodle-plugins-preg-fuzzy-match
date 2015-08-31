@@ -31,6 +31,8 @@ function qtype_preg_get_json_array() {
     $displayas = optional_param('displayas', '', PARAM_RAW);
     $foldcoords = optional_param('foldcoords', '', PARAM_RAW);
     $treeisfold = (bool)optional_param('treeisfold', '', PARAM_INT);
+    $problem_id = optional_param('problem_id', null, PARAM_INT);
+    $problem_type = optional_param('problem_type', null, PARAM_INT);
 
     // Array with authoring tools
     $options = new qtype_preg_authoring_tools_options();
@@ -57,6 +59,14 @@ function qtype_preg_get_json_array() {
     $stooloptions->engine = $engine;
     $stooloptions->notation = $notation;
     $stooloptions->exactmatch = $exactmatch;
+    $stooloptions->problem_id = $problem_id;
+    $stooloptions->problem_type = $problem_type;
+
+    if ($stooloptions->problem_id != -2 && $stooloptions->problem_type != -2) {
+        $simplified_regex = new qtype_preg_simplification_tool($regex, $stooloptions);
+        $simplified_regex->optimization();
+//        var_dump($simplified_regex->get_dst_root());
+    }
 
     $tools = array(
         'tree' => new qtype_preg_syntax_tree_tool($regex, $options),
