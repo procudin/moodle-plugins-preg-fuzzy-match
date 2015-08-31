@@ -14,9 +14,14 @@ class qtype_preg_simplification_tool_options extends qtype_preg_handling_options
     public $is_check_equivalences = true;
     public $is_check_errors = true;
     public $is_check_tips = true;
+    public $problem_id = -2;
+    public $problem_type = -2;
 }
 
 class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
+
+    private $problem_id = -2;
+    private $problem_type = -2;
 
     public function __construct($regex = null, $options = null) {
         parent::__construct($regex, $options);
@@ -70,11 +75,55 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Overloaded from qtype_preg_authoring_tool.
      */
     public function data_for_accepted_regex() {
+//        if ($this->options->problem_id != -2 && $this->options->problem_type != -2) {
+//            $this->optimization();
+//        }
+
         $data = array();
         $data['errors'] = $this->get_errors_description();
         $data['tips'] = $this->get_tips_description();
         $data['equivalences'] = $this->get_equivalences_description();
         return $data;
+    }
+
+
+    //--- OPTIMIZATION ---
+    public function optimization() {
+        if ($this->options->problem_type == 2) {
+            return $this->optimize_2($this->get_dst_root());
+        } else if ($this->options->problem_type == 3) {
+            return $this->optimize_3();
+        }
+        return false;
+    }
+
+
+    // The 2th rule
+    protected function optimize_2($node) {
+//        print('1--------------');
+
+        if ($node->id == $this->options->problem_id) {
+            return true;
+        }
+
+        foreach($node->operands as $i => $operand) {
+
+            if ($this->optimize_2($operand)) {
+                // TODO: delete subtree
+//                var_dump($i);
+//                var_dump($node->operands);
+                array_splice($node->operands, $i, 1);
+//                var_dump($node->operands);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // The 3th rule
+    protected function optimize_3() {
+        return true;
     }
 
     protected function get_errors_description() {
@@ -122,6 +171,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
+    //--- CHECK RULES ---
     /* The 2th rule */
     protected function grouping_node() {
         $equivalences = array();
@@ -129,14 +179,18 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($this->search_grouping_node($this->get_dst_root())) {
             $equivalences['problem'] = 'Пустая группировка "(?:)"';
             $equivalences['solve'] = 'Пустые скобки не влияют на работу регулярного выражения, их можно удалить';
+            $equivalences['problem_id'] = $this->problem_id;
+            $equivalences['problem_type'] = $this->problem_type;
         }
 
         return $equivalences;
     }
 
     private function search_grouping_node($node) {
-        if ($node->type == 'node_subexpr' && $node->subtype == 'grouping_node_subexpr') {
-            if ($node->operands[0]->type == 'leaf_meta' && $node->operands[0]->subtype == 'empty_leaf_meta') {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
+            if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                $this->problem_id = $node->id;
+                $this->problem_type = 2;
                 return true;
             }
         }
@@ -145,8 +199,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return true;
             }
         }
+        $this->problem_id = -2;
+        $this->problem_type = -2;
         return false;
     }
+
 
 
     /* The 3th rule */
@@ -156,15 +213,21 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($this->search_subpattern_node($this->get_dst_root())) {
             $equivalences['problem'] = 'Пустая подмаска "()"';
             $equivalences['solve'] = 'Пустые скобки не влияют на работу регулярного выражения, т.к. на них нет обратных ссылок или условных подмасок, их можно удалить';
+            $equivalences['problem_id'] = $this->problem_id;
+            $equivalences['problem_type'] = $this->problem_type;
         }
 
         return $equivalences;
     }
 
     private function search_subpattern_node($node) {
-        if ($node->type == 'node_subexpr' && $node->subtype == 'subexpr_node_subexpr') {
-            if ($node->operands[0]->type == 'leaf_meta' && $node->operands[0]->subtype == 'empty_leaf_meta') {
-                return !$this->check_backref_to_subexpr($this->get_dst_root(), $node->number);
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+            if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
+                    $this->problem_id = $node->id;
+                    $this->problem_type = 3;
+                    return true;
+                }
             }
         }
         foreach($node->operands as $operand) {
@@ -172,11 +235,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return true;
             }
         }
+        $this->problem_id = -2;
+        $this->problem_type = -2;
         return false;
     }
 
     private function check_backref_to_subexpr($node, $number) {
-        if ($node->type == 'leaf_backref' && $node->subtype == 'leaf_backref' && $node->number == $number) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_BACKREF && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $number) {
             return true;
         }
         foreach($node->operands as $operand) {
