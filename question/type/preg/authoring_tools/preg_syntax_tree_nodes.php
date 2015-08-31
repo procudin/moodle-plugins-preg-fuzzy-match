@@ -333,6 +333,10 @@ class qtype_preg_syntax_tree_leaf_charset extends qtype_preg_syntax_tree_leaf {
         return $ui->data;
     }
 
+    /**
+     * @return string
+     * @throws coding_exception
+     */
     public function tooltip() {
         $start = 0;
         $end = count($this->pregnode->userinscription);
