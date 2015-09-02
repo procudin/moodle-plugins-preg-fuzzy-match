@@ -1,0 +1,2661 @@
+<?php
+
+/**
+ * Unit tests for TFA equivalence tests.
+ *
+ * @package    qtype_preg
+ * @copyright  2012 Oleg Sychev, Volgograd State Technical University
+ * @author     Kamo Spertsian <spertsiankamo@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . '/question/type/poasquestion/stringstream/stringstream.php');
+require_once($CFG->dirroot . '/question/type/preg/preg_fa.php');
+require_once($CFG->dirroot . '/question/type/preg/preg_equivalence_subfunctions.php');
+
+class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
+
+    /**
+     * Generates pair of qtype_preg_fa_pair_of_groups with given parameters
+     */
+    function create_pair_of_groups($ffastates, $sfastates, $firstchar = 97, $lastchar = 97, $ffaendstates = array(), $sfaendstates = array(), $tags = array()) {
+        // Allocation
+        $ffa = new qtype_preg_fa();
+        $ffa->endstates = array();
+        $sfa = new qtype_preg_fa();
+        $sfa->endstates = array();
+        $pair = new qtype_preg_fa_pair_of_groups();
+        $pair->first = new qtype_preg_fa_group();
+        $pair->second = new qtype_preg_fa_group();
+        // Setting states
+        $ffa->statenumbers = $ffastates;
+        $ffa->endstates[0] = $ffaendstates;
+        $pair->first->set_states($ffastates);
+        $sfa->statenumbers = $sfastates;
+        $sfa->endstates[0] = $sfaendstates;
+        $pair->second->set_states($sfastates);
+        // Setting fas
+        $pair->first->set_fa($ffa);
+        $pair->second->set_fa($sfa);
+        // Setting tags
+        $pair->tags = $tags;
+        // Setting character
+        $pair->char = $firstchar;
+        $pair->first->set_char($firstchar);
+        $pair->second->set_char($firstchar);
+
+        return $pair;
+    }
+    /**
+     * Generates pair of qtype_preg_fa_pair_of_groups with initial states and given fas
+     */
+    function create_initial_pair_of_groups($ffa, $sfa) {
+        $pair = new qtype_preg_fa_pair_of_groups();
+        $pair->first = new qtype_preg_fa_group($ffa);
+        $pair->second = new qtype_preg_fa_group($sfa);
+        $pair->first->add_state(0);
+        $pair->second->add_state(0);
+        return $pair;
+    }
+    /**
+     * Compares two arrays of mismatches
+     */
+    function compare_mismatches($resmm, $expmm) {
+        $res = count($resmm) == count($expmm);
+        for ($i = 0; $i < count($resmm) && $res; $i++) {
+            $res = $resmm[$i]->type == $expmm[$i]->type
+                && $resmm[$i]->character == $expmm[$i]->character
+                && $resmm[$i]->firstfaindex == $expmm[$i]->firstfaindex
+                && $resmm[$i]->secondfaindex == $expmm[$i]->secondfaindex
+                && $resmm[$i]->tags == $expmm[$i]->tags;
+        }
+
+        return $res;
+    }
+    /**
+     * Compares two arrays with pairs of groups
+     */
+    function compare_pairs($pairs, $exppairs) {
+        $ans = count($pairs) == count($exppairs);
+        for ($i = 0; $i < count($pairs) && $ans; $i++) {
+            $ans = $pairs[$i]->compare($exppairs[$i]);
+        }
+        return $ans;
+    }
+/*
+    // Tests for automaton equivalence check function
+    public function test_equal_minimal_automata() {
+        $firstfadescription = 'digraph {
+                          0;
+                          1;
+                          0->1[label=<<B>o: [ab] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          1;
+                          0->1[label=<<B>o: [a] c:</B>>];
+                          0->1[label=<<B>o: [b] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_same_automata() {
+        $fadescription = 'digraph {
+                      0;
+                      1;
+                      0->1[label=<<B>o: [ab] c:</B>>];
+                      }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($fadescription);
+        $secondfa = qtype_preg_fa::read_fa($fadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equal_one_and_some_way_automata() {
+        $firstfadescription = 'digraph {
+                          0;
+                          1;
+                          0->1[label=<<B>o: [a-f] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          1;
+                          0->1[label=<<B>o: [ab] c:</B>>];
+                          0->1[label=<<B>o: [cf] c:</B>>];
+                          0->1[label=<<B>o: [ed] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equal_some_and_some_way_automata() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->4[label=<<B>o: [a-c] c:</B>>];
+                          1->3[label=<<B>o: [d-f] c:</B>>];
+                          4->2[label=<<B>o: [w] c:</B>>];
+                          3->2[label=<<B>o: [w] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          2;
+                          0->1[label=<<B>o: [ab] c:</B>>];
+                          0->1[label=<<B>o: [cf] c:</B>>];
+                          0->1[label=<<B>o: [ed] c:</B>>];
+                          1->2[label=<<B>o: [w] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription); // 3 2 4 1
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription); // 1 2 0
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equal_long_automata() {
+        $firstfadescription = 'digraph {
+                          1;
+                          15;
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          2->4[label=<<B>o: [q] c:</B>>];
+                          4->7[label=<<B>o: [u] c:</B>>];
+                          7->6[label=<<B>o: [a] c:</B>>];
+                          6->15[label=<<B>o: [l] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          6;
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          2->3[label=<<B>o: [q] c:</B>>];
+                          3->4[label=<<B>o: [u] c:</B>>];
+                          4->5[label=<<B>o: [a] c:</B>>];
+                          5->6[label=<<B>o: [l] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription); // 6 15 7 4 2 1
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription); // 5 6 4 3 2 1
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equal_automata_with_loop() {
+        $firstfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          2->3[label=<<B>o: [q] c:</B>>];
+                          2->1[label=<<B>o: [q] c:</B>>];
+                          3->7[label=<<B>o: [e] c:</B>>];
+                          7->1[label=<<B>o: [q] c:</B>>];
+                          1->4[label=<<B>o:1, [a] c:</B>>];
+                          4->5[label=<<B>o: [l] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          6;
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          2->1[label=<<B>o: [q] c:</B>>];
+                          1->3[label=<<B>o:1, [a] c:</B>>];
+                          3->6[label=<<B>o: [l] c:2,</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        //$this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_single_tag_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o:1, [e] c:</B>>];
+                          2->3[label=<<B>o: [q] c:2,</B>>];
+                          2->3[label=<<B>o: [g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          30;
+                          1->20[label=<<B>o:1, [e] c:</B>>];
+                          20->30[label=<<B>o: [qg] c:2,</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 103, 0, 30, array(2))); // g/2
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_automaton_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [e/1] c:</B>>];
+                          2->3[label=<<B>o: [q/2] c:</B>>];
+                          2->3[label=<<B>o: [g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          30;
+                          1->20[label=<<B>o: [e/1] c:</B>>];
+                          20->30[label=<<B>o: [q/2] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 103, 3, 0)); // g
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_both_automaton_and_tag_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o:1, [e] c:</B>>];
+                          2->3[label=<<B>o: [qg] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          30;
+                          1->20[label=<<B>o:1, [e] c:</B>>];
+                          20->30[label=<<B>o: [q] c:2,</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 103, 3, 0)); // g
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 103, 3, 0, array(2))); // g/2
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_automaton_mismatches_overlimit() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->4[label=<<B>o: [b] c:</B>>];
+                          1->5[label=<<B>o: [c] c:</B>>];
+                          2->3[label=<<B>o: [d] c:</B>>];
+                          5->4[label=<<B>o: [e] c:</B>>];
+                          4->3[label=<<B>o: [f] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [equ] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 2, 0)); // a
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 4, 0)); // b
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 5, 0)); // c
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 101, 0, 2)); // e
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 113, 0, 2)); // q
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_tag_mismatches_overlimit() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          1->4[label=<<B>o:3, [b] c:</B>>];
+                          1->5[label=<<B>o:5, [c] c:</B>>];
+                          1->6[label=<<B>o: [e] c:6,</B>>];
+                          1->7[label=<<B>o: [d] c:2,</B>>];
+                          1->3[label=<<B>o: [f] c:4,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          30;
+                          1->20[label=<<B>o: [a] c:</B>>];
+                          1->40[label=<<B>o: [b] c:</B>>];
+                          1->50[label=<<B>o: [c] c:</B>>];
+                          1->60[label=<<B>o: [d] c:</B>>];
+                          1->70[label=<<B>o: [f] c:</B>>];
+                          1->30[label=<<B>o: [e] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 97, 2, 0, array(1))); // a/1
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 98, 4, 0, array(3))); // b/3
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 99, 5, 0, array(5))); // c/5
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 100, 7, 0, array(2))); // d/2
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 101, 6, 0, array(6))); // e/6
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_loop_and_line_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->1[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->4[label=<<B>o: [a] c:</B>>];
+                          4->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 1, 0)); // a
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_loop_start_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->1[label=<<B>o: [c] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [d] c:</B>>];
+                          2->1[label=<<B>o: [c] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 2, 0)); // a
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 100, 0, 2)); // d
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_in_loop_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          2->4[label=<<B>o: [c] c:</B>>];
+                          4->1[label=<<B>o: [d] c:2,</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->4[label=<<B>o:1, [a] c:</B>>];
+                          4->8[label=<<B>o: [b] c:</B>>];
+                          8->1[label=<<B>o: [d] c:2,</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 0, 8)); // b
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 4, 0)); // c
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_after_loop_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          2->4[label=<<B>o: [b] c:</B>>];
+                          4->1[label=<<B>o: [d] c:2,</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->4[label=<<B>o:1, [a] c:</B>>];
+                          4->8[label=<<B>o: [b] c:</B>>];
+                          8->1[label=<<B>o: [d] c:2,</B>>];
+                          1->3[label=<<B>o: [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 0, 3)); // c
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_char_loop_count_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->1[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->4[label=<<B>o: [a] c:</B>>];
+                          4->1[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // c
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_equal_automata_with_pre_and_post_loop_transitions() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->1[label=<<B>o: [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->3[label=<<B>o: [a] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->2[label=<<B>o: [a] c:</B>>];
+                          2->3[label=<<B>o: [a] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equal_automata_with_initial_and_final_states_loops() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->1[label=<<B>o: [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->3[label=<<B>o: [a] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->3[label=<<B>o: [a] c:</B>>];
+                          3->3[label=<<B>o: [a] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_loop_branching_mismatch() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->4[label=<<B>o: [b] c:</B>>];
+                          2->5[label=<<B>o: [c] c:</B>>];
+                          4->1[label=<<B>o: [d] c:</B>>];
+                          5->1[label=<<B>o: [e] c:</B>>];
+                          1->3[label=<<B>o: [a] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          2->4[label=<<B>o: [b] c:</B>>];
+                          2->5[label=<<B>o: [c] c:</B>>];
+                          4->1[label=<<B>o: [d] c:</B>>];
+                          5->1[label=<<B>o: [f] c:</B>>];
+                          1->3[label=<<B>o: [a] c:</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 101, 1, 0)); // e
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 102, 0, 1)); // f
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_equal_automata_with_transitions_from_final_state() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->3[label=<<B>o: [a] c:</B>>];
+                          3->4[label=<<B>o: [qr] c:</B>>];
+                          4->3[label=<<B>o: [t] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->3[label=<<B>o: [a] c:</B>>];
+                          3->4[label=<<B>o: [q] c:</B>>];
+                          3->5[label=<<B>o: [r] c:</B>>];
+                          4->3[label=<<B>o: [t] c:</B>>];
+                          5->3[label=<<B>o: [t] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equal_nfa_and_dfa() {
+        $firstfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [a-f] c:</B>>];
+                          1->3[label=<<B>o: [a-t] c:</B>>];
+                          2->5[label=<<B>o: [k-p] c:</B>>];
+                          2->4[label=<<B>o: [k-s] c:</B>>];
+                          3->4[label=<<B>o: [0-9] c:</B>>];
+                          4->5[label=<<B>o: [op] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;7;
+                          1->2[label=<<B>o: [a-f] c:</B>>];
+                          1->3[label=<<B>o: [g-t] c:</B>>];
+                          2->4[label=<<B>o: [k-s] c:</B>>];
+                          2->5[label=<<B>o: [k-p] c:</B>>];
+                          2->6[label=<<B>o: [0-9] c:</B>>];
+                          3->6[label=<<B>o: [0-9] c:</B>>];
+                          6->7[label=<<B>o: [op] c:</B>>];
+                          4->7[label=<<B>o: [op] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_character_but_not_subpattern_mismatch_in_automaton() {
+        $firstfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o: [c] c:</B>>];
+                          1->2[label=<<B>o:3, [c] c:</B>>];
+                          2->3[label=<<B>o: [d] c:4,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          3;
+                          1->2[label=<<B>o:3, [c] c:</B>>];
+                          2->3[label=<<B>o: [d] c:4,</B>>];
+                          }';
+        $mismatches = array();
+        $expmismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER_BUT_NOT_SUBPATTERN, 99, 2, 0)); // c
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_equiv_dfas() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                0->2[label=<<B>o: [h-m05-8] c:</B>>];
+                                1->3[label=<<B>o: [0-9a-h] c:</B>>];
+                                2->3[label=<<B>o: [0-9a-h] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-dh-m0-35-8] c:</B>>];
+                                1->3[label=<<B>o: [a-h0-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equiv_dfas_with_direct_loop() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                0->2[label=<<B>o: [h-m05-8] c:</B>>];
+                                1->2[label=<<B>o: [z] c:</B>>];
+                                2->1[label=<<B>o: [z] c:</B>>];
+                                1->3[label=<<B>o: [0-9a-h] c:</B>>];
+                                2->3[label=<<B>o: [0-9a-h] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-dh-m0-35-8] c:</B>>];
+                                1->1[label=<<B>o: [z] c:</B>>];
+                                1->3[label=<<B>o: [a-h0-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equiv_dfas_with_indirect_loop() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                0->2[label=<<B>o: [h-m05-8] c:</B>>];
+                                1->3[label=<<B>o: [0-9a-h] c:</B>>];
+                                2->3[label=<<B>o: [0-9a-h] c:</B>>];
+                                3->0[label=<<B>o: [z] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-dh-m0-35-8] c:</B>>];
+                                1->3[label=<<B>o: [a-h0-9] c:</B>>];
+                                3->0[label=<<B>o: [z] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equiv_dfa_and_nfa_without_empty_transition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->12[label=<<B>o: [a-h] c:</B>>];
+                                0->2[label=<<B>o: [i-z] c:</B>>];
+                                12->2[label=<<B>o: [e-s] c:</B>>];
+                                12->3[label=<<B>o: [a-d0-9] c:</B>>];
+                                2->3[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-h] c:</B>>];
+                                0->2[label=<<B>o: [a-z] c:</B>>];
+                                1->2[label=<<B>o: [e-s] c:</B>>];
+                                1->3[label=<<B>o: [a-d] c:</B>>];
+                                2->3[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_equiv_dfa_and_nfa_with_direct_loop() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [c-h] c:</B>>];
+                                0->2[label=<<B>o: [a-z] c:</B>>];
+                                1->3[label=<<B>o: [c-h] c:</B>>];
+                                2->2[label=<<B>o: [0-5] c:</B>>];
+                                2->3[label=<<B>o: [3-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;23;
+                                0->2[label=<<B>o: [abi-z] c:</B>>];
+                                0->12[label=<<B>o: [c-h] c:</B>>];
+                                2->2[label=<<B>o: [0-2] c:</B>>];
+                                2->23[label=<<B>o: [3-5] c:</B>>];
+                                2->3[label=<<B>o: [6-9] c:</B>>];
+                                12->2[label=<<B>o: [0-2] c:</B>>];
+                                12->23[label=<<B>o: [3-5] c:</B>>];
+                                12->3[label=<<B>o: [6-9c-h] c:</B>>];
+                                23->23[label=<<B>o: [3-5] c:</B>>];
+                                23->2[label=<<B>o: [0-2] c:</B>>];
+                                23->3[label=<<B>o: [6-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfas_with_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                0->2[label=<<B>o: [h-m05-8] c:</B>>];
+                                1->3[label=<<B>o: [0-9] c:</B>>];
+                                2->3[label=<<B>o: [a-h] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                0->2[label=<<B>o: [h-m0] c:</B>>];
+                                0->3[label=<<B>o: [5-8] c:</B>>];
+                                1->3[label=<<B>o: [0-9] c:</B>>];
+                                2->3[label=<<B>o: [a-h] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfas_with_difftransition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                0->2[label=<<B>o: [h-m05-8] c:</B>>];
+                                1->3[label=<<B>o: [0-9] c:</B>>];
+                                2->3[label=<<B>o: [a-h] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                0->2[label=<<B>o: [h-m0] c:</B>>];
+                                1->3[label=<<B>o: [0-9] c:</B>>];
+                                2->3[label=<<B>o: [a-h] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfas_with_direct_loop_and_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                1->3[label=<<B>o: [a-h0-9] c:</B>>];
+                                1->1[label=<<B>o: [z] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                2;4;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                1->2[label=<<B>o: [a-h0-9] c:</B>>];
+                                1->3[label=<<B>o: [z] c:</B>>];
+                                3->4[label=<<B>o: [z] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfas_with_direct_loop_and_difftransition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                1->3[label=<<B>o: [a-h0-9] c:</B>>];
+                                1->1[label=<<B>o: [z] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-d1-3] c:</B>>];
+                                1->3[label=<<B>o: [a-h0-9] c:</B>>];
+                                1->2[label=<<B>o: [z] c:</B>>];
+                                2->4[label=<<B>o: [z] c:</B>>];
+                                4->2[label=<<B>o: [z] c:</B>>];
+                                2->3[label=<<B>o: [a-h0-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfas_with_indirect_loop_and_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                4;
+                                0->1[label=<<B>o: [a-d] c:</B>>];
+                                1->2[label=<<B>o: [1-3] c:</B>>];
+                                1->3[label=<<B>o: [h-m] c:</B>>];
+                                2->0[label=<<B>o: [a-h] c:</B>>];
+                                2->4[label=<<B>o: [i-n] c:</B>>];
+                                3->4[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                4;
+                                0->1[label=<<B>o: [a-d] c:</B>>];
+                                1->2[label=<<B>o: [1-3] c:</B>>];
+                                1->3[label=<<B>o: [h-m] c:</B>>];
+                                2->0[label=<<B>o: [i-n] c:</B>>];
+                                2->4[label=<<B>o: [a-h] c:</B>>];
+                                3->4[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfas_with_indirect_loop_and_difftransition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                4;
+                                0->1[label=<<B>o: [a-d] c:</B>>];
+                                1->2[label=<<B>o: [1-3] c:</B>>];
+                                1->3[label=<<B>o: [h-m] c:</B>>];
+                                2->4[label=<<B>o: [a-h] c:</B>>];
+                                3->4[label=<<B>o: [0-9] c:</B>>];
+                                4->0[label=<<B>o: [i-n] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                4;
+                                0->1[label=<<B>o: [a-d] c:</B>>];
+                                1->2[label=<<B>o: [1-3] c:</B>>];
+                                1->3[label=<<B>o: [h-m] c:</B>>];
+                                2->4[label=<<B>o: [a-h] c:</B>>];
+                                3->4[label=<<B>o: [0-9] c:</B>>];
+                                4->1[label=<<B>o: [i-n] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfa_and_nfa_with_direct_loop_and_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                2;3;
+                                0->1[label=<<B>o: [c-h] c:</B>>];
+                                1->1[label=<<B>o: [xz] c:</B>>];
+                                1->2[label=<<B>o: [xz] c:</B>>];
+                                1->3[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                2;3;
+                                0->1[label=<<B>o: [c-h] c:</B>>];
+                                1->1[label=<<B>o: [xz] c:</B>>];
+                                1->2[label=<<B>o: [5-9] c:</B>>];
+                                1->3[label=<<B>o: [0-4] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfa_and_nfa_with_direct_loop_and_difftransition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->12[label=<<B>o: [a-z] c:</B>>];
+                                12->3[label=<<B>o: [c-h3-9] c:</B>>];
+                                12->4[label=<<B>o: [0-2] c:</B>>];
+                                4->3[label=<<B>o: [c-h3-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [c-h] c:</B>>];
+                                0->2[label=<<B>o: [a-z] c:</B>>];
+                                1->3[label=<<B>o: [c-h] c:</B>>];
+                                2->2[label=<<B>o: [0-5] c:</B>>];
+                                2->3[label=<<B>o: [3-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfa_and_nfa_with_indirect_loop_and_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->12[label=<<B>o: [c-h] c:</B>>];
+                                0->2[label=<<B>o: [abi-z] c:</B>>];
+                                12->3[label=<<B>o: [c-h3-9] c:</B>>];
+                                2->0[label=<<B>o: [3-9] c:</B>>];
+                                3->0[label=<<B>o: [k-o] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [c-h] c:</B>>];
+                                0->2[label=<<B>o: [a-z] c:</B>>];
+                                1->3[label=<<B>o: [c-h] c:</B>>];
+                                2->3[label=<<B>o: [3-9] c:</B>>];
+                                3->0[label=<<B>o: [k-o] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_dfa_and_nfa_with_indirect_loop_and_difftransition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                5;
+                                0->1[label=<<B>o: [0-9] c:</B>>];
+                                0->4[label=<<B>o: [abix1-4] c:</B>>];
+                                4->1[label=<<B>o: [kln] c:</B>>];
+                                1->5[label=<<B>o: [09] c:</B>>];
+                                1->2[label=<<B>o: [a-h] c:</B>>];
+                                2->3[label=<<B>o: [i-n0-5] c:</B>>];
+                                3->1[label=<<B>o: [zxkt] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                5;
+                                0->1[label=<<B>o: [05-9] c:</B>>];
+                                0->4[label=<<B>o: [abix] c:</B>>];
+                                0->14[label=<<B>o: [1-4] c:</B>>];
+                                4->1[label=<<B>o: [kln] c:</B>>];
+                                14->1[label=<<B>o: [kln] c:</B>>];
+                                14->5[label=<<B>o: [09] c:</B>>];
+                                1->2[label=<<B>o: [a-h] c:</B>>];
+                                2->3[label=<<B>o: [i-n0-5] c:</B>>];
+                                3->14[label=<<B>o: [zxkt] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_nfas_with_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-z] c:</B>>];
+                                0->2[label=<<B>o: [a-h] c:</B>>];
+                                1->2[label=<<B>o: [a-s] c:</B>>];
+                                1->3[label=<<B>o: [a-d] c:</B>>];
+                                2->3[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-z] c:</B>>];
+                                0->2[label=<<B>o: [a-h] c:</B>>];
+                                1->2[label=<<B>o: [a-s] c:</B>>];
+                                1->3[label=<<B>o: [a-s] c:</B>>];
+                                2->3[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_nfas_with_difftransition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-z] c:</B>>];
+                                0->2[label=<<B>o: [a-h] c:</B>>];
+                                1->2[label=<<B>o: [a-s] c:</B>>];
+                                1->3[label=<<B>o: [a-d] c:</B>>];
+                                2->3[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [a-z] c:</B>>];
+                                0->2[label=<<B>o: [a-h] c:</B>>];
+                                1->2[label=<<B>o: [g-s] c:</B>>];
+                                1->3[label=<<B>o: [a-d] c:</B>>];
+                                2->3[label=<<B>o: [0-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_nfas_with_direct_loop_and_difftransition() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [c-h] c:</B>>];
+                                0->2[label=<<B>o: [a-z] c:</B>>];
+                                1->3[label=<<B>o: [c-h] c:</B>>];
+                                2->2[label=<<B>o: [0-5] c:</B>>];
+                                2->3[label=<<B>o: [3-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [c-h] c:</B>>];
+                                0->2[label=<<B>o: [a-z] c:</B>>];
+                                1->3[label=<<B>o: [c-h] c:</B>>];
+                                2->4[label=<<B>o: [0-5] c:</B>>];
+                                4->2[label=<<B>o: [0-5] c:</B>>];
+                                2->3[label=<<B>o: [3-9] c:</B>>];
+                                }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_nfas_with_direct_loop_and_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [0-5a-h] c:</B>>];
+                                0->2[label=<<B>o: [3-8c-z] c:</B>>];
+                                2->2[label=<<B>o: [z] c:</B>>];
+                                2->3[label=<<B>o: [a-y] c:</B>>];
+                                1->3[label=<<B>o: [3-9xy] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                3;
+                                0->1[label=<<B>o: [0-5a-h] c:</B>>];
+                                0->2[label=<<B>o: [3-8c-z] c:</B>>];
+                                2->2[label=<<B>o: [z] c:</B>>];
+                                2->3[label=<<B>o: [a-z] c:</B>>];
+                                1->3[label=<<B>o: [3-9xy] c:</B>>];
+                                }';
+
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    public function test_not_equiv_nfas_with_indirect_loop_and_early_endstate() {
+        $firstfadescription = 'digraph {
+                                0;
+                                6;
+                                0->1[label=<<B>o: [0-5a-h] c:</B>>];
+                                1->2[label=<<B>o: [3-8c-z] c:</B>>];
+                                1->6[label=<<B>o: [c-z] c:</B>>];
+                                1->4[label=<<B>o: [1-7] c:</B>>];
+                                2->3[label=<<B>o: [abkl] c:</B>>];
+                                4->5[label=<<B>o: [hklo] c:</B>>];
+                                3->1[label=<<B>o: [yz] c:</B>>];
+                                5->1[label=<<B>o: [1-9] c:</B>>];
+                                }';
+        $secondfadescription = 'digraph {
+                                0;
+                                6;
+                                0->1[label=<<B>o: [0-5a-h] c:</B>>];
+                                1->2[label=<<B>o: [3-8c-z] c:</B>>];
+                                1->6[label=<<B>o: [h-z] c:</B>>];
+                                1->4[label=<<B>o: [1-7] c:</B>>];
+                                2->3[label=<<B>o: [abkl] c:</B>>];
+                                4->5[label=<<B>o: [hklo] c:</B>>];
+                                3->1[label=<<B>o: [yz] c:</B>>];
+                                5->1[label=<<B>o: [1-9] c:</B>>];
+                                }';
+
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+
+    // Tests for function compare_current_transition_tags_array
+    /*public function test_noncrossed_with_initialized_min() {
+        $tags = array(3, 5);
+        $curtags = array(2, 5);
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 1);
+        $this->assertTrue($curtags[0] == 2);
+    }
+    public function test_noncrossed_with_noninitialized_min() {
+        $tags = array(1, 3, 5);
+        $curtags = array(2, 5);
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 1);
+        $this->assertTrue($curtags[0] == 1);
+    }
+    public function test_full_same_with_same_sizes() {
+        $tags = array(1, 3, 5);
+        $curtags = array(1, 3, 5);
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == count($tags));
+        $this->assertTrue($curtags == $tags);
+    }
+    public function test_full_same_initialized_size_smaller() {
+        $tags = array(1, 3, 5);
+        $curtags = array(1, 3);
+        $exptags = array(1, 3);
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 2);
+        $this->assertTrue($curtags == $exptags);
+    }
+    public function test_full_same_initialized_size_bigger() {
+        $tags = array(1, 3);
+        $curtags = array(1, 3, 5);
+        $exptags = array(1, 3);
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 2);
+        $this->assertTrue($curtags == $exptags);
+    }
+    public function test_part_same() {
+        $tags = array(1, 3, 4);
+        $curtags = array(1, 3, 5);
+        $exptags = array(1, 3);
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 2);
+        $this->assertTrue($curtags == $exptags);
+    }
+    public function test_empty_comparing_sequence() {
+        $tags = array();
+        $curtags = array(1, 3, 5);
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 0);
+    }
+    public function test_empty_initialized_sequence() {
+        $tags = array(1, 3, 4);
+        $curtags = array();
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 0);
+    }
+    public function test_both_empty_sequence() {
+        $tags = array();
+        $curtags = array();
+        compare_current_transition_tags_array($tags, $curtags);
+        $this->assertTrue(count($curtags) == 0);
+    }
+
+    // Tests for function compare_tag_sequences
+    public function test_comparing_sequence_is_bigger_and_contains_all_tags() {
+        $tags = array(1, 3, 5);
+        $curtags = array(1, 3);
+        $this->assertTrue(compare_tag_sequences($tags, $curtags));
+    }
+    public function test_comparing_single_tag() {
+        $tags = array(1, 3, 5);
+        $curtags = array(1);
+        $this->assertTrue(compare_tag_sequences($tags, $curtags));
+    }
+    public function test_comparing_same_arrays() {
+        $tags = array(1, 3, 5);
+        $curtags = array(1, 3, 5);
+        $this->assertTrue(compare_tag_sequences($tags, $curtags));
+    }
+    public function test_comparing_same_arrays_with_single_tag() {
+        $tags = array(1);
+        $curtags = array(1);
+        $this->assertTrue(compare_tag_sequences($tags, $curtags));
+    }
+    public function test_comparing_arrays_with_single_mismatch() {
+        $tags = array(1, 3, 5);
+        $curtags = array(1, 2);
+        $this->assertFalse(compare_tag_sequences($tags, $curtags));
+    }
+    public function test_comparing_full_different_arrays() {
+        $tags = array(2, 4);
+        $curtags = array(1, 3);
+        $this->assertFalse(compare_tag_sequences($tags, $curtags));
+    }
+    public function test_comparing_array_is_smaller() {
+        $tags = array(1, 3);
+        $curtags = array(1, 3, 5);
+        $this->assertFalse(compare_tag_sequences($tags, $curtags));
+    }
+
+    // Tests for function compare_groups
+    public function test_equal_groups_with_no_final_state() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(1), array(4, 8))));
+        $groups['a'][0]->first->set_states(array(0));
+        $groups['a'][0]->second->set_states(array(0, 1));
+        $mm = array();
+        $this->assertTrue(compare_groups($groups, 'a', $mm));
+        $this->assertTrue(count($mm) == 0);
+    }
+    public function test_equal_groups_with_final_states() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(1), array(2, 4), array(1), array(4))));
+        $groups['a'][0]->first->set_states(array(0));
+        $groups['a'][0]->second->set_states(array(0, 1));
+        $mm = array();
+        $this->assertTrue(compare_groups($groups, 'a', $mm));
+        $this->assertTrue(count($mm) == 0);
+    }
+    public function test_equal_groups_with_tags() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(1), array(4), array(1), array(4), array(1, 3))));
+        $groups['a'][0]->first->set_states(array(0));
+        $groups['a'][0]->second->set_states(array(0));
+        $mm = array();
+        $this->assertTrue(compare_groups($groups, 'a', $mm));
+        $this->assertTrue(count($mm) == 0);
+    }
+    public function test_character_mismatch_with_empty_first_group() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(), array(4))));
+        $groups['a'][0]->first->set_states(array());
+        $groups['a'][0]->second->set_states(array(0));
+        $mm = array();
+        $expmm = array(new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 'a', 0, 4));
+        $this->assertFalse(compare_groups($groups, 'a', $mm));
+        $this->assertTrue($this->compare_mismatches($mm, $expmm));
+    }
+    public function test_character_mismatch_with_empty_second_group() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(1, 2), array())));
+        $groups['a'][0]->first->set_states(array(0, 1));
+        $groups['a'][0]->second->set_states(array());
+        $mm = array();
+        $expmm = array(new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 'a', 1, 0));
+        $this->assertFalse(compare_groups($groups, 'a', $mm));
+        $this->assertTrue($this->compare_mismatches($mm, $expmm));
+    }
+    public function test_final_state_mismatch_with_only_first_group_final_state() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(1, 2), array(4), array(0))));
+        $groups['a'][0]->first->set_states(array(0, 1));
+        $groups['a'][0]->second->set_states(array(0));
+        $mm = array();
+        $expmm = array(new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::FINAL_STATE, 'a', 1, 0));
+        $this->assertFalse(compare_groups($groups, 'a', $mm));
+        $this->assertTrue($this->compare_mismatches($mm, $expmm));
+    }
+    public function test_final_state_mismatch_with_only_second_group_final_state() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(1, 2), array(4), array(), array(0))));
+        $groups['a'][0]->first->set_states(array(0, 1));
+        $groups['a'][0]->second->set_states(array(0));
+        $mm = array();
+        $expmm = array(new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::FINAL_STATE, 'a', 0, 4));
+        $this->assertFalse(compare_groups($groups, 'a', $mm));
+        $this->assertTrue($this->compare_mismatches($mm, $expmm));
+    }
+    public function test_subpattern_mismatch_with_empty_first_group() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(), array(4, 6), array(), array(), array(1, 3))));
+        $groups['a'][0]->first->set_states(array());
+        $groups['a'][0]->second->set_states(array(0, 1));
+        $mm = array();
+        $expmm = array(new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 'a', 0, 4),
+                       new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 'a', 0, 4, array(1, 3)));
+        $this->assertFalse(compare_groups($groups, 'a', $mm));
+        $this->assertTrue($this->compare_mismatches($mm, $expmm));
+    }
+    public function test_subpattern_mismatch_with_empty_second_group() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(1), array(), array(), array(), array(1, 3))));
+        $groups['a'][0]->first->set_states(array(0));
+        $groups['a'][0]->second->set_states(array());
+        $mm = array();
+        $expmm = array(new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 'a', 1, 0),
+                       new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 'a', 1, 0, array(1, 3)));
+        $this->assertFalse(compare_groups($groups, 'a', $mm));
+        $this->assertTrue($this->compare_mismatches($mm, $expmm));
+    }
+    public function test_character_but_not_subpattern_mismatch() {
+        $groups = array('a' => array($this->create_pair_of_groups(array(3), array()),
+                                     $this->create_pair_of_groups(array(3), array(3), array(), array(), array(3))));
+        $groups['a'][0]->first->set_states(array(0));
+        $groups['a'][0]->second->set_states(array());
+        $groups['a'][1]->first->set_states(array(0));
+        $groups['a'][1]->second->set_states(array(0));
+        $mm = array();
+        $expmm = array(new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER_BUT_NOT_SUBPATTERN, 'a', 3, 0));
+        $this->assertFalse(compare_groups($groups, 'a', $mm));
+        $this->assertTrue($this->compare_mismatches($mm, $expmm));
+    }
+
+    // Tests for function divide_crossed_intervals
+    public function test_non_crossed_groups() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o:1, [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(), array(3), array(), array(), array(1), 99), // c
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(), 101)); // e
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_adjoining_intervals_in_one_group() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(), array(3), array(), array(), array(), 98), // b
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(), 101)); // e
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_adjoining_intervals_between_groups() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [d] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o: [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(), array(3), array(), array(), array(), 99), // c
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(), 100)); // d
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_adjoining_intervals_between_groups_with_tags() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [c] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o:1, [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(), array(3), array(), array(), array(1), 99), // c/1
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(2), 99)); // c/2
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_crossed_intervals_in_one_group() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [d] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a-c] c:</B>>];
+                          1->3[label=<<B>o: [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(), array(2, 3), array(), array(), array(), 99), // c
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(), 100)); // d
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_crossed_intervals_between_groups() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [cd] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o: [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(2), array(3), array(), array(), array(), 99), // c
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(), 100)); // d
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_crossed_intervals_between_groups_with_tags() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o:1,3,5, [c] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o:1,3, [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(2), array(3), array(), array(), array(1, 3), 99), // c/1,3
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(5), 99)); // c/5
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_crossed_intervals_with_single_tag() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o:3, [c] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o:3, [c] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(2), array(3), array(), array(), array(3), 99)); // c/3
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_crossed_intervals_with_some_tags() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o:1,3,5, [c] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [c] c:5,</B>>];
+                          1->3[label=<<B>o: [c] c:1,3,</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(2), array(3), array(), array(), array(1, 3), 99), // c/1,3
+                          $this->create_pair_of_groups(array(2), array(2), array(), array(), array(5), 99)); // c/5
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_some_transitions_in_both_groups() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o:3, [d-u] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [a-h] c:</B>>];
+                          1->3[label=<<B>o: [s] c:</B>>];
+                          1->4[label=<<B>o:3, [s] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(2), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(), array(2), array(), array(), array(), 98), // b
+                          $this->create_pair_of_groups(array(), array(2), array(), array(), array(), 100), // d
+                          $this->create_pair_of_groups(array(3), array(), array(), array(), array(3), 100), // d/3
+                          $this->create_pair_of_groups(array(3), array(), array(), array(), array(3), 105), // i/3
+                          $this->create_pair_of_groups(array(), array(3), array(), array(), array(), 115), // s
+                          $this->create_pair_of_groups(array(3), array(4), array(), array(), array(3), 115), // s/3
+                          $this->create_pair_of_groups(array(3), array(), array(), array(), array(3), 116)); // t/3
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_multiple_transitions_with_single_characters_cross() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a-dh-j] c:</B>>];
+                          1->3[label=<<B>o: [ae-gk-m] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [abehikl] c:</B>>];
+                          1->3[label=<<B>o: [acfhjkm] c:</B>>];
+                          1->4[label=<<B>o: [adgijlm] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(2, 3), array(2, 3, 4), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(2), array(2), array(), array(), array(), 98), // b
+                          $this->create_pair_of_groups(array(2), array(3), array(), array(), array(), 99), // c
+                          $this->create_pair_of_groups(array(2), array(4), array(), array(), array(), 100), // d
+                          $this->create_pair_of_groups(array(3), array(2), array(), array(), array(), 101), // e
+                          $this->create_pair_of_groups(array(3), array(3), array(), array(), array(), 102), // f
+                          $this->create_pair_of_groups(array(3), array(4), array(), array(), array(), 103), // g
+                          $this->create_pair_of_groups(array(2), array(2, 3), array(), array(), array(), 104), // h
+                          $this->create_pair_of_groups(array(2), array(2, 4), array(), array(), array(), 105), // i
+                          $this->create_pair_of_groups(array(2), array(3, 4), array(), array(), array(), 106), // j
+                          $this->create_pair_of_groups(array(3), array(2, 3), array(), array(), array(), 107), // k
+                          $this->create_pair_of_groups(array(3), array(2, 4), array(), array(), array(), 108), // l
+                          $this->create_pair_of_groups(array(3), array(3, 4), array(), array(), array(), 109)); // m
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+    public function test_interval_and_enumeration_with_non_tag_in_middle() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [a-c] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [ac] c:</B>>];
+                          1->2[label=<<B>o:3, [b] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        $firstfa->set_ranges();
+        $secondfa->set_ranges();
+        $pairofgroups = $this->create_initial_pair_of_groups($firstfa, $secondfa);
+        $intervals = array();
+
+        divide_crossed_intervals($pairofgroups, $intervals);
+
+        $exppairs = array($this->create_pair_of_groups(array(2), array(2), array(), array(), array(), 97), // a
+                          $this->create_pair_of_groups(array(2), array(), array(), array(), array(), 98), // b
+                          $this->create_pair_of_groups(array(), array(2), array(), array(), array(3), 98), // b/3
+                          $this->create_pair_of_groups(array(2), array(2), array(), array(), array(), 99)); // c
+
+        $this->assertTrue($this->compare_pairs($intervals, $exppairs));
+    }
+*/
+
+    // Tests for charset intervals dividing function
+    function create_lexer($regex, $options = null) {
+        if ($options === null) {
+            $options = new qtype_preg_handling_options();
+            $options->preserveallnodes = true;
+        }
+        StringStreamController::createRef('regex', $regex);
+        $pseudofile = fopen('string://regex', 'r');
+        $lexer = new qtype_preg_lexer($pseudofile);
+        $lexer->set_options($options);
+        return $lexer;
+    }
+
+    function leaf_by_regex($regex, $options = null) {
+        $lexer = $this->create_lexer($regex, $options);
+        return $lexer->nextToken()->value;
+    }
+
+    function test_x1_non_crossed() {
+        $a = $this->leaf_by_regex('[0-37-9a-g]');
+        $b = $this->leaf_by_regex('[4-6h-io-u]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b), $indexes);
+
+        $expres = array(array(ord('0'), ord('3')),
+                        array(ord('4'), ord('6')),
+                        array(ord('7'), ord('9')),
+                        array(ord('a'), ord('g')),
+                        array(ord('h'), ord('i')),
+                        array(ord('o'), ord('u')));
+        $expindexes = array(array(array(0), array( )),
+                            array(array( ), array(0)),
+                            array(array(0), array( )),
+                            array(array(0), array( )),
+                            array(array( ), array(0)),
+                            array(array( ), array(0)));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x1_part_crossed() {
+        $a = $this->leaf_by_regex('[0-37-9a-g]');
+        $b = $this->leaf_by_regex('[2-9a-io-u]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b), $indexes);
+
+        $expres = array(array(ord('0'), ord('1')),
+                        array(ord('2'), ord('3')),
+                        array(ord('4'), ord('6')),
+                        array(ord('7'), ord('9')),
+                        array(ord('a'), ord('g')),
+                        array(ord('h'), ord('i')),
+                        array(ord('o'), ord('u')));
+        $expindexes = array(array(array(0), array( )),
+                            array(array(0), array(0)),
+                            array(array( ), array(0)),
+                            array(array(0), array(0)),
+                            array(array(0), array(0)),
+                            array(array( ), array(0)),
+                            array(array( ), array(0)));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x1_full_crossed() {
+        $a = $this->leaf_by_regex('[0-37-9a-g]');
+        $b = $this->leaf_by_regex('[0-37-9a-g]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b), $indexes);
+
+        $expres = array(array(ord('0'), ord('3')),
+                        array(ord('7'), ord('9')),
+                        array(ord('a'), ord('g')));
+        $expindexes = array(array(array(0), array(0)),
+                            array(array(0), array(0)),
+                            array(array(0), array(0)));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x2_non_crossed() {
+        $a = $this->leaf_by_regex('[0-37-9a-g]');
+        $b = $this->leaf_by_regex('[4-5o-qx-z]');
+        $c = $this->leaf_by_regex('[4-6i-ko-v]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c), $indexes);
+
+        $expres = array(array(ord('0'), ord('3')),
+                        array(ord('4'), ord('5')),
+                        array(ord('6'), ord('6')),
+                        array(ord('7'), ord('9')),
+                        array(ord('a'), ord('g')),
+                        array(ord('i'), ord('k')),
+                        array(ord('o'), ord('q')),
+                        array(ord('r'), ord('v')),
+                        array(ord('x'), ord('z')));
+        $expindexes = array(array(array(0), array(    )),
+                            array(array( ), array(0, 1)),
+                            array(array( ), array(1   )),
+                            array(array(0), array(    )),
+                            array(array(0), array(    )),
+                            array(array( ), array(1   )),
+                            array(array( ), array(0, 1)),
+                            array(array( ), array(1   )),
+                            array(array( ), array(0   )));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x2_part_crossed() {
+        $a = $this->leaf_by_regex('[0-37-9a-g]');
+        $b = $this->leaf_by_regex('[4-8o-qx-z]');
+        $c = $this->leaf_by_regex('[0-6a-ko-v]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c), $indexes);
+
+        $expres = array(array(ord('0'), ord('3')),
+                        array(ord('4'), ord('6')),
+                        array(ord('7'), ord('8')),
+                        array(ord('9'), ord('9')),
+                        array(ord('a'), ord('g')),
+                        array(ord('h'), ord('k')),
+                        array(ord('o'), ord('q')),
+                        array(ord('r'), ord('v')),
+                        array(ord('x'), ord('z')));
+        $expindexes = array(array(array(0), array(1   )),
+                            array(array( ), array(0, 1)),
+                            array(array(0), array(0   )),
+                            array(array(0), array(    )),
+                            array(array(0), array(1   )),
+                            array(array( ), array(1   )),
+                            array(array( ), array(0, 1)),
+                            array(array( ), array(1   )),
+                            array(array( ), array(0   )));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x2_full_crossed() {
+        $a = $this->leaf_by_regex('[0-47-9c-n]');
+        $b = $this->leaf_by_regex('[0-37-9d-g]');
+        $c = $this->leaf_by_regex('[2-4c-fh-n]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c), $indexes);
+
+        $expres = array(array(ord('0'), ord('1')),
+                        array(ord('2'), ord('3')),
+                        array(ord('4'), ord('4')),
+                        array(ord('7'), ord('9')),
+                        array(ord('c'), ord('c')),
+                        array(ord('d'), ord('f')),
+                        array(ord('g'), ord('g')),
+                        array(ord('h'), ord('n')));
+        $expindexes = array(array(array(0), array(0   )),
+                            array(array(0), array(0, 1)),
+                            array(array(0), array(1   )),
+                            array(array(0), array(0   )),
+                            array(array(0), array(1   )),
+                            array(array(0), array(0, 1)),
+                            array(array(0), array(0   )),
+                            array(array(0), array(1   )));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x3_non_crossed() {
+        $a = $this->leaf_by_regex('[0-37-9a-g]');
+        $b = $this->leaf_by_regex('[4-5o-qx-z]');
+        $c = $this->leaf_by_regex('[4-6i-ko-v]');
+        $d = $this->leaf_by_regex('[j-lrw]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c, $d), $indexes);
+
+        $expres = array(array(ord('0'), ord('3')),
+                        array(ord('4'), ord('5')),
+                        array(ord('6'), ord('6')),
+                        array(ord('7'), ord('9')),
+                        array(ord('a'), ord('g')),
+                        array(ord('i'), ord('i')),
+                        array(ord('j'), ord('k')),
+                        array(ord('l'), ord('l')),
+                        array(ord('o'), ord('q')),
+                        array(ord('r'), ord('r')),
+                        array(ord('s'), ord('v')),
+                        array(ord('w'), ord('w')),
+                        array(ord('x'), ord('z')));
+        $expindexes = array(array(array(0), array(    )),
+                            array(array( ), array(0, 1)),
+                            array(array( ), array(1   )),
+                            array(array(0), array(    )),
+                            array(array(0), array(    )),
+                            array(array( ), array(1   )),
+                            array(array( ), array(1, 2)),
+                            array(array( ), array(2   )),
+                            array(array( ), array(0, 1)),
+                            array(array( ), array(1, 2)),
+                            array(array( ), array(1   )),
+                            array(array( ), array(2   )),
+                            array(array( ), array(0   )));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x3_part_crossed() {
+        $a = $this->leaf_by_regex('[0-37-9a-g]');
+        $b = $this->leaf_by_regex('[4-5o-qx-z]');
+        $c = $this->leaf_by_regex('[0-6a-ko-v]');
+        $d = $this->leaf_by_regex('[j-lrw]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c, $d), $indexes);
+
+        $expres = array(array(ord('0'), ord('3')),
+                        array(ord('4'), ord('5')),
+                        array(ord('6'), ord('6')),
+                        array(ord('7'), ord('9')),
+                        array(ord('a'), ord('g')),
+                        array(ord('h'), ord('i')),
+                        array(ord('j'), ord('k')),
+                        array(ord('l'), ord('l')),
+                        array(ord('o'), ord('q')),
+                        array(ord('r'), ord('r')),
+                        array(ord('s'), ord('v')),
+                        array(ord('w'), ord('w')),
+                        array(ord('x'), ord('z')));
+        $expindexes = array(array(array(0), array(1   )),
+                            array(array( ), array(0, 1)),
+                            array(array( ), array(1   )),
+                            array(array(0), array(    )),
+                            array(array(0), array(1   )),
+                            array(array( ), array(1   )),
+                            array(array( ), array(1, 2)),
+                            array(array( ), array(2   )),
+                            array(array( ), array(0, 1)),
+                            array(array( ), array(1, 2)),
+                            array(array( ), array(1   )),
+                            array(array( ), array(2   )),
+                            array(array( ), array(0   )));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    function test_x3_full_crossed() {
+        $a = $this->leaf_by_regex('[0-8a-kn-y]');
+        $b = $this->leaf_by_regex('[4-8b-hj-k]');
+        $c = $this->leaf_by_regex('[0-6a-cn-v]');
+        $d = $this->leaf_by_regex('[irw-y]');
+        $indexes = array();
+
+        $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c, $d), $indexes);
+
+        $expres = array(array(ord('0'), ord('3')),
+                        array(ord('4'), ord('6')),
+                        array(ord('7'), ord('8')),
+                        array(ord('a'), ord('a')),
+                        array(ord('b'), ord('c')),
+                        array(ord('d'), ord('h')),
+                        array(ord('i'), ord('i')),
+                        array(ord('j'), ord('k')),
+                        array(ord('n'), ord('q')),
+                        array(ord('r'), ord('r')),
+                        array(ord('s'), ord('v')),
+                        array(ord('w'), ord('y')));
+        $expindexes = array(array(array(0), array(1   )),
+                            array(array(0), array(0, 1)),
+                            array(array(0), array(0   )),
+                            array(array(0), array(1   )),
+                            array(array(0), array(0, 1)),
+                            array(array(0), array(0   )),
+                            array(array(0), array(2   )),
+                            array(array(0), array(0   )),
+                            array(array(0), array(1   )),
+                            array(array(0), array(1, 2)),
+                            array(array(0), array(1   )),
+                            array(array(0), array(2   )));
+
+        $this->assertEquals($expres, $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+/*    function test_1x1_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [4-6h-io-u] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array( ), array(ord('0'), ord('3'))),
+                        $this->create_pair_of_groups(array( ), array(2), array(ord('4'), ord('6'))),
+                        $this->create_pair_of_groups(array(2), array( ), array(ord('7'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array( ), array(ord('a'), ord('g'))),
+                        $this->create_pair_of_groups(array( ), array(2), array(ord('h'), ord('i'))),
+                        $this->create_pair_of_groups(array( ), array(2), array(ord('o'), ord('u'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x1_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [2-9a-io-u] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        var_dump($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array( ), array(ord('0'), ord('1'))),
+                        $this->create_pair_of_groups(array(2), array(2), array(ord('2'), ord('3'))),
+                        $this->create_pair_of_groups(array( ), array(2), array(ord('4'), ord('6'))),
+                        $this->create_pair_of_groups(array(2), array(2), array(ord('7'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array(2), array(ord('a'), ord('g'))),
+                        $this->create_pair_of_groups(array( ), array(2), array(ord('h'), ord('i'))),
+                        $this->create_pair_of_groups(array( ), array(2), array(ord('o'), ord('u'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x1_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array(2), array(ord('0'), ord('3'))),
+                        $this->create_pair_of_groups(array(2), array(2), array(ord('7'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array(2), array(ord('a'), ord('g'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x2_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [4-5o-qx-z] c:</B>>];
+                          1->3[label=<<B>o: [4-6i-ko-v] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array(    ), array(ord('0'), ord('3'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('4'), ord('5'))),
+                        $this->create_pair_of_groups(array( ), array(   3), array(ord('6'), ord('6'))),
+                        $this->create_pair_of_groups(array(2), array(    ), array(ord('7'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array(    ), array(ord('a'), ord('g'))),
+                        $this->create_pair_of_groups(array( ), array(   3), array(ord('i'), ord('k'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('o'), ord('q'))),
+                        $this->create_pair_of_groups(array( ), array(   3), array(ord('r'), ord('v'))),
+                        $this->create_pair_of_groups(array( ), array(2   ), array(ord('x'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x2_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [4-8o-qx-z] c:</B>>];
+                          1->3[label=<<B>o: [0-6a-ko-v] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array(   3), array(ord('0'), ord('3'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('4'), ord('6'))),
+                        $this->create_pair_of_groups(array(2), array(2   ), array(ord('7'), ord('8'))),
+                        $this->create_pair_of_groups(array(2), array(    ), array(ord('9'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array(   3), array(ord('a'), ord('g'))),
+                        $this->create_pair_of_groups(array( ), array(   3), array(ord('h'), ord('k'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('o'), ord('q'))),
+                        $this->create_pair_of_groups(array( ), array(   3), array(ord('r'), ord('v'))),
+                        $this->create_pair_of_groups(array( ), array(2   ), array(ord('x'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x2_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-47-9c-n] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [0-37-9d-g] c:</B>>];
+                          1->3[label=<<B>o: [2-4c-fh-n] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array(2   ), array(ord('0'), ord('1'))),
+                        $this->create_pair_of_groups(array(2), array(2, 3), array(ord('2'), ord('3'))),
+                        $this->create_pair_of_groups(array(2), array(   3), array(ord('4'), ord('4'))),
+                        $this->create_pair_of_groups(array(2), array(2   ), array(ord('7'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array(   3), array(ord('c'), ord('c'))),
+                        $this->create_pair_of_groups(array(2), array(2, 3), array(ord('d'), ord('f'))),
+                        $this->create_pair_of_groups(array(2), array(2   ), array(ord('g'), ord('g'))),
+                        $this->create_pair_of_groups(array(2), array(   3), array(ord('h'), ord('n'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x3_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [4-5o-qx-z] c:</B>>];
+                          1->3[label=<<B>o: [4-6i-ko-v] c:</B>>];
+                          1->4[label=<<B>o: [j-irw] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0],
+                        $secondfa->adjacencymatrix[0][3][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array(    ), array(ord('0'), ord('3'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('4'), ord('5'))),
+                        $this->create_pair_of_groups(array( ), array(3   ), array(ord('6'), ord('6'))),
+                        $this->create_pair_of_groups(array(2), array(    ), array(ord('7'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array(    ), array(ord('a'), ord('g'))),
+                        $this->create_pair_of_groups(array( ), array(3   ), array(ord('i'), ord('i'))),
+                        $this->create_pair_of_groups(array( ), array(3, 4), array(ord('j'), ord('k'))),
+                        $this->create_pair_of_groups(array( ), array(4   ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('o'), ord('q'))),
+                        $this->create_pair_of_groups(array( ), array(3, 4), array(ord('r'), ord('r'))),
+                        $this->create_pair_of_groups(array( ), array(3   ), array(ord('s'), ord('v'))),
+                        $this->create_pair_of_groups(array( ), array(4   ), array(ord('w'), ord('w'))),
+                        $this->create_pair_of_groups(array( ), array(2   ), array(ord('x'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x3_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [4-5o-qx-z] c:</B>>];
+                          1->3[label=<<B>o: [0-6a-ko-v] c:</B>>];
+                          1->4[label=<<B>o: [j-lrw] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0],
+                        $secondfa->adjacencymatrix[0][3][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array(3   ), array(ord('0'), ord('3'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('4'), ord('5'))),
+                        $this->create_pair_of_groups(array( ), array(3   ), array(ord('6'), ord('6'))),
+                        $this->create_pair_of_groups(array(2), array(    ), array(ord('7'), ord('9'))),
+                        $this->create_pair_of_groups(array(2), array(3   ), array(ord('a'), ord('g'))),
+                        $this->create_pair_of_groups(array( ), array(3   ), array(ord('h'), ord('i'))),
+                        $this->create_pair_of_groups(array( ), array(3, 4), array(ord('j'), ord('k'))),
+                        $this->create_pair_of_groups(array( ), array(4   ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array( ), array(2, 3), array(ord('o'), ord('q'))),
+                        $this->create_pair_of_groups(array( ), array(3, 4), array(ord('r'), ord('r'))),
+                        $this->create_pair_of_groups(array( ), array(3   ), array(ord('s'), ord('v'))),
+                        $this->create_pair_of_groups(array( ), array(4   ), array(ord('w'), ord('w'))),
+                        $this->create_pair_of_groups(array( ), array(2   ), array(ord('x'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_1x3_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [0-8a-kn-y] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [4-8b-hj-k] c:</B>>];
+                          1->3[label=<<B>o: [0-6a-cn-v] c:</B>>];
+                          1->4[label=<<B>o: [irw-y] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0],
+                        $secondfa->adjacencymatrix[0][3][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2), array(3   ), array(ord('0'), ord('3'))),
+                        $this->create_pair_of_groups(array(2), array(2, 3), array(ord('4'), ord('6'))),
+                        $this->create_pair_of_groups(array(2), array(2   ), array(ord('7'), ord('8'))),
+                        $this->create_pair_of_groups(array(2), array(3   ), array(ord('a'), ord('a'))),
+                        $this->create_pair_of_groups(array(2), array(2, 3), array(ord('b'), ord('c'))),
+                        $this->create_pair_of_groups(array(2), array(2   ), array(ord('d'), ord('h'))),
+                        $this->create_pair_of_groups(array(2), array(4   ), array(ord('i'), ord('i'))),
+                        $this->create_pair_of_groups(array(2), array(2   ), array(ord('j'), ord('k'))),
+                        $this->create_pair_of_groups(array(2), array(3   ), array(ord('n'), ord('q'))),
+                        $this->create_pair_of_groups(array(2), array(3, 4), array(ord('r'), ord('r'))),
+                        $this->create_pair_of_groups(array(2), array(3   ), array(ord('s'), ord('v'))),
+                        $this->create_pair_of_groups(array(2), array(4   ), array(ord('w'), ord('y'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_2x2_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [1-7a-kz] c:</B>>];
+                          1->3[label=<<B>o: [5g-lx] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [0m-py] c:</B>>];
+                          1->3[label=<<B>o: [8-9o-rw] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
+                        $firstfa->adjacencymatrix[0][2][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(    ), array(2   ), array(ord('0'), ord('0'))),
+                        $this->create_pair_of_groups(array(2   ), array(    ), array(ord('1'), ord('4'))),
+                        $this->create_pair_of_groups(array(2, 3), array(    ), array(ord('5'), ord('5'))),
+                        $this->create_pair_of_groups(array(2   ), array(    ), array(ord('6'), ord('7'))),
+                        $this->create_pair_of_groups(array(    ), array(3   ), array(ord('8'), ord('9'))),
+                        $this->create_pair_of_groups(array(2   ), array(    ), array(ord('a'), ord('f'))),
+                        $this->create_pair_of_groups(array(2, 3), array(    ), array(ord('g'), ord('k'))),
+                        $this->create_pair_of_groups(array(3   ), array(    ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array(    ), array(2   ), array(ord('m'), ord('n'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 3), array(ord('o'), ord('p'))),
+                        $this->create_pair_of_groups(array(    ), array(3   ), array(ord('q'), ord('r'))),
+                        $this->create_pair_of_groups(array(    ), array(3   ), array(ord('w'), ord('w'))),
+                        $this->create_pair_of_groups(array(3   ), array(    ), array(ord('x'), ord('x'))),
+                        $this->create_pair_of_groups(array(    ), array(2   ), array(ord('y'), ord('y'))),
+                        $this->create_pair_of_groups(array(2   ), array(    ), array(ord('z'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_2x2_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [1-7a-kz] c:</B>>];
+                          1->3[label=<<B>o: [5g-lx] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [0-5m-px] c:</B>>];
+                          1->3[label=<<B>o: [8-9o-rz] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
+                        $firstfa->adjacencymatrix[0][2][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(    ), array(2   ), array(ord('0'), ord('0'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('1'), ord('4'))),
+                        $this->create_pair_of_groups(array(2, 3), array(2   ), array(ord('5'), ord('5'))),
+                        $this->create_pair_of_groups(array(2   ), array(    ), array(ord('6'), ord('7'))),
+                        $this->create_pair_of_groups(array(    ), array(3   ), array(ord('8'), ord('9'))),
+                        $this->create_pair_of_groups(array(2   ), array(    ), array(ord('a'), ord('f'))),
+                        $this->create_pair_of_groups(array(2, 3), array(    ), array(ord('g'), ord('k'))),
+                        $this->create_pair_of_groups(array(3   ), array(    ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array(    ), array(2   ), array(ord('m'), ord('n'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 3), array(ord('o'), ord('p'))),
+                        $this->create_pair_of_groups(array(    ), array(3   ), array(ord('q'), ord('r'))),
+                        $this->create_pair_of_groups(array(3   ), array(2   ), array(ord('x'), ord('x'))),
+                        $this->create_pair_of_groups(array(2   ), array(3   ), array(ord('z'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_2x2_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [1-7a-kz] c:</B>>];
+                          1->3[label=<<B>o: [5g-lx] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [1-7a-kz] c:</B>>];
+                          1->3[label=<<B>o: [5g-lx] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
+                        $firstfa->adjacencymatrix[0][2][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2   ), array(2   ), array(ord('1'), ord('4'))),
+                        $this->create_pair_of_groups(array(2, 3), array(2, 3), array(ord('5'), ord('5'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('6'), ord('7'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('a'), ord('f'))),
+                        $this->create_pair_of_groups(array(2, 3), array(2, 3), array(ord('g'), ord('k'))),
+                        $this->create_pair_of_groups(array(3   ), array(3   ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array(3   ), array(3   ), array(ord('x'), ord('x'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('z'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_2x3_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [1-7a-kz] c:</B>>];
+                          1->3[label=<<B>o: [5g-lx] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [0m-py] c:</B>>];
+                          1->3[label=<<B>o: [89o-rw] c:</B>>];
+                          1->4[label=<<B>o: [mnor-u] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
+                        $firstfa->adjacencymatrix[0][2][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0],
+                        $secondfa->adjacencymatrix[0][3][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(    ), array(2      ), array(ord('0'), ord('0'))),
+                        $this->create_pair_of_groups(array(2   ), array(       ), array(ord('1'), ord('4'))),
+                        $this->create_pair_of_groups(array(2, 3), array(       ), array(ord('5'), ord('5'))),
+                        $this->create_pair_of_groups(array(2   ), array(       ), array(ord('6'), ord('7'))),
+                        $this->create_pair_of_groups(array(    ), array(3      ), array(ord('8'), ord('9'))),
+                        $this->create_pair_of_groups(array(2   ), array(       ), array(ord('a'), ord('f'))),
+                        $this->create_pair_of_groups(array(2, 3), array(       ), array(ord('g'), ord('k'))),
+                        $this->create_pair_of_groups(array(3   ), array(       ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 4   ), array(ord('m'), ord('n'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 3, 4), array(ord('o'), ord('o'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 3   ), array(ord('p'), ord('p'))),
+                        $this->create_pair_of_groups(array(    ), array(3, 4   ), array(ord('q'), ord('r'))),
+                        $this->create_pair_of_groups(array(    ), array(4      ), array(ord('s'), ord('u'))),
+                        $this->create_pair_of_groups(array(    ), array(3      ), array(ord('w'), ord('w'))),
+                        $this->create_pair_of_groups(array(3   ), array(       ), array(ord('x'), ord('x'))),
+                        $this->create_pair_of_groups(array(    ), array(2      ), array(ord('y'), ord('y'))),
+                        $this->create_pair_of_groups(array(2   ), array(       ), array(ord('z'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_2x3_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [1-7a-kz] c:</B>>];
+                          1->3[label=<<B>o: [2-5g-lx] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [0-7m-py] c:</B>>];
+                          1->3[label=<<B>o: [2-5o-rw] c:</B>>];
+                          1->4[label=<<B>o: [h-noz] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
+                        $firstfa->adjacencymatrix[0][2][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0],
+                        $secondfa->adjacencymatrix[0][3][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(    ), array(2   ), array(ord('0'), ord('0'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('1'), ord('1'))),
+                        $this->create_pair_of_groups(array(2, 3), array(2, 3), array(ord('2'), ord('5'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('6'), ord('7'))),
+                        $this->create_pair_of_groups(array(2   ), array(    ), array(ord('a'), ord('f'))),
+                        $this->create_pair_of_groups(array(2, 3), array(    ), array(ord('g'), ord('g'))),
+                        $this->create_pair_of_groups(array(2, 3), array(4   ), array(ord('h'), ord('k'))),
+                        $this->create_pair_of_groups(array(3   ), array(4   ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 4), array(ord('m'), ord('m'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 4), array(ord('n'), ord('n'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 3), array(ord('o'), ord('o'))),
+                        $this->create_pair_of_groups(array(    ), array(2, 3), array(ord('p'), ord('p'))),
+                        $this->create_pair_of_groups(array(    ), array(3   ), array(ord('q'), ord('r'))),
+                        $this->create_pair_of_groups(array(    ), array(3   ), array(ord('w'), ord('w'))),
+                        $this->create_pair_of_groups(array(3   ), array(    ), array(ord('x'), ord('x'))),
+                        $this->create_pair_of_groups(array(    ), array(2   ), array(ord('y'), ord('y'))),
+                        $this->create_pair_of_groups(array(2   ), array(4   ), array(ord('z'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }
+
+    function test_2x3_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          4;
+                          1->2[label=<<B>o: [1-7a-kz] c:</B>>];
+                          1->3[label=<<B>o: [2-5g-lx] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          5;
+                          1->2[label=<<B>o: [1-3a-gz] c:</B>>];
+                          1->3[label=<<B>o: [2-5g-jx] c:</B>>];
+                          1->4[label=<<B>o: [67klx] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+
+        // Creating arrays of transitions of each automata
+        $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
+                        $firstfa->adjacencymatrix[0][2][0]);
+        $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0],
+                        $secondfa->adjacencymatrix[0][2][0],
+                        $secondfa->adjacencymatrix[0][3][0]);
+
+        // Generating result array
+        $expres = array($this->create_pair_of_groups(array(2   ), array(2   ), array(ord('1'), ord('1'))),
+                        $this->create_pair_of_groups(array(2, 3), array(2, 3), array(ord('2'), ord('2'))),
+                        $this->create_pair_of_groups(array(2, 3), array(2, 3), array(ord('3'), ord('3'))),
+                        $this->create_pair_of_groups(array(2, 3), array(3   ), array(ord('4'), ord('5'))),
+                        $this->create_pair_of_groups(array(2   ), array(4   ), array(ord('6'), ord('7'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('a'), ord('f'))),
+                        $this->create_pair_of_groups(array(2, 3), array(2, 3), array(ord('g'), ord('g'))),
+                        $this->create_pair_of_groups(array(2, 3), array(3   ), array(ord('h'), ord('j'))),
+                        $this->create_pair_of_groups(array(2, 3), array(4   ), array(ord('k'), ord('k'))),
+                        $this->create_pair_of_groups(array(3   ), array(4   ), array(ord('l'), ord('l'))),
+                        $this->create_pair_of_groups(array(3   ), array(3, 4), array(ord('x'), ord('x'))),
+                        $this->create_pair_of_groups(array(2   ), array(2   ), array(ord('z'), ord('z'))));
+
+        // Calling testing function
+        $res = divide_intervals($firstfatransitions, $secondfatransitions);
+
+        // Comparing result and expecting arrays
+        $this->assertTrue($this->compare_pairs($res, $expres));
+    }*/
+}
