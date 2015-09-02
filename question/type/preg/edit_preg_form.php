@@ -145,8 +145,15 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
             }
         }
 
-        $currentlanguages = block_formal_langs::available_langs( $context );
-        //$langs = block_formal_langs::available_langs();// TODO - add context.
+        $pickedlanguage = 0;
+        if(is_object($this->question)) {
+            if (isset($this->question->options)) {
+                if (isset($this->question->options->langid)) {
+                    $pickedlanguage = intval($this->question->options->langid);
+                }
+            }
+        }
+        $currentlanguages = block_formal_langs::available_langs( $context, $pickedlanguage );
         $mform->addElement('select', 'langid', get_string('langselect', 'qtype_preg'), $currentlanguages);
         $mform->setDefault('langid', $CFG->qtype_preg_defaultlang);
         $mform->addHelpButton('langid', 'langselect', 'qtype_preg');
