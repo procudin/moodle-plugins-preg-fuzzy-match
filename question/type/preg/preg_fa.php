@@ -141,6 +141,10 @@ class qtype_preg_fa_transition {
         return $this->from == $other->from && $this->to == $other->to && $this->pregleaf == $other->pregleaf && count($this->mergedbefore) == count($other->mergedbefore) && count($this->mergedafter) == count($other->mergedafter);
     }
 
+    public static function divide_intervals($firstgroup, $secondgroup, &$resint) {
+
+    }
+
     /**
      * Generates a character considering merged transitions that affect the resulting char (^ \A $ \Z \z)
      */
