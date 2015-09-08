@@ -14,10 +14,26 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/poasquestion/stringstream/stringstream.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_fa.php');
-require_once($CFG->dirroot . '/question/type/preg/preg_equivalence_subfunctions.php');
+//require_once($CFG->dirroot . '/question/type/preg/preg_equivalence_subfunctions.php');
 
 class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
+    /**
+     * Generates array of qtype_preg_fa_transitions from given fa.
+     */
+    function create_array_of_transitions_from_fa($fa) {
+        $arr = array();
+
+        foreach ($fa->adjacencymatrix as $matr) {
+            foreach ($matr as $marray) {
+                foreach ($marray as $tr) {
+                    $arr[] = $tr;
+                }
+            }
+        }
+
+        return $arr;
+    }
     /**
      * Generates pair of qtype_preg_fa_pair_of_groups with given parameters
      */
@@ -244,15 +260,15 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfadescription = 'digraph {
                           1;
                           3;
-                          1->2[label=<<B>o: [e/1] c:</B>>];
-                          2->3[label=<<B>o: [q/2] c:</B>>];
+                          1->2[label=<<B>o:1 [e] c:</B>>];
+                          2->3[label=<<B>o: [q] c:2</B>>];
                           2->3[label=<<B>o: [g] c:</B>>];
                           }';
         $secondfadescription = 'digraph {
                           1;
                           30;
-                          1->20[label=<<B>o: [e/1] c:</B>>];
-                          20->30[label=<<B>o: [q/2] c:</B>>];
+                          1->20[label=<<B>o:1 [e] c:</B>>];
+                          20->30[label=<<B>o: [q] c:2</B>>];
                           }';
         $mismatches = array();
         $expmismatches = array();
@@ -426,12 +442,11 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $expmismatches = array();
         $firstfa = qtype_preg_fa::read_fa($firstfadescription);
         $secondfa = qtype_preg_fa::read_fa($secondfadescription);
-
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 0, 8)); // b
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 4, 0)); // c
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+        this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_after_loop_mismatch() {
         $firstfadescription = 'digraph {
@@ -581,7 +596,6 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $mismatches = array();
         $firstfa = qtype_preg_fa::read_fa($firstfadescription);
         $secondfa = qtype_preg_fa::read_fa($secondfadescription);
-
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
@@ -1730,8 +1744,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           $this->create_pair_of_groups(array(2), array(2), array(), array(), array(), 99)); // c
 
         $this->assertTrue($this->compare_pairs($intervals, $exppairs));
-    }
-*/
+    }*/
 
     // Tests for charset intervals dividing function
     function create_lexer($regex, $options = null) {
@@ -2028,6 +2041,441 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expindexes, $indexes);
     }
 
+    // Tests for transitions intervals dividing function
+    public function test_tr_1x1_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [e] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->2[label=<<B>o:1, [e] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array(0), array()),
+                            array(array(), array(0)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_1x1_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [e] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a-e] c:</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a-d] c:</B>>];
+                          1->2[label=<<B>o:1, [e] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array( ), array(0)),
+                            array(array(0), array(0)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_1x1_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a-e] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a-e] c:</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a-e] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array(0), array(0)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+    public function test_tr_1x2_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [ab] c:</B>>];
+                          1->2[label=<<B>o: [c] c:2,</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [ab] c:</B>>];
+                          1->2[label=<<B>o: [c] c:2,</B>>];
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array( ), array(0)),
+                            array(array( ), array(1)),
+                            array(array(0), array( )));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_1x2_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [e] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [ab] c:</B>>];
+                          1->2[label=<<B>o: [c-e] c:2,</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [ab] c:</B>>];
+                          1->2[label=<<B>o: [cd] c:2,</B>>];
+                          1->2[label=<<B>o: [e] c:2,</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array( ), array(0)),
+                            array(array( ), array(1)),
+                            array(array(0), array(1)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_1x2_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a-e] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [ab] c:2,</B>>];
+                          1->2[label=<<B>o: [c-e] c:2,</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [ab] c:2,</B>>];
+                          1->2[label=<<B>o: [c-e] c:2,</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array(0), array(0)),
+                            array(array(0), array(1)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_2x3_non_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->2[label=<<B>o: [c-e] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [f-h] c:2,</B>>];
+                          1->2[label=<<B>o:1, [i] c:</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [c-e] c:2,</B>>];
+                          1->2[label=<<B>o: [f-h] c:2,</B>>];
+                          1->2[label=<<B>o:1, [i] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array(0), array( )),
+                            array(array( ), array(0)),
+                            array(array(1), array( )),
+                            array(array( ), array(1)),
+                            array(array( ), array(2)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_2x3_part_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a] c:4,</B>>];
+                          1->2[label=<<B>o: [c-e] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [d-h] c:2,</B>>];
+                          1->2[label=<<B>o:1, [i] c:</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [c] c:2,</B>>];
+                          1->2[label=<<B>o: [d-e] c:2,</B>>];
+                          1->2[label=<<B>o: [f-h] c:2,</B>>];
+                          1->2[label=<<B>o:1, [i] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array(0), array( )),
+                            array(array(0), array(0)),
+                            array(array(1), array( )),
+                            array(array(1), array(1)),
+                            array(array(0), array(1)),
+                            array(array( ), array(2)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_2x3_full_crossed() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [d-i] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [d-h] c:2,</B>>];
+                          1->2[label=<<B>o: [i] c:2,</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [d-h] c:2,</B>>];
+                          1->2[label=<<B>o: [i] c:2,</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array(0), array(0)),
+                            array(array(1), array(1)),
+                            array(array(1), array(2)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_2x3_open_and_close_tags_in_one_tr() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:3, [a] c:4,</B>>];
+                          1->2[label=<<B>o:1, [d-i] c:2,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:3, [a] c:4,</B>>];
+                          1->2[label=<<B>o:1, [d-h] c:2,</B>>];
+                          1->2[label=<<B>o: [i] c:2,</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:3, [a] c:4,</B>>];
+                          1->2[label=<<B>o:1, [d-h] c:2,</B>>];
+                          1->2[label=<<B>o:1, [i] c:2,</B>>];
+                          1->2[label=<<B>o: [i] c:2,</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array(0), array(0)),
+                            array(array(1), array(1)),
+                            array(array(1), array( )),
+                            array(array( ), array(2)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_2x3_multiple_tags_in_one_tr() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:4,6,8,</B>>];
+                          1->2[label=<<B>o:1,3,5, [d-i] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:3, [a] c:4,</B>>];
+                          1->2[label=<<B>o:1,3, [d-h] c:</B>>];
+                          1->2[label=<<B>o:1,3,5, [i] c:</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:3, [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:4,</B>>];
+                          1->2[label=<<B>o: [a] c:6,8,</B>>];
+                          1->2[label=<<B>o:1,3, [d-h] c:</B>>];
+                          1->2[label=<<B>o:5, [d-h] c:</B>>];
+                          1->2[label=<<B>o:1,3,5, [i] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array( ), array(0)),
+                            array(array(0), array(0)),
+                            array(array(0), array( )),
+                            array(array(1), array(1)),
+                            array(array(1), array( )),
+                            array(array(1), array(2)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+    public function test_tr_2x3_non_crossed_tags() {
+        $firstfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o: [a] c:4,6,</B>>];
+                          1->2[label=<<B>o:1, [d-i] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          1->2[label=<<B>o:3, [d-h] c:</B>>];
+                          1->2[label=<<B>o:5, [i] c:</B>>];
+                          }';
+        $resfadescription = 'digraph {
+                          1;
+                          2;
+                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:4,6,</B>>];
+                          1->2[label=<<B>o:1, [d-h] c:</B>>];
+                          1->2[label=<<B>o:3, [d-h] c:</B>>];
+                          1->2[label=<<B>o:1, [i] c:</B>>];
+                          1->2[label=<<B>o:5, [i] c:</B>>];
+                          }';
+        $mismatches = array();
+        $firstfa = qtype_preg_fa::read_fa($firstfadescription);
+        $secondfa = qtype_preg_fa::read_fa($secondfadescription);
+        $resfa = qtype_preg_fa::read_fa($resfadescription);
+        $indexes = array();
+
+        $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+
+        $expindexes = array(array(array( ), array(0)),
+                            array(array(0), array( )),
+                            array(array(1), array( )),
+                            array(array( ), array(1)),
+                            array(array(1), array( )),
+                            array(array( ), array(2)));
+
+        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertEquals($expindexes, $indexes);
+    }
+
+
 /*    function test_1x1_non_crossed() {
         $firstfadescription = 'digraph {
                           1;
@@ -2079,7 +2527,6 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
-        var_dump($firstfa->adjacencymatrix[0][1][0]);
         $secondfatransitions = array($secondfa->adjacencymatrix[0][1][0]);
 
         // Generating result array
