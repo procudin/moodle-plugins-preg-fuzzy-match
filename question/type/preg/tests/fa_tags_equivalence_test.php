@@ -1744,7 +1744,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           $this->create_pair_of_groups(array(2), array(2), array(), array(), array(), 99)); // c
 
         $this->assertTrue($this->compare_pairs($intervals, $exppairs));
-    }*/
+    }
 
     // Tests for charset intervals dividing function
     function create_lexer($regex, $options = null) {
@@ -2039,10 +2039,239 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals($expres, $res);
         $this->assertEquals($expindexes, $indexes);
+    }*/
+
+    // Tests for tagset sequences dividing function
+    public function group_of_leafs_by_tagsets($tagsets) {
+        $res = array();
+        $count = 0;
+        foreach ($tagsets as $tagset) {
+            $res[] = array(array(), array());
+            for ($k = 0; $k <= 1; ++$k) {
+                foreach ($tagset[$k] as $opentag) {
+                    $meta = new qtype_preg_leaf_meta();
+                    $meta->subpattern = $opentag;
+                    $res[$count][$k][] = $meta;
+                }
+            }
+            $count++;
+        }
+        return $res;
+    }
+
+    public function test_ts_1x1_non_crossed() {
+        $firstgroup = array( array(array(3),              array(4)));
+
+        $secondgroup = array(array(array(1),              array(2, 8)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(1),               array(2, 8)),
+                            array(array(3),               array(4)));
+
+        $expindexes = array(array(array(),                array(0)),
+                            array(array(0),               array()));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
+    }
+
+    public function test_ts_1x1_part_crossed() {
+        $firstgroup = array( array(array(1, 3),           array(2, 6)));
+
+        $secondgroup = array(array(array(1),              array(2, 8)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(1),               array(2)),
+                            array(array(3),               array(6)),
+                            array(array(),                array(8)));
+
+        $expindexes = array(array(array(0),               array(0)),
+                            array(array(0),               array()),
+                            array(array(),                array(0)));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
+    }
+
+    public function test_ts_1x1_full_crossed() {
+        $firstgroup = array( array(array(1, 3),           array(2)));
+
+        $secondgroup = array(array(array(1, 3),           array(2)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(1, 3),            array(2)));
+
+        $expindexes = array(array(array(0),               array(0)));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
+    }
+
+    public function test_ts_2x2_non_crossed() {
+        $firstgroup = array( array(array(1, 3),           array(4, 6)),
+                             array(array(7),              array()));
+
+        $secondgroup = array(array(array(5),              array(2)),
+                             array(array(),               array(8, 10)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(),                array(8, 10)),
+                            array(array(1, 3),            array(4, 6)),
+                            array(array(5),               array(2)),
+                            array(array(7),               array()));
+
+        $expindexes = array(array(array(),                array(1)),
+                            array(array(0),               array()),
+                            array(array(),                array(0)),
+                            array(array(1),               array()));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
+    }
+
+    public function test_ts_2x2_part_crossed() {
+        $firstgroup = array( array(array(1, 3),           array(4, 6)),
+                             array(array(7),              array(8)));
+
+        $secondgroup = array(array(array(1, 3, 5),        array(2)),
+                             array(array(),               array(8, 10)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(),                array(10)),
+                            array(array(1, 3),            array()),
+                            array(array(5),               array(2)),
+                            array(array(7),               array()),
+                            array(array(),                array(4, 6)),
+                            array(array(),                array(8)));
+
+        $expindexes = array(array(array(),                array(1)),
+                            array(array(0),               array(0)),
+                            array(array(),                array(0)),
+                            array(array(1),               array()),
+                            array(array(0),               array()),
+                            array(array(1),               array(1)));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
+    }
+
+    public function test_ts_2x2_full_crossed() {
+        $firstgroup = array( array(array(1, 3),           array(2, 6)),
+                             array(array(7),              array(8)));
+
+        $secondgroup = array(array(array(1, 3, 7),        array(2)),
+                             array(array(1),              array(6, 8)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(1),               array()),
+                            array(array(3),               array(2)),
+                            array(array(7),               array()),
+                            array(array(),                array(6)),
+                            array(array(),                array(8)));
+
+        $expindexes = array(array(array(0),               array(0, 1)),
+                            array(array(0),               array(0)),
+                            array(array(1),               array(0)),
+                            array(array(0),               array(1)),
+                            array(array(1),               array(1)));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
+    }
+
+    public function test_ts_crossed_in_one_group() {
+        $firstgroup = array( array(array(1, 3),           array(2, 6)),
+                             array(array(),               array(2, 6)));
+
+        $secondgroup = array(array(array(1, 3, 7),        array(2)),
+                             array(array(7, 9),           array(8)),
+                             array(array(3, 7),           array(8)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(),                array()),
+                            array(array(1),               array()),
+                            array(array(3),               array()),
+                            array(array(7),               array()),
+                            array(array(9),               array()),
+                            array(array(),                array(2)),
+                            array(array(),                array(6)),
+                            array(array(),                array(8)));
+
+        $expindexes = array(array(array(1),               array()),
+                            array(array(0),               array(0)),
+                            array(array(0),               array(0, 2)),
+                            array(array(),                array(0, 1, 2)),
+                            array(array(),                array(1)),
+                            array(array(0, 1),            array(0)),
+                            array(array(0, 1),            array()),
+                            array(array(),                array(1, 2)));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
+    }
+
+    public function test_ts_absolutely_same() {
+        $firstgroup = array( array(array(1, 3),           array(2, 6)),
+                             array(array(),               array(2, 6)));
+
+        $secondgroup = array(array(array(1, 3),           array(2, 6)),
+                             array(array(),               array(2, 6)));
+
+        $firstgroup = $this->group_of_leafs_by_tagsets($firstgroup);
+        $secondgroup = $this->group_of_leafs_by_tagsets($secondgroup);
+
+        $indexes = array();
+        $res = qtype_preg_leaf_meta::divide_tagsets($firstgroup, $secondgroup, $indexes);
+
+        $expres = array(    array(array(),                array()),
+                            array(array(1, 3),            array()),
+                            array(array(),                array(2, 6)));
+
+        $expindexes = array(array(array(1),               array(1)),
+                            array(array(0),               array(0)),
+                            array(array(0, 1),            array(0, 1)));
+
+        $this->assertEquals($res, $expres);
+        $this->assertEquals($indexes, $expindexes);
     }
 
     // Tests for transitions intervals dividing function
-    public function test_tr_1x1_non_crossed() {
+    /*function test_tr_1x1_non_crossed() {
         $firstfadescription = 'digraph {
                           1;
                           2;
@@ -2073,7 +2302,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
         $this->assertEquals($expindexes, $indexes);
     }
-    public function test_tr_1x1_part_crossed() {
+    function test_tr_1x1_part_crossed() {
         $firstfadescription = 'digraph {
                           1;
                           2;
@@ -2473,7 +2702,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
         $this->assertEquals($expindexes, $indexes);
-    }
+    }*/
 
 
 /*    function test_1x1_non_crossed() {
