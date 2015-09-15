@@ -1350,6 +1350,121 @@ class qtype_preg_leaf_meta extends qtype_preg_leaf {
         return 'ε';
     }
 
+    /**
+     * Function divides two arrays of preg_leaf_meta to noncrossed tag sequences
+     * param[in] firstgroup - three dimensial array of qtype_preg_leaf_meta of first automata
+     * param[in] secondgroup - three dimensial array of qtype_preg_leaf_meta of second automata
+     * param[in] indexes - array, including for each result tagset indexes of initial tagsets, which include result sequences
+     * return - two dimensial array of sequences
+     */
+    public static function divide_tagsets($firstgroup, $secondgroup, &$indexes) {
+        $result = array();
+        $indexes = array();
+        $count = 0;         // count of different tags of each type (open or close)
+        $tmptagsets = array(array(), array());
+        $tmpindexes = array(array(), array());
+
+        // First for opentags, then for closetags
+        // 0 - opentags
+        // 1 - closetags
+        for ($k = 0; $k <= 1; $k++) {
+            // Merging two groups into one array
+            $count = 0;
+            $tagsers = array();
+            for ($i = 0; $i < count($firstgroup); ++$i) {
+                $tagsets[] = array($firstgroup[$i][$k], 0, $i);
+            }
+            for ($i = 0; $i < count($secondgroup); ++$i) {
+                $tagsets[] = array($secondgroup[$i][$k], 1, $i);
+            }
+
+            // Dividing tags
+
+            // Checking for situation with empty tagset
+            $tmptagsets[$k][] = -1 + $k * (-1);
+            $tmpindexes[$k][] = array(array(), array());
+            for ($i = 0; $i < count($tagsets); ++$i) {
+                if (current($tagsets[$i][0]) === false) {
+                    $tmpindexes[$k][0][$tagsets[$i][1]][] = $tagsets[$i][2];
+                    array_splice($tagsets, $i, 1);
+                    $i--;
+                }
+            }
+            // If there was no matches with empty tagset
+            if (count($tmpindexes[$k][0][0]) + count($tmpindexes[$k][0][1]) == 0) {
+                array_splice($tmptagsets[$k], 0, 1);
+                array_splice($tmpindexes[$k], 0, 1);
+            }
+            else {
+                $count++;
+            }
+
+            while (count($tagsets)) {
+                $mintag = 1e6;
+                // Finding current mintag
+                foreach ($tagsets as $tagset) {
+                    if (current($tagset[0])->subpattern < $mintag)
+                        $mintag = current($tagset[0])->subpattern;
+                }
+                $tmptagsets[$k][] = $mintag;
+                $tmpindexes[$k][] = array(array(), array());
+
+                // Finding matches
+                for ($i = 0; $i < count($tagsets); ++$i) {
+                    // Matched
+                    if (current($tagsets[$i][0])->subpattern == $mintag) {
+                        $tmpindexes[$k][$count][$tagsets[$i][1]][] = $tagsets[$i][2];
+                        // Tags ended
+                        if (next($tagsets[$i][0]) === false) {
+                            array_splice($tagsets, $i, 1);
+                            $i--;
+                        }
+                    }
+                }
+                $count++;
+            }
+        }
+
+        // Grouping tagsets with the same matched indexes
+        $count = 0;
+        while (count($tmptagsets[0]) + count($tmptagsets[1]) > 0) {
+            // Taking first of remaining tagsets as the base of grouping
+            $result[] = array(array(), array());
+            $k = 0;
+            if (count($tmptagsets[0]) == 0) {
+                $k = 1;
+            }
+
+            $result[$count][$k][] = $tmptagsets[$k][0];
+            $indexes[] = $tmpindexes[$k][0];
+            array_splice($tmptagsets[$k], 0, 1);
+            array_splice($tmpindexes[$k], 0, 1);
+
+            // Finding matches of indexes in remaining temporary arrays
+            for ($k = 0; $k <= 1; ++$k) {
+                for ($i = 0; $i < count($tmptagsets[$k]); ++$i) {
+                    if ($tmpindexes[$k][$i] == $indexes[$count]) {
+                        $result[$count][$k][] = $tmptagsets[$k][$i];
+                        array_splice($tmptagsets[$k], $i, 1);
+                        array_splice($tmpindexes[$k], $i, 1);
+                        $i--;
+                    }
+                }
+            }
+
+            $count++;
+        }
+
+        // Remove -1 and -2 tags from result, added to set empty tagsets
+        for ($i = 0; $i < count($result); ++$i) {
+            if (current($result[$i][0]) == -1)
+                array_splice($result[$i][0], 0, 1);
+            if (current($result[$i][1]) == -2)
+                array_splice($result[$i][1], 0, 1);
+        }
+
+        return $result;
+    }
 }
 
 class qtype_preg_leaf_complex_assert extends qtype_preg_leaf_meta {
