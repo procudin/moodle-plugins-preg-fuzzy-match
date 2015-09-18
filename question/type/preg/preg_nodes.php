@@ -949,6 +949,31 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
             }
         }
 
+        // Translating integer intervals to character
+        for ($i = 0; $i < count($result); ++$i) {
+            if ($result[$i][1] == $result[$i][0])
+                $result[$i] = chr($result[$i][0]);
+            else
+                $result[$i] = chr($result[$i][0]) . '-' . chr($result[$i][1]);
+        }
+
+        // Grouping intervals with the same matched indexes
+        for ($i = 0; $i < count($result); ++$i) {
+            for ($j = $i + 1; $j < count($result); ++$j) {
+                if ($indexes[$j] == $indexes[$i]) {
+                    $result[$i] = $result[$i] . $result[$j];
+                    array_splice($result, $j, 1);
+                    array_splice($indexes, $j, 1);
+                    $j--;
+                }
+            }
+        }
+
+        // Adding square brackets around charset
+        for ($i = 0; $i < count($result); ++$i) {
+            $result[$i] = '[' . $result[$i] . ']';
+        }
+
         return $result;
     }
 
