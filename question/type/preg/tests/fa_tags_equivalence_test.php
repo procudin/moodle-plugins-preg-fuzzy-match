@@ -1744,7 +1744,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           $this->create_pair_of_groups(array(2), array(2), array(), array(), array(), 99)); // c
 
         $this->assertTrue($this->compare_pairs($intervals, $exppairs));
-    }
+    }*/
 
     // Tests for charset intervals dividing function
     function create_lexer($regex, $options = null) {
@@ -1771,17 +1771,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b), $indexes);
 
-        $expres = array(array(ord('0'), ord('3')),
-                        array(ord('4'), ord('6')),
-                        array(ord('7'), ord('9')),
-                        array(ord('a'), ord('g')),
-                        array(ord('h'), ord('i')),
-                        array(ord('o'), ord('u')));
+        $expres = array('[0-37-9a-g]',
+                        '[4-6h-io-u]');
         $expindexes = array(array(array(0), array( )),
-                            array(array( ), array(0)),
-                            array(array(0), array( )),
-                            array(array(0), array( )),
-                            array(array( ), array(0)),
                             array(array( ), array(0)));
 
         $this->assertEquals($expres, $res);
@@ -1795,19 +1787,11 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b), $indexes);
 
-        $expres = array(array(ord('0'), ord('1')),
-                        array(ord('2'), ord('3')),
-                        array(ord('4'), ord('6')),
-                        array(ord('7'), ord('9')),
-                        array(ord('a'), ord('g')),
-                        array(ord('h'), ord('i')),
-                        array(ord('o'), ord('u')));
+        $expres = array('[0-1]',
+                        '[2-37-9a-g]',
+                        '[4-6h-io-u]');
         $expindexes = array(array(array(0), array( )),
                             array(array(0), array(0)),
-                            array(array( ), array(0)),
-                            array(array(0), array(0)),
-                            array(array(0), array(0)),
-                            array(array( ), array(0)),
                             array(array( ), array(0)));
 
         $this->assertEquals($expres, $res);
@@ -1821,12 +1805,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b), $indexes);
 
-        $expres = array(array(ord('0'), ord('3')),
-                        array(ord('7'), ord('9')),
-                        array(ord('a'), ord('g')));
-        $expindexes = array(array(array(0), array(0)),
-                            array(array(0), array(0)),
-                            array(array(0), array(0)));
+        $expres = array('[0-37-9a-g]');
+        $expindexes = array(array(array(0), array(0)));
 
         $this->assertEquals($expres, $res);
         $this->assertEquals($expindexes, $indexes);
@@ -1840,21 +1820,11 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c), $indexes);
 
-        $expres = array(array(ord('0'), ord('3')),
-                        array(ord('4'), ord('5')),
-                        array(ord('6'), ord('6')),
-                        array(ord('7'), ord('9')),
-                        array(ord('a'), ord('g')),
-                        array(ord('i'), ord('k')),
-                        array(ord('o'), ord('q')),
-                        array(ord('r'), ord('v')),
-                        array(ord('x'), ord('z')));
+        $expres = array('[0-37-9a-g]',
+                        '[4-5o-q]',
+                        '[6i-kr-v]',
+                        '[x-z]');
         $expindexes = array(array(array(0), array(    )),
-                            array(array( ), array(0, 1)),
-                            array(array( ), array(1   )),
-                            array(array(0), array(    )),
-                            array(array(0), array(    )),
-                            array(array( ), array(1   )),
                             array(array( ), array(0, 1)),
                             array(array( ), array(1   )),
                             array(array( ), array(0   )));
@@ -1871,22 +1841,16 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c), $indexes);
 
-        $expres = array(array(ord('0'), ord('3')),
-                        array(ord('4'), ord('6')),
-                        array(ord('7'), ord('8')),
-                        array(ord('9'), ord('9')),
-                        array(ord('a'), ord('g')),
-                        array(ord('h'), ord('k')),
-                        array(ord('o'), ord('q')),
-                        array(ord('r'), ord('v')),
-                        array(ord('x'), ord('z')));
+        $expres = array('[0-3a-g]',
+                        '[4-6o-q]',
+                        '[7-8]',
+                        '[9]',
+                        '[h-kr-v]',
+                        '[x-z]');
         $expindexes = array(array(array(0), array(1   )),
                             array(array( ), array(0, 1)),
                             array(array(0), array(0   )),
                             array(array(0), array(    )),
-                            array(array(0), array(1   )),
-                            array(array( ), array(1   )),
-                            array(array( ), array(0, 1)),
                             array(array( ), array(1   )),
                             array(array( ), array(0   )));
 
@@ -1902,21 +1866,11 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c), $indexes);
 
-        $expres = array(array(ord('0'), ord('1')),
-                        array(ord('2'), ord('3')),
-                        array(ord('4'), ord('4')),
-                        array(ord('7'), ord('9')),
-                        array(ord('c'), ord('c')),
-                        array(ord('d'), ord('f')),
-                        array(ord('g'), ord('g')),
-                        array(ord('h'), ord('n')));
+        $expres = array('[0-17-9g]',
+                        '[2-3d-f]',
+                        '[4ch-n]');
         $expindexes = array(array(array(0), array(0   )),
                             array(array(0), array(0, 1)),
-                            array(array(0), array(1   )),
-                            array(array(0), array(0   )),
-                            array(array(0), array(1   )),
-                            array(array(0), array(0, 1)),
-                            array(array(0), array(0   )),
                             array(array(0), array(1   )));
 
         $this->assertEquals($expres, $res);
@@ -1932,30 +1886,16 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c, $d), $indexes);
 
-        $expres = array(array(ord('0'), ord('3')),
-                        array(ord('4'), ord('5')),
-                        array(ord('6'), ord('6')),
-                        array(ord('7'), ord('9')),
-                        array(ord('a'), ord('g')),
-                        array(ord('i'), ord('i')),
-                        array(ord('j'), ord('k')),
-                        array(ord('l'), ord('l')),
-                        array(ord('o'), ord('q')),
-                        array(ord('r'), ord('r')),
-                        array(ord('s'), ord('v')),
-                        array(ord('w'), ord('w')),
-                        array(ord('x'), ord('z')));
+        $expres = array('[0-37-9a-g]',
+                        '[4-5o-q]',
+                        '[6is-v]',
+                        '[j-kr]',
+                        '[lw]',
+                        '[x-z]');
         $expindexes = array(array(array(0), array(    )),
                             array(array( ), array(0, 1)),
                             array(array( ), array(1   )),
-                            array(array(0), array(    )),
-                            array(array(0), array(    )),
-                            array(array( ), array(1   )),
                             array(array( ), array(1, 2)),
-                            array(array( ), array(2   )),
-                            array(array( ), array(0, 1)),
-                            array(array( ), array(1, 2)),
-                            array(array( ), array(1   )),
                             array(array( ), array(2   )),
                             array(array( ), array(0   )));
 
@@ -1972,30 +1912,18 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c, $d), $indexes);
 
-        $expres = array(array(ord('0'), ord('3')),
-                        array(ord('4'), ord('5')),
-                        array(ord('6'), ord('6')),
-                        array(ord('7'), ord('9')),
-                        array(ord('a'), ord('g')),
-                        array(ord('h'), ord('i')),
-                        array(ord('j'), ord('k')),
-                        array(ord('l'), ord('l')),
-                        array(ord('o'), ord('q')),
-                        array(ord('r'), ord('r')),
-                        array(ord('s'), ord('v')),
-                        array(ord('w'), ord('w')),
-                        array(ord('x'), ord('z')));
+        $expres = array('[0-3a-g]',
+                        '[4-5o-q]',
+                        '[6h-is-v]',
+                        '[7-9]',
+                        '[j-kr]',
+                        '[lw]',
+                        '[x-z]');
         $expindexes = array(array(array(0), array(1   )),
                             array(array( ), array(0, 1)),
                             array(array( ), array(1   )),
                             array(array(0), array(    )),
-                            array(array(0), array(1   )),
-                            array(array( ), array(1   )),
                             array(array( ), array(1, 2)),
-                            array(array( ), array(2   )),
-                            array(array( ), array(0, 1)),
-                            array(array( ), array(1, 2)),
-                            array(array( ), array(1   )),
                             array(array( ), array(2   )),
                             array(array( ), array(0   )));
 
@@ -2012,35 +1940,21 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_leaf_charset::divide_intervals(array($a), array($b, $c, $d), $indexes);
 
-        $expres = array(array(ord('0'), ord('3')),
-                        array(ord('4'), ord('6')),
-                        array(ord('7'), ord('8')),
-                        array(ord('a'), ord('a')),
-                        array(ord('b'), ord('c')),
-                        array(ord('d'), ord('h')),
-                        array(ord('i'), ord('i')),
-                        array(ord('j'), ord('k')),
-                        array(ord('n'), ord('q')),
-                        array(ord('r'), ord('r')),
-                        array(ord('s'), ord('v')),
-                        array(ord('w'), ord('y')));
+        $expres = array('[0-3an-qs-v]',
+                        '[4-6b-c]',
+                        '[7-8d-hj-k]',
+                        '[iw-y]',
+                        '[r]');
         $expindexes = array(array(array(0), array(1   )),
                             array(array(0), array(0, 1)),
                             array(array(0), array(0   )),
-                            array(array(0), array(1   )),
-                            array(array(0), array(0, 1)),
-                            array(array(0), array(0   )),
                             array(array(0), array(2   )),
-                            array(array(0), array(0   )),
-                            array(array(0), array(1   )),
-                            array(array(0), array(1, 2)),
-                            array(array(0), array(1   )),
-                            array(array(0), array(2   )));
+                            array(array(0), array(1, 2)));
 
         $this->assertEquals($expres, $res);
         $this->assertEquals($expindexes, $indexes);
-    }*/
-
+    }
+/*
     // Tests for tagset sequences dividing function
     public function group_of_leafs_by_tagsets($tagsets) {
         $res = array();
@@ -2268,9 +2182,17 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals($res, $expres);
         $this->assertEquals($indexes, $expindexes);
-    }
+    }*/
 
     // Tests for transitions intervals dividing function
+    function compare_conditions_of_transitions($first, $second) {
+        if (count($first) != count($second))
+            return false;
+
+        for($i = 0; $i < count($first); ++$i) {
+
+        }
+    }
     /*function test_tr_1x1_non_crossed() {
         $firstfadescription = 'digraph {
                           1;
