@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // This file is part of POAS question and related behaviours - https://code.google.com/p/oasychev-moodle-plugins/
 //
 // POAS question is free software: you can redistribute it and/or modify
