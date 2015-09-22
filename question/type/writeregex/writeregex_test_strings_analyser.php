@@ -42,7 +42,7 @@ class test_strings_analyser {
      * @param $response string User response.
      * @return float Value of compare.
      */
-    public function get_equality($answer, $response) {
+    public function get_fitness($answer, $response) {
 
         $totalfraction = 0;
 

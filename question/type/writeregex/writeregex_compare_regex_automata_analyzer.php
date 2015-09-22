@@ -42,7 +42,7 @@ class compare_regex_automata_analyzer {
      * @param $respose string User response.
      * @return float Value of compare.
      */
-    public function get_equality ($answer, $respose) {
+    public function get_fitness ($answer, $respose) {
         return 0;
     }
 }
