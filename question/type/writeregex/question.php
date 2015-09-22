@@ -276,9 +276,9 @@ class qtype_writeregex_question extends question_graded_automatically
 
         foreach ($this->answers as $answer) {
             if ($answer->feedbackformat == 1) {
-                $fitness1 = $graderanalyzer->get_equality($answer->answer, $response['answer']);
-                $fitness2 = $compregex->get_equality($answer->answer, $response['answer']);
-                $fitness3 = $compregexa->get_equality($answer->answer, $response['answer']);
+                $fitness1 = $graderanalyzer->get_fitness($answer->answer, $response['answer']);
+                $fitness2 = $compregex->get_fitness($answer->answer, $response['answer']);
+                $fitness3 = $compregexa->get_fitness($answer->answer, $response['answer']);
 
                 $teststringfiness = $fitness1 * $this->compareregexpteststrings / 100;
                 $compregexfitness = $fitness2 * $this->compareregexpercentage / 100;
