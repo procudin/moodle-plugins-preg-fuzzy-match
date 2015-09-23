@@ -23,6 +23,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private $problem_id = -2;
     private $problem_type = -2;
     private $is_find_assert = false;
+    private $regex_from_tree = '';
 
     public function __construct($regex = null, $options = null) {
         parent::__construct($regex, $options);
@@ -80,8 +81,40 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $data['errors'] = $this->get_errors_description();
         $data['tips'] = $this->get_tips_description();
         $data['equivalences'] = $this->get_equivalences_description();
+
         return $data;
     }
+
+    public function get_regex() {
+        return $this->get_regex_from_tree($this->get_dst_root());
+    }
+
+    protected function get_regex_from_tree($node) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET
+            || $node->type == qtype_preg_node::TYPE_LEAF_ASSERT
+            || $node->type == qtype_preg_node::TYPE_LEAF_META
+            || $node->type == qtype_preg_node::TYPE_LEAF_BACKREF
+            || $node->type == qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL
+            || $node->type == qtype_preg_node::TYPE_LEAF_TEMPLATE
+            || $node->type == qtype_preg_node::TYPE_LEAF_CONTROL
+            || $node->type == qtype_preg_node::TYPE_LEAF_OPTIONS
+            || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT) {
+
+            foreach ($node->userinscription as $u_inscription) {
+                $this->regex_from_tree += $u_inscription;
+            }
+            return true;
+        }
+        foreach ($node->operands as $operand) {
+            if ($this->search_grouping_node($operand)) {
+                return true;
+            }
+        }
+        $this->problem_id = -2;
+        $this->problem_type = -2;
+        return false;
+    }
+
 
 
     //--- CHECK ALL RULES ---
@@ -179,7 +212,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                    || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT) {
             $this->is_find_assert = false;
         }
-        foreach($node->operands as $operand) {
+        foreach ($node->operands as $operand) {
             if ($this->search_repeated_assertions($operand)) {
                 return true;
             }
@@ -213,7 +246,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return true;
             }
         }
-        foreach($node->operands as $operand) {
+        foreach ($node->operands as $operand) {
             if ($this->search_grouping_node($operand)) {
                 return true;
             }
@@ -249,7 +282,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             }
         }
-        foreach($node->operands as $operand) {
+        foreach ($node->operands as $operand) {
             if ($this->search_subpattern_node($operand)) {
                 return true;
             }
@@ -263,10 +296,67 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($node->type == qtype_preg_node::TYPE_LEAF_BACKREF && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $number) {
             return true;
         }
-        foreach($node->operands as $operand) {
+        foreach ($node->operands as $operand) {
             if ($this->check_backref_to_subexpr($operand, $number)) {
                 return true;
             }
+        }
+        return false;
+    }
+
+
+
+    /* The 4th rule */
+    protected function cse() {
+        $equivalences = array();
+
+        $leafs = array();
+        if ($this->search_cse($this->get_dst_root())) {
+            $equivalences['problem'] = 'Повторяющееся подвыражение';
+            $equivalences['solve'] = 'Одинаковые повторяющиеся части подвыражения можно записать короче';
+            $equivalences['problem_id'] = $this->problem_id;
+            $equivalences['problem_type'] = $this->problem_type;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_cse($tree_root, $leafs, $current_leaf = null) {
+        foreach ($tree_root->operands as $operand) {
+            $current_leaf = $operand;
+            if ($this->is_can_check($operand)) {
+                $this->tree_folding($leafs, $operand);
+                $leafs[count($leafs) - 1] = array();
+                $leafs[count($leafs) - 1] = $operand;
+            }
+            for ($i = 0; $i < count($leafs) - 1; $i++) {
+                $leafs[$i] += $operand;
+            }
+        }
+
+        $this->search_cse($tree_root, $leafs, $current_leaf);
+        $this->problem_id = -2;
+        $this->problem_type = -2;
+        return false;
+    }
+
+    private function tree_folding($leafs, $current_leaf) {
+        for ($i = 0; $i < count($leafs); $i++) {
+//            $leafs[$i] += $operand;
+        }
+    }
+
+    private function is_can_check($node) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET
+            || $node->type == qtype_preg_node::TYPE_LEAF_ASSERT
+            || $node->type == qtype_preg_node::TYPE_LEAF_META
+            || $node->type == qtype_preg_node::TYPE_LEAF_BACKREF
+            || $node->type == qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL
+            || $node->type == qtype_preg_node::TYPE_LEAF_TEMPLATE
+            || $node->type == qtype_preg_node::TYPE_LEAF_CONTROL
+            || $node->type == qtype_preg_node::TYPE_LEAF_OPTIONS
+            || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT) {
+            return true;
         }
         return false;
     }
@@ -295,7 +385,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return true;
             }
         }
-        foreach($node->operands as $operand) {
+        foreach ($node->operands as $operand) {
             if ($this->search_single_charset_node($operand)) {
                 return true;
             }
@@ -306,29 +396,33 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if ($this->options->problem_id != -2 && $this->options->problem_type != -2) {
             $function_name = ('optimize_' . $this->options->problem_type);
-            return $this->$function_name($this->get_dst_root());
+            $this->$function_name($this->get_dst_root());
+//            return $this->$function_name($this->get_dst_root());
         }
-        return false;
+//        return false;
+//        return $this->get_dst_root()->get_regex_string();
+        return $this->get_regex_string();
     }
 
 
     // The 1st rule
     protected function optimize_1($node) {
-        return remove_subtree($node, $this->options->problem_id);
+        return $this->remove_subtree($node, $this->options->problem_id);
     }
 
     // The 2nd rule
     protected function optimize_2($node) {
-        return remove_subtree($node, $this->options->problem_id);
+        return $this->remove_subtree($node, $this->options->problem_id);
     }
 
     // The 3rd rule
     protected function optimize_3($node) {
-        return remove_subtree($node, $this->options->problem_id);
+        return $this->remove_subtree($node, $this->options->problem_id);
     }
 
     // The 5th rule
@@ -341,10 +435,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             return true;
         }
 
-        foreach($node->operands as $i => $operand) {
+        foreach ($node->operands as $i => $operand) {
             if ($this->remove_subtree($operand, $remove_node_id)) {
                 array_splice($node->operands, $i, 1);
-                return true;
+                return false;
             }
         }
 
@@ -356,8 +450,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             return true;
         }
 
-        foreach($node->operands as $operand) {
-            if ($this->remove_subtree($operand, $remove_node_id)) {
+        foreach ($node->operands as $operand) {
+            if ($this->remove_square_brackets_from_charset($operand, $remove_node_id)) {
                 array_shift($operand->userinscription);
                 array_pop($operand->userinscription);
                 return true;
