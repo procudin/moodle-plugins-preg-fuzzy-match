@@ -242,44 +242,44 @@ class qtype_preg_syntax_tree_operator extends qtype_preg_syntax_tree_node {
     }
 
     public function dot_script_inner($context) {
-            // Calculate the node name and style.
-            $nodename = $this->pregnode->id;
-            $style = $nodename . self::get_style($context) . ";\n";
-            $dotscript = $nodename . ";\n";
+        // Calculate the node name and style.
+        $nodename = $this->pregnode->id;
+        $style = $nodename . self::get_style($context) . ";\n";
+        $dotscript = $nodename . ";\n";
 
-            //$currcoord = $this->pregnode->position->indfirst . ',' . $this->pregnode->position->indlast;
-            if(strpos($context->foldcoords, $this->pregnode->position->indfirst . ',' . $this->pregnode->position->indlast) === false) {
-                foreach ($this->operands as $operand) {
-                    $newcontext = clone $context;
-                    $newcontext->isroot = false;
-                    $tmp = $operand->dot_script($newcontext);
-                    $edgelabel = $this->label_for_edge($operand);
-                    if ($edgelabel != '') {
-                        $othernodename = $operand->pregnode->id;
-                        $dotscript .= $nodename . '->' . $othernodename . "[label=\"$edgelabel\"];\n";
-                        $dotscript .= $tmp[0];
-                    } else {
-                        $dotscript .= $nodename . '->' . $tmp[0];
-                    }
-                    $style .= $tmp[1];
+        //$currcoord = $this->pregnode->position->indfirst . ',' . $this->pregnode->position->indlast;
+        if(strpos($context->foldcoords, $this->pregnode->position->indfirst . ',' . $this->pregnode->position->indlast) === false) {
+            foreach ($this->operands as $operand) {
+                $newcontext = clone $context;
+                $newcontext->isroot = false;
+                $tmp = $operand->dot_script($newcontext);
+                $edgelabel = $this->label_for_edge($operand);
+                if ($edgelabel != '') {
+                    $othernodename = $operand->pregnode->id;
+                    $dotscript .= $nodename . '->' . $othernodename . "[label=\"$edgelabel\"];\n";
+                    $dotscript .= $tmp[0];
+                } else {
+                    $dotscript .= $nodename . '->' . $tmp[0];
                 }
-            } else {
-                $indfirst = $this->pregnode->position->indfirst;
-                $length =  $this->pregnode->position->indlast - $this->pregnode->position->indfirst + 1;
-                if ($indfirst < 0) {
-                    $indfirst = 0;
-                }
-                if ($this->pregnode->position->indlast < 0) {
-                    $length = 0;
-                }
-                $tooltip = substr($context->handler->get_regex(),
-                                    $indfirst,
-                                    $length);
-                $tmpcoord = "treeid_" . $this->pregnode->id . '_' . $this->pregnode->position->indfirst . '_' . $this->pregnode->position->indlast;
-                $dotscript .= $nodename . "[id=\"" . $tmpcoord . "\"" . "label=\"...\", tooltip=\"" . $tooltip . "\", style=\"dotted\"];\n";
+                $style .= $tmp[1];
             }
+        } else {
+            $indfirst = $this->pregnode->position->indfirst;
+            $length =  $this->pregnode->position->indlast - $this->pregnode->position->indfirst + 1;
+            if ($indfirst < 0) {
+                $indfirst = 0;
+            }
+            if ($this->pregnode->position->indlast < 0) {
+                $length = 0;
+            }
+            $tooltip = substr($context->handler->get_regex(),
+                                $indfirst,
+                                $length);
+            $tmpcoord = "treeid_" . $this->pregnode->id . '_' . $this->pregnode->position->indfirst . '_' . $this->pregnode->position->indlast;
+            $dotscript .= $nodename . "[id=\"" . $tmpcoord . "\"" . "label=\"...\", tooltip=\"" . $tooltip . "\", style=\"dotted\"];\n";
+        }
 
-            return array($dotscript, $style);
+        return array($dotscript, $style);
     }
 
     public function label() {
