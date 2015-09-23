@@ -414,6 +414,7 @@ M.preg_authoring_tools_script = (function ($) {
         self.cache[self.DESCRIPTION_KEY][k] = d;
         //self.cache[self.SIMPLIFICATION_KEY][k] = si;
 
+        self.regex_input.val(regex);
         // Display the content.
         self.display_content(t, g, d, si, indfirst, indlast, indfirstorig, indlastorig);
     },

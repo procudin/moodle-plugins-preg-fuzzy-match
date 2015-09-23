@@ -62,10 +62,16 @@ function qtype_preg_get_json_array() {
     $stooloptions->problem_id = $problem_id;
     $stooloptions->problem_type = $problem_type;
 
+//    $tree = new qtype_preg_simplification_tool($regex, $stooloptions);
+//    var_dump('+------------------------------------');
+//    var_dump($tree->get_dst_root()->get_regex_string());
+
     if ($stooloptions->problem_id != -2 && $stooloptions->problem_type != -2) {
         $simplified_regex = new qtype_preg_simplification_tool($regex, $stooloptions);
-        $simplified_regex->optimization();
-//        var_dump($simplified_regex->get_dst_root());
+//        var_dump('+------------------------------------');
+//        var_dump($stooloptions->problem_type);
+        $regex = $simplified_regex->optimization();
+//        var_dump($regex);
     }
 
     $tools = array(
