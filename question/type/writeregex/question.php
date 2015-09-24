@@ -267,22 +267,23 @@ class qtype_writeregex_question extends question_graded_automatically
             return $this->bestfitanswer;
         }
 
-        $graderanalyzer = new test_strings_analyser($this);
-        $compregex = new compare_regex_analyzer($this);
-        $compregexa = new compare_regex_automata_analyzer($this);
+        $analyzers = array("string" => new test_strings_analyser($this),
+                           "regex" => new compare_regex_analyzer($this),
+                           "automata" => new compare_regex_automata_analyzer($this));
 
         $bestfitanswer = null;
         $bestfitness = 0.0;
 
         foreach ($this->answers as $answer) {
             if ($answer->feedbackformat == 1) {
-                $fitness1 = $graderanalyzer->get_fitness($answer->answer, $response['answer']);
-                $fitness2 = $compregex->get_fitness($answer->answer, $response['answer']);
-                $fitness3 = $compregexa->get_fitness($answer->answer, $response['answer']);
+                $fitnesses = array();
+                foreach ($analyzers as $key => $analyzer) {
+                    $fitnesses[] = $analyzer->get_fitness($answer->answer, $response['answer']);
+                }
 
-                $teststringfiness = $fitness1 * $this->compareregexpteststrings / 100;
-                $compregexfitness = $fitness2 * $this->compareregexpercentage / 100;
-                $compregexafitness = $fitness3 * $this->compareautomatapercentage / 100;
+                $teststringfiness = $fitnesses[0] * $this->compareregexpteststrings / 100;
+                $compregexfitness = $fitnesses[1] * $this->compareregexpercentage / 100;
+                $compregexafitness = $fitnesses[2] * $this->compareautomatapercentage / 100;
 
                 $fraction = $teststringfiness + $compregexfitness + $compregexafitness;
 
