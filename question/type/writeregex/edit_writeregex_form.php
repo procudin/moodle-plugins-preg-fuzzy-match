@@ -263,13 +263,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $sumgrade = 0;
 
         foreach ($strings as $key => $item) {
-            $trimdata = trim($item);
+			$trimdata = trim($item);
             if ($trimdata !== '') {
                 $answercount++;
                 $sumgrade = $sumgrade + $data['wre_regexp_ts_fraction'][$key];
             }
         }
-
+	
+		$sumgrade = round($sumgrade, 2);
         if ($sumgrade != 1 and $test > 0) {
             $errors["wre_regexp_ts_answer[0]"] = get_string('invalidtssumvalue', 'qtype_writeregex');
         }
