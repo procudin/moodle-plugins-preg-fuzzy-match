@@ -330,7 +330,8 @@ class qtype_preg_hintnextlexem extends qtype_preg_hintmatchingpart {
     }
 
     public function to_be_continued($matchresults) {
-        return  $this->hinttoken->position()->colend() + 1 < core_text::strlen($matchresults->extendedmatch->str())
-                || $matchresults->extendedmatch->full === false;
+        return  is_object($this->hinttoken) && // There is something to add to the response (sometimes we need to delete, not add).
+                ( $this->hinttoken->position()->colend() + 1 < core_text::strlen($matchresults->extendedmatch->str()) || // Hinted token ends before generated string end.
+                    $matchresults->extendedmatch->full === false ); // Generated string is not full.
     }
 }

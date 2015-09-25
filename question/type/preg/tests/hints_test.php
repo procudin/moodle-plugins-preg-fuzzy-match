@@ -44,7 +44,7 @@ class qtype_preg_hints_test extends PHPUnit_Framework_TestCase {
         // Correct answer.
         $answer100 = new stdClass();
         $answer100->id = 100;
-        $answer100->answer = 'He\s+suspects,\s+but\s+he\s+does\s+not\s+know\s+\-\s+not\s+yet\.\s*';
+        $answer100->answer = 'He\s+suspects,\s+but\s+he\s+does\s+not\s+know\s+\-\s+not\s+yet\.\s*$';
         $answer100->fraction = 1;
         $answer100->feedback = '';
 
@@ -91,6 +91,12 @@ class qtype_preg_hints_test extends PHPUnit_Framework_TestCase {
         $matchresults = $bestfit['match'];
         $this->assertTrue($hint->hinted_string($matchresults) == 'suspects');
         $this->assertTrue($hint->to_be_continued($matchresults));
+
+        // Response contains answer and some more.
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'He suspects, but he does not know - not yet. (c) who?'));
+        $matchresults = $bestfit['match'];
+        $this->assertTrue($hint->hinted_string($matchresults) == '');
+        $this->assertFalse($hint->to_be_continued($matchresults));
 
         // No match at all.
         $bestfit = $testquestion->get_best_fit_answer(array('answer' => '%^&%^*&^%'));
@@ -146,6 +152,12 @@ class qtype_preg_hints_test extends PHPUnit_Framework_TestCase {
         $matchresults = $bestfit['match'];
         $this->assertTrue($hint->hinted_string($matchresults) == 's');
         $this->assertTrue($hint->to_be_continued($matchresults));
+
+        // Response contains answer and some more.
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'He suspects, but he does not know - not yet. (c) who?'));
+        $matchresults = $bestfit['match'];
+        $this->assertTrue($hint->hinted_string($matchresults) == '');
+        $this->assertFalse($hint->to_be_continued($matchresults));
 
         // No match at all.
         $bestfit = $testquestion->get_best_fit_answer(array('answer' => '%^&%^*&^%'));
