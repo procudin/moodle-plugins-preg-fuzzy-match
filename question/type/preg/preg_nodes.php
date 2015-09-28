@@ -809,6 +809,16 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         }
     }
 
+    public static function by_regex($regex) {
+        $options = new qtype_preg_handling_options();
+        $options->preserveallnodes = true;
+        StringStreamController::createRef('regex', $regex);
+        $pseudofile = fopen('string://regex', 'r');
+        $lexer = new qtype_preg_lexer($pseudofile);
+        $lexer->set_options($options);
+        return $lexer->nextToken()->value;
+    }
+
     public function clear_cached_ranges() {
         $this->cachedranges = null;
     }
