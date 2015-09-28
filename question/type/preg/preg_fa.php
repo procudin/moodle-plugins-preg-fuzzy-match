@@ -141,8 +141,72 @@ class qtype_preg_fa_transition {
         return $this->from == $other->from && $this->to == $other->to && $this->pregleaf == $other->pregleaf && count($this->mergedbefore) == count($other->mergedbefore) && count($this->mergedafter) == count($other->mergedafter);
     }
 
-    public static function divide_intervals($firstgroup, $secondgroup, &$resint) {
+    /**
+     * Divides two arrays of transitions to noncrossed with tags
+     * @param firstgroup - first array of transitions
+     * @param secondgroup - second array of transitions
+     * @param indexes - array of two arrays of indexes of given transitions, completing each result transition condition
+     * @return result intervals, containing noncrossed transition conditions
+     */
+    public static function divide_intervals($firstgroup, $secondgroup, &$indexes) {
+        $result = array();
+        $indexes = array();
+        $charsetranges = array();
 
+        // Divide charsets
+        $firstgroupcharsets = array();
+        $secondgroupcharsets = array();
+        foreach ($firstgroup as $curtransition) {
+            $firstgroupcharsets[] = $curtransition->pregleaf;
+        }
+        foreach ($secondgroup as $curtransition) {
+            $secondgroupcharsets[] = $curtransition->pregleaf;
+        }
+        $charsetranges = qtype_preg_leaf_charset::divide_intervals($firstgroupcharsets, $secondgroupcharsets, $charsetindexes);
+        $newtagsequenceappear = true;
+
+        // Divide tagsets
+        for ($i = 0; $i < count($charsetranges); ++$i) {
+            $firstgrouptagsets = array();
+            $secondgrouptagsets = array();
+            for ($j = 0; $j < count($charsetindexes[$i][0]); ++$j) {
+                $transitionind = $charsetindexes[$i][0][$j];
+                $firstgrouptagsets[] = array($firstgroup[$transitionind]->opentags, $firstgroup[$transitionind]->closetags);
+            }
+            for ($j = 0; $j < count($charsetindexes[$i][1]); ++$j) {
+                $transitionind = $charsetindexes[$i][1][$j];
+                $secondgrouptagsets[] = array($secondgroup[$transitionind]->opentags, $secondgroup[$transitionind]->closetags);
+            }
+            $tagsets = qtype_preg_leaf_meta::divide_tagsets($firstgrouptagsets, $secondgrouptagsets, $tagsetindexes);
+
+            // Generate results
+            for ($j = 0; $j < count($tagsets); ++$j) {
+                $curtransition = new qtype_preg_fa_transition(1, qtype_preg_leaf_charset::by_regex($charsetranges[$i]), 2);
+
+                foreach ($tagsets[$j][0] as $opentagvalue) {
+                    $meta = new qtype_preg_leaf_meta();
+                    $meta->subpattern = $opentagvalue;
+                    $curtransition->opentags[] = $meta;
+                }
+                foreach ($tagsets[$j][1] as $opentagvalue) {
+                    $meta = new qtype_preg_leaf_meta();
+                    $meta->subpattern = $opentagvalue;
+                    $curtransition->closetags[] = $meta;
+                }
+                $result[] = $curtransition;
+
+                // Tagset indexes are truw for given subarrays of remaining groups.
+                // Translating this local indexes to global ones.
+                $indexes[] = array(array(), array());
+                for ($k = 0; $k <= 1; ++$k) {
+                    foreach ($tagsetindexes[$j][$k] as $curindex) {
+                        $indexes[count($indexes) - 1][$k][] = $charsetindexes[$i][$k][$curindex];
+                    }
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
