@@ -23,13 +23,18 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
      */
     function create_array_of_transitions_from_fa($fa) {
         $arr = array();
-
         foreach ($fa->adjacencymatrix as $matr) {
             foreach ($matr as $marray) {
                 foreach ($marray as $tr) {
                     $arr[] = $tr;
                 }
             }
+        }
+
+        for ($i = 0; $i < count($arr) / 2; ++$i) {
+            $tmp = $arr[$i];
+            $arr[$i] = $arr[count($arr) - $i - 1];
+            $arr[count($arr) - $i - 1] = $tmp;
         }
 
         return $arr;
@@ -1745,7 +1750,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $this->assertTrue($this->compare_pairs($intervals, $exppairs));
     }*/
-
+/*
     // Tests for charset intervals dividing function
     function create_lexer($regex, $options = null) {
         if ($options === null) {
@@ -1956,7 +1961,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
     }*/
 
     // Tests for tagset sequences dividing function
-    public function group_of_leafs_by_tagsets($tagsets) {
+    /*public function group_of_leafs_by_tagsets($tagsets) {
         $res = array();
         $count = 0;
         foreach ($tagsets as $tagset) {
@@ -2338,17 +2343,33 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->compare_tagsets_and_indexes($expres, $res, $expindexes, $indexes));
     }
 
-/*
+*/
     // Tests for transitions intervals dividing function
+    function compare_tagsets($first, $second) {
+        if (count($first) != count($second))
+            return false;
+
+        for($i = 0; $i < count($first); ++$i) {
+            if ($first[$i]->subpattern != $second[$i]->subpattern)
+                return false;
+        }
+
+        return true;
+    }
     function compare_conditions_of_transitions($first, $second) {
         if (count($first) != count($second))
             return false;
 
         for($i = 0; $i < count($first); ++$i) {
-
+            if ($first[$i]->pregleaf->excluding_ranges() != $second[$i]->pregleaf->excluding_ranges() ||
+                !$this->compare_tagsets($first[$i]->opentags, $second[$i]->opentags) ||
+                !$this->compare_tagsets($first[$i]->closetags, $second[$i]->closetags))
+                return false;
         }
+
+        return true;
     }
-    /*function test_tr_1x1_non_crossed() {
+    function test_tr_1x1_non_crossed() {
         $firstfadescription = 'digraph {
                           1;
                           2;
@@ -2373,10 +2394,10 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
 
-        $expindexes = array(array(array(0), array()),
-                            array(array(), array(0)));
+        $expindexes = array(array(array(), array(0)),
+                            array(array(0), array()));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     function test_tr_1x1_part_crossed() {
@@ -2407,7 +2428,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $expindexes = array(array(array( ), array(0)),
                             array(array(0), array(0)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_1x1_full_crossed() {
@@ -2436,7 +2457,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $expindexes = array(array(array(0), array(0)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
 
@@ -2471,7 +2492,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                             array(array( ), array(1)),
                             array(array(0), array( )));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_1x2_part_crossed() {
@@ -2505,7 +2526,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                             array(array( ), array(1)),
                             array(array(0), array(1)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_1x2_full_crossed() {
@@ -2537,7 +2558,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $expindexes = array(array(array(0), array(0)),
                             array(array(0), array(1)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_2x3_non_crossed() {
@@ -2571,13 +2592,13 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
 
-        $expindexes = array(array(array(0), array( )),
+        $expindexes = array(array(array(0), array(0)),
                             array(array( ), array(0)),
                             array(array(1), array( )),
                             array(array( ), array(1)),
                             array(array( ), array(2)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_2x3_part_crossed() {
@@ -2597,7 +2618,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $resfadescription = 'digraph {
                           1;
                           2;
-                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          1->2[label=<<B>o:1, [a] c:4,</B>>];
                           1->2[label=<<B>o: [a] c:4,</B>>];
                           1->2[label=<<B>o: [c] c:2,</B>>];
                           1->2[label=<<B>o: [d-e] c:2,</B>>];
@@ -2616,10 +2637,10 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                             array(array(0), array(0)),
                             array(array(1), array( )),
                             array(array(1), array(1)),
-                            array(array(0), array(1)),
+                            array(array( ), array(1)),
                             array(array( ), array(2)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_2x3_full_crossed() {
@@ -2655,7 +2676,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                             array(array(1), array(1)),
                             array(array(1), array(2)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_2x3_open_and_close_tags_in_one_tr() {
@@ -2691,9 +2712,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $expindexes = array(array(array(0), array(0)),
                             array(array(1), array(1)),
                             array(array(1), array( )),
-                            array(array( ), array(2)));
+                            array(array(1), array(2)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_2x3_multiple_tags_in_one_tr() {
@@ -2713,11 +2734,11 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $resfadescription = 'digraph {
                           1;
                           2;
-                          1->2[label=<<B>o:3, [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:4,6,8,</B>>];
+                          1->2[label=<<B>o:3, [a] c:4,</B>>];
                           1->2[label=<<B>o: [a] c:4,</B>>];
-                          1->2[label=<<B>o: [a] c:6,8,</B>>];
+                          1->2[label=<<B>o:1,3,5, [d-h] c:</B>>];
                           1->2[label=<<B>o:1,3, [d-h] c:</B>>];
-                          1->2[label=<<B>o:5, [d-h] c:</B>>];
                           1->2[label=<<B>o:1,3,5, [i] c:</B>>];
                           }';
         $mismatches = array();
@@ -2728,14 +2749,14 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
 
-        $expindexes = array(array(array( ), array(0)),
+        $expindexes = array(array(array(0), array( )),
+                            array(array( ), array(0)),
                             array(array(0), array(0)),
-                            array(array(0), array( )),
-                            array(array(1), array(1)),
                             array(array(1), array( )),
+                            array(array(1), array(1)),
                             array(array(1), array(2)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
     }
     public function test_tr_2x3_non_crossed_tags() {
@@ -2755,12 +2776,15 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $resfadescription = 'digraph {
                           1;
                           2;
-                          1->2[label=<<B>o:1, [a] c:</B>>];
                           1->2[label=<<B>o: [a] c:4,6,</B>>];
+                          1->2[label=<<B>o:1, [a] c:</B>>];
+                          1->2[label=<<B>o: [a] c:</B>>];
                           1->2[label=<<B>o:1, [d-h] c:</B>>];
                           1->2[label=<<B>o:3, [d-h] c:</B>>];
+                          1->2[label=<<B>o: [d-h] c:</B>>];
                           1->2[label=<<B>o:1, [i] c:</B>>];
                           1->2[label=<<B>o:5, [i] c:</B>>];
+                          1->2[label=<<B>o: [i] c:</B>>];
                           }';
         $mismatches = array();
         $firstfa = qtype_preg_fa::read_fa($firstfadescription);
@@ -2770,19 +2794,22 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $res = qtype_preg_fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
 
-        $expindexes = array(array(array( ), array(0)),
-                            array(array(0), array( )),
+        $expindexes = array(array(array(0), array( )),
+                            array(array( ), array(0)),
+                            array(array(0), array(0)),
                             array(array(1), array( )),
                             array(array( ), array(1)),
+                            array(array(1), array(1)),
                             array(array(1), array( )),
-                            array(array( ), array(2)));
+                            array(array( ), array(2)),
+                            array(array(1), array(2)));
 
-        $this->assertEquals($this->create_array_of_transitions_from_fa($resfa), $res);
+        $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
         $this->assertEquals($expindexes, $indexes);
-    }*/
+    }
 
 
-/*    function test_1x1_non_crossed() {
+    /*function test_1x1_non_crossed() {
         $firstfadescription = 'digraph {
                           1;
                           4;
@@ -2816,7 +2843,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->compare_pairs($res, $expres));
     }
 
-    function test_1x1_part_crossed() {
+    /*function test_1x1_part_crossed() {
         $firstfadescription = 'digraph {
                           1;
                           4;
