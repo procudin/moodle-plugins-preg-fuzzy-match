@@ -87,8 +87,8 @@ $string['compareautomatapercentage'] = 'Проверка совпадения р
 
 $string['compareregexpteststrings'] = 'Проверка совпадения регулярных выражений (в %) по тестовым строкам';
 
-$string['wre_regexp_answers'] = "Регулярное\nвыражение";
-$string['wre_regexp_ts'] = 'Тестовая строка';
+$string['wre_regexp_answers'] = "Регулярное\nвыражение {no}";
+$string['wre_regexp_ts'] = 'Тестовая строка {no}';
 
 $string['wre_error_matching'] = 'Сумма всех типов проверок не равна 100%';
 
