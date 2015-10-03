@@ -87,8 +87,8 @@ $string['compareautomatapercentage'] = 'Checking regular expression matching (in
 
 $string['compareregexpteststrings'] = 'Checking regular expression matching (in %) in test strings';
 
-$string['wre_regexp_answers'] = 'Regular expression';
-$string['wre_regexp_ts'] = 'Test string';
+$string['wre_regexp_answers'] = 'Regular expression {no}';
+$string['wre_regexp_ts'] = 'Test string {no}';
 
 $string['wre_error_matching'] = 'Sum of all matching type is not equal 100%';
 
