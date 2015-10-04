@@ -381,7 +381,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     private function add_test_strings(&$mform, $label, $gradeoptions,
                                       $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        $mform->addElement('header', 'teststrhdr', get_string($label, 'qtype_writeregex'), '');
+        $mform->addElement('header', 'teststrhdr', get_string($label."_header", 'qtype_writeregex'), '');
         $mform->setExpanded('teststrhdr', 1);
 
         $answersoption = '';
@@ -405,7 +405,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     private function add_regexp_strings(&$mform, $label, $gradeoptions,
                                         $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        $mform->addElement('header', 'answerhdr', get_string($label, 'qtype_writeregex'), '');
+        $mform->addElement('header', 'answerhdr', get_string($label."_header", 'qtype_writeregex'), '');
         $mform->setExpanded('answerhdr', 1);
 
         $answersoption = '';
@@ -419,7 +419,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $repeatsatstart = $minoptions;
         }
 
-        $addoptions = 1;
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noanswers', 'addanswers', $addoptions,
             $this->get_more_choices_string(), true);
