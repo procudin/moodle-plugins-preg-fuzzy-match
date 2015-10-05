@@ -148,7 +148,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
 
         // Add answers fields.
-        $this->add_regexp_strings($mform, 'wre_regexp_answers', question_bank::fraction_options(), 1);
+        $this->add_per_answer_fields($mform, 'wre_regexp_answers', question_bank::fraction_options(), 1);
 
         $this->add_test_strings($mform, 'wre_regexp_ts', question_bank::fraction_options(), 5);
 
@@ -322,7 +322,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @param $answersoption array Answers option
      * @return array Group of fields.
      */
-    private function  get_per_answer_fields_regexp($mform, $label, $gradeoptions,
+    protected function  get_per_answer_fields($mform, $label, $gradeoptions,
                                                    &$repeatedoptions, &$answersoption) {
 
         $repeated = array();
@@ -391,35 +391,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $repeatsatstart = $minoptions;
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noteststrings', 'addteststrings', $addoptions,
-            $this->get_more_choices_string(), true);
-    }
-
-    /**
-     * Add fields for regexp strings answers.
-     * @param $mform MoodleForm Form variable.
-     * @param $label string Label of group fields.
-     * @param $gradeoptions array Grade options array.
-     * @param int $minoptions Min options value.
-     * @param int $addoptions Additional options value
-     */
-    private function add_regexp_strings(&$mform, $label, $gradeoptions,
-                                        $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        $mform->addElement('header', 'answerhdr', get_string($label."_header", 'qtype_writeregex'), '');
-        $mform->setExpanded('answerhdr', 1);
-
-        $answersoption = '';
-        $repeatedoptions = array();
-        $repeated = $this->get_per_answer_fields_regexp($mform, $label, $gradeoptions,
-            $repeatedoptions, $answersoption);
-
-        if (isset($this->question->options)) {
-            $repeatsatstart = count($this->question->options->$answersoption);
-        } else {
-            $repeatsatstart = $minoptions;
-        }
-
-        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
-            'noanswers', 'addanswers', $addoptions,
             $this->get_more_choices_string(), true);
     }
 
