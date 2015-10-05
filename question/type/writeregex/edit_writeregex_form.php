@@ -156,6 +156,131 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
+     * Insert fields for regexp answers.
+     * @param $mform MoodleForm Form variable.
+     * @param $label string Label of group fields.
+     * @param $gradeoptions array Grade options array.
+     * @param $repeatedoptions array Repeated options.
+     * @param $answersoption array Answers option
+     * @return array Group of fields.
+     */
+    protected function  get_per_answer_fields($mform, $label, $gradeoptions,
+                                                   &$repeatedoptions, &$answersoption) {
+
+        $repeated = array();
+        $answeroptions = array();
+        $answeroptions[] = $mform->CreateElement('hidden', 'freply', 'yes');
+        $repeated[] = $mform->createElement('group', 'answeroptions',
+            '', $answeroptions, null, false);
+        $repeated[] = $mform->createElement('textarea', 'answer',
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="4" cols="80"');
+        $repeated[] = $mform->createElement('select', 'fraction',
+            get_string('grade'), $gradeoptions);
+        $repeated[] = $mform->createElement('editor', 'feedback',
+            get_string('feedback', 'question'), array('rows' => 8, 'cols' => 80), $this->editoroptions);
+        $repeatedoptions['freply']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = 'answers';
+        return $repeated;
+
+    }
+
+    /**
+     * Insert fields for test strings answers.
+     * @param $mform MoodleForm Form variable.
+     * @param $label string Label of group fields.
+     * @param $gradeoptions array Grade options array.
+     * @param $repeatedoptions array Repeated options.
+     * @param $answersoption array Answers option
+     * @return array Group of fields.
+     */
+    private function  get_per_test_string_fields($mform, $label, $gradeoptions,
+                                                    &$repeatedoptions, &$answersoption) {
+        $repeated = array();
+
+        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"', $this->editoroptions);
+
+        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
+
+        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = $label;
+
+        return $repeated;
+    }
+
+    /**
+     * Add fields for test strings answers.
+     * @param $mform MoodleForm Form variable.
+     * @param $label string Label of group fields.
+     * @param $gradeoptions array Grade options array.
+     * @param int $minoptions Min options value.
+     * @param int $addoptions Additional options value
+     */
+    private function add_per_test_string_fields(&$mform, $label, $gradeoptions,
+                                      $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+        $mform->addElement('header', 'teststrhdr', get_string($label."_header", 'qtype_writeregex'), '');
+        $mform->setExpanded('teststrhdr', 1);
+
+        $answersoption = '';
+        $repeatedoptions = array();
+        $repeated = $this->get_per_test_string_fields($mform, $label, $gradeoptions,
+            $repeatedoptions, $answersoption);
+
+        
+        $repeatsatstart = $minoptions;
+        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
+            'noteststrings', 'addteststrings', $addoptions,
+            $this->get_more_choices_string(), true);
+    }
+
+    /**
+     * Get value string for label which showing text for more choices string.
+     * @return string String from lang file.
+     */
+    protected function get_more_choices_string() {
+        return get_string('addmorechoiceblanks', 'question');
+    }
+
+    /**
+     * Create the form elements required by one hint.
+     * @param bool $withclearwrong whether this quesiton type uses the 'Clear wrong' option on hints.
+     * @param bool $withshownumpartscorrect whether this quesiton type uses the 'Show num parts correct' option on hints.
+     * @return array form field elements for one hint.
+     */
+    protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
+        $repeated = array();
+
+        $parentresult = parent::get_hint_fields($withclearwrong, $withshownumpartscorrect);
+
+        // Add our inputs.
+        $mform = $this->_form;
+        $count = count($parentresult[0]);
+
+        // Add syntax tree options.
+        $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+        // Add explaining graph options.
+        $repeated[$count++] = $mform->createElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+        // Add description options.
+        $repeated[$count++] = $mform->createElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+        // Add test string option.
+        $repeated[$count] = $mform->createElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
+            $this->hintsoptions);
+
+        $parentresult[0] = array_merge($parentresult[0], $repeated);
+
+        return $parentresult;
+    }
+
+    /**
      * Prepare answers data.
      * @param object $question Question's object.
      * @param bool $withanswerfiles If question has answers files.
@@ -311,131 +436,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         }
 
         return $errors;
-    }
-
-    /**
-     * Insert fields for regexp answers.
-     * @param $mform MoodleForm Form variable.
-     * @param $label string Label of group fields.
-     * @param $gradeoptions array Grade options array.
-     * @param $repeatedoptions array Repeated options.
-     * @param $answersoption array Answers option
-     * @return array Group of fields.
-     */
-    protected function  get_per_answer_fields($mform, $label, $gradeoptions,
-                                                   &$repeatedoptions, &$answersoption) {
-
-        $repeated = array();
-        $answeroptions = array();
-        $answeroptions[] = $mform->CreateElement('hidden', 'freply', 'yes');
-        $repeated[] = $mform->createElement('group', 'answeroptions',
-            '', $answeroptions, null, false);
-        $repeated[] = $mform->createElement('textarea', 'answer',
-            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="4" cols="80"');
-        $repeated[] = $mform->createElement('select', 'fraction',
-            get_string('grade'), $gradeoptions);
-        $repeated[] = $mform->createElement('editor', 'feedback',
-            get_string('feedback', 'question'), array('rows' => 8, 'cols' => 80), $this->editoroptions);
-        $repeatedoptions['freply']['type'] = PARAM_RAW;
-        $repeatedoptions['fraction']['default'] = 0;
-        $answersoption = 'answers';
-        return $repeated;
-
-    }
-
-    /**
-     * Insert fields for test strings answers.
-     * @param $mform MoodleForm Form variable.
-     * @param $label string Label of group fields.
-     * @param $gradeoptions array Grade options array.
-     * @param $repeatedoptions array Repeated options.
-     * @param $answersoption array Answers option
-     * @return array Group of fields.
-     */
-    private function  get_per_test_string_fields($mform, $label, $gradeoptions,
-                                                    &$repeatedoptions, &$answersoption) {
-        $repeated = array();
-
-        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
-            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"', $this->editoroptions);
-
-        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
-
-        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
-        $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
-        $repeatedoptions['fraction']['default'] = 0;
-        $answersoption = $label;
-
-        return $repeated;
-    }
-
-    /**
-     * Add fields for test strings answers.
-     * @param $mform MoodleForm Form variable.
-     * @param $label string Label of group fields.
-     * @param $gradeoptions array Grade options array.
-     * @param int $minoptions Min options value.
-     * @param int $addoptions Additional options value
-     */
-    private function add_per_test_string_fields(&$mform, $label, $gradeoptions,
-                                      $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        $mform->addElement('header', 'teststrhdr', get_string($label."_header", 'qtype_writeregex'), '');
-        $mform->setExpanded('teststrhdr', 1);
-
-        $answersoption = '';
-        $repeatedoptions = array();
-        $repeated = $this->get_per_test_string_fields($mform, $label, $gradeoptions,
-            $repeatedoptions, $answersoption);
-
-        
-        $repeatsatstart = $minoptions;
-        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
-            'noteststrings', 'addteststrings', $addoptions,
-            $this->get_more_choices_string(), true);
-    }
-
-    /**
-     * Get value string for label which showing text for more choices string.
-     * @return string String from lang file.
-     */
-    protected function get_more_choices_string() {
-        return get_string('addmorechoiceblanks', 'question');
-    }
-
-    /**
-     * Create the form elements required by one hint.
-     * @param bool $withclearwrong whether this quesiton type uses the 'Clear wrong' option on hints.
-     * @param bool $withshownumpartscorrect whether this quesiton type uses the 'Show num parts correct' option on hints.
-     * @return array form field elements for one hint.
-     */
-    protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
-        $repeated = array();
-
-        $parentresult = parent::get_hint_fields($withclearwrong, $withshownumpartscorrect);
-
-        // Add our inputs.
-        $mform = $this->_form;
-        $count = count($parentresult[0]);
-
-        // Add syntax tree options.
-        $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
-            $this->hintsoptions);
-
-        // Add explaining graph options.
-        $repeated[$count++] = $mform->createElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
-            $this->hintsoptions);
-
-        // Add description options.
-        $repeated[$count++] = $mform->createElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
-            $this->hintsoptions);
-
-        // Add test string option.
-        $repeated[$count] = $mform->createElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
-            $this->hintsoptions);
-
-        $parentresult[0] = array_merge($parentresult[0], $repeated);
-
-        return $parentresult;
     }
 
     /**
