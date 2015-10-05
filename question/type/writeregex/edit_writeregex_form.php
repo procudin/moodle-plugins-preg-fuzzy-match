@@ -148,9 +148,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
 
         // Add answers fields.
-        $this->add_regexp_strings($mform, 'wre_regexp_answers', question_bank::fraction_options());
+        $this->add_regexp_strings($mform, 'wre_regexp_answers', question_bank::fraction_options(), 1);
 
-        $this->add_test_strings($mform, 'wre_regexp_ts', question_bank::fraction_options());
+        $this->add_test_strings($mform, 'wre_regexp_ts', question_bank::fraction_options(), 5);
 
         $this->add_interactive_settings();
     }
@@ -388,7 +388,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $repeatedoptions, $answersoption);
 
         
-        $repeatsatstart = 5;
+        $repeatsatstart = $minoptions;
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noteststrings', 'addteststrings', $addoptions,
             $this->get_more_choices_string(), true);
