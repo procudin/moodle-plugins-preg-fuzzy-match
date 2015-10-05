@@ -150,7 +150,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         // Add answers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers', question_bank::fraction_options(), 1);
 
-        $this->add_test_strings($mform, 'wre_regexp_ts', question_bank::fraction_options(), 5);
+        $this->add_per_test_string_fields($mform, 'wre_regexp_ts', question_bank::fraction_options(), 5);
 
         $this->add_interactive_settings();
     }
@@ -352,7 +352,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @param $answersoption array Answers option
      * @return array Group of fields.
      */
-    private function  get_per_answer_fields_strings($mform, $label, $gradeoptions,
+    private function  get_per_test_string_fields($mform, $label, $gradeoptions,
                                                     &$repeatedoptions, &$answersoption) {
         $repeated = array();
 
@@ -377,14 +377,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @param int $minoptions Min options value.
      * @param int $addoptions Additional options value
      */
-    private function add_test_strings(&$mform, $label, $gradeoptions,
+    private function add_per_test_string_fields(&$mform, $label, $gradeoptions,
                                       $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
         $mform->addElement('header', 'teststrhdr', get_string($label."_header", 'qtype_writeregex'), '');
         $mform->setExpanded('teststrhdr', 1);
 
         $answersoption = '';
         $repeatedoptions = array();
-        $repeated = $this->get_per_answer_fields_strings($mform, $label, $gradeoptions,
+        $repeated = $this->get_per_test_string_fields($mform, $label, $gradeoptions,
             $repeatedoptions, $answersoption);
 
         
