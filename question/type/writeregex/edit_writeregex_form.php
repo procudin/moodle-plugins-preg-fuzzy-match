@@ -148,11 +148,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
 
         // Add answers fields.
-        $this->add_per_answer_fields($mform, 'wre_regexp_answers',
-            question_bank::fraction_options());
+        $this->add_regexp_strings($mform, 'wre_regexp_answers', question_bank::fraction_options());
 
-        $this->add_per_answer_fields($mform, 'wre_regexp_ts',
-            question_bank::fraction_options());
+        $this->add_test_strings($mform, 'wre_regexp_ts', question_bank::fraction_options());
 
         $this->add_interactive_settings();
     }
@@ -389,6 +387,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $repeated = $this->get_per_answer_fields_strings($mform, $label, $gradeoptions,
             $repeatedoptions, $answersoption);
 
+        
         $repeatsatstart = 5;
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noteststrings', 'addteststrings', $addoptions,
@@ -422,25 +421,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noanswers', 'addanswers', $addoptions,
             $this->get_more_choices_string(), true);
-    }
-
-    /**
-     * Add a set of form fields, obtained from get_per_answer_fields, to the form,
-     * one for each existing answer, with some blanks for some new ones.
-     * @param object $mform the form being built.
-     * @param the $label the label to use for each option.
-     * @param the $gradeoptions the possible grades for each answer.
-     * @param int|the $minoptions the minimum number of answer blanks to display.
-     * @param int|the $addoptions the number of answer blanks to add.
-     */
-    protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
-                                             $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        // Select type of answers fields.
-        if ($label == 'wre_regexp_ts') {
-            $this->add_test_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
-        } else {
-            $this->add_regexp_strings($mform, $label, $gradeoptions, $minoptions, $addoptions);
-        }
     }
 
     /**
