@@ -89,7 +89,6 @@ $string['compareregexpteststrings'] = 'Проверка совпадения р�
 
 $string['wre_regexp_answers'] = "Регулярное\nвыражение {no}";
 $string['wre_regexp_ts'] = 'Тестовая строка {no}';
-$string['wre_regexp_answers_header'] = "Регулярные выражения";
 $string['wre_regexp_ts_header'] = 'Тестовые строки';
 
 $string['wre_error_matching'] = 'Сумма всех типов проверок не равна 100%';
