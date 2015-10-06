@@ -456,11 +456,14 @@ class qtype_preg_question extends question_graded_automatically
         if (count($this->hints) > 0) {
             $hinttypes[] = 'hintmoodle#';
         }
-        if ($this->usecharhint) {
-            $hinttypes[] = 'hintnextchar';
-        }
-        if ($this->uselexemhint) {
-            $hinttypes[] = 'hintnextlexem';
+        $querymatcher = $this->get_query_matcher($this->engine);
+        if ($querymatcher->is_supporting(qtype_preg_matcher::CORRECT_ENDING)) {
+            if ($this->usecharhint) {
+                $hinttypes[] = 'hintnextchar';
+            }
+            if ($this->uselexemhint) {
+                $hinttypes[] = 'hintnextlexem';
+            }
         }
         return $hinttypes;
     }
