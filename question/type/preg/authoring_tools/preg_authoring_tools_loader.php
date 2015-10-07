@@ -14,6 +14,7 @@ require_once(dirname(__FILE__) . '/../../../../config.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_description_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_explaining_graph_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_syntax_tree_tool.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_simplification_tool.php');
 
 /**
  * Generates json array which stores authoring tools' content.
@@ -30,6 +31,8 @@ function qtype_preg_get_json_array() {
     $displayas = optional_param('displayas', '', PARAM_RAW);
     $foldcoords = optional_param('foldcoords', '', PARAM_RAW);
     $treeisfold = (bool)optional_param('treeisfold', '', PARAM_INT);
+    $problem_id = optional_param('problem_id', null, PARAM_INT);
+    $problem_type = optional_param('problem_type', null, PARAM_INT);
 
     // Array with authoring tools
     $options = new qtype_preg_authoring_tools_options();
@@ -52,10 +55,30 @@ function qtype_preg_get_json_array() {
     $options->foldcoords = $foldcoords;
     $options->treeisfold = $treeisfold;
 
+    $stooloptions = new qtype_preg_simplification_tool_options();
+    $stooloptions->engine = $engine;
+    $stooloptions->notation = $notation;
+    $stooloptions->exactmatch = $exactmatch;
+    $stooloptions->problem_id = $problem_id;
+    $stooloptions->problem_type = $problem_type;
+
+//    $tree = new qtype_preg_simplification_tool($regex, $stooloptions);
+//    var_dump('+------------------------------------');
+//    var_dump($tree->get_dst_root()->get_regex_string());
+
+    if ($stooloptions->problem_id != -2 && $stooloptions->problem_type != -2) {
+        $simplified_regex = new qtype_preg_simplification_tool($regex, $stooloptions);
+//        var_dump('+------------------------------------');
+//        var_dump($stooloptions->problem_type);
+        $regex = $simplified_regex->optimization();
+//        var_dump($regex);
+    }
+
     $tools = array(
         'tree' => new qtype_preg_syntax_tree_tool($regex, $options),
         'graph' => new qtype_preg_explaining_graph_tool($regex, $options),
-        'description' => new qtype_preg_description_tool($regex, $options)
+        'description' => new qtype_preg_description_tool($regex, $options),
+        'simplification' => new qtype_preg_simplification_tool($regex, $stooloptions)
     );
 
     // Fill the json array.
