@@ -2421,6 +2421,10 @@ class qtype_preg_node_subexpr extends qtype_preg_operator {
 
     public function get_regex_string() {
         $regex_string = '(';
+        if ($this->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
+            $regex_string .= '?:';
+        }
+
         foreach ($this->operands as $operand) {
             $regex_string .= $operand->get_regex_string();
         }
