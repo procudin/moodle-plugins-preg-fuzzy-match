@@ -56,46 +56,7 @@ class qtype_preg_authoring_form extends moodleform {
         $mform->addElement('textarea', 'regex_text', get_string('authoring_form_text', 'qtype_preg'), array('rows' => 1, 'cols' => 80, 'style' => 'width: 100%', 'class'=>'qtype-preg-highlighted-regex-text'));
         $mform->setType('regex_text', PARAM_RAW);
 
-
-
         $mform->addElement('preg_collapsible_info_block');
-
-        // НАЧАЛО ПОДСКАЗОК
-//        $mform->addElement('html', '
-//                                <div class="accordion" id="healp_accordion" style="margin-top: -20px; overflow: hidden; position: relative; width: 80%; top: auto; left: 90px; margin: 0px 0px 10px; padding-right: 7px; padding-bottom: 12px;">
-//                                  <div class="accordion-group">
-//                                    <div class="accordion-heading">
-//                                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#healp_accordion" href="#healpAccordion">
-//                                        <strong>' . get_string('simplification_tool', 'qtype_preg') . '</strong>
-//                                        <span class="label label-important">' . get_string('simplification_tool_error', 'qtype_preg') . '<span id="simplification_tool_errors_count">0</span></span>
-//                                        <span class="label label-warning">' . get_string('simplification_tool_tip', 'qtype_preg') . '<span id="simplification_tool_tips_count">0</span></span>
-//                                        <span class="label label-info">' . get_string('simplification_tool_equivalence', 'qtype_preg') . '<span id="simplification_tool_equivalences_count">0</span></span>
-//                                      </a>
-//                                    </div>
-//                                    <div id="healpAccordion" class="accordion-body collapse">
-//                                      <div class="accordion-inner">
-//                                        <div style="height: 150px; overflow: auto; margin-bottom: 10px;">
-//                                            <table class="table table-hover" id="simplification_tool_hints">
-//                                              <tbody>
-//                                              </tbody>
-//                                            </table>
-//                                        </div>
-//
-//                                        <div class="fitem">
-//                                            <div class="felement" style="margin-left: 155px;">
-//                                                <p><span id="simplification_tool_hint_text">
-//                                                </span></p>
-//                                                <button class="btn btn-primary" id="simplification_tool_apply_btn">' . get_string('simplification_tool_apply', 'qtype_preg') . '</button>
-//                                                <button class="btn btn-default" id="simplification_tool_cancel_btn">' . get_string('simplification_tool_cancel', 'qtype_preg') . '</button>
-//                                            </div>
-//                                        </div>
-//                                      </div>
-//                                    </div>
-//                                  </div>
-//                                </div>');
-        // КОНЕЦ ПОДСКАЗОК
-
-
 
         $topline = array();
         $topline[] =& $mform->createElement('submit', 'regex_show', get_string('show', 'moodle'));
