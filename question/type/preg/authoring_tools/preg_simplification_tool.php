@@ -229,9 +229,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                    || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT) {
             $this->is_find_assert = false;
         }
-        foreach ($node->operands as $operand) {
-            if ($this->search_repeated_assertions($operand)) {
-                return true;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_repeated_assertions($operand)) {
+                    return true;
+                }
             }
         }
 
@@ -269,9 +271,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return true;
             }
         }
-        foreach ($node->operands as $operand) {
-            if ($this->search_grouping_node($operand)) {
-                return true;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_grouping_node($operand)) {
+                    return true;
+                }
             }
         }
 
@@ -311,9 +315,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             }
         }
-        foreach ($node->operands as $operand) {
-            if ($this->search_subpattern_node($operand)) {
-                return true;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_subpattern_node($operand)) {
+                    return true;
+                }
             }
         }
 
@@ -327,9 +333,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($node->type == qtype_preg_node::TYPE_LEAF_BACKREF && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $number) {
             return true;
         }
-        foreach ($node->operands as $operand) {
-            if ($this->check_backref_to_subexpr($operand, $number)) {
-                return true;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->check_backref_to_subexpr($operand, $number)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -339,7 +347,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
     /* The 4th rule */
-    protected function cse() {
+    public function cse() {
         $equivalences = array();
 
         if ($this->search_cse($this->get_dst_root())) {
@@ -362,16 +370,18 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             array_push($leafs[0], $tree_root);
         }
 
-        foreach ($tree_root->operands as $operand) {
-            if ($this->search_subexpr($leafs, $operand, $tree_root)) {
-                return true;
-            }
-            $leafs[count($leafs)] = array();
-            for ($i = 0; $i < count($leafs); $i++) {
-                array_push($leafs[$i], $operand);
-            }
-            if ($this->search_cse($operand, $leafs)) {
-                return true;
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                if ($this->search_subexpr($leafs, $operand, $tree_root)) {
+                    return true;
+                }
+                $leafs[count($leafs)] = array();
+                for ($i = 0; $i < count($leafs); $i++) {
+                    array_push($leafs[$i], $operand);
+                }
+                if ($this->search_cse($operand, $leafs)) {
+                    return true;
+                }
             }
         }
 
@@ -381,7 +391,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function search_subexpr($leafs, $current_leaf, $tree_root) {
         foreach ($leafs as $leaf) {
             $tmp_root = $this->get_local_root_for_node($this->get_dst_root(), $leaf[0]);
-            if ($leaf[0]->is_equal($current_leaf) && $this->compare_local_root($tmp_root, $tree_root)) {
+            if ($leaf[0]->is_equal($current_leaf, null) && $this->compare_local_root($tmp_root, $tree_root)) {
                 if (count($leaf) == 1) {
                     array_push($this->problem_ids, 1);//length
                     array_push($this->problem_ids, $leaf[0]->id);
@@ -405,35 +415,41 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function get_local_root_for_node($tree_root, $node) {
+    private function get_local_root_for_node($tree_root, $node)
+    {
         $local_root = null;
-        foreach ($tree_root->operands as $operand) {
-            if ($operand->id == $node->id) {
-                return $tree_root;
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                if ($operand->id == $node->id) {
+                    return $tree_root;
+                }
+                $local_root = $this->get_local_root_for_node($operand, $node);
             }
-            $local_root = $this->get_local_root_for_node($operand, $node);
         }
         return $local_root;
     }
 
-    private function get_right_leafs($tree_root, $current_leaf, $size, &$leafs = null, $is_found = false) {
+    private function get_right_leafs($tree_root, $current_leaf, $size, &$leafs = null, $is_found = false)
+    {
         if ($leafs == NULL) {
             $leafs = array();
         }
 
-        foreach ($tree_root->operands as $operand) {
-            if ($current_leaf->id == $operand->id) {
-                $is_found = true;
-            }
-
-            if ($is_found && count($leafs) < $size) {
-                array_push($leafs, $operand);
-                if (count($leafs) >= $size) {
-                    return $leafs;
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                if ($current_leaf->id == $operand->id) {
+                    $is_found = true;
                 }
-            }
 
-            $this->get_right_leafs($operand, $current_leaf, $size, $leafs, $is_found);
+                if ($is_found && count($leafs) < $size) {
+                    array_push($leafs, $operand);
+                    if (count($leafs) >= $size) {
+                        return $leafs;
+                    }
+                }
+
+                $this->get_right_leafs($operand, $current_leaf, $size, $leafs, $is_found);
+            }
         }
 
         return $leafs;
@@ -446,7 +462,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         for ($i = 0; $i < count($leafs1); $i++) {
-            if (!$leafs1[$i]->is_equal($leafs2[$i])) {
+            if (!$leafs1[$i]->is_equal($leafs2[$i], null)) {
                 return false;
             }
         }
@@ -454,7 +470,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     private function compare_local_root($local_root1, $local_root2) {
-        if ($local_root1 != null && $local_root2 != null && $local_root1->is_equal($local_root2)) {
+        if ($local_root1 != null && $local_root2 != null && $local_root1->is_equal($local_root2, null)) {
             return $this->is_can_local_root($local_root1) && $this->is_can_local_root($local_root2);
         }
         return false;
@@ -482,13 +498,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     // Функция светрки подвыражений
     private function fold_cse($tree_root) {
         if ($tree_root->id != $this->options->problem_ids[1]) {
-            foreach ($tree_root->operands as $operand) {
-                if ($operand->id == $this->options->problem_ids[1]) {
-                    $this->tree_folding($operand, $tree_root);
-                    return true;
-                }
-                if ($this->fold_cse($operand)) {
-                    return true;
+            if ($this->is_operator($tree_root)) {
+                foreach ($tree_root->operands as $operand) {
+                    if ($operand->id == $this->options->problem_ids[1]) {
+                        $this->tree_folding($operand, $tree_root);
+                        return true;
+                    }
+                    if ($this->fold_cse($operand)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -598,7 +616,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
     /* The 5th rule */
-    protected function single_charset_node() {
+    public function single_charset_node() {
         $equivalences = array();
 
         if ($this->search_single_charset_node($this->get_dst_root())) {
@@ -623,9 +641,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return true;
             }
         }
-        foreach ($node->operands as $operand) {
-            if ($this->search_single_charset_node($operand)) {
-                return true;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_single_charset_node($operand)) {
+                    return true;
+                }
             }
         }
 
@@ -699,11 +719,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             return true;
         }
 
-        foreach ($node->operands as $operand) {
-            if ($this->remove_square_brackets_from_charset($operand, $remove_node_id)) {
-                array_shift($operand->userinscription);
-                array_pop($operand->userinscription);
-                return true;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->remove_square_brackets_from_charset($operand, $remove_node_id)) {
+                    array_shift($operand->userinscription);
+                    array_pop($operand->userinscription);
+                    return true;
+                }
             }
         }
     }
