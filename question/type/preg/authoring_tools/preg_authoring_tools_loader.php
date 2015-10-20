@@ -31,7 +31,7 @@ function qtype_preg_get_json_array() {
     $displayas = optional_param('displayas', '', PARAM_RAW);
     $foldcoords = optional_param('foldcoords', '', PARAM_RAW);
     $treeisfold = (bool)optional_param('treeisfold', '', PARAM_INT);
-    $problem_id = optional_param('problem_id', null, PARAM_INT);
+    $problem_ids = explode(',', optional_param('problem_ids', null, PARAM_RAW));
     $problem_type = optional_param('problem_type', null, PARAM_INT);
 
     // Array with authoring tools
@@ -59,26 +59,22 @@ function qtype_preg_get_json_array() {
     $stooloptions->engine = $engine;
     $stooloptions->notation = $notation;
     $stooloptions->exactmatch = $exactmatch;
-    $stooloptions->problem_id = $problem_id;
+    $stooloptions->problem_ids = $problem_ids;
     $stooloptions->problem_type = $problem_type;
+    $stooloptions->indfirst = $indfirst;
+    $stooloptions->indlast = $indlast;
 
-//    $tree = new qtype_preg_simplification_tool($regex, $stooloptions);
-//    var_dump('+------------------------------------');
-//    var_dump($tree->get_dst_root()->get_regex_string());
-
-    if ($stooloptions->problem_id != -2 && $stooloptions->problem_type != -2) {
+    if (count($stooloptions->problem_ids) > 0 && $stooloptions->problem_type != -2) {
         $simplified_regex = new qtype_preg_simplification_tool($regex, $stooloptions);
-//        var_dump('+------------------------------------');
-//        var_dump($stooloptions->problem_type);
         $regex = $simplified_regex->optimization();
-//        var_dump($regex);
+        $options->selection = new qtype_preg_position(-2, -2);
     }
 
     $tools = array(
+        'simplification' => new qtype_preg_simplification_tool($regex, $stooloptions),
         'tree' => new qtype_preg_syntax_tree_tool($regex, $options),
         'graph' => new qtype_preg_explaining_graph_tool($regex, $options),
-        'description' => new qtype_preg_description_tool($regex, $options),
-        'simplification' => new qtype_preg_simplification_tool($regex, $stooloptions)
+        'description' => new qtype_preg_description_tool($regex, $options)
     );
 
     // Fill the json array.
@@ -89,6 +85,7 @@ function qtype_preg_get_json_array() {
 
     $json['indfirstorig'] = $indfirst;
     $json['indlastorig'] = $indlast;
+
     return $json;
 }
 

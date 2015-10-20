@@ -217,7 +217,7 @@ M.preg_authoring_tools_script = (function ($) {
             indfirst = indlast = -2;
         }
         $('input[name=\'tree_selected_node_points\']').val(indfirst + ',' + indlast);
-        self.load_content(indfirst, indlast);
+        self.load_content(indfirst, indlast, null, null);
         self.load_strings(indfirst, indlast);
 
         /*$('input[name=\'tree_selected_node_points\']').val('');
@@ -255,14 +255,14 @@ M.preg_authoring_tools_script = (function ($) {
     btn_apply_hint_click : function (e) {
         e.preventDefault();
         var hint = self.get_hint();
-        self.load_apply_hints(-2, -2, hint.problem_id, hint.problem_type);
+        self.load_apply_hints(hint.problem_indfirst, hint.problem_indlast, hint.problem_ids, hint.problem_type);
     },
 
     rbtn_changed : function (e) {
         e.preventDefault();
         if (e.currentTarget.id != "id_tree_folding_mode") {
             var sel = self.get_selection();
-            self.load_content(sel.indfirst, sel.indlast);
+            self.load_content(sel.indfirst, sel.indlast, null, null);
             self.panzooms.reset_tree();
         }
     },
@@ -275,8 +275,24 @@ M.preg_authoring_tools_script = (function ($) {
     simplification_hints_clicked : function (e) {
         e.preventDefault();
         $('#simplification_tool_hint_text').text(e.currentTarget.children[1].value);
-        $('#problem_id')[0].value = e.currentTarget.children[2].value;
+        $('#problem_ids')[0].value = e.currentTarget.children[2].value;
         $('#problem_type')[0].value = e.currentTarget.children[3].value;
+        $('#problem_indfirst')[0].value = e.currentTarget.children[4].value;
+        $('#problem_indlast')[0].value = e.currentTarget.children[5].value;
+        //var indfirst = e.currentTarget.children[4].value,
+        //    indlast = e.currentTarget.children[5].value;
+
+        //self.load_content(indfirst, indlast, null, null);
+        //self.load_strings(indfirst, indlast);
+
+        self.regex_input.textrange('set', 0, 0);
+        self.regex_input.textareaHighlighter('updateMatches',
+            [
+                {'type': 'qtype-preg-orange', start: e.currentTarget.children[4].value, end: e.currentTarget.children[5].value}
+            ]
+        );
+        //$('#problem_indfirst')[0].value = e.currentTarget.children[4].value;
+        //$('#problem_indlast')[0].value = e.currentTarget.children[5].value;
     },
 
     tree_node_clicked : function (e) {
@@ -312,7 +328,7 @@ M.preg_authoring_tools_script = (function ($) {
                 indfirst = tmpcoords[0];
                 indlast = tmpcoords[1];
 
-                self.load_content(indfirst, indlast);
+                self.load_content(indfirst, indlast, null, null);
                 self.load_strings(indfirst, indlast);
             } else {
                 self.load_content();
@@ -320,7 +336,7 @@ M.preg_authoring_tools_script = (function ($) {
             }
         } else {
             $('input[name=\'tree_selected_node_points\']').val(indfirst + ',' + indlast);
-            self.load_content(indfirst, indlast);
+            self.load_content(indfirst, indlast, null, null);
             self.load_strings(indfirst, indlast);
         }
     },
@@ -343,7 +359,7 @@ M.preg_authoring_tools_script = (function ($) {
 
             $('input[name=\'tree_selected_node_points\']').val(indfirst + ',' + indlast);
 
-            self.load_content(indfirst, indlast);
+            self.load_content(indfirst, indlast, null, null);
             self.load_strings(indfirst, indlast);
         }
     },
@@ -528,7 +544,7 @@ M.preg_authoring_tools_script = (function ($) {
 
                     $('input[name=\'tree_selected_node_points\']').val(sel.indfirst + ',' + sel.indlast);
 
-                    self.load_content(sel.indfirst, sel.indlast);
+                    self.load_content(sel.indfirst, sel.indlast, null, null);
                     self.load_strings(sel.indfirst, sel.indlast);
 
                     $('#resizeGraph').css({
@@ -545,16 +561,16 @@ M.preg_authoring_tools_script = (function ($) {
 
         if (typeof si != 'undefined') {
 
-            var get_error_row = function(problem, solve, problem_id, problem_type) {
-                return self.get_hint_row(problem, solve, problem_id, problem_type, "error", "color: #222222;");
+            var get_error_row = function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast) {
+                return self.get_hint_row(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, "error", "color: #222222;");
             };
 
-            var get_tip_row = function(problem, solve, problem_id, problem_type) {
-                return self.get_hint_row(problem, solve, problem_id, problem_type, "warning", "font-weight: normal;");
+            var get_tip_row = function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast) {
+                return self.get_hint_row(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, "warning", "font-weight: normal;");
             };
 
-            var get_equivalence_row = function(problem, solve, problem_id, problem_type) {
-                return self.get_hint_row(problem, solve, problem_id, problem_type, "info", "");
+            var get_equivalence_row = function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast) {
+                return self.get_hint_row(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, "info", "");
             };
 
             // Set count of any hints
@@ -575,17 +591,20 @@ M.preg_authoring_tools_script = (function ($) {
             // Set errors
             for (var i = 0; i < si.errors.length; ++i) {
                 hints_table.append(get_error_row(si.errors[i].problem, si.errors[i].solve,
-                                                 si.errors[i].problem_id, si.errors[i].problem_type));
+                                                 si.errors[i].problem_ids, si.errors[i].problem_type,
+                                                 si.errors[i].problem_indfirst, si.errors[i].problem_indlast));
             }
             // Set tips
             for (var i = 0; i < si.tips.length; ++i) {
                 hints_table.append(get_tip_row(si.tips[i].problem, si.tips[i].solve,
-                                               si.tips[i].problem_id, si.tips[i].problem_type));
+                                               si.tips[i].problem_ids, si.tips[i].problem_type,
+                                               si.tips[i].problem_indfirst, si.tips[i].problem_indlast));
             }
             // Set equivalences
             for (var i = 0; i < si.equivalences.length; ++i) {
                 hints_table.append(get_equivalence_row(si.equivalences[i].problem, si.equivalences[i].solve,
-                                                       si.equivalences[i].problem_id, si.equivalences[i].problem_type));
+                                                       si.equivalences[i].problem_ids, si.equivalences[i].problem_type,
+                                                       si.equivalences[i].problem_indfirst, si.equivalences[i].problem_indlast));
             }
 
             self.simplification_hints().click(self.simplification_hints_clicked);
@@ -619,13 +638,15 @@ M.preg_authoring_tools_script = (function ($) {
         //}
     },
 
-    get_hint_row : function(problem, solve, problem_id, problem_type, hint_class, hint_style) {
+    get_hint_row : function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, hint_class, hint_style) {
         return '<tr class=\"' + hint_class + '\"  style=\"' + hint_style + '\">' +
                    '<td>' +
                        '<span>' + problem + '</span>' +
                        '<input type=\"hidden\" value=\"' + solve + '\">' +
-                       '<input type=\"hidden\" value=\"' + problem_id + '\">' +
+                       '<input type=\"hidden\" value=\"' + problem_ids + '\">' +
                        '<input type=\"hidden\" value=\"' + problem_type + '\">' +
+                       '<input type=\"hidden\" value=\"' + problem_indfirst + '\">' +
+                       '<input type=\"hidden\" value=\"' + problem_indlast + '\">' +
                        '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-remove\"></i></button>' +
                        '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-ok\"></i></button>' +
                    '</td>' +
@@ -992,13 +1013,15 @@ M.preg_authoring_tools_script = (function ($) {
     },
 
     /** Checks for cached data and if it doesn't exist, sends a request to the server */
-    load_content : function (indfirst, indlast, problem_id, problem_type) {
+    load_content : function (indfirst, indlast, problem_ids, problem_type) {
         if (typeof indfirst == "undefined" || typeof indlast == "undefined") {
             indfirst = indlast = -2;
         }
 
-        if (typeof problem_id == "undefined" || typeof problem_type == "undefined") {
-            problem_id = problem_type = -2;
+        if (typeof problem_ids == "undefined" || typeof problem_type == "undefined"
+            || problem_ids == null || typeof problem_type == null) {
+            problem_ids = '';
+            problem_type = -2;
         }
 
         // Unbind tree handlers so nothing is clickable till the response is received.
@@ -1030,7 +1053,7 @@ M.preg_authoring_tools_script = (function ($) {
                 displayas: self.get_displayas(),
                 foldcoords: $('input[name=\'tree_fold_node_points\']').val(),
                 treeisfold: $("#id_tree_folding_mode").is(':checked') ? 1 : 0,
-                problem_id: problem_id,
+                problem_ids: problem_ids,
                 problem_type: problem_type,
                 ajax: true
             },
@@ -1098,18 +1121,17 @@ M.preg_authoring_tools_script = (function ($) {
         return $('#fgroup_id_charset_process_radioset input:checked').val();
     },
 
-    ///////////////////////////////////////
     get_hint : function () {
-        var problem_id = parseInt($('#problem_id').val()),
-            problem_type = parseInt($('#problem_type').val());
         return {
-            problem_id : problem_id,
-            problem_type : problem_type
+            problem_ids : $('#problem_ids').val(),
+            problem_type : parseInt($('#problem_type').val()),
+            problem_indfirst : parseInt($('#problem_indfirst').val()),
+            problem_indlast : parseInt($('#problem_indlast').val())
         };
     },
 
-    load_apply_hints : function (indfirst, indlast, problem_id, problem_type) {
-        self.load_content(indfirst, indlast, problem_id, problem_type);
+    load_apply_hints : function (indfirst, indlast, problem_ids, problem_type) {
+        self.load_content(indfirst, indlast, problem_ids, problem_type);
         self.load_strings();
     },
 

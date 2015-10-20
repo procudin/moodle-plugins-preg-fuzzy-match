@@ -105,7 +105,7 @@ class qtype_preg_collapsible_info_block extends MoodleQuickForm_textarea {
                     </div>
                     <div id="healpAccordion" class="accordion-body collapse">
                       <div class="accordion-inner">
-                        <div style="height: 150px; overflow: auto; margin-bottom: 10px;">
+                        <div style="height: auto; max-height: 150px; overflow: auto; margin-bottom: 10px;">
                             <table class="table table-hover" id="simplification_tool_hints">
                               <tbody>
                               </tbody>
@@ -115,8 +115,10 @@ class qtype_preg_collapsible_info_block extends MoodleQuickForm_textarea {
                         <div class="fitem">
                             <div class="felement" style="margin-left: 155px;">
                                 <p><span id="simplification_tool_hint_text"></span></p>
-                                <input type="hidden" id="problem_id"/>
+                                <input type="hidden" id="problem_ids"/>
                                 <input type="hidden" id="problem_type"/>
+                                <input type="hidden" id="problem_indfirst"/>
+                                <input type="hidden" id="problem_indlast"/>
                                 <button class="btn btn-primary" id="simplification_tool_apply_btn">' . get_string('simplification_tool_apply', 'qtype_preg') . '</button>
                                 <button class="btn btn-default" id="simplification_tool_cancel_btn">' . get_string('simplification_tool_cancel', 'qtype_preg') . '</button>
                             </div>
