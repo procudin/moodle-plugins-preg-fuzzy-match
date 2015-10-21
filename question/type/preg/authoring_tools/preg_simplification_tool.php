@@ -716,14 +716,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function remove_square_brackets_from_charset($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
+            array_shift($node->userinscription);
+            array_pop($node->userinscription);
             return true;
         }
 
         if ($this->is_operator($node)) {
             foreach ($node->operands as $operand) {
                 if ($this->remove_square_brackets_from_charset($operand, $remove_node_id)) {
-                    array_shift($operand->userinscription);
-                    array_pop($operand->userinscription);
                     return true;
                 }
             }
