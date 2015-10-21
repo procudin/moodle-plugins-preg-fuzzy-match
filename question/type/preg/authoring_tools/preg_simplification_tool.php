@@ -246,7 +246,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
     /* The 2nd rule */
-    protected function grouping_node() {
+    public function grouping_node() {
         $equivalences = array();
 
         if ($this->search_grouping_node($this->get_dst_root())) {
@@ -288,7 +288,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
     /* The 3rd rule */
-    protected function subpattern_node() {
+    public function subpattern_node() {
         $equivalences = array();
 
         if ($this->search_subpattern_node($this->get_dst_root())) {
