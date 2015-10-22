@@ -42,6 +42,9 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var array Answers. */
     public $answers = array();
 
+    /** @var array Test strings */
+    public $teststrings = array();
+
     /** @var string Value of using case. */
     public $usecase;
 
