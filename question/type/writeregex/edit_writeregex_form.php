@@ -186,32 +186,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
-     * Insert fields for test strings answers.
-     * @param $mform MoodleForm Form variable.
-     * @param $label string Label of group fields.
-     * @param $gradeoptions array Grade options array.
-     * @param $repeatedoptions array Repeated options.
-     * @param $answersoption array Answers option
-     * @return array Group of fields.
-     */
-    private function  get_per_test_string_fields($mform, $label, $gradeoptions,
-                                                    &$repeatedoptions, &$answersoption) {
-        $repeated = array();
-
-        $repeated [] =& $mform->createElement('textarea', $label . '_answer',
-            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"', $this->editoroptions);
-
-        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
-
-        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
-        $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
-        $repeatedoptions['fraction']['default'] = 0;
-        $answersoption = $label;
-
-        return $repeated;
-    }
-
-    /**
      * Add fields for test strings answers.
      * @param $mform MoodleForm Form variable.
      * @param $label string Label of group fields.
@@ -226,11 +200,24 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $answersoption = '';
         $repeatedoptions = array();
-        $repeated = $this->get_per_test_string_fields($mform, $label, $gradeoptions,
-            $repeatedoptions, $answersoption);
+        $repeated = array();
 
-        
-        $repeatsatstart = $minoptions;
+        $repeated[] =& $mform->createElement('textarea', $label . '_answer',
+            get_string($label, 'qtype_writeregex'), 'wrap="virtual" rows="2" cols="80"', $this->editoroptions);
+
+        $repeated[] =& $mform->createElement('select', $label . '_fraction', get_string('grade'), $gradeoptions);
+
+        $repeatedoptions[$label . '_answer']['type'] = PARAM_RAW;
+        $repeatedoptions['test_string_id']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = $label;
+
+        if (isset($this->question->options)) {
+            $repeatsatstart = count($this->question->options->teststrings);
+        } else {
+            $repeatsatstart = $minoptions;
+        }
+
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noteststrings', 'addteststrings', $addoptions,
             $this->get_more_choices_string(), true);
@@ -297,21 +284,19 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $index = 0;
         foreach ($question->options->answers as $answer) {
 
-            if ($answer->answerformat != qtype_writeregex::TEST_STRING_ANSWER_FORMAT_VALUE) {
-                $question->answer[$key] = $answer->answer;
-                unset($this->_form->_defaultValues["fraction[$key]"]);
-                $question->fraction[$key] = $answer->fraction;
-                $question->feedback[$key] = array();
-                $question->feedback[$key]['text'] = $answer->feedback;
-                $question->feedback[$key]['format'] = $answer->feedbackformat;
-                $key++;
-            } else if ($answer->answerformat == qtype_writeregex::TEST_STRING_ANSWER_FORMAT_VALUE) {
+            $question->answer[$key] = $answer->answer;
+            unset($this->_form->_defaultValues["fraction[$key]"]);
+            $question->fraction[$key] = $answer->fraction;
+            $question->feedback[$key] = array();
+            $question->feedback[$key]['text'] = $answer->feedback;
+            $question->feedback[$key]['format'] = $answer->feedbackformat;
+            $key++;
+        }
+        foreach ($question->options->teststrings as $teststring) {
 
-                $question->wre_regexp_ts_answer[$index] = $answer->answer;
-                $question->wre_regexp_ts_fraction[$index] = $answer->fraction;
-                $index++;
-            }
-
+            $question->wre_regexp_ts_answer[$index] = $teststring->answer;
+            $question->wre_regexp_ts_fraction[$index] = $teststring->fraction;
+            $index++;
         }
 
         return $question;
