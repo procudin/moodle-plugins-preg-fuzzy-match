@@ -57,7 +57,7 @@ class qtype_preg_nodes_test extends PHPUnit_Framework_TestCase {
         $charsetbigw = new qtype_preg_leaf_charset();
         $charsetbigw->flags = array(array($flagbigw));
         $charsetbigw->userinscription = array(new qtype_preg_userinscription("\W", qtype_preg_charset_flag::SLASH_W));
-        $tranbigw = new \qtype_preg\fa_transition(0, $charsetbigw, 1, \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, false);
+        $tranbigw = new \qtype_preg\fa\transition(0, $charsetbigw, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, false);
         $result = $transition->intersect($tranbigw);
         $result->from = $transition->from;
         $result->to = $transition->to;

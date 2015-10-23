@@ -23,7 +23,7 @@
  * @author     Oleg Sychev <oasychev@gmail.com>, Valeriy Streltsov, Elena Lepilkina
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace qtype_preg;
+namespace qtype_preg\fa;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -35,7 +35,7 @@ require_once($CFG->dirroot . '/question/type/preg/preg_dot_parser.php');
 /**
  * Represents a finite automaton transition.
  */
-class fa_transition {
+class transition {
 
     //const GREED_ZERO = 1;
     const GREED_LAZY = 2;
@@ -183,7 +183,7 @@ class fa_transition {
 
                 // Generate results
                 for ($j = 0; $j < count($tagsets); ++$j) {
-                    $curtransition = new fa_transition(1, \qtype_preg_leaf_charset::by_regex($charsetranges[$i]), 2);
+                    $curtransition = new transition(1, \qtype_preg_leaf_charset::by_regex($charsetranges[$i]), 2);
 
                     foreach ($tagsets[$j][0] as $opentagvalue) {
                         $meta = new \qtype_preg_leaf_meta();
@@ -197,7 +197,7 @@ class fa_transition {
                     }
                     $result[] = $curtransition;
 
-                    // Tagset indexes are truw for given subarrays of remaining groups.
+                    // Tagset indexes are true for given subarrays of remaining groups.
                     // Translating this local indexes to global ones.
                     $indexes[] = array(array(), array());
                     for ($k = 0; $k <= 1; ++$k) {
@@ -210,7 +210,7 @@ class fa_transition {
         }
         else {
             for ($i = 0; $i < count($charsetranges); ++$i) {
-                $result[] = new fa_transition(1, \qtype_preg_leaf_charset::by_regex($charsetranges[$i]), 2);
+                $result[] = new transition(1, \qtype_preg_leaf_charset::by_regex($charsetranges[$i]), 2);
                 $indexes = $charsetindexes;
             }
         }
@@ -419,7 +419,7 @@ class fa_transition {
                 //unset($resultafter[0]);
             } else {
                 $pregleaf = new \qtype_preg_leaf_meta(\qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-                $assert = new fa_transition(0, $pregleaf, 1);
+                $assert = new transition(0, $pregleaf, 1);
             }
         }
         $assert->mergedbefore = $resultbefore;
@@ -577,7 +577,7 @@ class fa_transition {
         $charset = new \qtype_preg_leaf_charset();
         $charset->flags = array(array($flag));
         $charset->userinscription = array(new \qtype_preg_userinscription("\n"));
-        $righttran = new fa_transition(0, $charset, 1);
+        $righttran = new transition(0, $charset, 1);
         if ($this->pregleaf->type === \qtype_preg_node::TYPE_LEAF_BACKREF) {
             throw new \qtype_preg_backref_intersection_exception('', $this->pregleaf->position);
         }
@@ -586,7 +586,7 @@ class fa_transition {
         }
         // Consider that eps and transition which doesn't consume characters always intersect
         if ($this->is_eps() && $other->consumeschars == false) {
-            $resulttran = new fa_transition(0, $other->pregleaf, 1, self::ORIGIN_TRANSITION_INTER, $other->consumeschars);
+            $resulttran = new transition(0, $other->pregleaf, 1, self::ORIGIN_TRANSITION_INTER, $other->consumeschars);
             $assert = $this->intersect_asserts($other);
             $resulttran->mergedbefore = $assert->mergedbefore;
             if ($thishastags) {
@@ -599,7 +599,7 @@ class fa_transition {
             return $resulttran;
         }
         if ($other->is_eps() && $this->consumeschars == false) {
-            $resulttran = new fa_transition(0, $this->pregleaf, 1, self::ORIGIN_TRANSITION_INTER, $this->consumeschars);
+            $resulttran = new transition(0, $this->pregleaf, 1, self::ORIGIN_TRANSITION_INTER, $this->consumeschars);
 
             $assert = $this->intersect_asserts($other);
 
@@ -648,7 +648,7 @@ class fa_transition {
             } else if (($other->is_eps() || $other->is_unmerged_assert()) && (!$this->is_eps() && !$this->is_unmerged_assert())) {
                 $resulttran = null;
             } else {
-                $resulttran = new fa_transition(0, $resultleaf, 1, self::ORIGIN_TRANSITION_INTER);
+                $resulttran = new transition(0, $resultleaf, 1, self::ORIGIN_TRANSITION_INTER);
             }
         }
         if ($resulttran !== null ) {

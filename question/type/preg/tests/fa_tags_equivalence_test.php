@@ -18,7 +18,7 @@ require_once($CFG->dirroot . '/question/type/preg/preg_regex_handler.php');
 class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
     /**
-     * Generates array of \qtype_preg\fa_transitions from given fa.
+     * Generates array of \qtype_preg\fa\fa_transitions from given fa.
      */
     function create_array_of_transitions_from_fa($fa) {
         $arr = array();
@@ -43,9 +43,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
      */
     function create_pair_of_groups($ffastates, $sfastates, $firstchar = 97, $lastchar = 97, $ffaendstates = array(), $sfaendstates = array(), $tags = array()) {
         // Allocation
-        $ffa = new \qtype_preg\fa();
+        $ffa = new \qtype_preg\fa\fa();
         $ffa->endstates = array();
-        $sfa = new \qtype_preg\fa();
+        $sfa = new \qtype_preg\fa\fa();
         $sfa->endstates = array();
         $pair = new qtype_preg_fa_pair_of_groups();
         $pair->first = new qtype_preg_fa_group();
@@ -120,8 +120,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           0->1[label=<<B>o: [b] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -133,8 +133,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                       0->1[label=<<B>o: [ab] c:</B>>];
                       }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($fadescription);
-        $secondfa = \qtype_preg\fa::read_fa($fadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($fadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($fadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -153,8 +153,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           0->1[label=<<B>o: [ed] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -177,8 +177,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [w] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription); // 3 2 4 1
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription); // 1 2 0
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription); // 3 2 4 1
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription); // 1 2 0
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -203,8 +203,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           5->6[label=<<B>o: [l] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription); // 6 15 7 4 2 1
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription); // 5 6 4 3 2 1
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription); // 6 15 7 4 2 1
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription); // 5 6 4 3 2 1
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -230,8 +230,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           3->6[label=<<B>o: [l] c:2,</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         //$this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -252,8 +252,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 103, 0, 30, array(2))); // g/2
 
@@ -276,8 +276,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 103, 3, 0)); // g
 
@@ -299,8 +299,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 103, 3, 0)); // g
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 103, 3, 0, array(2))); // g/2
@@ -326,8 +326,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 2, 0)); // a
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 4, 0)); // b
@@ -361,8 +361,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 97, 2, 0, array(1))); // a/1
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 98, 4, 0, array(3))); // b/3
@@ -389,8 +389,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
@@ -416,8 +416,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 2, 0)); // a
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 100, 0, 2)); // d
@@ -444,8 +444,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 0, 8)); // b
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 4, 0)); // c
 
@@ -471,8 +471,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 0, 3)); // c
@@ -496,8 +496,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // c
 
@@ -520,8 +520,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           2->3[label=<<B>o: [a] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -542,8 +542,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           3->3[label=<<B>o: [a] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -571,8 +571,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 101, 1, 0)); // e
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 102, 0, 1)); // f
@@ -598,8 +598,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           5->3[label=<<B>o: [t] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
@@ -627,8 +627,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           4->7[label=<<B>o: [op] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -649,8 +649,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           }';
         $mismatches = array();
         $expmismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER_BUT_NOT_SUBPATTERN, 99, 2, 0)); // c
 
@@ -673,8 +673,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 1->3[label=<<B>o: [a-h0-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -698,8 +698,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 1->3[label=<<B>o: [a-h0-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -722,8 +722,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->0[label=<<B>o: [z] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -748,8 +748,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [0-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -780,8 +780,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 23->3[label=<<B>o: [6-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -805,8 +805,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [a-h] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -829,8 +829,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [a-h] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -852,8 +852,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->4[label=<<B>o: [z] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -877,8 +877,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [a-h0-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -905,8 +905,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->4[label=<<B>o: [0-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -933,8 +933,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 4->1[label=<<B>o: [i-n] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -957,8 +957,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 1->3[label=<<B>o: [0-4] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -982,8 +982,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [3-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -1008,8 +1008,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->0[label=<<B>o: [k-o] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -1040,8 +1040,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->14[label=<<B>o: [zxkt] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -1066,8 +1066,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [0-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -1092,8 +1092,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [0-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -1119,8 +1119,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [3-9] c:</B>>];
                                 }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -1146,8 +1146,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 }';
 
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
@@ -1179,48 +1179,11 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 }';
 
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
-    }
-
-    // Tests for function compare_tag_sequences
-    public function test_comparing_sequence_is_bigger_and_contains_all_tags() {
-        $tags = array(1, 3, 5);
-        $curtags = array(1, 3);
-        $this->assertTrue(compare_tag_sequences($tags, $curtags));
-    }
-    public function test_comparing_single_tag() {
-        $tags = array(1, 3, 5);
-        $curtags = array(1);
-        $this->assertTrue(compare_tag_sequences($tags, $curtags));
-    }
-    public function test_comparing_same_arrays() {
-        $tags = array(1, 3, 5);
-        $curtags = array(1, 3, 5);
-        $this->assertTrue(compare_tag_sequences($tags, $curtags));
-    }
-    public function test_comparing_same_arrays_with_single_tag() {
-        $tags = array(1);
-        $curtags = array(1);
-        $this->assertTrue(compare_tag_sequences($tags, $curtags));
-    }
-    public function test_comparing_arrays_with_single_mismatch() {
-        $tags = array(1, 3, 5);
-        $curtags = array(1, 2);
-        $this->assertFalse(compare_tag_sequences($tags, $curtags));
-    }
-    public function test_comparing_full_different_arrays() {
-        $tags = array(2, 4);
-        $curtags = array(1, 3);
-        $this->assertFalse(compare_tag_sequences($tags, $curtags));
-    }
-    public function test_comparing_array_is_smaller() {
-        $tags = array(1, 3);
-        $curtags = array(1, 3, 5);
-        $this->assertFalse(compare_tag_sequences($tags, $curtags));
     }
 
     // Tests for function compare_groups
@@ -1331,8 +1294,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o:1, [c] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1360,8 +1323,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [b] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1389,8 +1352,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [c] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1418,8 +1381,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o:1, [c] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1447,8 +1410,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [c] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1476,8 +1439,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [c] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1505,8 +1468,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o:1,3, [c] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1534,8 +1497,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o:3, [c] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1562,8 +1525,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [c] c:1,3,</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1592,8 +1555,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o:3, [s] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1628,8 +1591,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o: [adgijlm] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1667,8 +1630,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o:3, [b] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         $firstfa->set_ranges();
         $secondfa->set_ranges();
@@ -1894,7 +1857,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expindexes, $indexes);
     }
 */
-    // Tests for transitions intervals dividing function
+/*    // Tests for transitions intervals dividing function
     private $without_tags = true;
     private $with_tags = false;
     function compare_tagsets($first, $second) {
@@ -1932,8 +1895,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           2;
                           1->2[label=<<B>o: [a] c:</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -1943,9 +1906,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [a] c:</B>>];
                               1->2[label=<<B>o:1, [e] c:</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array(), array(0)),
                                 array(array(0), array()));
 
@@ -1960,9 +1923,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [a] c:</B>>];
                               1->2[label=<<B>o: [e] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array(), array(0)),
                                 array(array(0), array()));
 
@@ -1981,8 +1944,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           2;
                           1->2[label=<<B>o:1, [a-e] c:</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -1992,9 +1955,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o:1, [a-d] c:</B>>];
                               1->2[label=<<B>o:1, [e] c:</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array( ), array(0)),
                                 array(array(0), array(0)));
 
@@ -2009,9 +1972,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [a-d] c:</B>>];
                               1->2[label=<<B>o: [e] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array( ), array(0)),
                                 array(array(0), array(0)));
 
@@ -2030,8 +1993,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           2;
                           1->2[label=<<B>o:1, [a-e] c:</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -2040,9 +2003,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               2;
                               1->2[label=<<B>o:1, [a-e] c:</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array(0), array(0)));
 
             $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfa), $res));
@@ -2055,9 +2018,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               2;
                               1->2[label=<<B>o: [a-e] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array(0), array(0)));
 
             $this->assertTrue($this->compare_conditions_of_transitions($this->create_array_of_transitions_from_fa($resfawithouttags), $res));
@@ -2077,8 +2040,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o:1, [ab] c:</B>>];
                           1->2[label=<<B>o: [c] c:2,</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -2089,9 +2052,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [c] c:2,</B>>];
                               1->2[label=<<B>o: [e] c:</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array( ), array(0)),
                                 array(array( ), array(1)),
                                 array(array(0), array( )));
@@ -2108,9 +2071,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [c] c:</B>>];
                               1->2[label=<<B>o: [e] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array( ), array(0)),
                                 array(array( ), array(1)),
                                 array(array(0), array( )));
@@ -2131,8 +2094,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o:1, [ab] c:</B>>];
                           1->2[label=<<B>o: [c-e] c:2,</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -2143,9 +2106,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [cd] c:2,</B>>];
                               1->2[label=<<B>o: [e] c:2,</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array( ), array(0)),
                                 array(array( ), array(1)),
                                 array(array(0), array(1)));
@@ -2162,9 +2125,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [cd] c:</B>>];
                               1->2[label=<<B>o: [e] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array( ), array(0)),
                                 array(array( ), array(1)),
                                 array(array(0), array(1)));
@@ -2185,8 +2148,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [ab] c:2,</B>>];
                           1->2[label=<<B>o: [c-e] c:2,</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -2196,9 +2159,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [ab] c:2,</B>>];
                               1->2[label=<<B>o: [c-e] c:2,</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array(0), array(0)),
                                 array(array(0), array(1)));
 
@@ -2213,9 +2176,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [ab] c:</B>>];
                               1->2[label=<<B>o: [c-e] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array(0), array(0)),
                                 array(array(0), array(1)));
 
@@ -2237,8 +2200,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [f-h] c:2,</B>>];
                           1->2[label=<<B>o:1, [i] c:</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -2251,9 +2214,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [f-h] c:2,</B>>];
                               1->2[label=<<B>o:1, [i] c:</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array(0), array(0)),
                                 array(array( ), array(0)),
                                 array(array(1), array( )),
@@ -2273,9 +2236,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [f-h] c:</B>>];
                               1->2[label=<<B>o: [i] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array(0), array(0)),
                                 array(array(1), array( )),
                                 array(array( ), array(1)),
@@ -2299,8 +2262,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [d-h] c:2,</B>>];
                           1->2[label=<<B>o:1, [i] c:</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -2314,9 +2277,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [f-h] c:2,</B>>];
                               1->2[label=<<B>o:1, [i] c:</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array(0), array( )),
                                 array(array(0), array(0)),
                                 array(array(1), array( )),
@@ -2338,9 +2301,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [f-h] c:</B>>];
                               1->2[label=<<B>o: [i] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array(0), array(0)),
                                 array(array(1), array( )),
                                 array(array(1), array(1)),
@@ -2365,8 +2328,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [d-h] c:2,</B>>];
                           1->2[label=<<B>o: [i] c:2,</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         if ($this->with_tags) {
             $indexes = array();
@@ -2377,9 +2340,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [d-h] c:2,</B>>];
                               1->2[label=<<B>o: [i] c:2,</B>>];
                               }';
-            $resfa = \qtype_preg\fa::read_fa($resfadescription);
+            $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
             $expindexes = array(array(array(0), array(0)),
                                 array(array(1), array(1)),
                                 array(array(1), array(2)));
@@ -2396,9 +2359,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                               1->2[label=<<B>o: [d-h] c:</B>>];
                               1->2[label=<<B>o: [i] c:</B>>];
                               }';
-            $resfawithouttags = \qtype_preg\fa::read_fa($resfadescription);
+            $resfawithouttags = \qtype_preg\fa\fa::read_fa($resfadescription);
 
-            $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
+            $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes);
             $expindexes = array(array(array(0), array(0)),
                                 array(array(1), array(1)),
                                 array(array(1), array(2)));
@@ -2432,12 +2395,12 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o:1, [i] c:2,</B>>];
                           1->2[label=<<B>o: [i] c:2,</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
-        $resfa = \qtype_preg\fa::read_fa($resfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
+        $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
         $indexes = array();
 
-        $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+        $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
 
         $expindexes = array(array(array(0), array(0)),
                             array(array(1), array(1)),
@@ -2474,12 +2437,12 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o:1,3, [d-h] c:</B>>];
                           1->2[label=<<B>o:1,3,5, [i] c:</B>>];
                           }';
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
-        $resfa = \qtype_preg\fa::read_fa($resfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
+        $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
         $indexes = array();
 
-        $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+        $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
 
         $expindexes = array(array(array(0), array( )),
                             array(array( ), array(0)),
@@ -2522,12 +2485,12 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [i] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
-        $resfa = \qtype_preg\fa::read_fa($resfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
+        $resfa = \qtype_preg\fa\fa::read_fa($resfadescription);
         $indexes = array();
 
-        $res = \qtype_preg\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
+        $res = \qtype_preg\fa\fa_transition::divide_intervals($this->create_array_of_transitions_from_fa($firstfa), $this->create_array_of_transitions_from_fa($secondfa), $indexes, true);
 
         $expindexes = array(array(array(0), array( )),
                             array(array( ), array(0)),
@@ -2556,8 +2519,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [4-6h-io-u] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2590,8 +2553,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [2-9a-io-u] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2625,8 +2588,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->2[label=<<B>o: [0-37-9a-g] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2657,8 +2620,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [4-6i-ko-v] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2696,8 +2659,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [0-6a-ko-v] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2735,8 +2698,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [2-4c-fh-n] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2774,8 +2737,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o: [j-irw] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2819,8 +2782,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o: [j-lrw] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2864,8 +2827,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o: [irw-y] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0]);
@@ -2908,8 +2871,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [8-9o-rw] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
@@ -2955,8 +2918,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [8-9o-rz] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
@@ -3000,8 +2963,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->3[label=<<B>o: [5g-lx] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
@@ -3041,8 +3004,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o: [mnor-u] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
@@ -3092,8 +3055,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o: [h-noz] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
@@ -3143,8 +3106,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                           1->4[label=<<B>o: [67klx] c:</B>>];
                           }';
         $mismatches = array();
-        $firstfa = \qtype_preg\fa::read_fa($firstfadescription);
-        $secondfa = \qtype_preg\fa::read_fa($secondfadescription);
+        $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
+        $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
         // Creating arrays of transitions of each automata
         $firstfatransitions = array($firstfa->adjacencymatrix[0][1][0],
