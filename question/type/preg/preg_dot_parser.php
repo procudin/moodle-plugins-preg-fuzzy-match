@@ -111,7 +111,7 @@ class qtype_preg_dot_parser#line 108 "../preg_dot_parser.php"
     private $automaton;
 
 	public function __construct() {
-		$this->automaton = new \qtype_preg\fa();
+		$this->automaton = new \qtype_preg\fa\fa();
 	}
     public function get_automaton() {
         return $this->automaton;
@@ -884,22 +884,22 @@ static public $yy_action = array(
 #line 891 "../preg_dot_parser.php"
 #line 61 "../preg_dot_parser.y"
     function yy_r6(){
-    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -3]->minor[0], $this->yystack[$this->yyidx + -1]->minor, $this->yystack[$this->yyidx + -3]->minor[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, false, $this->yystack[$this->yyidx + -2]->minor, $this->yystack[$this->yyidx + 0]->minor);
+    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -3]->minor[0], $this->yystack[$this->yyidx + -1]->minor, $this->yystack[$this->yyidx + -3]->minor[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, false, $this->yystack[$this->yyidx + -2]->minor, $this->yystack[$this->yyidx + 0]->minor);
     }
 #line 896 "../preg_dot_parser.php"
 #line 64 "../preg_dot_parser.y"
     function yy_r7(){
-    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -2]->minor[0], $this->yystack[$this->yyidx + 0]->minor, $this->yystack[$this->yyidx + -2]->minor[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, true, $this->yystack[$this->yyidx + -1]->minor);
+    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -2]->minor[0], $this->yystack[$this->yyidx + 0]->minor, $this->yystack[$this->yyidx + -2]->minor[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, true, $this->yystack[$this->yyidx + -1]->minor);
     }
 #line 901 "../preg_dot_parser.php"
 #line 67 "../preg_dot_parser.y"
     function yy_r8(){
-    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -2]->minor[0], $this->yystack[$this->yyidx + -1]->minor, $this->yystack[$this->yyidx + -2]->minor[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, true, array(), $this->yystack[$this->yyidx + 0]->minor);
+    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -2]->minor[0], $this->yystack[$this->yyidx + -1]->minor, $this->yystack[$this->yyidx + -2]->minor[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, true, array(), $this->yystack[$this->yyidx + 0]->minor);
     }
 #line 906 "../preg_dot_parser.php"
 #line 70 "../preg_dot_parser.y"
     function yy_r9(){
-    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -1]->minor[0], $this->yystack[$this->yyidx + 0]->minor, $this->yystack[$this->yyidx + -1]->minor[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, true);
+    $this->_retvalue = $this->get_transition($this->yystack[$this->yyidx + -1]->minor[0], $this->yystack[$this->yyidx + 0]->minor, $this->yystack[$this->yyidx + -1]->minor[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, true);
     }
 #line 911 "../preg_dot_parser.php"
 #line 73 "../preg_dot_parser.y"
@@ -950,17 +950,17 @@ static public $yy_action = array(
 #line 957 "../preg_dot_parser.php"
 #line 103 "../preg_dot_parser.y"
     function yy_r18(){
-    $this->_retvalue = \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST;
+    $this->_retvalue = \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST;
     }
 #line 962 "../preg_dot_parser.php"
 #line 106 "../preg_dot_parser.y"
     function yy_r19(){
-    $this->_retvalue = \qtype_preg\fa_transition::ORIGIN_TRANSITION_SECOND;
+    $this->_retvalue = \qtype_preg\fa\transition::ORIGIN_TRANSITION_SECOND;
     }
 #line 967 "../preg_dot_parser.php"
 #line 109 "../preg_dot_parser.y"
     function yy_r20(){
-    $this->_retvalue = \qtype_preg\fa_transition::ORIGIN_TRANSITION_INTER;
+    $this->_retvalue = \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER;
     }
 #line 972 "../preg_dot_parser.php"
 #line 112 "../preg_dot_parser.y"
@@ -976,7 +976,7 @@ static public $yy_action = array(
 #line 118 "../preg_dot_parser.y"
     function yy_r23(){
     $pregleaf = $this->yystack[$this->yyidx + -1]->minor;
-    $this->_retvalue = new \qtype_preg\fa_transition(0, $pregleaf, 1);
+    $this->_retvalue = new \qtype_preg\fa\transition(0, $pregleaf, 1);
     foreach ($this->yystack[$this->yyidx + -2]->minor as $tag) {
         $open = new qtype_preg_leaf_meta();
         $open->subpattern = $tag;

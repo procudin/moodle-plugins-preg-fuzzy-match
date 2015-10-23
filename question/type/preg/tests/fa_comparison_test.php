@@ -10,8 +10,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_dfas() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -43,8 +43,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_dfas_with_direct_loop() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -79,8 +79,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_dfas_with_indirect_loop() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -114,8 +114,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_dfa_and_nfa_without_empty_transition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -151,8 +151,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_dfa_and_nfa_with_empty_transition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -189,8 +189,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_dfa_and_nfa_with_direct_loop() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -232,8 +232,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_nfas() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -270,8 +270,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_nfas_with_direct_loop() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -308,8 +308,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_nfas_with_indirect_loop() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -347,8 +347,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfas_with_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -383,8 +383,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfas_with_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -418,8 +418,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfas_with_direct_loop_and_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -452,8 +452,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfas_with_direct_loop_and_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -488,8 +488,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfas_with_indirect_loop_and_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -527,8 +527,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfas_with_indirect_loop_and_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -566,8 +566,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfa_and_nfa_with_empty_transition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -603,8 +603,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfa_and_nfa_with_direct_loop_and_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -638,8 +638,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfa_and_nfa_with_direct_loop_and_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -674,8 +674,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfa_and_nfa_with_indirect_loop_and_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -711,8 +711,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_dfa_and_nfa_with_indirect_loop_and_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -754,8 +754,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_nfas_with_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -791,8 +791,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_nfas_with_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -828,8 +828,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_nfas_with_direct_loop_and_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -866,8 +866,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_nfas_with_indirect_loop_and_difftransition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -908,8 +908,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_nfas_with_direct_loop_and_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -945,8 +945,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_not_equiv_nfas_with_indirect_loop_and_early_endstate() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;
@@ -988,8 +988,8 @@ class qtype_preg_fa_comparison_test extends PHPUnit_Framework_TestCase {
     public function test_equiv_nfas_with_indirect_loop_from_empty_transition() {
         $differences = array();
         $resultdifferences = array();
-        $firstautomata = new \qtype_preg\fa();
-        $secondautomata = new \qtype_preg\fa();
+        $firstautomata = new \qtype_preg\fa\fa();
+        $secondautomata = new \qtype_preg\fa\fa();
 
         $dotdescriptionfirst = 'digraph example {
                                 0;

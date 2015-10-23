@@ -33,7 +33,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     5->7[label = <o: ε c:4,2,1,(5,7)<BR/><B>o: \\\\W c:</B>>, color = red, penwidth = 2, style = dotted];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -62,7 +62,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     1->2[label = <<B>o: [abc] c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -91,7 +91,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     1->2[label = <<B>o: [0-9] c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -120,7 +120,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     1->2[label = <<B>o: [\\\\$\\\\Z] c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -151,7 +151,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     3->4[label = <<B>o: y c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -174,7 +174,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     1->2[label = <<B>o: [a-jxy] c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -201,7 +201,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     2->3[label = <<B>o: [a-z] c:</B><BR/>o: ^ c:(2,3)>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -224,7 +224,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     "1,0"->"2,1"[label = <<B>o: [0-9] c:</B>>, color = red, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -249,7 +249,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     1->3[label = <<B>o: ε c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }
@@ -273,7 +273,7 @@ class qtype_preg_fa_reading_test extends PHPUnit_Framework_TestCase {
     1->3[label = <<B>o: [.] c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $automata = \qtype_preg\fa::read_fa($dotdescription);
+        $automata = \qtype_preg\fa\fa::read_fa($dotdescription);
 
         $this->assertEquals($automata->fa_to_dot(null, null, true), $expectedresult, 'Result automata is not equal to expected');
     }

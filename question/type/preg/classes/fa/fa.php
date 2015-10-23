@@ -23,7 +23,7 @@
  * @author     Oleg Sychev <oasychev@gmail.com>, Valeriy Streltsov, Elena Lepilkina
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace qtype_preg;
+namespace qtype_preg\fa;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -875,13 +875,12 @@ class fa {
     }
 
     /**
-     * Compares to FA and returns whether they are equal. Mainly used for unit-testing.
+     * Compares two FA and returns whether they are equal.
      *
      * @param another fa object - FA to compare.
      * @return boolean true if this FA equal to $another.
      */
-    public function compare_fa($another, &$differences) {
-        // TODO
+    public function equal($another, &$differences, $withtags = false) {
         return false;
     }
 
@@ -972,7 +971,7 @@ class fa {
      */
     public function modify_state($changedstate, $origin) {
         $resultstate = $changedstate;
-        if ($origin == fa_transition::ORIGIN_TRANSITION_FIRST) {
+        if ($origin == transition::ORIGIN_TRANSITION_FIRST) {
             $last = substr($changedstate, -1);
             if ($last != ',') {
                 $resultstate = $changedstate . ',';
@@ -1021,7 +1020,7 @@ class fa {
                 $transitions = $source->get_adjacent_transitions($states[$keys[0]], false);
                 $keys = array_keys($transitions);
                 if (empty($keys)) {
-                    $origin = fa_transition::ORIGIN_TRANSITION_FIRST;
+                    $origin = transition::ORIGIN_TRANSITION_FIRST;
                 } else {
                     $origin = $transitions[$keys[0]]->origin;
                 }
@@ -1037,7 +1036,7 @@ class fa {
         // Search transition among states were.
         foreach ($stateswere as $state) {
             // Get real number of source state.
-            if ($origin == fa_transition::ORIGIN_TRANSITION_FIRST) {
+            if ($origin == transition::ORIGIN_TRANSITION_FIRST) {
                 $number = rtrim($state, ',');
             } else {
                 $number = ltrim($state, ',');
@@ -1054,15 +1053,15 @@ class fa {
                         $memstate = array_search($state, $this->statenumbers);
                         $transition = clone $tran;
                         if ($direction == 0) {
-                            //$transition = new fa_transition($memstate, $tran->pregleaf, $workstate, $tran->origin, $tran->consumeschars);
+                            //$transition = new transition($memstate, $tran->pregleaf, $workstate, $tran->origin, $tran->consumeschars);
                             $transition->from = $memstate;
                             $transition->to = $workstate;
                         } else {
-                            //$transition = new fa_transition($workstate, $tran->pregleaf, $memstate, $tran->origin, $tran->consumeschars);
+                            //$transition = new transition($workstate, $tran->pregleaf, $memstate, $tran->origin, $tran->consumeschars);
                             $transition->to = $memstate;
                             $transition->from = $workstate;
                         }
-                        if ($tran->origin == fa_transition::ORIGIN_TRANSITION_SECOND && !($tran->is_eps())) {
+                        if ($tran->origin == transition::ORIGIN_TRANSITION_SECOND && !($tran->is_eps())) {
                             $transition->consumeschars = false;
                         }
                         $transition->redirect_merged_transitions();
@@ -1091,15 +1090,15 @@ class fa {
                     $transition = clone $tran;
                     // Add transition.
                     if ($direction == 0) {
-                        //$transition = new fa_transition($state, $tran->pregleaf, $workstate, $tran->origin, $tran->consumeschars);
+                        //$transition = new transition($state, $tran->pregleaf, $workstate, $tran->origin, $tran->consumeschars);
                         $transition->from = $state;
                         $transition->to = $workstate;
                     } else {
-                        //$transition = new fa_transition($workstate, $tran->pregleaf, $state, $tran->origin, $tran->consumeschars);
+                        //$transition = new transition($workstate, $tran->pregleaf, $state, $tran->origin, $tran->consumeschars);
                         $transition->to = $state;
                         $transition->from = $workstate;
                     }
-                    if ($tran->origin == fa_transition::ORIGIN_TRANSITION_SECOND && !($tran->is_eps())) {
+                    if ($tran->origin == transition::ORIGIN_TRANSITION_SECOND && !($tran->is_eps())) {
                         $transition->consumeschars = false;
                     }
                     $transition->redirect_merged_transitions();
@@ -1142,7 +1141,7 @@ class fa {
                 $transitions = $source->get_adjacent_transitions($states[$keys[0]], false);
                 $keys = array_keys($transitions);
                 if (empty($keys)) {
-                    $origin = fa_transition::ORIGIN_TRANSITION_FIRST;
+                    $origin = transition::ORIGIN_TRANSITION_FIRST;
                 } else {
                     $origin = $transitions[$keys[0]]->origin;
                 }
@@ -1392,7 +1391,7 @@ class fa {
                                 $delclone->mergedbefore = array();
                                 $delclonemerged = clone $endtran;
                                 $clonetran->loopsback = $tran->loopsback || $endtran->loopsback;
-                                $clonetran->greediness = fa_transition::min_greediness($tran->greediness, $delclone->greediness);
+                                $clonetran->greediness = transition::min_greediness($tran->greediness, $delclone->greediness);
                                 $merged = array_merge($delclonemerged->mergedbefore, array($delclone), $delclonemerged->mergedafter);
                                 // Work with tags.
                                 $merged = array_merge($merged, $clonetran->mergedafter);
@@ -1892,7 +1891,7 @@ class fa {
                 $intertransitions1 = $this->get_transitions_for_intersection($workstate1, $direction);
 
                 foreach ($intertransitions1 as &$tran) {
-                    if ($tran->is_eps() && $tran->origin === fa_transition::ORIGIN_TRANSITION_SECOND) {
+                    if ($tran->is_eps() && $tran->origin === transition::ORIGIN_TRANSITION_SECOND) {
                         unset($tran);
                     }
                 }
@@ -2115,7 +2114,7 @@ class fa {
         // Connect end states with first while automata has only one end state.
         while ($i > 0) {
             $exendstate = $endstates[$i];
-            $epstran = new fa_transition ($exendstate, $newleaf, $to);
+            $epstran = new transition ($exendstate, $newleaf, $to);
             $this->add_transition($epstran);
             $i--;
             $this->remove_end_state($exendstate);
@@ -2127,7 +2126,7 @@ class fa {
         // Connect end states with first while automata has only one end state.
         while ($i > 0) {
             $exendstate = $this->fastartstates[0][$i];
-            $epstran = new fa_transition ($from, $newleaf, $exendstate);
+            $epstran = new transition ($from, $newleaf, $exendstate);
             $this->add_transition($epstran);
             $i--;
             $this->remove_start_state($exendstate);
@@ -2170,8 +2169,8 @@ class fa {
             }
         }
 
-        $this->to_origin(fa_transition::ORIGIN_TRANSITION_FIRST);
-        $anotherfa->to_origin(fa_transition::ORIGIN_TRANSITION_SECOND);
+        $this->to_origin(transition::ORIGIN_TRANSITION_FIRST);
+        $anotherfa->to_origin(transition::ORIGIN_TRANSITION_SECOND);
         $result = $this->intersect_fa($anotherfa, $numbers, $isstart);
         $result->remove_unreachable_states();
         if (empty($result->adjacencymatrix)) {
@@ -2246,7 +2245,7 @@ class fa {
         $charset = new \qtype_preg_leaf_charset();
         $charset->flags = array(array($flag));
         $charset->userinscription = array(new \qtype_preg_userinscription("\n"));
-        $righttran = new fa_transition(0, $charset, 1);
+        $righttran = new transition(0, $charset, 1);
         $outtransitions = $this->get_adjacent_transitions($del->to, true);
         if (!is_array($stackitem['end'])) {
             $endstates = array($stackitem['end']);
@@ -2290,10 +2289,10 @@ class fa {
                 $delclone->mergedbefore = array();
                 $delclonemerged = clone $del;
                 $tran->loopsback = $transition->loopsback || $del->loopsback;
-                $tran->greediness = fa_transition::min_greediness($tran->greediness, $del->greediness);
+                $tran->greediness = transition::min_greediness($tran->greediness, $del->greediness);
                 $merged = array_merge($delclonemerged->mergedbefore, array($delclone), $delclonemerged->mergedafter);
                 // Work with tags.
-                if (!$tran->consumeschars && $del->is_eps() && $del->from !== $del->to && $tran->origin !== fa_transition::ORIGIN_TRANSITION_SECOND) {
+                if (!$tran->consumeschars && $del->is_eps() && $del->from !== $del->to && $tran->origin !== transition::ORIGIN_TRANSITION_SECOND) {
                     if ($back) {
                         $tran->mergedbefore = array_merge($tran->mergedbefore, $merged);
                     } else {
@@ -2442,7 +2441,7 @@ class fa {
                 $transitions = $this->get_adjacent_transitions($curstate, false);
                 foreach ($transitions as $transition) {
                     $front[] = $transition->from;
-                    if ($transition->origin !== fa_transition::ORIGIN_TRANSITION_SECOND) {
+                    if ($transition->origin !== transition::ORIGIN_TRANSITION_SECOND) {
                         $iswrong = false;
                     }
                 }
@@ -2539,7 +2538,7 @@ class fa {
                         }
                         $copiedstate = array_search($number, $this->statenumbers);
                         // Add transition.
-                        //$addtran = new fa_transition($state, $tran->pregleaf, $copiedstate, $tran->origin, $tran->consumeschars);
+                        //$addtran = new transition($state, $tran->pregleaf, $copiedstate, $tran->origin, $tran->consumeschars);
                         $addtran = clone $tran;
                         $addtran->from = $state;
                         $addtran->to = $copiedstate;
@@ -2555,7 +2554,7 @@ class fa {
                     foreach ($transitions as $tran) {
                         $oldfront[] = $tran->to;
                     }
-                    $this->copy_modify_branches($anotherfa, $oldfront, null, $direction, fa_transition::ORIGIN_TRANSITION_SECOND);
+                    $this->copy_modify_branches($anotherfa, $oldfront, null, $direction, transition::ORIGIN_TRANSITION_SECOND);
 
                     // Connect last state of intersection and copied branch.
                     foreach ($transitions as $tran) {
@@ -2568,11 +2567,11 @@ class fa {
                         }
                         $copiedstate = array_search($number, $this->statenumbers);
                         // Add transition.
-                        //$addtran = new fa_transition($state, $tran->pregleaf, $copiedstate, $tran->origin, $tran->consumeschars);
+                        //$addtran = new transition($state, $tran->pregleaf, $copiedstate, $tran->origin, $tran->consumeschars);
                         $addtran = clone $tran;
                         $addtran->from = $state;
                         $addtran->to = $copiedstate;
-                        $addtran->origin = fa_transition::ORIGIN_TRANSITION_SECOND;
+                        $addtran->origin = transition::ORIGIN_TRANSITION_SECOND;
                         $addtran->redirect_merged_transitions();
                         $addtran->consumeschars = false;
                         if ($copiedstate !== false) {
@@ -2693,7 +2692,7 @@ class fa {
                         }
                         $copiedstate = array_search($number, $this->statenumbers);
                         // Add transition.
-                        //$addtran = new fa_transition($copiedstate, $tran->pregleaf, $state);
+                        //$addtran = new transition($copiedstate, $tran->pregleaf, $state);
                         $addtran = clone $tran;
                         $addtran->to = $state;
                         $addtran->from = $copiedstate;
@@ -2708,7 +2707,7 @@ class fa {
                     foreach ($transitions as $tran) {
                         $oldfront[] = $tran->from;
                     }
-                    $this->copy_modify_branches($anotherfa, $oldfront, null, $direction, fa_transition::ORIGIN_TRANSITION_SECOND);
+                    $this->copy_modify_branches($anotherfa, $oldfront, null, $direction, transition::ORIGIN_TRANSITION_SECOND);
                     // Connect last state of intersection and copied branch.
                     foreach ($transitions as $tran) {
                         // Get number of copied state.
@@ -2720,12 +2719,12 @@ class fa {
                         }
                         $copiedstate = array_search($number, $this->statenumbers);
                         // Add transition.
-                        //$addtran = new fa_transition($copiedstate, $tran->pregleaf, $state, $tran->origin, $tran->consumeschars);
+                        //$addtran = new transition($copiedstate, $tran->pregleaf, $state, $tran->origin, $tran->consumeschars);
                         $addtran = clone $tran;
                         $addtran->to = $state;
                         $addtran->from = $copiedstate;
                         $addtran->redirect_merged_transitions();
-                        if ($tran->origin == fa_transition::ORIGIN_TRANSITION_SECOND) {
+                        if ($tran->origin == transition::ORIGIN_TRANSITION_SECOND) {
                             $addtran->consumeschars = false;
                         }
                         $this->add_transition($addtran);
@@ -3124,7 +3123,7 @@ class fa {
                             $tran->to = $addedstate;
                             $tran->redirect_merged_transitions();
                             $result->add_transition($tran);
-                            $tran->origin = fa_transition::ORIGIN_TRANSITION_SECOND;
+                            $tran->origin = transition::ORIGIN_TRANSITION_SECOND;
                             $newstop[] = $addedstate;
                         }
                         //$anotherfa->remove_transition($transition);
@@ -3150,7 +3149,7 @@ class fa {
                             $addedstate = $result->add_state($addednumber);
                             $tran->from = $addedstate;
                             $tran->redirect_merged_transitions();
-                            $tran->origin = fa_transition::ORIGIN_TRANSITION_SECOND;
+                            $tran->origin = transition::ORIGIN_TRANSITION_SECOND;
                             $result->add_transition($tran);
                             $newstop[] = $addedstate;
                         }

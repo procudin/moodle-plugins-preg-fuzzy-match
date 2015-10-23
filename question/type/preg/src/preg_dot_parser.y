@@ -8,7 +8,7 @@
     private $automaton;
 
 	public function __construct() {
-		$this->automaton = new \qtype_preg\fa();
+		$this->automaton = new \qtype_preg\fa\fa();
 	}
     public function get_automaton() {
         return $this->automaton;
@@ -58,16 +58,16 @@ transitions_list ::= transition_stmt(A) transitions_list.{
 
 }
 transition_stmt(A) ::= TRANSITIONSTATES(B) transition_merged_list(C) main_transition(D) transition_merged_list(E). {
-    A = $this->get_transition(B[0], D, B[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, false, C, E);
+    A = $this->get_transition(B[0], D, B[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, false, C, E);
 }
 transition_stmt(A) ::= TRANSITIONSTATES(B) transition_merged_list(C) main_transition(D).{
-    A = $this->get_transition(B[0], D, B[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, true, C);
+    A = $this->get_transition(B[0], D, B[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, true, C);
 }
 transition_stmt(A) ::= TRANSITIONSTATES(B) main_transition(C) transition_merged_list(D). {
-    A = $this->get_transition(B[0], C, B[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, true, array(), D);
+    A = $this->get_transition(B[0], C, B[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, true, array(), D);
 }
 transition_stmt(A) ::= TRANSITIONSTATES(B) main_transition(C). {
-    A = $this->get_transition(B[0], C, B[1], \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST, true);
+    A = $this->get_transition(B[0], C, B[1], \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, true);
 }
 transition_stmt(A) ::= TRANSITIONSTATES(B) transition_merged_list(C) main_transition(D) transition_merged_list(E) transition_params(F). {
     A = $this->get_transition(B[0], D, B[1], F['type'], F['consumes'], C, E);
@@ -100,13 +100,13 @@ transition_params(A) ::= transition_params_type(B) COMMA STYLE EQUALS DOTTED. {
     A['consumes'] = false;
 }
 transition_params_type(A) ::= COLOR EQUALS VIOLET. {
-    A = \qtype_preg\fa_transition::ORIGIN_TRANSITION_FIRST;
+    A = \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST;
 }
 transition_params_type(A) ::= COLOR EQUALS BLUE. {
-    A = \qtype_preg\fa_transition::ORIGIN_TRANSITION_SECOND;
+    A = \qtype_preg\fa\transition::ORIGIN_TRANSITION_SECOND;
 }
 transition_params_type(A) ::= COLOR EQUALS RED.{
-    A = \qtype_preg\fa_transition::ORIGIN_TRANSITION_INTER;
+    A = \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER;
 }
 merged_transition(A) ::= transition_desc(B). {
     A = B;
@@ -116,7 +116,7 @@ main_transition(A) ::= MAINSTART transition_desc(B) MAINEND. {
 }
 transition_desc(A) ::= OPEN(B) LEAF(C) CLOSE(D). {
     $pregleaf = C;
-    A = new \qtype_preg\fa_transition(0, $pregleaf, 1);
+    A = new \qtype_preg\fa\transition(0, $pregleaf, 1);
     foreach (B as $tag) {
         $open = new qtype_preg_leaf_meta();
         $open->subpattern = $tag;
