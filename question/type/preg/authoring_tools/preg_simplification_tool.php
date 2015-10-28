@@ -89,38 +89,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $data;
     }
 
-//    public function get_regex() {
-//        return $this->get_regex_from_tree($this->get_dst_root());
-//    }
-//
-//    protected function get_regex_from_tree($node) {
-//        if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET
-//            || $node->type == qtype_preg_node::TYPE_LEAF_ASSERT
-//            || $node->type == qtype_preg_node::TYPE_LEAF_META
-//            || $node->type == qtype_preg_node::TYPE_LEAF_BACKREF
-//            || $node->type == qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL
-//            || $node->type == qtype_preg_node::TYPE_LEAF_TEMPLATE
-//            || $node->type == qtype_preg_node::TYPE_LEAF_CONTROL
-//            || $node->type == qtype_preg_node::TYPE_LEAF_OPTIONS
-//            || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT) {
-//
-//            foreach ($node->userinscription as $u_inscription) {
-//                $this->regex_from_tree += $u_inscription;
-//            }
-//            return true;
-//        }
-//        foreach ($node->operands as $operand) {
-//            if ($this->search_grouping_node($operand)) {
-//                return true;
-//            }
-//        }
-//
-//        $this->problem_type = -2;
-//        $this->indfirst = -2;
-//        $this->indlast = -2;
-//        return false;
-//    }
-
 
 
     //--- CHECK ALL RULES ---
@@ -211,7 +179,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($node->type == qtype_preg_node::TYPE_LEAF_ASSERT
             && ($node->subtype == qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX || $node->subtype == qtype_preg_leaf_assert::SUBTYPE_DOLLAR)) {
             if ($this->is_find_assert == true) {
-                array_push($this->problem_ids, $node->id);
+                $this->problem_ids[] = $node->id;
                 $this->problem_type = 1;
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
@@ -264,7 +232,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function search_grouping_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
             if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
-                array_push($this->problem_ids, $node->id);
+                $this->problem_ids[] = $node->id;
                 $this->problem_type = 2;
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
@@ -307,7 +275,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
             if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
                 if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
-                    array_push($this->problem_ids, $node->id);
+                    $this->problem_ids[] = $node->id;
                     $this->problem_type = 3;
                     $this->indfirst = $node->position->indfirst;
                     $this->indlast = $node->position->indlast;
@@ -392,31 +360,41 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         foreach ($leafs as $leaf) {
             $tmp_root = $this->get_local_root_for_node($this->get_dst_root(), $leaf[0]);
             if ($leaf[0]->is_equal($current_leaf, null) && $this->compare_local_root($tmp_root, $tree_root)) {
-                if (count($leaf) == 1) {
-                    array_push($this->problem_ids, 1);//length
-                    array_push($this->problem_ids, $leaf[0]->id);
-                    array_push($this->problem_ids, $current_leaf->id);
-                    $this->problem_type = 4;
-                    $this->get_subexpression_regex_position_for_node($leaf[0], $current_leaf);
+                if($this->get_right_set_of_leafs($leaf, $current_leaf, $tree_root)) {
                     return true;
-                } else if (count($leaf) > 1) {
-                    $right_leafs = $this->get_right_leafs($tree_root, $current_leaf, count($leaf));
-                    if ($this->leafs_compare($leaf, $right_leafs)) {
-                        array_push($this->problem_ids, count($leaf));//length
-                        array_push($this->problem_ids, $leaf[0]->id);
-                        array_push($this->problem_ids, $right_leafs[0]->id);
-                        $this->problem_type = 4;
-                        $this->get_subexpression_regex_position_for_nodes($leaf, $right_leafs);
-                        return true;
-                    }
                 }
             }
         }
         return false;
     }
 
-    private function get_local_root_for_node($tree_root, $node)
-    {
+    private function get_right_set_of_leafs($leafs, $current_leaf, $tree_root) {
+        $right_leafs = $this->get_right_leafs($tree_root, $current_leaf, count($leafs));
+        $right_leafs_tmp = $right_leafs;
+        if ($this->leafs_compare($leafs, $right_leafs)) {
+            $this->problem_ids[] = count($leafs);//length
+            $this->problem_ids[] = $leafs[0]->id;
+            $is_found = true;
+            while($is_found) {
+                $this->problem_ids[] = $right_leafs_tmp[0]->id;
+                $right_leafs_tmp = $right_leafs;
+                $next_leafs = $this->get_right_leafs($tree_root, $right_leafs_tmp[count($right_leafs_tmp) - 1], 2);
+                $next_leaf = null;
+                if (count($next_leafs) > 1) {
+                    $next_leaf = $next_leafs[1];
+                }
+                $right_leafs = $this->get_right_leafs($tree_root, $next_leaf, count($leafs));
+                $is_found = $this->leafs_compare($leafs, $right_leafs);
+            }
+            $this->problem_type = 4;
+            $this->get_subexpression_regex_position_for_nodes($leafs, $right_leafs_tmp);
+            return true;
+        }
+
+        return false;
+    }
+
+    private function get_local_root_for_node($tree_root, $node) {
         $local_root = null;
         if ($this->is_operator($tree_root)) {
             foreach ($tree_root->operands as $operand) {
@@ -429,8 +407,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $local_root;
     }
 
-    private function get_right_leafs($tree_root, $current_leaf, $size, &$leafs = null, $is_found = false)
-    {
+    private function get_right_leafs($tree_root, $current_leaf, $size, &$leafs = null, $is_found = false) {
+        if ($current_leaf == NULL) {
+            return array();
+        }
         if ($leafs == NULL) {
             $leafs = array();
         }
@@ -634,7 +614,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function search_single_charset_node($node) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET && $node->subtype == NULL) {
             if ($node->is_single_character() == true && $node->negative == false) {
-                array_push($this->problem_ids, $node->id);
+                $this->problem_ids[] = $node->id;
                 $this->problem_type = 5;
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
