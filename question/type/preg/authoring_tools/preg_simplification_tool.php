@@ -613,12 +613,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function search_single_charset_node($node) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET && $node->subtype == NULL) {
-            if ($node->is_single_character() == true && $node->negative == false) {
+            if (($node->is_single_character() == true || $this->check_many_charset_node($node)) && !$node->negative) {
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 5;
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
                 return true;
+            } else {
+
             }
         }
         if ($this->is_operator($node)) {
@@ -635,6 +637,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    private function check_many_charset_node($node) {
+        $symbol = $node->userinscription[1]->data;
+        for($i = 2; $i < count($node->userinscription) - 1; ++$i) {
+            if ($node->userinscription[$i]->data !== $symbol) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 
     //--- OPTIMIZATION ---
@@ -696,8 +707,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function remove_square_brackets_from_charset($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
-            array_shift($node->userinscription);
-            array_pop($node->userinscription);
+            $tmp = $node->userinscription[1];
+            $node->userinscription = array($tmp);
             return true;
         }
 
@@ -708,5 +719,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             }
         }
+
+        return false;
     }
 }
