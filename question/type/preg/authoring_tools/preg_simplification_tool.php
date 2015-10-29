@@ -375,7 +375,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $this->problem_ids[] = count($leafs);//length
             $this->problem_ids[] = $leafs[0]->id;
             $is_found = true;
-            while($is_found) {
+            while ($is_found) {
                 $this->problem_ids[] = $right_leafs_tmp[0]->id;
                 $right_leafs_tmp = $right_leafs;
                 $next_leafs = $this->get_right_leafs($tree_root, $right_leafs_tmp[count($right_leafs_tmp) - 1], 2);
@@ -398,10 +398,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $local_root = null;
         if ($this->is_operator($tree_root)) {
             foreach ($tree_root->operands as $operand) {
-                if ($operand->id == $node->id) {
+                if ($operand->id === $node->id) {
                     return $tree_root;
                 }
                 $local_root = $this->get_local_root_for_node($operand, $node);
+                if ($local_root !== null) {
+                    return $local_root;
+                }
             }
         }
         return $local_root;
