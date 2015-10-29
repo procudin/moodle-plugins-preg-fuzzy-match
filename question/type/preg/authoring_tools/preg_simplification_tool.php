@@ -123,6 +123,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
+                $this->problem_ids = array();
             }
 
             $result = $this->grouping_node();
@@ -130,6 +131,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
+                $this->problem_ids = array();
             }
 
             $result = $this->subpattern_node();
@@ -137,13 +139,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
-            }
-
-            $result = $this->cse();
-            if ($result != array()) {
-                $equivalences[$i] = array();
-                $equivalences[$i] += $result;
-                ++$i;
+                $this->problem_ids = array();
             }
 
             $result = $this->single_charset_node();
@@ -151,6 +147,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
+                $this->problem_ids = array();
+            }
+
+            $result = $this->cse();
+            if ($result != array()) {
+                $equivalences[$i] = array();
+                $equivalences[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
             }
         }
 
@@ -336,6 +341,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $leafs = array();
             $leafs[0] = array();
             array_push($leafs[0], $tree_root);
+
+            $this->normalization($tree_root);
         }
 
         if ($this->is_operator($tree_root)) {
@@ -475,6 +482,59 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT);
     }
 
+    private function associative_commutative_operator_sort($tree_root){
+        if ($this->is_operator($tree_root)) {
+            if ($this->is_associative_commutative_operator($tree_root)) {
+                $this->sort_associative_commutative_operator_childs($tree_root);
+            }
+            foreach ($tree_root->operands as $operand) {
+                if ($this->is_associative_commutative_operator($operand)) {
+                    $this->sort_associative_commutative_operator_childs($operand);
+                }
+
+                $this->associative_commutative_operator_sort($operand);
+            }
+        }
+    }
+
+    private function sort_associative_commutative_operator_childs(&$operator) {
+        for ($j = 0; $j < count($operator->operands) - 1; $j++) {
+            for ($i = 0; $i < count($operator->operands) - $j - 1; $i++) {
+                if ($operator->operands[$i]->get_regex_string() > $operator->operands[$i+1]->get_regex_string()) {
+                    $b = $operator->operands[$i];
+                    $operator->operands[$i] = $operator->operands[$i + 1];
+                    $operator->operands[$i + 1] = $b;
+                }
+            }
+        }
+    }
+
+    private function is_associative_commutative_operator($node) {
+        return $node->type == qtype_preg_node::TYPE_NODE_ALT;
+    }
+
+    protected function normalization($tree_root) {
+        $problem_exist = true;
+//        while($problem_exist) {
+            if ($this->search_single_charset_node($this->get_dst_root())) {
+                $this->remove_square_brackets_from_charset($this->get_dst_root(), $this->problem_ids[0]);
+            } else {
+                $problem_exist = false;
+            }
+//        }
+        $problem_exist = true;
+        while($problem_exist) {
+            if ($this->search_grouping_node($this->get_dst_root())) {
+                $this->remove_subtree($this->get_dst_root(), $this->problem_ids[0]);
+            } else {
+                $problem_exist = false;
+            }
+        }
+
+        $this->associative_commutative_operator_sort($this->get_dst_root());
+
+        $this->problem_ids = array();
+    }
 
 
 
@@ -698,25 +758,29 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             return true;
         }
 
-        foreach ($node->operands as $i => $operand) {
-            if ($this->remove_subtree($operand, $remove_node_id)) {
-                array_splice($node->operands, $i, 1);
-                return false;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $i => $operand) {
+                if ($this->remove_subtree($operand, $remove_node_id)) {
+                    array_splice($node->operands, $i, 1);
+                    return false;
+                }
             }
         }
 
         return false;
     }
 
-    private function remove_square_brackets_from_charset($node, $remove_node_id) {
-        if ($node->id == $remove_node_id) {
-            $tmp = $node->userinscription[1];
-            $node->userinscription = array($tmp);
+    private function remove_square_brackets_from_charset($tree_root, $remove_node_id) {
+        if ($tree_root->id == $remove_node_id) {
+            $tmp = $tree_root->userinscription[1];
+            $tree_root->userinscription = array($tmp);
+            $tree_root->flags[0][0]->data = new qtype_poasquestion\string($tmp->data);
+            $tree_root->subtype = "enumerable_characters";
             return true;
         }
 
-        if ($this->is_operator($node)) {
-            foreach ($node->operands as $operand) {
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
                 if ($this->remove_square_brackets_from_charset($operand, $remove_node_id)) {
                     return true;
                 }
