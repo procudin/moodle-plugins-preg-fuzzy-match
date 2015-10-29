@@ -22,6 +22,8 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             $test_result = $tests[$i][1];
             $test_regex = $tests[$i][0];
 
+            var_dump($test_regex);
+
             $stooloptions = new qtype_preg_simplification_tool_options();
             $stooloptions->engine = 'fa_matcher';
             $stooloptions->notation = 'native';
@@ -55,7 +57,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             $this->assertTrue($result_regex === $test_result);
         }
     }
-
+/*
     public function test_grouping_node_trivial() {
         $tests = $this->get_test_grouping_node_trivial();
         for($i = 0; $i < count($tests); $i++) {
@@ -135,7 +137,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             $this->assertTrue($result_regex === $test_result);
         }
     }
-
+*/
     public function test_single_charset_trivial() {
         $tests = $this->get_test_single_charset_trivial();
         for($i = 0; $i < count($tests); $i++) {
@@ -178,9 +180,9 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_cse_trivial() {
         return array (
-            array('aaa', 'a{2}a', true),
-            array('aaab', 'a{2}ab', true),
-            array('baaa', 'ba{2}a', true),
+            array('aaa', 'a{3}', true),
+            array('aaab', 'a{3}b', true),
+            array('baaa', 'ba{3}', true),
             array('abab', '(?:ab){2}', true),
             array('ababa', '(?:ab){2}a', true), //или a(?:ba){2}
             array('cbaba', 'c(?:ba){2}', true),
@@ -194,33 +196,31 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('cb{2}ababa', 'cb{2}(?:ab){2}a', true), //или cb(?:ba){3}
             array('aababab', 'a{2}babab', true),
             array('a{2}babab', 'a{2}(?:ba){2}b', true), //или a(?:ab){3}
-            array('(aaa)', '(a{2}a)', true),
-            array('(?:aaa)', '(?:a{2}a)', true),
+            array('(aaa)', '(a{3})', true),
+            array('(?:aaa)', '(?:a{3})', true),
             array('(abab)', '((?:ab){2})', true),
             array('(?:abab)', '(?:(?:ab){2})', true),
             array('aa(?:a)', 'a{2}(?:a)', true),
             array('(?:a)aa', '(?:a)a{2}', true),
             array('a(?:a)a', 'a(?:a)a', true),
-            array('(?:aa)aa', '(?:a{2})aa', true),
+            //array('(?:aa)aa', '(?:a{2})aa', true),
             array('(?:a{2})aa', '(?:a{2})a{2}', true),
             array('aa(?:aa)aa', 'a{2}(?:aa)aa', true),
-            array('a{2}(?:aa)aa', 'a{2}(?:a{2})aa', true),
+            //array('a{2}(?:aa)aa', 'a{2}(?:a{2})aa', true),
             array('a{2}(?:a{2})aa', 'a{2}(?:a{2})a{2}', true),
             array('aa(?:aa)', 'a{2}(?:aa)', true),
             array('a{2}(?:aa)', 'a{2}(?:a{2})', true),
-            array('(?:ab)aaaa', '(?:ab)a{2}aa', true),
-            array('(?:ab)a{2}aa', '(?:ab)a{2}a{2}', true),
+            array('(?:ab)aaaa', '(?:ab)a{4}', true),
             array('aa(?:ab)aa', 'a{2}(?:ab)aa', true),
             array('a{2}(?:ab)aa', 'a{2}(?:ab)a{2}', true),
-            array('aaaa(?:ab)', 'a{2}aa(?:ab)', true),
-            array('a{2}aa(?:ab)', 'a{2}a{2}(?:ab)', true),
+            array('aaaa(?:ab)', 'a{4}(?:ab)', true),
             array('(?:ab)aa', '(?:ab)a{2}', true),
             array('aa(?:ab)', 'a{2}(?:ab)', true),
             array('(?:ba)aa', '(?:ba)a{2}', true),
             array('aa(?:ba)aa', 'a{2}(?:ba)aa', true),
             array('a{2}(?:ba)aa', 'a{2}(?:ba)a{2}', true),
             array('aa(?:ba)', 'a{2}(?:ba)', true),
-            array('(?:ab)ab', '(?:ab){2}', true),
+            /*array('(?:ab)ab', '(?:ab){2}', true),
             array('ab(?:ab)ab', '(?:ab){3}', true),
             array('ab(?:ab)', '(?:ab){2}', true),
             array('(?:abab)ab', '(?:ab){3}', true),
@@ -236,7 +236,14 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('[a]bab', '(?:ab){2}', true),
             array('a[b]ab', '(?:ab){2}', true),
             array('ab[a]b', '(?:ab){2}', true),
-            array('aba[b]', '(?:ab){2}', true),
+            array('aba[b]', '(?:ab){2}', true),*/
+            array('(?:)aa', '(?:)a{2}', true),
+            array('a(?:)a', 'a{2}', true),
+            array('aa(?:)', 'a{2}(?:)', true),
+            array('(?:a|c)(?:c|a)', '(?:a|c){2}', true),
+            array('(?:ab|c)(?:c|ab)', '(?:ab|c){2}', true),
+            array('a(?:ab|c)(?:c|ab)', 'a(?:ab|c){2}', true),
+            array('(?:ab|c)(?:c|ab)a', '(?:ab|c){2}a', true),
         );
     }
 
@@ -247,10 +254,10 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('[a]a', 'aa'),
             array('a[a]a', 'aaa'),
             array('b[a]c', 'bac'),
-            array('[aa]', '[aa]'),
-            array('a[aa]', 'a[aa]'),
-            array('[aa]a', '[aa]a'),
-            array('a[aa]a', 'a[aa]a'),
+            array('[aa]', 'a'),
+            array('a[aa]', 'aa'),
+            array('[aa]a', 'aa'),
+            array('a[aa]a', 'aaa'),
             array('[^a]', '[^a]'),
             array('a[^a]', 'a[^a]'),
             array('[^a]a', '[^a]a'),
