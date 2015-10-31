@@ -235,13 +235,23 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     private function search_grouping_node($node) {
-        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
-            if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
+            if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
+                && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 2;
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
                 return true;
+            } else {
+                if ($this->check_other_grouping_node($node->operands[0])) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 2;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+                }
             }
         }
         if ($this->is_operator($node)) {
@@ -255,6 +265,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $this->problem_type = -2;
         $this->indfirst = -2;
         $this->indlast = -2;
+        return false;
+    }
+
+    private function check_other_grouping_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
+            if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
+                && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                return true;
+            } else {
+                return $this->check_other_grouping_node($node->operands[0]);
+            }
+        }
         return false;
     }
 
@@ -278,13 +301,21 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function search_subpattern_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
-            if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
-                if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
+            if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
+                if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
                     $this->problem_ids[] = $node->id;
                     $this->problem_type = 3;
                     $this->indfirst = $node->position->indfirst;
                     $this->indlast = $node->position->indlast;
                     return true;
+                } else {
+                    if ($this->check_other_subpattern_node($node->operands[0])) {
+                        $this->problem_ids[] = $node->id;
+                        $this->problem_type = 2;
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    }
                 }
             }
         }
@@ -316,6 +347,20 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    private function check_other_subpattern_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+            if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
+                && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
+                    return true;
+                }
+            } else {
+                return $this->check_other_grouping_node($node->operands[0]);
+            }
+        }
+        return false;
+    }
 
 
 
@@ -445,7 +490,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $leafs;
     }
 
-    // Функция проверки массива с узлами на эквивалентность
     private function leafs_compare($leafs1, $leafs2) {
         if (count($leafs1) != count($leafs2)) {
             return false;
@@ -538,7 +582,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
-    // Функция светрки подвыражений
     private function fold_cse($tree_root) {
         if ($tree_root->id != $this->options->problem_ids[1]) {
             if ($this->is_operator($tree_root)) {
@@ -557,13 +600,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    // Функция свертки листьев
     private function tree_folding($current_leaf, $parent_node) {
         // Старая регулярка, которую будем менять
         $regex_string = $this->get_regex_string();
 
         // Подсчет границ квантификатора
-        $counts = $this->repeat_count_of_subexpressions($parent_node, $current_leaf);
+        $counts = $this->subexpressions_repeats($parent_node, $current_leaf);
 
         // Создаем узел - квантификатор с нужнымыми границами
         $qu = new qtype_preg_node_finite_quant($counts[0], $counts[1]);
@@ -605,10 +647,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     // Функция подсчета количества повторений подвыражений
-    private function repeat_count_of_subexpressions($current_root, $nodes) {
+    private function subexpressions_repeats($current_root, $nodes) {
         $counts = array(0,0);
 //        foreach ($nodes as $node) {
-//            $tmp_counts = $this->repeat_count_of_subexpression($current_root, $node);
+//            $tmp_counts = $this->subexpression_repeats($current_root, $node);
 //            $counts[0] += $tmp_counts[0];
 //            $counts[1] += $tmp_counts[1];
 //        }
@@ -618,8 +660,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $counts;
     }
 
-    // Функция подсчета количества повторений подвыражения
-    private function repeat_count_of_subexpression($current_root, $node) {
+    private function subexpression_repeats($current_root, $node) {
         return array(1,1);
     }
 
