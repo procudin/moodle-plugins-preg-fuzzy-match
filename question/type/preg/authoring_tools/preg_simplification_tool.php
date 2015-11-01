@@ -858,6 +858,51 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         );
     }
 
+
+
+    //--- tips ---
+    /* The 1st rule */
+    public function space_charset() {
+        $equivalences = array();
+
+        if ($this->search_space_charset($this->get_dst_root())) {
+            $equivalences['problem'] = get_string('simplification_tips_short_1', 'qtype_preg');
+            $equivalences['solve'] = get_string('simplification_tips_full_1', 'qtype_preg');
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_space_charset($node) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
+            if (($node->is_single_character() && $node->userinscription[0]->data === ' ')
+                || ($this->check_many_charset_node($node) && $node->userinscription[1]->data === ' ')
+                && !$node->negative) {
+                $this->problem_ids[] = $node->id;
+                $this->problem_type = 101;
+                $this->indfirst = $node->position->indfirst;
+                $this->indlast = $node->position->indlast;
+                return true;
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_space_charset($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
