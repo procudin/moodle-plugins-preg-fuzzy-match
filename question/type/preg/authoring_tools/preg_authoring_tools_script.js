@@ -275,9 +275,12 @@ M.preg_authoring_tools_script = (function ($) {
     simplification_hints_clicked : function (e) {
         e.preventDefault();
 
+        // Clear highlighting
         var hints_table = $('#simplification_tool_hints > tbody');
         for(var i = 0; i < hints_table.children.length; ++i) {
-            hints_table[0].children[i].children[0].style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.0) inset';
+            if (typeof hints_table[0].children[i] != 'undefined') {
+                hints_table[0].children[i].children[0].style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.0) inset';
+            }
         }
 
         e.currentTarget.style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.1) inset';
@@ -616,6 +619,13 @@ M.preg_authoring_tools_script = (function ($) {
             }
 
             self.simplification_hints().click(self.simplification_hints_clicked);
+
+            // Highlight 1st element
+            if (typeof hints_table[0].children[0] !== 'undefined') {
+                setTimeout(function () {
+                    hints_table[0].children[0].children[0].click();
+                }, 500);
+            }
         }
 
         if (typeof d != 'undefined') {
