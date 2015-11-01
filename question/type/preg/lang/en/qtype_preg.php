@@ -774,7 +774,7 @@ $string['simplification_equivalences_short_13'] = 'Excess emptiness in the alter
 $string['simplification_equivalences_full_13'] = 'The emptiness in the alternative, is superfluous because alternative and always coincides with emptiness';
 
 $string['simplification_tips_short_1'] = 'Expand the list of whitespace';
-$string['simplification_tips_full_1'] = 'You may want to allow any whitespace (such as a tab), you have to use "\ s"';
+$string['simplification_tips_full_1'] = 'You may want to allow any whitespace (such as a tab), you have to use "\s"';
 $string['simplification_tips_short_2'] = 'Increase the amount of whitespace';
 $string['simplification_tips_full_2'] = 'You may want to allow any number of whitespace characters in this place, you have to use a quantifier "+"';
 $string['simplification_tips_short_3'] = 'The extra parentheses, for which there is no backreferences';
