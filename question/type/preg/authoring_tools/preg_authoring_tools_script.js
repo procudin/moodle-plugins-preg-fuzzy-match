@@ -274,6 +274,14 @@ M.preg_authoring_tools_script = (function ($) {
 
     simplification_hints_clicked : function (e) {
         e.preventDefault();
+
+        var hints_table = $('#simplification_tool_hints > tbody');
+        for(var i = 0; i < hints_table.children.length; ++i) {
+            hints_table[0].children[i].children[0].style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.0) inset';
+        }
+
+        e.currentTarget.style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.1) inset';
+
         $('#simplification_tool_hint_text').text(e.currentTarget.children[1].value);
         $('#problem_ids')[0].value = e.currentTarget.children[2].value;
         $('#problem_type')[0].value = e.currentTarget.children[3].value;
