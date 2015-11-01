@@ -903,6 +903,48 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+
+
+    /* The 3rd rule */
+    public function subpattern_without_backref() {
+        $equivalences = array();
+
+        if ($this->search_subpattern_without_backref($this->get_dst_root())) {
+            $equivalences['problem'] = get_string('simplification_tips_short_3', 'qtype_preg');
+            $equivalences['solve'] = get_string('simplification_tips_full_3', 'qtype_preg');
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_subpattern_without_backref($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+            if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
+                $this->problem_ids[] = $node->id;
+                $this->problem_type = 103;
+                $this->indfirst = $node->position->indfirst;
+                $this->indlast = $node->position->indlast;
+                return true;
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_subpattern_without_backref($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
