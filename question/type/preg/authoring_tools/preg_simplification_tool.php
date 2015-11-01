@@ -752,6 +752,60 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
+
+    /* The 6th rule */
+    public function single_alternative_node() {
+        $equivalences = array();
+
+        if ($this->search_single_alternative_node($this->get_dst_root())) {
+            $equivalences['problem'] = get_string('simplification_equivalences_short_6', 'qtype_preg');
+            $equivalences['solve'] = get_string('simplification_equivalences_full_6', 'qtype_preg');
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_single_alternative_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_ALT) {
+            if ($this->is_single_alternative($node)) {
+                $this->problem_ids[] = $node->id;
+                $this->problem_type = 6;
+                $this->indfirst = $node->position->indfirst;
+                $this->indlast = $node->position->indlast;
+                return true;
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_single_alternative_node($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function is_single_alternative($node) {
+        foreach ($node->operands as $operand) {
+            if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
+                if (!(($operand->is_single_character() || $this->check_many_charset_node($node)) && !$operand->negative)) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
