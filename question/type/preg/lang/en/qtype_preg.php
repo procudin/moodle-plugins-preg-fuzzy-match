@@ -164,6 +164,8 @@ $string['nla_node_cond_subexpr']       = 'negative lookahead conditional subpatt
 $string['plb_node_cond_subexpr']       = 'positive lookbehind conditional subpattern';
 $string['nlb_node_cond_subexpr']       = 'negative lookbehind conditional subpattern';
 
+$string['collapsed_node']              = 'collapsed subexpression';
+
 $string['unknown_error_node_error']                = 'Unknown error';
 $string['missing_open_paren_node_error']           = 'Syntax error: missing opening parenthesis \'(\' for the closing parenthesis in position {$a->colfirst}';
 $string['missing_template_open_paren_node_error']  = 'Syntax error: missing template opening \'(?###name<)\' for the template closing in position {$a->colfirst}';
