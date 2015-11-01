@@ -945,6 +945,47 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+
+
+    /* The 8rd rule */
+    public function exact_match() {
+        $equivalences = array();
+
+        if ($this->search_exact_match($this->get_regex_string())) {
+            if ($this->options->exactmatch) {
+                $equivalences['problem'] = get_string('simplification_tips_short_8', 'qtype_preg');
+                $equivalences['solve'] = htmlspecialchars(get_string('simplification_tips_full_8_alt', 'qtype_preg'));
+            } else {
+                $equivalences['problem'] = get_string('simplification_tips_short_8', 'qtype_preg');
+                $equivalences['solve'] = htmlspecialchars(get_string('simplification_tips_full_8', 'qtype_preg'));
+            }
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_exact_match($regex_string) {
+        $regex_length = strlen($regex_string);
+        if ($regex_length > 0) {
+            if ($regex_string[0] === '^' && $regex_string[$regex_length - 1] === '$') {
+                //$this->problem_ids[] = $node->id;
+                $this->problem_type = 108;
+                $this->indfirst = -2;
+                $this->indlast = -2;
+                return true;
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
