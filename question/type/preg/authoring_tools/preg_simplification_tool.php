@@ -806,6 +806,58 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return true;
     }
 
+
+    /* The 11th rule */
+    public function quant_node() {
+        $equivalences = array();
+
+        if ($this->search_quant_node($this->get_dst_root())) {
+            $equivalences['problem'] = get_string('simplification_equivalences_short_11', 'qtype_preg');
+            $equivalences['solve'] = get_string('simplification_equivalences_full_11', 'qtype_preg');
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_quant_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT || $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+            if ($this->is_simple_quant_node($node)) {
+                $this->problem_ids[] = $node->id;
+                $this->problem_type = 11;
+                $this->indfirst = $node->position->indfirst;
+                $this->indlast = $node->position->indlast;
+                return true;
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_quant_node($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function is_simple_quant_node($node) {
+        return ($node->greedy
+                && (
+                 ($node->leftborder === 0 && $node->rightborder === 1 && $node->userinscription[0]->data !== '?'
+                   && $node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT)
+                 || ($node->leftborder === 0 && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                 || ($node->leftborder === 1 && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                )
+        );
+    }
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
