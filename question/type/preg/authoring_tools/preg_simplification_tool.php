@@ -884,16 +884,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     private function is_simple_quant_node($node) {
-        return ($node->greedy
-                && (
-                 ($node->leftborder === 0 && $node->rightborder === 1 && $node->userinscription[0]->data !== '?'
-                     && $node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT)
-                 || ($node->leftborder === 0 && $node->userinscription[0]->data !== '*'
-                     && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
-                 || ($node->leftborder === 1 && $node->userinscription[0]->data !== '+'
-                     && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
-                )
-        );
+        if ($node->greedy) {
+            if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                return (($node->leftborder === 0 && $node->userinscription[0]->data !== '*')
+                        || ($node->leftborder === 1 && $node->userinscription[0]->data !== '+'));
+            } else if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                return ($node->leftborder === 0 && $node->rightborder === 1 && $node->userinscription[0]->data !== '?');
+            }
+        }
+        return false;
     }
 
 
@@ -1075,7 +1074,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     // The 11th rule
     protected function optimize_11($node) {
-        return true;
+        return $this->change_quant_to_equivalent($node, $this->options->problem_ids[0]);
     }
 
     private function remove_subtree($node, $remove_node_id) {
@@ -1107,6 +1106,42 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($this->is_operator($tree_root)) {
             foreach ($tree_root->operands as $operand) {
                 if ($this->remove_square_brackets_from_charset($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function change_quant_to_equivalent($tree_root, $remove_node_id) {
+        if ($tree_root->id == $remove_node_id) {
+            if ($tree_root->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                if ($tree_root->leftborder === 0 && $tree_root->userinscription[0]->data !== '*') {
+                    $tmp = $tree_root->userinscription[0];
+                    $tree_root->userinscription = array($tmp);
+                    $tree_root->userinscription[0]->data = new qtype_poasquestion\string('*');
+                    return true;
+                } else if ($tree_root->leftborder === 1 && $tree_root->userinscription[0]->data !== '+') {
+                    $tmp = $tree_root->userinscription[0];
+                    $tree_root->userinscription = array($tmp);
+                    $tree_root->userinscription[0]->data = new qtype_poasquestion\string('+');
+                    return true;
+                }
+            } else if ($tree_root->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                if ($tree_root->leftborder === 0 && $tree_root->rightborder === 1 && $tree_root->userinscription[0]->data !== '?') {
+                    $tmp = $tree_root->userinscription[0];
+                    $tree_root->userinscription = array($tmp);
+                    $tree_root->userinscription[0]->data = new qtype_poasquestion\string('?');
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                if ($this->change_quant_to_equivalent($operand, $remove_node_id)) {
                     return true;
                 }
             }
