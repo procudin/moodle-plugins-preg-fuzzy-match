@@ -778,13 +778,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     private function check_many_charset_node($node) {
-        $symbol = $node->userinscription[1]->data;
-        for($i = 2; $i < count($node->userinscription) - 1; ++$i) {
-            if ($node->userinscription[$i]->data !== $symbol) {
-                return false;
+        if (count($node->userinscription) > 1) {
+            $symbol = $node->userinscription[1]->data;
+            for ($i = 2; $i < count($node->userinscription) - 1; ++$i) {
+                if ($node->userinscription[$i]->data !== $symbol) {
+                    return false;
+                }
             }
+            return true;
         }
-        return true;
+        return false;
     }
 
 
