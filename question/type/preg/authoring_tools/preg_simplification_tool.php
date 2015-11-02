@@ -1080,6 +1080,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->change_quant_to_equivalent($node, $this->options->problem_ids[0]);
     }
 
+    protected function optimize_101($node) {
+        return $this->change_space_to_charset_s($node, $this->options->problem_ids[0]);
+    }
+
     protected function optimize_103($node) {
         return $this->change_subpattern_to_group($node, $this->options->problem_ids[0]);
     }
@@ -1167,6 +1171,24 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
         return false;
     }
+
+    private function change_space_to_charset_s($node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            $node->userinscription[0]->data = '\s';
+            return true;
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $i => $operand) {
+                if ($this->change_space_to_charset_s($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function change_alternative_to_charset($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             $characters = '[';
