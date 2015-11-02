@@ -676,7 +676,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $qu->operands[] = $current_leaf;
         }
 
-        // Новая часть регулярки, на которую юудем заменять
+        // Новая часть регулярки, на которую будем заменять
         $new_regex_string_part = $qu->get_regex_string();
 
         // Новое регулярное выражение
@@ -1079,6 +1079,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function remove_subtree($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
+            if ($node->id == $this->get_dst_root()->id) {
+                $this->dstroot = null;
+            }
             return true;
         }
 
@@ -1086,6 +1089,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             foreach ($node->operands as $i => $operand) {
                 if ($this->remove_subtree($operand, $remove_node_id)) {
                     array_splice($node->operands, $i, 1);
+                    if ($this->is_associative_commutative_operator($node) && count($node->operands) < 2) {
+                        $node->operands[] = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
+                    }
                     return false;
                 }
             }
