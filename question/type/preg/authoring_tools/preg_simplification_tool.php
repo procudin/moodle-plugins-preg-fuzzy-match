@@ -1077,7 +1077,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->change_quant_to_equivalent($node, $this->options->problem_ids[0]);
     }
 
-
+    protected function optimize_103($node) {
+        return $this->change_subpattern_to_group($node, $this->options->problem_ids[0]);
+    }
 
     private function remove_subtree($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
@@ -1203,5 +1205,20 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    private function change_subpattern_to_group($node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            $node->subtype = qtype_preg_node_subexpr::SUBTYPE_GROUPING;
+            return true;
+        }
 
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $i => $operand) {
+                if ($this->change_subpattern_to_group($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
