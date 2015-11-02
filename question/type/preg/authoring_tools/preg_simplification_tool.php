@@ -187,13 +187,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
-            /*$result = $this->cse();
+            $result = $this->cse();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
-            }*/
+            }
         }
 
         return $equivalences;
@@ -1069,13 +1069,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     // The 6th rule
     protected function optimize_6($node) {
-        return true;
+        return $this->change_alternative_to_charset($node, $this->options->problem_ids[0]);
     }
 
     // The 11th rule
     protected function optimize_11($node) {
         return $this->change_quant_to_equivalent($node, $this->options->problem_ids[0]);
     }
+
+
 
     private function remove_subtree($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
@@ -1160,4 +1162,46 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
         return false;
     }
+    private function change_alternative_to_charset($node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            $characters = '[';
+            foreach ($node->operands as $operand) {
+                if (count($operand->userinscription) === 1) {
+                    $characters .= $operand->userinscription[0]->data;
+                } else {
+                    $characters .= $operand->userinscription[1]->data;
+                }
+            }
+            $characters .= ']';
+
+            $new_node = new qtype_preg_leaf_charset();
+            $new_node->set_user_info(null, array(new qtype_preg_userinscription($characters, null)));
+
+            if ($node->id == $this->get_dst_root()->id) {
+                $this->dstroot = $new_node;
+            } else {
+                $local_root = $this->get_local_root_for_node($this->get_dst_root(), $node);
+
+                foreach ($local_root->operands as $i => $operand) {
+                    if ($operand->id == $node->id) {
+                        $local_root->operands[$i] = $new_node;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $i => $operand) {
+                if ($this->change_alternative_to_charset($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
 }
