@@ -887,9 +887,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return ($node->greedy
                 && (
                  ($node->leftborder === 0 && $node->rightborder === 1 && $node->userinscription[0]->data !== '?'
-                   && $node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT)
-                 || ($node->leftborder === 0 && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
-                 || ($node->leftborder === 1 && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                     && $node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT)
+                 || ($node->leftborder === 0 && $node->userinscription[0]->data !== '*'
+                     && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                 || ($node->leftborder === 1 && $node->userinscription[0]->data !== '+'
+                     && $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
                 )
         );
     }
