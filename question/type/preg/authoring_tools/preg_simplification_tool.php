@@ -187,13 +187,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
-            $result = $this->cse();
+            /*$result = $this->cse();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
-            }
+            }*/
         }
 
         return $equivalences;
@@ -1088,10 +1088,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($this->is_operator($node)) {
             foreach ($node->operands as $i => $operand) {
                 if ($this->remove_subtree($operand, $remove_node_id)) {
+                    if (count($node->operands) === 1) {
+                        return $this->remove_subtree($this->get_dst_root(), $node->id);
+                    }
+
                     array_splice($node->operands, $i, 1);
                     if ($this->is_associative_commutative_operator($node) && count($node->operands) < 2) {
                         $node->operands[] = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
                     }
+
                     return false;
                 }
             }
