@@ -22,12 +22,14 @@ class qtype_preg_simplification_tool_options extends qtype_preg_handling_options
 
 class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
+    /** Array with root ids of problem subtree */
     private $problem_ids = array();
+    /** Number type of problem */
     private $problem_type = -2;
+    /** First index of something in regex string (absolute positioning). */
     private $indfirst = -2;
+    /** Last index of something in regex string (absolute positioning). */
     private $indlast = -2;
-    private $is_find_assert = false;
-    private $regex_from_tree = '';
 
     public function __construct($regex = null, $options = null) {
         parent::__construct($regex, $options);
@@ -68,6 +70,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return 'simplification';
     }
 
+    /**
+     * Overloaded from qtype_preg_authoring_tool.
+     */
     public function generate_html() {
         if ($this->regex->string() == '') {
             return $this->data_for_empty_regex();
@@ -91,7 +96,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
-    //--- CHECK ALL RULES ---
+    /**
+     * Get array of errors in regex.
+     */
     protected function get_errors_description() {
         $errors = array();
 //        if ($this->options->is_check_errors == true) {
@@ -102,6 +109,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 //        return array(array('problem' => 'Описание ошибки', 'solve' => 'Подробное описание информации'));
     }
 
+    /**
+     * Get array of tips in regex.
+     */
     protected function get_tips_description() {
         $tips = array();
 
@@ -134,6 +144,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $tips;
     }
 
+    /**
+     * Get array of equivalences in regex.
+     */
     protected function get_equivalences_description() {
         $equivalences = array();
 
@@ -200,9 +213,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
-    //--- CHECK RULES ---
-    //--- equivalences ---
-    /* The 1st rule */
+
+    /**
+     * Check repeated assertions.
+     */
     protected function repeated_assertions() {
         $equivalences = array();
 
@@ -218,6 +232,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
+    /**
+     * Search repeated assertions in tree.
+     */
     private function search_repeated_assertions($node) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_ASSERT
             && ($node->subtype == qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX || $node->subtype == qtype_preg_leaf_assert::SUBTYPE_DOLLAR)) {
@@ -256,7 +273,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
-    /* The 2nd rule */
+    /**
+     * Check empty grouping node.
+     */
     public function grouping_node() {
         $equivalences = array();
 
@@ -272,6 +291,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
+    /**
+     * Search repeated assertions assertions in tree.
+     */
     private function search_grouping_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
             && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
@@ -306,6 +328,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Check included empty grouping node in empty grouping node.
+     */
     private function check_other_grouping_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
             && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
@@ -321,7 +346,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
-    /* The 3rd rule */
+    /**
+     * Check empty subpattern node.
+     */
     public function subpattern_node() {
         $equivalences = array();
 
@@ -337,6 +364,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
+    /**
+     * Search empty subpattern node.
+     */
     private function search_subpattern_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
             if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
@@ -371,6 +401,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Check backreference to subexpression.
+     */
     private function check_backref_to_subexpr($node, $number) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_BACKREF && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $number) {
             return true;
@@ -385,6 +418,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Check included empty subpattern node in empty subpattern node.
+     */
     private function check_other_subpattern_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
             && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
@@ -402,7 +438,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
-    /* The 4th rule */
+    /**
+     * Check common subexpressions in tree.
+     */
     public function cse() {
         $equivalences = array();
 
@@ -418,7 +456,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
-    // Функция поиска повторяющихся подвыражений
+    /**
+     * Search common subexpressions in tree.
+     */
     private function search_cse($tree_root, &$leafs = null, $current_leaf = null) {
         if ($leafs == NULL) {
             $leafs = array();
@@ -446,6 +486,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Search suitable common subexpressions in tree.
+     */
     private function search_subexpr($leafs, $current_leaf, $tree_root) {
         foreach ($leafs as $leaf) {
             $tmp_root = $this->get_local_root_for_node($this->get_dst_root(), $leaf[0]);
@@ -458,6 +501,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Trying to get a set of equivalent $leafs nodes from $current_leaf.
+     */
     private function get_right_set_of_leafs($leafs, $current_leaf, $tree_root) {
         $right_leafs = $this->get_right_leafs($tree_root, $current_leaf, count($leafs));
         $right_leafs_tmp = $right_leafs;
@@ -484,6 +530,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Get parent of node.
+     * TODO: delete
+     */
     private function get_local_root_for_node($tree_root, $node) {
         $local_root = null;
         if ($this->is_operator($tree_root)) {
@@ -500,6 +550,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $local_root;
     }
 
+    /**
+     * Trying to get a set of equivalent $leafs nodes from $current_leaf.
+     * TODO: get N nodes from subtree where $current_leaf is root
+     */
     private function get_right_leafs($tree_root, $current_leaf, $size, &$leafs = null, $is_found = false) {
         if ($current_leaf == NULL) {
             return array();
@@ -528,6 +582,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $leafs;
     }
 
+    /**
+     * Compare two arrays with nodes
+     */
     private function leafs_compare($leafs1, $leafs2) {
         if (count($leafs1) != count($leafs2)) {
             return false;
@@ -541,6 +598,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return true;
     }
 
+    /**
+     * Compare two nodes who are parents
+     */
     private function compare_local_root($local_root1, $local_root2) {
         if ($local_root1 != null && $local_root2 != null && $local_root1->is_equal($local_root2, null)) {
             return $this->is_can_local_root($local_root1) && $this->is_can_local_root($local_root2);
@@ -548,10 +608,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Whether the node is a parent for common sybexpression
+     */
     private function is_can_local_root($local_root) {
         return !($local_root->type == qtype_preg_node::TYPE_NODE_ALT);
     }
 
+    /**
+     * Whether the node is operator
+     */
     private function is_operator($node) {
         return !($node->type == qtype_preg_node::TYPE_LEAF_CHARSET
             || $node->type == qtype_preg_node::TYPE_LEAF_ASSERT
@@ -564,6 +630,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT);
     }
 
+    /**
+     * Find and sort leafs for associative-commutative operators
+     */
     private function associative_commutative_operator_sort($tree_root){
         if ($this->is_operator($tree_root)) {
             if ($this->is_associative_commutative_operator($tree_root)) {
@@ -579,6 +648,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
     }
 
+    /**
+     * Sort leafs for associative-commutative operators
+     */
     private function sort_associative_commutative_operator_childs(&$operator) {
         for ($j = 0; $j < count($operator->operands) - 1; $j++) {
             for ($i = 0; $i < count($operator->operands) - $j - 1; $i++) {
@@ -591,10 +663,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
     }
 
+    /**
+     * Whether the node is associative commutative operator
+     */
     private function is_associative_commutative_operator($node) {
         return $node->type == qtype_preg_node::TYPE_NODE_ALT;
     }
 
+    /**
+     * Tree normalization
+     */
     protected function normalization($tree_root) {
         $problem_exist = true;
 //        while($problem_exist) {
@@ -619,7 +697,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
-
+    /**
+     * Elimination of common subexpressions
+     */
     private function fold_cse($tree_root) {
         if ($tree_root->id != $this->options->problem_ids[1]) {
             if ($this->is_operator($tree_root)) {
@@ -638,28 +718,31 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Generate new fixed regex
+     */
     private function tree_folding($current_leaf, $parent_node) {
-        // Старая регулярка, которую будем менять
+        // Old regex string
         $regex_string = $this->get_regex_string();
 
-        // Подсчет границ квантификатора
+        // Calculate quantifier borders
         $counts = $this->subexpressions_repeats($parent_node, $current_leaf);
 
-        // Создаем узел - квантификатор с нужнымыми границами
+        // Create new quantifier with needed borders
         $qu = new qtype_preg_node_finite_quant($counts[0], $counts[1]);
         $text = $this->get_quant_text_from_borders($counts[0], $counts[1]);
         $qu->set_user_info(null, array(new qtype_preg_userinscription($text)));
 
-        // Созданному узлу в операнды записываем текущий operand
+        // Current operand is operand of quantifier node
         if ($this->options->problem_ids[0] > 1 && $current_leaf->type != qtype_preg_node::TYPE_NODE_SUBEXPR) {
             $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
             $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
 
-            // Добавляем недостающие узлы к группировке
+            // Add needed nodes to grouping node
             if (!$this->is_operator($current_leaf)) {
-                // Берем узлы справа от текущего
+                // Get right leafs from current node
                 $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, $this->options->problem_ids[0]);
-                // Добавляем эти узлы до тех пор, пока это не оператор
+                // Add this nodes while node in not operator
                 foreach ($right_leafs as $rleaf) {
                     if (!$this->is_operator($rleaf)) {
                         $se->operands[] = $rleaf;
@@ -676,15 +759,17 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $qu->operands[] = $current_leaf;
         }
 
-        // Новая часть регулярки, на которую будем заменять
+        // New part of regex string
         $new_regex_string_part = $qu->get_regex_string();
 
-        // Новое регулярное выражение
+        // New fixed regex
         return $this->regex_from_tree = substr_replace($regex_string, $new_regex_string_part, $this->options->indfirst,
                                                        $this->options->indlast - $this->options->indfirst + 1);
     }
 
-    // Функция подсчета количества повторений подвыражений
+    /**
+     * Calculate repeats of subexpression
+     */
     private function subexpressions_repeats($current_root, $nodes) {
         $counts = array(0,0);
 //        foreach ($nodes as $node) {
@@ -702,12 +787,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return array(1,1);
     }
 
-    // Функция подсчета координат строки для подстветки повторяющихся подвыражений
+    /**
+     * Get subexpression position in regex string
+     * TODO: in these two subexpressions should always be one parent node with positions
+     */
     private function get_subexpression_regex_position_for_node($leaf1, $leaf2) {
         $this->indfirst = (($leaf1->position->indfirst < $leaf2->position->indfirst) ? $leaf1->position->indfirst : $leaf2->position->indfirst);
         $this->indlast = (($leaf1->position->indlast > $leaf2->position->indlast) ? $leaf1->position->indlast : $leaf2->position->indlast);
     }
 
+    /**
+     * Get subexpression position in regex string
+     * TODO: in these two subexpressions should always be one parent node with positions
+     */
     private function get_subexpression_regex_position_for_nodes($leafs1, $leafs2) {
         $this->indfirst = $leafs1[0]->position->indfirst;
         $this->indlast = $leafs2[count($leafs2)-1]->position->indlast;
@@ -730,6 +822,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
     }
 
+    /**
+     * Get quantifier regex text from borders
+     */
     private function get_quant_text_from_borders($left_border, $right_border) {
         return '{' . $left_border . ($left_border == $right_border ? '' : ',' . $right_border) . '}';
     }
@@ -737,7 +832,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
-    /* The 5th rule */
+    /**
+     * Check charset node with one character.
+     */
     public function single_charset_node() {
         $equivalences = array();
 
@@ -753,6 +850,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
+    /**
+     * Search charset node with one character.
+     */
     private function search_single_charset_node($node) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET && $node->subtype == NULL) {
             if (($node->is_single_character() || $this->check_many_charset_node($node)) && !$node->negative) {
@@ -777,6 +877,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Check charset node with two and more same characters
+     */
     private function check_many_charset_node($node) {
         if (count($node->userinscription) > 1) {
             $symbol = $node->userinscription[1]->data;
@@ -792,7 +895,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
-    /* The 6th rule */
+    /**
+     * Check alternative node with only charsets operands with one character
+     */
     public function single_alternative_node() {
         $equivalences = array();
 
@@ -808,6 +913,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
+    /**
+     * Search alternative node with only charsets operands with one character
+     */
     private function search_single_alternative_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_ALT) {
             if ($this->is_single_alternative($node)) {
@@ -832,6 +940,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Check found alternative node with only charsets operands with one character
+     */
     private function is_single_alternative($node) {
         foreach ($node->operands as $operand) {
             if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
@@ -847,7 +958,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
-    /* The 11th rule */
+    /**
+     * Check quantifier node who can convert to short quantifier
+     */
     public function quant_node() {
         $equivalences = array();
 
@@ -863,6 +976,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $equivalences;
     }
 
+    /**
+     * Search quantifier node who can convert to short quantifier
+     */
     private function search_quant_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT || $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
             if ($this->is_simple_quant_node($node)) {
@@ -887,6 +1003,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     * Check found quantifier node who can convert to short quantifier
+     */
     private function is_simple_quant_node($node) {
         if ($node->greedy) {
             if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
