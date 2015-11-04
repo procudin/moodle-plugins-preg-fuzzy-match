@@ -292,5 +292,35 @@ class qtype_writeregex extends qtype_shortanswer {
         return qtype_poasquestion_moodlehint_adapter::load_from_record($hint);
     }
 
+    protected function initialise_question_instance(question_definition $question, $questiondata) {
+        $this->initialise_question_teststrings($question, $questiondata);
+        parent::initialise_question_instance($question, $questiondata);
+    }
 
+    /**
+     * Initialise question_definition::teststring field.
+     * @param question_definition $question the question_definition we are creating.
+     * @param object $questiondata the question data loaded from the database.
+     * @param bool $forceplaintextanswers most qtypes assume that answers are
+     *      FORMAT_PLAIN, and dont use the answerformat DB column (it contains
+     *      the default 0 = FORMAT_MOODLE). Therefore, by default this method
+     *      ingores answerformat. Pass false here to use answerformat. For example
+     *      multichoice does this.
+     */
+    protected function initialise_question_teststrings(question_definition $question,
+                                                   $questiondata, $forceplaintextanswers = true) {
+        $question->teststrings = array();
+        if (empty($questiondata->options->answers)) {
+            return;
+        }
+        foreach ($questiondata->options->answers as $key => $a) {
+            if ($a->answerformat == self::TEST_STRING_ANSWER_FORMAT_VALUE) {
+                $question->teststrings[$a->id] = $this->make_answer($a);
+                if (!$forceplaintextanswers) {
+                    $question->teststrings[$a->id]->answerformat = $a->answerformat;
+                }
+                unset($questiondata->options->answers[$key]);
+            }
+        }
+    }
 }
