@@ -835,7 +835,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function is_single_alternative($node) {
         foreach ($node->operands as $operand) {
             if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
-                if (!(($operand->is_single_character() || $this->check_many_charset_node($operand)) && !$operand->negative)) {
+                if (!(($operand->is_single_character() || $this->check_many_charset_node($operand)
+                      || $operand->subtype == qtype_preg_charset_flag::TYPE_FLAG) && !$operand->negative)) {
                     return false;
                 }
             } else {
