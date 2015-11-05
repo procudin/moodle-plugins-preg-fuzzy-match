@@ -958,7 +958,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     private function search_single_charset_node($node) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET && $node->subtype == NULL) {
-            if (($node->is_single_character() || $this->check_many_charset_node($node)) && !$node->negative) {
+            if (($node->is_single_character() || $this->check_many_charset_node($node))
+                && !$node->negative && count($node->userinscription) > 1) {
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 5;
                 $this->indfirst = $node->position->indfirst;
@@ -1341,11 +1342,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function remove_square_brackets_from_charset($tree_root, $remove_node_id) {
         if ($tree_root->id == $remove_node_id) {
-            $tmp = $tree_root->userinscription[1];
-            $tree_root->userinscription = array($tmp);
-            $tree_root->flags[0][0]->data = new qtype_poasquestion\string($tmp->data);
-            $tree_root->subtype = "enumerable_characters";
-            return true;
+            if (count($tree_root->userinscription) > 1) {
+                $tmp = $tree_root->userinscription[1];
+                $tree_root->userinscription = array($tmp);
+                $tree_root->flags[0][0]->data = new qtype_poasquestion\string($tmp->data);
+                $tree_root->subtype = "enumerable_characters";
+                return true;
+            }
         }
 
         if ($this->is_operator($tree_root)) {
