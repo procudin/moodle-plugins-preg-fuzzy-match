@@ -810,38 +810,50 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $counts = $this->subexpressions_repeats($parent_node, $current_leaf);
 
         // Create new quantifier with needed borders
-        $qu = new qtype_preg_node_finite_quant($counts[0], $counts[1]);
         $text = $this->get_quant_text_from_borders($counts[0], $counts[1]);
-        $qu->set_user_info(null, array(new qtype_preg_userinscription($text)));
-
-        // Current operand is operand of quantifier node
-        if ($this->options->problem_ids[0] > 1 && $current_leaf->type != qtype_preg_node::TYPE_NODE_SUBEXPR) {
-            $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
-            $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
-
-            // Add needed nodes to grouping node
-            if (!$this->is_operator($current_leaf)) {
-                // Get right leafs from current node
-                $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, $this->options->problem_ids[0]);
-                // Add this nodes while node in not operator
-                foreach ($right_leafs as $rleaf) {
-                    if (!$this->is_operator($rleaf)) {
-                        $se->operands[] = $rleaf;
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                $se->operands[] = $current_leaf;
-            }
-
-            $qu->operands[] = $se;
-        } else {
-            $qu->operands[] = $current_leaf;
-        }
 
         // New part of regex string
-        $new_regex_string_part = $qu->get_regex_string();
+        $new_regex_string_part = '';
+
+        if ($text !== '') {
+            $qu = new qtype_preg_node_finite_quant($counts[0], $counts[1]);
+            $qu->set_user_info(null, array(new qtype_preg_userinscription($text)));
+
+            // Current operand is operand of quantifier node
+            if ($this->options->problem_ids[0] > 1 && $current_leaf->type != qtype_preg_node::TYPE_NODE_SUBEXPR) {
+                $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+
+                // Add needed nodes to grouping node
+                if (!$this->is_operator($current_leaf)) {
+                    // Get right leafs from current node
+                    $is_fount = false;
+                    $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, $this->options->problem_ids[0], $is_fount);
+                    // Add this nodes while node is not operator
+                    foreach ($right_leafs as $rleaf) {
+                        $se->operands[] = $rleaf;
+//                        if (!$this->is_operator($rleaf)) {
+//                            $se->operands[] = $rleaf;
+//                        } else {
+//                            break;
+//                        }
+                    }
+                } else {
+                    $se->operands[] = $current_leaf;
+                }
+
+                $qu->operands[] = $se;
+            } else {
+                $qu->operands[] = $current_leaf;
+            }
+
+            $this->normalization($qu->operands[0]);
+
+            $new_regex_string_part = $qu->get_regex_string();
+        } else {
+            $this->normalization($current_leaf);
+            $new_regex_string_part = $current_leaf->get_regex_string();
+        }
 
         // New fixed regex
         return $this->regex_from_tree = substr_replace($regex_string, $new_regex_string_part, $this->options->indfirst,
@@ -858,9 +870,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 //            $counts[0] += $tmp_counts[0];
 //            $counts[1] += $tmp_counts[1];
 //        }
-        $tmp_count = count($this->options->problem_ids) -1;
-        $counts[0] += $tmp_count;
-        $counts[1] += $tmp_count;
+
+        for($i = 1; $i < count($this->options->problem_ids); $i++) {
+            $parent = $this->get_parent_node($this->get_dst_root(), $this->options->problem_ids[$i]);
+
+            if ($this->is_can_parent_node($parent)) {
+                $counts[0] += 1;
+                $counts[1] += 1;
+            }
+        }
+
         return $counts;
     }
 
@@ -906,7 +925,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Get quantifier regex text from borders
      */
     private function get_quant_text_from_borders($left_border, $right_border) {
-        return '{' . $left_border . ($left_border == $right_border ? '' : ',' . $right_border) . '}';
+        if (($left_border !== 1 && $right_border !== 1)
+            && ($left_border !== 0 && $right_border !== 0)) {
+            return '{' . $left_border . ($left_border == $right_border ? '' : ',' . $right_border) . '}';
+        }
+        return '';
     }
 
 
