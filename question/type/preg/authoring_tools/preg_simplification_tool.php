@@ -1281,7 +1281,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     // The 3rd rule
     protected function optimize_3($node) {
-        return $this->remove_subtree($node, $this->options->problem_ids[0]);
+        $this->remove_subtree($node, $this->options->problem_ids[0]);
+        $subpattern_last_number = 0;
+        $this->rename_backreferences_for_subpattern($this->get_dst_root(), $subpattern_last_number);
+        return true;
     }
 
     // The 4rd rule
@@ -1458,6 +1461,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function change_subpattern_to_group($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             $node->subtype = qtype_preg_node_subexpr::SUBTYPE_GROUPING;
+            $subpattern_last_number = 0;
+            $this->rename_backreferences_for_subpattern($this->get_dst_root(), $subpattern_last_number);
             return true;
         }
 
@@ -1470,5 +1475,34 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return false;
+    }
+
+    private function rename_backreferences_for_subpattern($node, &$subpattern_last_number) {
+        if ($node !== null) {
+            if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+                ++$subpattern_last_number;
+                $this->rename_backref($this->get_dst_root(), $node->number, $subpattern_last_number);
+            }
+            if ($this->is_operator($node)) {
+                foreach ($node->operands as $operand) {
+                    if ($this->rename_backreferences_for_subpattern($operand, $subpattern_last_number)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function rename_backref($node, $old_number, $new_number) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_BACKREF && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $old_number) {
+            $node->number = $new_number;
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                $this->rename_backref($operand, $old_number, $new_number);
+            }
+        }
     }
 }
