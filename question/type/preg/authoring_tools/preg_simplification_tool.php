@@ -606,7 +606,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     private function compare_parent_nodes($local_root1, $local_root2) {
         if ($local_root1 != null && $local_root2 != null && $local_root1->is_equal($local_root2, null)) {
-            return $this->is_can_local_root($local_root1) && $this->is_can_local_root($local_root2);
+            //return $this->is_can_parent_node($local_root1) && $this->is_can_parent_node($local_root2);
+            return true;
         }
         return false;
     }
