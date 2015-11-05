@@ -872,10 +872,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Get subexpression position in regex string
      * TODO: in these two subexpressions should always be one parent node with positions
      */
-    private function get_subexpression_regex_position_for_node($leaf1, $leaf2) {
+    /*private function get_subexpression_regex_position_for_node($leaf1, $leaf2) {
         $this->indfirst = (($leaf1->position->indfirst < $leaf2->position->indfirst) ? $leaf1->position->indfirst : $leaf2->position->indfirst);
         $this->indlast = (($leaf1->position->indlast > $leaf2->position->indlast) ? $leaf1->position->indlast : $leaf2->position->indlast);
-    }
+    }*/
 
     /**
      * Get subexpression position in regex string
