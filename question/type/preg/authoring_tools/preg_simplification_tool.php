@@ -505,7 +505,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Trying to get a set of equivalent $leafs nodes from $current_leaf.
      */
     private function get_right_set_of_leafs($leafs, $current_leaf, $tree_root) {
-        $right_leafs = $this->get_right_leafs($tree_root, $current_leaf, count($leafs));
+        $is_fount = false;
+        $right_leafs = $this->get_right_leafs($tree_root, $current_leaf, count($leafs), $is_fount);
         $right_leafs_tmp = $right_leafs;
         if ($this->leafs_compare($leafs, $right_leafs)) {
             $this->problem_ids[] = count($leafs);//length
@@ -514,12 +515,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             while ($is_found) {
                 $this->problem_ids[] = $right_leafs_tmp[0]->id;
                 $right_leafs_tmp = $right_leafs;
-                $next_leafs = $this->get_right_leafs($tree_root, $right_leafs_tmp[count($right_leafs_tmp) - 1], 2);
+                $is_fount1 = false;
+                $next_leafs = $this->get_right_leafs($tree_root, $right_leafs_tmp[count($right_leafs_tmp) - 1], 2, $is_fount1);
                 $next_leaf = null;
                 if (count($next_leafs) > 1) {
                     $next_leaf = $next_leafs[1];
                 }
-                $right_leafs = $this->get_right_leafs($tree_root, $next_leaf, count($leafs));
+                $is_fount2 = false;
+                $right_leafs = $this->get_right_leafs($tree_root, $next_leaf, count($leafs), $is_fount2);
                 $is_found = $this->leafs_compare($leafs, $right_leafs);
             }
             $this->problem_type = 4;
@@ -554,7 +557,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Trying to get a set of equivalent $leafs nodes from $current_leaf.
      * TODO: get N nodes from subtree where $current_leaf is root
      */
-    private function get_right_leafs($tree_root, $current_leaf, $size, &$leafs = null, $is_found = false) {
+    private function get_right_leafs($tree_root, $current_leaf, $size, &$is_found, &$leafs = null) {
         if ($current_leaf == NULL) {
             return array();
         }
@@ -575,7 +578,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     }
                 }
 
-                $this->get_right_leafs($operand, $current_leaf, $size, $leafs, $is_found);
+                $this->get_right_leafs($operand, $current_leaf, $size, $is_found, $leafs);
             }
         }
 
