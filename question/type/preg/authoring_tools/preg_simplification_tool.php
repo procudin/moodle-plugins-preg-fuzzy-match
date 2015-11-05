@@ -200,7 +200,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
-            $result = $this->cse();
+            $result = $this->common_subexpressions();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
@@ -441,10 +441,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Check common subexpressions in tree.
      */
-    public function cse() {
+    public function common_subexpressions() {
         $equivalences = array();
 
-        if ($this->search_cse($this->get_dst_root())) {
+        if ($this->search_common_subexpressions($this->get_dst_root())) {
             $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_4', 'qtype_preg'));
             $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_4', 'qtype_preg'));
             $equivalences['problem_ids'] = $this->problem_ids;
@@ -459,7 +459,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Search common subexpressions in tree.
      */
-    private function search_cse($tree_root, &$leafs = null, $current_leaf = null) {
+    private function search_common_subexpressions($tree_root, &$leafs = null) {
         if ($leafs == NULL) {
             $leafs = array();
             $leafs[0] = array();
@@ -477,7 +477,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 for ($i = 0; $i < count($leafs); $i++) {
                     array_push($leafs[$i], $operand);
                 }
-                if ($this->search_cse($operand, $leafs)) {
+                if ($this->search_common_subexpressions($operand, $leafs)) {
                     return true;
                 }
             }
@@ -491,8 +491,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     private function search_subexpr($leafs, $current_leaf, $tree_root) {
         foreach ($leafs as $leaf) {
-            $tmp_root = $this->get_local_root_for_node($this->get_dst_root(), $leaf[0]);
-            if ($leaf[0]->is_equal($current_leaf, null) && $this->compare_local_root($tmp_root, $tree_root)) {
+            $tmp_root = $this->get_parent_node($this->get_dst_root(), $leaf[0]->id);
+            if ($leaf[0]->is_equal($current_leaf, null) && $this->compare_parent_nodes($tmp_root, $tree_root)) {
                 if($this->get_right_set_of_leafs($leaf, $current_leaf, $tree_root)) {
                     return true;
                 }
@@ -534,14 +534,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Get parent of node.
      * TODO: delete
      */
-    private function get_local_root_for_node($tree_root, $node) {
+    private function get_parent_node($tree_root, $node_id) {
         $local_root = null;
         if ($this->is_operator($tree_root)) {
             foreach ($tree_root->operands as $operand) {
-                if ($operand->id === $node->id) {
+                if ($operand->id == $node_id) {
                     return $tree_root;
                 }
-                $local_root = $this->get_local_root_for_node($operand, $node);
+                $local_root = $this->get_parent_node($operand, $node_id);
                 if ($local_root !== null) {
                     return $local_root;
                 }
@@ -601,7 +601,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Compare two nodes who are parents
      */
-    private function compare_local_root($local_root1, $local_root2) {
+    private function compare_parent_nodes($local_root1, $local_root2) {
         if ($local_root1 != null && $local_root2 != null && $local_root1->is_equal($local_root2, null)) {
             return $this->is_can_local_root($local_root1) && $this->is_can_local_root($local_root2);
         }
@@ -611,7 +611,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Whether the node is a parent for common sybexpression
      */
-    private function is_can_local_root($local_root) {
+    private function is_can_parent_node($local_root) {
         return !($local_root->type == qtype_preg_node::TYPE_NODE_ALT);
     }
 
@@ -700,7 +700,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Elimination of common subexpressions
      */
-    private function fold_cse($tree_root) {
+    private function fold_common_subexpressions($tree_root) {
         if ($tree_root->id != $this->options->problem_ids[1]) {
             if ($this->is_operator($tree_root)) {
                 foreach ($tree_root->operands as $operand) {
@@ -708,7 +708,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         $this->tree_folding($operand, $tree_root);
                         return true;
                     }
-                    if ($this->fold_cse($operand)) {
+                    if ($this->fold_common_subexpressions($operand)) {
                         return true;
                     }
                 }
@@ -798,7 +798,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     /**
      * Get subexpression position in regex string
-     * TODO: in these two subexpressions should always be one parent node with positions
      */
     private function get_subexpression_regex_position_for_nodes($leafs1, $leafs2) {
         $this->indfirst = $leafs1[0]->position->indfirst;
@@ -1152,7 +1151,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
             if ($this->options->problem_type == 4) {
-                if ($this->fold_cse($this->get_dst_root())) {
+                if ($this->fold_common_subexpressions($this->get_dst_root())) {
                     return $this->regex_from_tree;
                 } else {
                     return '';
@@ -1182,7 +1181,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     // The 4rd rule
 //    protected function optimize_4($node) {
-//        return $this->fold_cse($node/*, $this->options->problem_ids[0]*/);
+//        return $this->fold_common_subexpressions($node/*, $this->options->problem_ids[0]*/);
 //    }
 
     // The 5th rule
@@ -1252,7 +1251,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             }
         }
-
         return false;
     }
 
@@ -1327,7 +1325,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($node->id == $this->get_dst_root()->id) {
                 $this->dstroot = $new_node;
             } else {
-                $local_root = $this->get_local_root_for_node($this->get_dst_root(), $node);
+                $local_root = $this->get_parent_node($this->get_dst_root(), $node->id);
 
                 foreach ($local_root->operands as $i => $operand) {
                     if ($operand->id == $node->id) {
