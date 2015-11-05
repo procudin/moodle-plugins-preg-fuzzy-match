@@ -677,28 +677,105 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Tree normalization
      */
-    protected function normalization($tree_root) {
-        $problem_exist = true;
-//        while($problem_exist) {
-            if ($this->search_single_charset_node($this->get_dst_root())) {
-                $this->remove_square_brackets_from_charset($this->get_dst_root(), $this->problem_ids[0]);
-            } else {
-                $problem_exist = false;
-            }
-//        }
+    protected function normalization(&$tree_root) {
+        $this->delete_not_empty_grouping_node($tree_root, $tree_root);
+
         $problem_exist = true;
         while($problem_exist) {
-            if ($this->search_grouping_node($this->get_dst_root())) {
-                $this->remove_subtree($this->get_dst_root(), $this->problem_ids[0]);
+            if ($this->search_single_charset_node($tree_root)) {
+                $this->remove_square_brackets_from_charset($tree_root, $this->problem_ids[0]);
             } else {
                 $problem_exist = false;
             }
+            $this->problem_ids = array();
         }
 
-        $this->associative_commutative_operator_sort($this->get_dst_root());
+        $problem_exist = true;
+        while($problem_exist) {
+            if ($this->search_grouping_node($tree_root)) {
+//                $this->remove_subtree($tree_root, $this->problem_ids[0]);
+                $this->delete_empty_groping_node($tree_root, $tree_root, $this->problem_ids[0]);
+            } else {
+                $problem_exist = false;
+            }
+            $this->problem_ids = array();
+        }
+
+//        $problem_exist = true;
+//        while($problem_exist) {
+//            if ($this->single_alternative_node($this->get_dst_root())) {
+//                $this->change_alternative_to_charset($this->get_dst_root(),  $this->problem_ids[0]);
+//            } else {
+//                $problem_exist = false;
+//            }
+//            $this->problem_ids = array();
+//        }
+
+        $this->associative_commutative_operator_sort($tree_root);
 
         $this->problem_ids = array();
     }
+
+    // TODO: delete
+    private function delete_empty_groping_node($tree_root, &$node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            if ($node->id == $tree_root->id) {
+                $tree_root = null;
+            }
+            return true;
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $i => $operand) {
+                if ($this->delete_empty_groping_node($tree_root, $operand, $remove_node_id)) {
+                    if (count($node->operands) === 1) {
+                        return $this->delete_empty_groping_node($tree_root, $tree_root, $node->id);
+                    }
+
+                    array_splice($node->operands, $i, 1);
+                    if ($this->is_associative_commutative_operator($node) && count($node->operands) < 2) {
+                        $node->operands[] = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
+                    }
+
+                    return false;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function delete_not_empty_grouping_node($tree_root, $node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
+            $parent = $this->get_parent_node($tree_root, $node->id);
+            if ($parent !== null) {
+                if ($parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                    $group_operand = $node->operands[0];
+
+                    if ($group_operand->type != qtype_preg_node::TYPE_LEAF_META
+                        && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                        $group_operand->position->indfirst = $node->position->indfirst;
+                        $group_operand->position->indlast = $node->position->indlast;
+
+                        foreach ($parent->operands as $i => $operand) {
+                            if ($operand->id == $node->id) {
+                                $parent->operands[$i] = $group_operand;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                $this->delete_not_empty_grouping_node($tree_root, $operand);
+            }
+        }
+    }
+
 
 
     /**
