@@ -31,6 +31,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /** Last index of something in regex string (absolute positioning). */
     private $indlast = -2;
 
+    private $deleted_grouping_positions = array();
+
+    private $regex_from_tree = '';
+
     public function __construct($regex = null, $options = null) {
         parent::__construct($regex, $options);
     }
@@ -451,6 +455,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $equivalences['problem_type'] = $this->problem_type;
             $equivalences['problem_indfirst'] = $this->indfirst;
             $equivalences['problem_indlast'] = $this->indlast;
+
+//            var_dump($equivalences);
         }
 
         return $equivalences;
@@ -638,31 +644,21 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Find and sort leafs for associative-commutative operators
      */
     private function associative_commutative_operator_sort($tree_root){
-        if ($this->is_operator($tree_root)) {
-            if ($this->is_associative_commutative_operator($tree_root)) {
-                $this->sort_associative_commutative_operator_childs($tree_root);
-            }
-            foreach ($tree_root->operands as $operand) {
-                if ($this->is_associative_commutative_operator($operand)) {
-                    $this->sort_associative_commutative_operator_childs($operand);
+        if ($this->is_associative_commutative_operator($tree_root)) {
+            for ($j = 0; $j < count($tree_root->operands) - 1; $j++) {
+                for ($i = 0; $i < count($tree_root->operands) - $j - 1; $i++) {
+                    if ($tree_root->operands[$i]->get_regex_string() > $tree_root->operands[$i+1]->get_regex_string()) {
+                        $b = $tree_root->operands[$i];
+                        $tree_root->operands[$i] = $tree_root->operands[$i + 1];
+                        $tree_root->operands[$i + 1] = $b;
+                    }
                 }
-
-                $this->associative_commutative_operator_sort($operand);
             }
         }
-    }
 
-    /**
-     * Sort leafs for associative-commutative operators
-     */
-    private function sort_associative_commutative_operator_childs(&$operator) {
-        for ($j = 0; $j < count($operator->operands) - 1; $j++) {
-            for ($i = 0; $i < count($operator->operands) - $j - 1; $i++) {
-                if ($operator->operands[$i]->get_regex_string() > $operator->operands[$i+1]->get_regex_string()) {
-                    $b = $operator->operands[$i];
-                    $operator->operands[$i] = $operator->operands[$i + 1];
-                    $operator->operands[$i + 1] = $b;
-                }
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                $this->associative_commutative_operator_sort($operand);
             }
         }
     }
@@ -678,6 +674,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Tree normalization
      */
     protected function normalization(&$tree_root) {
+        $this->deleted_grouping_positions = array();
         $this->delete_not_empty_grouping_node($tree_root, $tree_root);
 
         $problem_exist = true;
@@ -759,9 +756,21 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         $group_operand->position->indfirst = $node->position->indfirst;
                         $group_operand->position->indlast = $node->position->indlast;
 
+                        $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+
                         foreach ($parent->operands as $i => $operand) {
                             if ($operand->id == $node->id) {
-                                $parent->operands[$i] = $group_operand;
+                                if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                    && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                                    //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
+                                    //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
+
+                                    $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                                                    $group_operand->operands,
+                                                                    array_slice($parent->operands, $i + 1));
+                                } else {
+                                    $parent->operands[$i] = $group_operand;
+                                }
                                 break;
                             }
                         }
@@ -830,6 +839,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $is_fount = false;
                     $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, $this->options->problem_ids[0], $is_fount);
                     // Add this nodes while node is not operator
+                    // TODO: maybe one operator is child of subexpr?
                     foreach ($right_leafs as $rleaf) {
                         $se->operands[] = $rleaf;
 //                        if (!$this->is_operator($rleaf)) {
@@ -848,7 +858,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
 
             $this->normalization($qu->operands[0]);
-
             $new_regex_string_part = $qu->get_regex_string();
         } else {
             $this->normalization($current_leaf);
@@ -856,8 +865,33 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         // New fixed regex
-        return $this->regex_from_tree = substr_replace($regex_string, $new_regex_string_part, $this->options->indfirst,
-                                                       $this->options->indlast - $this->options->indfirst + 1);
+        // Delete ')' for deleted "(?:)"
+        $tmp_dst_root = $this->get_dst_root();
+        $this->normalization($tmp_dst_root);
+        foreach($this->deleted_grouping_positions as $deleted_grouping_position) {
+            if ($deleted_grouping_position[1] > $this->options->indlast
+                && $deleted_grouping_position[0] < $this->options->indlast
+                && $deleted_grouping_position[0] > $this->options->indfirst) {
+                $regex_string = substr($regex_string, 0, $deleted_grouping_position[1])
+                                . substr($regex_string, $deleted_grouping_position[1] + 1);
+            }
+        }
+
+        // Generate new regex
+        $this->regex_from_tree = substr_replace($regex_string, $new_regex_string_part, $this->options->indfirst,
+                                                $this->options->indlast - $this->options->indfirst + 1);
+
+        // Delete '(?:' for deleted "(?:)"
+        foreach($this->deleted_grouping_positions as $deleted_grouping_position) {
+            if ($deleted_grouping_position[0] < $this->options->indfirst
+                && $deleted_grouping_position[1] > $this->options->indfirst
+                && $deleted_grouping_position[1] < $this->options->indlast) {
+                $this->regex_from_tree = substr($this->regex_from_tree, 0, $deleted_grouping_position[0])
+                                         . substr($this->regex_from_tree, $deleted_grouping_position[0] + 3);
+            }
+        }
+
+        return $this->regex_from_tree;
     }
 
     /**
