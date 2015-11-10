@@ -81,18 +81,37 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         return $pair;
     }
     /**
+     * Creates \qtype_preg\fa\equivalence\mismatched_pair with diven parameters
+     */
+    function create_mismatch($type, $matchedautomaton, $matchedstring, $firstfastates, $secondfastates, $tags = array()) {
+        $pair = \qtype_preg\fa\equivalence\groups_pair::generate_pair(new \qtype_preg\fa\equivalence\states_group(null, $firstfastates),
+                                                                      new \qtype_preg\fa\equivalence\states_group(null, $secondfastates),
+                                                                      $matchedstring);
+        $mismatch = new \qtype_preg\fa\equivalence\mismatched_pair($type, $matchedautomaton, $pair);
+        $mismatch->tags = $tags;
+        return $mismatch;
+    }
+    /**
      * Compares two arrays of mismatches
      */
     function compare_mismatches($resmm, $expmm) {
         $res = count($resmm) == count($expmm);
         for ($i = 0; $i < count($resmm) && $res; $i++) {
+            $resfisrtstatenumbers = array();
+            $ressecondstatenumbers = array();
+            foreach ($resmm[$i]->first->get_states() as $stateind) {
+                $resfisrtstatenumbers[] = $resmm[$i]->first->get_fa()->statenumbers[$stateind];
+            }
+            foreach ($resmm[$i]->second->get_states() as $stateind) {
+                $ressecondstatenumbers[] = $resmm[$i]->second->get_fa()->statenumbers[$stateind];
+            }
             $res = $resmm[$i]->type == $expmm[$i]->type
-                && $resmm[$i]->character == $expmm[$i]->character
-                && $resmm[$i]->firstfaindex == $expmm[$i]->firstfaindex
-                && $resmm[$i]->secondfaindex == $expmm[$i]->secondfaindex
-                && $resmm[$i]->tags == $expmm[$i]->tags;
+                && $resmm[$i]->matchedautomaton == $expmm[$i]->matchedautomaton
+                && $resmm[$i]->matchedstring == $expmm[$i]->matchedstring
+                && $resmm[$i]->tags == $expmm[$i]->tags
+                && $expmm[$i]->first->get_states() == $resfisrtstatenumbers
+                && $expmm[$i]->second->get_states() == $ressecondstatenumbers;
         }
-
         return $res;
     }
     /**
@@ -105,7 +124,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         }
         return $ans;
     }
-/*
+
     // Tests for automaton equivalence check function
     public function test_equal_minimal_automata() {
         $firstfadescription = 'digraph {
@@ -123,7 +142,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_same_automata() {
@@ -136,7 +155,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($fadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($fadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equal_one_and_some_way_automata() {
@@ -156,7 +175,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equal_some_and_some_way_automata() {
@@ -179,8 +198,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $mismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription); // 3 2 4 1
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription); // 1 2 0
-
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equal_long_automata() {
@@ -206,7 +224,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription); // 6 15 7 4 2 1
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription); // 5 6 4 3 2 1
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equal_automata_with_loop() {
@@ -233,10 +251,10 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        //$this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($secondfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
-    public function test_single_tag_mismatch() {
+    /*public function test_single_tag_mismatch() {
         $firstfadescription = 'digraph {
                           1;
                           3;
@@ -257,34 +275,34 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 103, 0, 30, array(2))); // g/2
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
-    }
+    }*/
     public function test_automaton_mismatch() {
         $firstfadescription = 'digraph {
                           1;
                           3;
-                          1->2[label=<<B>o:1 [e] c:</B>>];
-                          2->3[label=<<B>o: [q] c:2</B>>];
+                          1->2[label=<<B>o:1, [e] c:</B>>];
+                          2->3[label=<<B>o: [q] c:2,</B>>];
                           2->3[label=<<B>o: [g] c:</B>>];
                           }';
         $secondfadescription = 'digraph {
                           1;
                           30;
-                          1->20[label=<<B>o:1 [e] c:</B>>];
-                          20->30[label=<<B>o: [q] c:2</B>>];
+                          1->20[label=<<B>o:1, [e] c:</B>>];
+                          20->30[label=<<B>o: [q] c:2,</B>>];
                           }';
         $mismatches = array();
         $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 103, 3, 0)); // g
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'eg', array("3"), array())); // g
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
-    public function test_both_automaton_and_tag_mismatch() {
+    /*public function test_both_automaton_and_tag_mismatch() {
         $firstfadescription = 'digraph {
                           1;
                           3;
@@ -305,9 +323,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 103, 3, 0)); // g
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 103, 3, 0, array(2))); // g/2
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
-    }
+    }*/
     public function test_automaton_mismatches_overlimit() {
         $firstfadescription = 'digraph {
                           1;
@@ -322,23 +340,25 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $secondfadescription = 'digraph {
                           1;
                           2;
-                          1->2[label=<<B>o: [equ] c:</B>>];
+                          1->2[label=<<B>o: [e] c:</B>>];
+                          1->3[label=<<B>o: [q] c:</B>>];
+                          1->4[label=<<B>o: [u] c:</B>>];
                           }';
         $mismatches = array();
         $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 2, 0)); // a
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 4, 0)); // b
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 5, 0)); // c
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 101, 0, 2)); // e
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 113, 0, 2)); // q
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'a', array("2"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'b', array("4"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'c', array("5"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'e', array(), array("2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'q', array(), array("3")));
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
-    public function test_tag_mismatches_overlimit() {
+    /*public function test_tag_mismatches_overlimit() {
         $firstfadescription = 'digraph {
                           1;
                           3;
@@ -370,9 +390,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 100, 7, 0, array(2))); // d/2
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::SUBPATTERN, 101, 6, 0, array(6))); // e/6
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
-    }
+    }*/
     public function test_loop_and_line_mismatch() {
         $firstfadescription = 'digraph {
                           1;
@@ -392,11 +412,11 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 1, 0)); // a
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'b', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ab', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'aaa', array("1"), array()));
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_loop_start_mismatch() {
@@ -419,10 +439,10 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 97, 2, 0)); // a
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 100, 0, 2)); // d
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'a', array("2"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'd', array(), array("2")));
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_in_loop_mismatch() {
@@ -446,11 +466,12 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 0, 8)); // b
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 4, 0)); // c
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'ab', array(), array("8")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ac', array("4"), array()));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_after_loop_mismatch() {
         $firstfadescription = 'digraph {
@@ -474,10 +495,10 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // b
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 99, 0, 3)); // c
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'b', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'c', array(), array("3")));
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_char_loop_count_mismatch() {
@@ -499,9 +520,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 98, 3, 0)); // c
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ab', array("3"), array()));
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_equal_automata_with_pre_and_post_loop_transitions() {
@@ -523,7 +544,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equal_automata_with_initial_and_final_states_loops() {
@@ -545,7 +566,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_loop_branching_mismatch() {
@@ -574,10 +595,10 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 101, 1, 0)); // e
-        array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER, 102, 0, 1)); // f
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ace', array("1"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'acf', array(), array("1")));
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_equal_automata_with_transitions_from_final_state() {
@@ -600,7 +621,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $mismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equal_nfa_and_dfa() {
@@ -630,10 +651,10 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
-    public function test_character_but_not_subpattern_mismatch_in_automaton() {
+    /*public function test_character_but_not_subpattern_mismatch_in_automaton() {
         $firstfadescription = 'digraph {
                           1;
                           3;
@@ -654,9 +675,9 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         array_push($expmismatches, new qtype_preg_fa_mismatch(qtype_preg_fa_mismatch::CHARACTER_BUT_NOT_SUBPATTERN, 99, 2, 0)); // c
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
-    }
+    }*/
     public function test_equiv_dfas() {
         $firstfadescription = 'digraph {
                                 0;
@@ -676,7 +697,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equiv_dfas_with_direct_loop() {
@@ -701,7 +722,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equiv_dfas_with_indirect_loop() {
@@ -725,7 +746,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equiv_dfa_and_nfa_without_empty_transition() {
@@ -751,7 +772,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_equiv_dfa_and_nfa_with_direct_loop() {
@@ -783,7 +804,7 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertTrue($firstfa->compare_fa_with_tags($secondfa, $mismatches));
+        $this->assertTrue($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue(count($mismatches) == 0);
     }
     public function test_not_equiv_dfas_with_early_endstate() {
@@ -805,11 +826,14 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [a-h] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, '5', array("2"), array("3")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfas_with_difftransition() {
         $firstfadescription = 'digraph {
@@ -829,11 +853,14 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [a-h] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '5', array("2"), array()));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfas_with_direct_loop_and_early_endstate() {
         $firstfadescription = 'digraph {
@@ -852,11 +879,15 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->4[label=<<B>o: [z] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '1z0', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, '1zz', array("1"), array("4")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfas_with_direct_loop_and_difftransition() {
         $firstfadescription = 'digraph {
@@ -877,11 +908,14 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [a-h0-9] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '1zz0', array("3"), array()));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfas_with_indirect_loop_and_early_endstate() {
         $firstfadescription = 'digraph {
@@ -905,11 +939,15 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->4[label=<<B>o: [0-9] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, 'a1a', array("0"), array("4")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, 'a1i', array("4"), array("0")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfas_with_indirect_loop_and_difftransition() {
         $firstfadescription = 'digraph {
@@ -933,11 +971,16 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 4->1[label=<<B>o: [i-n] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'a1ai1', array(), array("2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'a1aia', array("1"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'a1aih', array(), array("3")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfa_and_nfa_with_direct_loop_and_early_endstate() {
         $firstfadescription = 'digraph {
@@ -957,11 +1000,14 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 1->3[label=<<B>o: [0-4] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, 'cx', array("2", "1"), array("1")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfa_and_nfa_with_direct_loop_and_difftransition() {
         $firstfadescription = 'digraph {
@@ -982,11 +1028,18 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [3-9] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ac', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'a00', array(), array("2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'a0c', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'a30', array(), array("2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, 'a33', array(), array("3", "2")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfa_and_nfa_with_indirect_loop_and_early_endstate() {
         $firstfadescription = 'digraph {
@@ -1008,11 +1061,14 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->0[label=<<B>o: [k-o] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, 'a3', array("0"), array("3")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_dfa_and_nfa_with_indirect_loop_and_difftransition() {
         $firstfadescription = 'digraph {
@@ -1040,11 +1096,17 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->14[label=<<B>o: [zxkt] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '00', array("5"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '1a', array("2"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '0a0ka', array("2"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, '0a0kk', array(), array("1")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_nfas_with_early_endstate() {
         $firstfadescription = 'digraph {
@@ -1066,11 +1128,15 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [0-9] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, 'ae', array("2"), array("3", "2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, 'ie', array("2"), array("3", "2")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_nfas_with_difftransition() {
         $firstfadescription = 'digraph {
@@ -1092,11 +1158,16 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [0-9] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ae', array("2"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ie', array("2"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'aa0', array("3"), array()));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_nfas_with_direct_loop_and_difftransition() {
         $firstfadescription = 'digraph {
@@ -1119,11 +1190,17 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [3-9] c:</B>>];
                                 }';
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, 'a03', array("3", "2"), array("2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'a06', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, 'a33', array("3", "2"), array("2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'a36', array("3"), array()));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_nfas_with_direct_loop_and_early_endstate() {
         $firstfadescription = 'digraph {
@@ -1144,13 +1221,16 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 2->3[label=<<B>o: [a-z] c:</B>>];
                                 1->3[label=<<B>o: [3-9xy] c:</B>>];
                                 }';
-
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, '3z', array("2"), array("3", "2")));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, '6z', array("2"), array("3", "2")));
+
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
     }
     public function test_not_equiv_nfas_with_indirect_loop_and_early_endstate() {
         $firstfadescription = 'digraph {
@@ -1177,15 +1257,17 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
                                 3->1[label=<<B>o: [yz] c:</B>>];
                                 5->1[label=<<B>o: [1-9] c:</B>>];
                                 }';
-
         $mismatches = array();
+        $expmismatches = array();
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        $this->assertFalse($firstfa->compare_fa_with_tags($secondfa, $mismatches));
-        $this->assertTrue(count($mismatches) == 0);
-    }
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, '0c', array("6", "2"), array("2")));
 
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+/*
     // Tests for function compare_groups
     public function test_equal_groups_with_no_final_state() {
         $groups = array('a' => array($this->create_pair_of_groups(array(1), array(4, 8))));
