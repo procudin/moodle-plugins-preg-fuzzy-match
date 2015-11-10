@@ -878,10 +878,60 @@ class fa {
      * Compares two FA and returns whether they are equal.
      *
      * @param another fa object - FA to compare.
+     * @param withtags - flag to point, if fas should be compared with subpatterns.
      * @return boolean true if this FA equal to $another.
      */
     public function equal($another, &$differences, $withtags = false) {
-        return false;
+        // Initialize memory and stack - arrays of qtype_preg_fa_pair_of_groups
+        $stack = array();
+        $memory = array();
+
+        // Generating initial pair of groups
+        $groupspair = equivalence\groups_pair::generate_pair(new equivalence\states_group($this, $this->get_start_states()),
+                                                            new equivalence\states_group($another, $another->get_start_states()),
+                                                            "");
+        // If first group contains final states and second doesn't or vise versa
+        if ($groupspair->first->has_end_states() != $groupspair->second->has_end_states()) {
+            return false;
+        }
+
+        $stack[] = $groupspair;
+        $memory[] = $groupspair;
+
+        // While stack is not empty
+        while (count($stack)) {
+            // Taking new pair of groups from bottom of stack
+            $groupspair = current($stack);
+            array_splice($stack, 0, 1);
+
+            // Genereta array of new qtype_preg_fa_pair_of_groups from current pair
+            $curmismatches = array();
+            $groups = transition::divide_intervals($groupspair->first->get_outgoing_transitions(),
+                                        $groupspair->second->get_outgoing_transitions(),
+                                        $this, $another, $groupspair->matchedstring, $curmismatches, $withtags);
+
+            // Adding mismatches to final array
+            foreach ($curmismatches as $mismatch) {
+                if (count($differences) < 5)
+                    $differences[] = $mismatch;
+            }
+
+            // Adding pairs to stack and memory
+            foreach ($groups as $curpair) {
+                // If current pair is unique - push it to the stack and memory
+                $exists = false;
+                foreach ($memory as $mempair) {
+                    $exists = $exists || $curpair->first->get_states() == $mempair->first->get_states() && $curpair->second->get_states() == $mempair->second->get_states();
+                }
+
+                if (!$exists) {
+                    array_push($stack, $curpair);
+                    array_push($memory, $curpair);
+                }
+            }
+        }
+
+        return count($differences) == 0;
     }
 
     /**
