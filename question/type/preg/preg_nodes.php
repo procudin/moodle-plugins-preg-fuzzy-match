@@ -894,9 +894,11 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
     }
 
     public function excluding_ranges() {
-        $this->ranges();
-        foreach ($this->cachedranges as &$cur) {
-            $cur[1]++;
+        if ($this->cachedranges == null) {
+            $this->ranges();
+            foreach ($this->cachedranges as &$cur) {
+                $cur[1]++;
+            }
         }
         return $this->cachedranges;
     }
@@ -919,7 +921,6 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         for ($i = 0; $i < count($secondgroup); $i++) {
             $ranges[] = array($secondgroup[$i]->excluding_ranges(), 1, $i);
         }
-
         while (count($ranges)) {
             // Searching current minimal character
             $curchar = 257;
