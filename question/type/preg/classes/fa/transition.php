@@ -147,11 +147,12 @@ class transition {
      * @param firstgroup - first array of transitions
      * @param secondgroup - second array of transitions
      * @param indexes - array of two arrays of indexes of given transitions, completing each result transition condition
+     * @param withtags - flag of nessesity to divide transitions with tags or not
      * @return result intervals, containing noncrossed transition conditions
      */
-    public static function divide_intervals($firstgroup, $secondgroup, &$indexes, $withtags = false) {
+    public static function divide_intervals($firstgroup, $secondgroup, $firstfa, $secondfa, $matchedstring, &$mismatches, $withtags = false) {
         $result = array();
-        $indexes = array();
+        $mismatches = array();
         $charsetranges = array();
 
         // Divide charsets
@@ -164,11 +165,37 @@ class transition {
             $secondgroupcharsets[] = $curtransition->pregleaf;
         }
         $charsetranges = \qtype_preg_leaf_charset::divide_intervals($firstgroupcharsets, $secondgroupcharsets, $charsetindexes);
+        for ($i = 0; $i < count($charsetranges); ++$i) {
+            // Creating initial pair of groups for current charset range
+            $firststates = array();
+            foreach ($charsetindexes[$i][0] as $transitionind) {
+                $firststates[] = $firstgroup[$transitionind]->to;
+            }
+            $secondstates = array();
+            foreach ($charsetindexes[$i][1] as $transitionind) {
+                $secondstates[] = $secondgroup[$transitionind]->to;
+            }
+            $pair = equivalence\groups_pair::generate_pair(new equivalence\states_group($firstfa, $firststates),
+                                                            new equivalence\states_group($secondfa, $secondstates),
+                                                            $matchedstring . $charsetranges[$i][1]);
 
-        if ($withtags)
-        {
-            /*// Divide tagsets
-            for ($i = 0; $i < count($charsetranges); ++$i) {
+            // Check for character mismatch
+            if ($pair->first->is_empty() != $pair->second->is_empty()) {
+                $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::CHARACTER,
+                                                                $pair->first->is_empty() ? 1 : 0, $pair);
+                continue;
+            }
+
+            // Check for final state mismatch
+            if ($pair->first->has_end_states() != $pair->second->has_end_states()) {
+                $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE,
+                                                                $pair->first->has_end_states() ? 0 : 1, $pair);
+                continue;
+            }
+
+            if ($withtags)
+            {
+                /*// Divide tagsets
                 $firstgrouptagsets = array();
                 $secondgrouptagsets = array();
                 for ($j = 0; $j < count($charsetindexes[$i][0]); ++$j) {
@@ -206,17 +233,21 @@ class transition {
                         }
                     }
                 }
-            }*/
-        }
-        else {
-            for ($i = 0; $i < count($charsetranges); ++$i) {
-                $result[] = new transition(1, \qtype_preg_leaf_charset::by_regex($charsetranges[$i]), 2);
-                $indexes = $charsetindexes;
+                */
+            }
+            else {
+                $result[] = $pair;
             }
         }
 
-
         return $result;
+    }
+
+    /**
+     * Returns true, if given tag match to subpattern, and false otherwise
+     */
+    public function is_subpattern_tag($tag) {
+        return true;
     }
 
     /**
