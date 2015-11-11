@@ -1405,11 +1405,26 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $tmp = $tree_root->userinscription[0];
                     $tree_root->userinscription = array($tmp);
                     $tree_root->userinscription[0]->data = new qtype_poasquestion\string('*');
+
+                    if ($tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                        || $tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                        $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                        $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                        $se->operands[] = $tree_root->operands[0];
+                        $tree_root->operands[0] = $se;
+                    }
                     return true;
                 } else if ($tree_root->leftborder === 1 && $tree_root->userinscription[0]->data !== '+') {
                     $tmp = $tree_root->userinscription[0];
                     $tree_root->userinscription = array($tmp);
                     $tree_root->userinscription[0]->data = new qtype_poasquestion\string('+');
+                    if ($tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                        || $tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                        $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                        $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                        $se->operands[] = $tree_root->operands[0];
+                        $tree_root->operands[0] = $se;
+                    }
                     return true;
                 }
             } else if ($tree_root->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
@@ -1417,6 +1432,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $tmp = $tree_root->userinscription[0];
                     $tree_root->userinscription = array($tmp);
                     $tree_root->userinscription[0]->data = new qtype_poasquestion\string('?');
+                    if ($tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                        || $tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                        $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                        $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                        $se->operands[] = $tree_root->operands[0];
+                        $tree_root->operands[0] = $se;
+                    }
                     return true;
                 }
             }
