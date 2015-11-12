@@ -1602,9 +1602,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $characters = '[';
             foreach ($node->operands as $operand) {
                 if (count($operand->userinscription) === 1) {
-                    $characters .= $operand->userinscription[0]->data;
+                    $characters .= $this->escape_character_for_charset($operand->userinscription[0]->data);
                 } else {
-                    $characters .= $operand->userinscription[1]->data;
+                    $characters .= $this->escape_character_for_charset($operand->userinscription[1]->data);
                 }
             }
             $characters .= ']';
@@ -1636,6 +1636,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return false;
+    }
+
+    private function escape_character_for_charset($character) {
+        if ($character === '-' || $character === ']' || $character === '{' || $character === '}') {
+            return '\\' . $character;
+        }
+        return $character;
     }
 
     private function change_subpattern_to_group($node, $remove_node_id) {
