@@ -16,7 +16,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/question/type/poasquestion/hints.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_description_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_regex_testing_tool.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_syntax_tree_tool.php');
@@ -32,7 +31,7 @@ require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
+class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
 
     /** @var  int Mode of hint. */
     protected $mode;
@@ -185,7 +184,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_specific_hint {
 /**
  * Class qtype_writeregex_explgraphhint Class of explanation graph hint.
  */
-class qtype_writeregex_explgraphhint extends qtype_specific_hint {
+class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
 
     /** @var  int Mode of hint. */
     protected $mode;
@@ -338,7 +337,7 @@ class qtype_writeregex_explgraphhint extends qtype_specific_hint {
 /**
  * Class qtype_writeregex_descriptionhint Class of text description hint.
  */
-class qtype_writeregex_descriptionhint extends qtype_specific_hint {
+class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
 
     /** @var  int Mode of hint. */
     protected $mode;
@@ -491,7 +490,7 @@ class qtype_writeregex_descriptionhint extends qtype_specific_hint {
 /**
  * Class qtype_writeregex_teststringshint Class of test strings hint.
  */
-class qtype_writeregex_teststringshint extends qtype_specific_hint {
+class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
 
     /** @var  int Mode of hint. */
     protected $mode;
@@ -538,7 +537,7 @@ class qtype_writeregex_teststringshint extends qtype_specific_hint {
      * @return int hint type.
      */
     public function hint_type() {
-        return qtype_specific_hint::SINGLE_INSTANCE_HINT;
+        return qtype_poasquestion\hint::SINGLE_INSTANCE_HINT;
     }
 
     /**
