@@ -96,7 +96,7 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
 
         $br = html_writer::empty_tag('br');
 
-        if (is_a($behaviour, 'behaviour_with_hints')) {
+        if (is_a($behaviour, 'qtype_poasquestion\\behaviour_with_hints')) {
             $hints = $question->available_specific_hints();
             $hints = $behaviour->adjust_hints($hints);
 
