@@ -310,17 +310,26 @@ class qtype_writeregex extends qtype_shortanswer {
     protected function initialise_question_teststrings(question_definition $question,
                                                    $questiondata, $forceplaintextanswers = true) {
         $question->teststrings = array();
-        if (empty($questiondata->options->answers)) {
+        if (empty($questiondata->options->teststrings)) {
             return;
         }
-        foreach ($questiondata->options->answers as $key => $a) {
-            if ($a->answerformat == self::TEST_STRING_ANSWER_FORMAT_VALUE) {
-                $question->teststrings[$a->id] = $this->make_answer($a);
-                if (!$forceplaintextanswers) {
-                    $question->teststrings[$a->id]->answerformat = $a->answerformat;
-                }
-                unset($questiondata->options->answers[$key]);
+        foreach ($questiondata->options->teststrings as $ind => $teststring) {
+            $question->teststrings[$teststring->id] = $this->make_teststring($teststring);
+            if (!$forceplaintextanswers) {
+                $question->teststrings[$teststring->id]->stringformat = $teststring->answerformat;
             }
+            unset($questiondata->options->teststrings[$ind]);
         }
+    }
+
+    /**
+     * Create a test_string, or an appropriate subclass for this teststring,
+     * from a row loaded from the database.
+     * @param object $teststring the DB row from the question_answers.
+     * @return test_string
+     */
+    protected function make_teststring($teststring) {
+        return new \qtype_writeregex\test_string($teststring->id, $teststring->answer,
+            $teststring->fraction, $teststring->feedback, $teststring->feedbackformat);
     }
 }
