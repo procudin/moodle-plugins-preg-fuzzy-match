@@ -538,17 +538,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $this->normalization($tree_root);
         }
 
-        if ($this->is_operator($tree_root)) {
-            foreach ($tree_root->operands as $operand) {
-                if ($this->search_subexpr($leafs, $operand, $tree_root)) {
-                    return true;
-                }
-                $leafs[count($leafs)] = array();
-                for ($i = 0; $i < count($leafs); $i++) {
-                    array_push($leafs[$i], $operand);
-                }
-                if ($this->search_common_subexpressions($operand, $leafs)) {
-                    return true;
+        if ($tree_root !== null) {
+            if ($this->is_operator($tree_root)) {
+                foreach ($tree_root->operands as $operand) {
+                    if ($this->search_subexpr($leafs, $operand, $tree_root)) {
+                        return true;
+                    }
+                    $leafs[count($leafs)] = array();
+                    for ($i = 0; $i < count($leafs); $i++) {
+                        array_push($leafs[$i], $operand);
+                    }
+                    if ($this->search_common_subexpressions($operand, $leafs)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -708,20 +710,23 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Find and sort leafs for associative-commutative operators
      */
     private function associative_commutative_operator_sort($tree_root){
-        if ($this->is_associative_commutative_operator($tree_root)) {
-            for ($j = 0; $j < count($tree_root->operands) - 1; $j++) {
-                for ($i = 0; $i < count($tree_root->operands) - $j - 1; $i++) {
-                    if ($tree_root->operands[$i]->get_regex_string() > $tree_root->operands[$i+1]->get_regex_string()) {
-                        $b = $tree_root->operands[$i];
-                        $tree_root->operands[$i] = $tree_root->operands[$i + 1];
-                        $tree_root->operands[$i + 1] = $b;
+        if ($tree_root !== null) {
+            if ($this->is_associative_commutative_operator($tree_root)) {
+                for ($j = 0; $j < count($tree_root->operands) - 1; $j++) {
+                    for ($i = 0; $i < count($tree_root->operands) - $j - 1; $i++) {
+                        if ($tree_root->operands[$i]->get_regex_string() > $tree_root->operands[$i + 1]->get_regex_string()) {
+                            $b = $tree_root->operands[$i];
+                            $tree_root->operands[$i] = $tree_root->operands[$i + 1];
+                            $tree_root->operands[$i + 1] = $b;
+                        }
                     }
                 }
             }
 
-        if ($this->is_operator($tree_root)) {
-            foreach ($tree_root->operands as $operand) {
-                $this->associative_commutative_operator_sort($operand);
+            if ($this->is_operator($tree_root)) {
+                foreach ($tree_root->operands as $operand) {
+                    $this->associative_commutative_operator_sort($operand);
+                }
             }
         }
     }
