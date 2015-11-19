@@ -612,16 +612,13 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
 
         $strings = '';
         $key = 0;
-        foreach ($this->question->answers as $item) {
+        foreach ($this->question->teststrings as $item) {
 
-            if ($item->feedbackformat == 0) {
-
-                if ($key == count($this->question->answers) - 1) {
-                    $strings .= $item->answer;
-                    $key++;
-                } else {
-                    $strings .= $item->answer . "\n";
-                }
+            if ($key == count($this->question->teststrings) - 1) {
+                $strings .= $item->teststring;
+            } else {
+                $strings .= $item->teststring . "\n";
+                $key++;
             }
         }
 
