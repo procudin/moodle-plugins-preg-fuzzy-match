@@ -78,7 +78,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
      * @return int hint type.
      */
     public function hint_type() {
-        return qtype_specific_hint::SINGLE_INSTANCE_HINT;
+        return qtype_poasquestion\hint::SINGLE_INSTANCE_HINT;
     }
 
     /**
@@ -231,7 +231,7 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
      * @return int Hint type.
      */
     public function hint_type() {
-        return qtype_specific_hint::SINGLE_INSTANCE_HINT;
+        return qtype_poasquestion\hint::SINGLE_INSTANCE_HINT;
     }
 
     /**
@@ -384,7 +384,7 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
      * @return int hint type.
      */
     public function hint_type() {
-        return qtype_specific_hint::SINGLE_INSTANCE_HINT;
+        return qtype_poasquestion\hint::SINGLE_INSTANCE_HINT;
     }
 
     /**

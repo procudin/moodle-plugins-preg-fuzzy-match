@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_writeregex_question extends question_graded_automatically
-    implements question_automatically_gradable, question_with_qtype_specific_hints {
+    implements question_automatically_gradable, \qtype_poasquestion\question_with_hints {
 
 
     /** @var array Answers. */
@@ -138,7 +138,7 @@ class qtype_writeregex_question extends question_graded_automatically
         $bestfit = $this->get_best_fit_answer($response);
 
         if ($bestfit['fitness'] >= $this->hintgradeborder) {
-            return $bestfit['answer']->answer;
+            return $bestfit['answer'];
         }
 
         return array();
@@ -315,7 +315,7 @@ class qtype_writeregex_question extends question_graded_automatically
 
         // Moodle-specific hints.
         if (substr($hintkey, 0, 11) == 'hintmoodle#') {
-            return new qtype_poasquestion_hintmoodle($this, $hintkey);
+            return new qtype_poasquestion\hintmoodle($this, $hintkey);
         }
 
         $hintclass = 'qtype_writeregex_'.$hintkey;
