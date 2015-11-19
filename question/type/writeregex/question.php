@@ -348,7 +348,7 @@ class qtype_writeregex_question extends question_graded_automatically
     public function available_specific_hints ($response = null) {
         $hinttypes = array();
 
-        if (count($this->hints) < 0) {
+        if (count($this->hints) > 0) {
             $hinttypes[] = 'hintmoodle#';
         }
 
