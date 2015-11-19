@@ -1149,18 +1149,20 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Check found alternative node with only charsets operands with one character
      */
     private function is_single_alternative($node) {
+        $repeats_count = 0;
         foreach ($node->operands as $operand) {
-            if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
-                if (!(($operand->is_single_character() || $this->check_many_charset_node($operand)
-                      || $operand->subtype == qtype_preg_charset_flag::TYPE_FLAG) && !$operand->negative
-                    && $operand->userinscription[0]->data != '.')) {
-                    return false;
+            if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET && !$operand->negative
+                && $operand->userinscription[0]->data != '.') {
+                $repeats_count++;
+                if ($this->indfirst == -2) {
+                    $this->indfirst = $operand->position->indfirst;
                 }
+                $this->indlast = $operand->position->indlast;
             } else {
-                return false;
+                return $repeats_count > 1;
             }
         }
-        return true;
+        return $repeats_count > 1;
     }
 
 
@@ -1630,11 +1632,24 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function change_alternative_to_charset($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             $characters = '[';
+            $searched = false;
+            $count = 0;
             foreach ($node->operands as $operand) {
-                if (count($operand->userinscription) === 1) {
-                    $characters .= $this->escape_character_for_charset($operand->userinscription[0]->data);
-                } else {
-                    $characters .= $this->escape_character_for_charset($operand->userinscription[1]->data);
+                if ($operand->position->indfirst == $this->options->indfirst) {
+                    $searched = true;
+                }
+                if ($searched) {
+                    if (count($operand->userinscription) === 1) {
+                        $characters .= $this->escape_character_for_charset($operand->userinscription[0]->data);
+                    } else {
+                        for ($i = 1; $i < count($operand->userinscription) - 1; ++$i) {
+                            $characters .= $this->escape_character_for_charset($operand->userinscription[$i]->data);
+                        }
+                    }
+                    $count++;
+                }
+                if ($operand->position->indlast == $this->options->indlast) {
+                    $searched = false;
                 }
             }
             $characters .= ']';
@@ -1642,14 +1657,30 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $new_node = new qtype_preg_leaf_charset();
             $new_node->set_user_info(null, array(new qtype_preg_userinscription($characters, null)));
 
-            if ($node->id == $this->get_dst_root()->id) {
-                $this->dstroot = $new_node;
-            } else {
-                $local_root = $this->get_parent_node($this->get_dst_root(), $node->id);
+            if ($count == count($node->operands)) {
+                if ($node->id == $this->get_dst_root()->id) {
+                    $this->dstroot = $new_node;
+                } else {
+                    $local_root = $this->get_parent_node($this->get_dst_root(), $node->id);
 
-                foreach ($local_root->operands as $i => $operand) {
-                    if ($operand->id == $node->id) {
-                        $local_root->operands[$i] = $new_node;
+                    foreach ($local_root->operands as $i => $operand) {
+                        if ($operand->id == $node->id) {
+                            $local_root->operands[$i] = $new_node;
+                        }
+                    }
+                }
+            } else {
+                $searched = false;
+                foreach ($node->operands as $i => $operand) {
+                    if ($searched) {
+                        array_splice($node->operands, $i, 1);
+                    }
+                    if ($operand->position->indfirst == $this->options->indfirst) {
+                        $node->operands[$i] = $new_node;
+                        $searched = true;
+                    }
+                    if ($operand->position->indlast == $this->options->indlast) {
+                        $searched = false;
                     }
                 }
             }
