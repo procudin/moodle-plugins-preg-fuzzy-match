@@ -781,7 +781,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     // TODO: delete
-    private function delete_empty_groping_node($tree_root, &$node, $remove_node_id) {
+    private function delete_empty_groping_node(&$tree_root, &$node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             if ($node->id == $tree_root->id) {
                 $tree_root = null;
@@ -1126,8 +1126,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($this->is_single_alternative($node)) {
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 6;
-                $this->indfirst = $node->position->indfirst;
-                $this->indlast = $node->position->indlast;
+                //$this->indfirst = $node->position->indfirst;
+                //$this->indlast = $node->position->indlast;
                 return true;
             }
         }
@@ -1523,6 +1523,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($tree_root->id == $remove_node_id) {
             if (count($tree_root->userinscription) > 1) {
                 $tmp = $tree_root->userinscription[1];
+                $tmp->data = $this->escape_character_for_single_charset($tmp->data);
                 $tree_root->userinscription = array($tmp);
                 $tree_root->flags[0][0]->data = new qtype_poasquestion\string($tmp->data);
                 $tree_root->subtype = "enumerable_characters";
@@ -1538,6 +1539,17 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
         }
         return false;
+    }
+
+    private function escape_character_for_single_charset($character) {
+        if ($character === '\\' || $character === '^' || $character === '$'
+            || $character === '.' || $character === '[' || $character === ']'
+            || $character === '|' || $character === '(' || $character === ')'
+            || $character === '?' || $character === '*' || $character === '+'
+            || $character === '{' || $character === '}') {
+            return '\\' . $character;
+        }
+        return $character;
     }
 
     private function change_quant_to_equivalent($tree_root, $remove_node_id) {
