@@ -47,22 +47,22 @@ class test_strings_analyser {
         $totalfraction = 0;
 
         $pregquestionstd = new qtype_preg_question();
-        $matcherstd = $pregquestionstd->get_matcher($this->question->engine, $answer, false,
+        $studentmatcher = $pregquestionstd->get_matcher($this->question->engine, $answer, false,
             $pregquestionstd->get_modifiers($this->question->usecase), 0, $this->question->notation);
 
         $pregquestiont = new qtype_preg_question();
-        $matchert = $pregquestiont->get_matcher($this->question->engine, $response, false,
+        $teachermatcher = $pregquestiont->get_matcher($this->question->engine, $response, false,
             $pregquestiont->get_modifiers($this->question->usecase), 0, $this->question->notation);
 
-        foreach ($this->question->answers as $item) {
+        foreach ($this->question->teststrings as $string) {
 
-            if (!$matcherstd->errors_exist() and !$matchert->errors_exist() and $item->feedbackformat == 0) {
-                $resulltstd = $matcherstd->match($item->answer);
-                $resulltt = $matchert->match($item->answer);
+            if (!$studentmatcher->errors_exist() and !$teachermatcher->errors_exist()) {
+                $resulltstd = $studentmatcher->match($string->teststring);
+                $resulltt = $teachermatcher->match($string->teststring);
 
                 if ($resulltstd->indexfirst == $resulltt->indexfirst and
                     $resulltstd->length == $resulltt->length) {
-                    $totalfraction += $item->fraction;
+                    $totalfraction += $string->fraction;
                 }
             }
         }
