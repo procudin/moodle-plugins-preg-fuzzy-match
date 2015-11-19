@@ -303,10 +303,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Search repeated assertions assertions in tree.
      */
     private function search_grouping_node($node) {
-        if ($this->search_not_empty_grouping_node($node)) {
-            return true;
+        if ($node !== null) {
+            if ($this->search_not_empty_grouping_node($node)) {
+                return true;
+            }
+            return $this->search_empty_grouping_node($node);
         }
-        return $this->search_empty_grouping_node($node);
+        return false;
     }
 
     private function search_empty_grouping_node($node) {
@@ -368,8 +371,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 } else if (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
                             || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
                           && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
-                          && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT) {
-
+                          && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                          && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                          && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
                     $this->problem_ids[] = $node->id;
                     $this->problem_type = 2;
                     $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_2_1', 'qtype_preg'));
