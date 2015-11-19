@@ -35,6 +35,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private $regex_from_tree = '';
 
+    // TODO: delete this
+    private $problem_message = '';
+    private $solve_message = '';
+
     public function __construct($regex = null, $options = null) {
         parent::__construct($regex, $options);
     }
@@ -122,7 +126,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($this->options->is_check_tips == true) {
             $i = 0;
             $result = $this->space_charset();
-            /*if ($result != array()) {
+            if ($result != array()) {
                 $tips[$i] = array();
                 $tips[$i] += $result;
                 ++$i;
@@ -143,7 +147,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $tips[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
-            }*/
+            }
         }
         return $tips;
     }
@@ -156,13 +160,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
         if ($this->options->is_check_equivalences == true) {
             $i = 0;
-            /*$result = $this->repeated_assertions();
+            $result = $this->repeated_assertions();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
-            }*/
+            }
 
             $result = $this->grouping_node();
             if ($result != array()) {
@@ -172,7 +176,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
-            /*$result = $this->subpattern_node();
+            $result = $this->subpattern_node();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
@@ -210,7 +214,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $equivalences[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
-            }*/
+            }
         }
 
         return $equivalences;
@@ -284,8 +288,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $equivalences = array();
 
         if ($this->search_grouping_node($this->get_dst_root())) {
-            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_2', 'qtype_preg'));
-            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_2', 'qtype_preg'));
+            $equivalences['problem'] = $this->problem_message;
+            $equivalences['solve'] = $this->solve_message;
             $equivalences['problem_ids'] = $this->problem_ids;
             $equivalences['problem_type'] = $this->problem_type;
             $equivalences['problem_indfirst'] = $this->indfirst;
@@ -312,6 +316,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 2;
+                $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_2', 'qtype_preg'));
+                $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_2', 'qtype_preg'));
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
                 return true;
@@ -319,6 +325,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 if ($this->check_other_grouping_node($node->operands[0])) {
                     $this->problem_ids[] = $node->id;
                     $this->problem_type = 2;
+                    $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_2', 'qtype_preg'));
+                    $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_2', 'qtype_preg'));
                     $this->indfirst = $node->position->indfirst;
                     $this->indlast = $node->position->indlast;
                     return true;
@@ -349,8 +357,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
                     && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
                     && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+
                         $this->problem_ids[] = $node->id;
                         $this->problem_type = 2;
+                        $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_2_1', 'qtype_preg'));
+                        $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_2_1', 'qtype_preg'));
                         $this->indfirst = $node->position->indfirst;
                         $this->indlast = $node->position->indlast;
                         return true;
@@ -361,6 +372,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
                     $this->problem_ids[] = $node->id;
                     $this->problem_type = 2;
+                    $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_2_1', 'qtype_preg'));
+                    $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_2_1', 'qtype_preg'));
                     $this->indfirst = $node->position->indfirst;
                     $this->indlast = $node->position->indlast;
                     return true;
@@ -504,8 +517,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $equivalences['problem_type'] = $this->problem_type;
             $equivalences['problem_indfirst'] = $this->indfirst;
             $equivalences['problem_indlast'] = $this->indlast;
-
-//            var_dump($equivalences);
         }
 
         return $equivalences;
@@ -703,7 +714,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     }
                 }
             }
-        }
 
         if ($this->is_operator($tree_root)) {
             foreach ($tree_root->operands as $operand) {
@@ -739,7 +749,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $problem_exist = true;
         while($problem_exist) {
             if ($this->search_grouping_node($tree_root)) {
-//                $this->remove_subtree($tree_root, $this->problem_ids[0]);
                 $this->delete_empty_groping_node($tree_root, $tree_root, $this->problem_ids[0]);
             } else {
                 $problem_exist = false;
