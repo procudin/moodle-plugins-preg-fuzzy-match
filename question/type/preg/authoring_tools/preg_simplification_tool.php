@@ -574,7 +574,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Check backreference to subexpression.
      */
     private function check_backref_to_subexpr($node, $number) {
-        if ($node->type == qtype_preg_node::TYPE_LEAF_BACKREF && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $number) {
+        if (($node->type == qtype_preg_node::TYPE_LEAF_BACKREF
+             && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $number)
+            || ($node->type == qtype_preg_node::TYPE_NODE_COND_SUBEXPR
+                && $node->subtype == qtype_preg_node_cond_subexpr::SUBTYPE_SUBEXPR && $node->number == $number)) {
             return true;
         }
         if ($this->is_operator($node)) {
@@ -599,7 +602,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     return true;
                 }
             } else {
-                return $this->check_other_grouping_node($node->operands[0]);
+                return $this->check_other_subpattern_node($node->operands[0]);
             }
         }
         return false;
