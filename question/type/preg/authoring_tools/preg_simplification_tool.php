@@ -382,6 +382,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $this->indlast = $node->position->indlast;
                     return true;
                 }
+            } else {
+                if ($node->position != NULL) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 2;
+                    $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_2_1', 'qtype_preg'));
+                    $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_2_1', 'qtype_preg'));
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+                }
             }
         }
         if ($this->is_operator($node)) {
