@@ -1076,14 +1076,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $is_fount = false;
                     $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, $this->options->problem_ids[0], $is_fount);
                     // Add this nodes while node is not operator
-                    // TODO: maybe one operator is child of subexpr?
-                    foreach ($right_leafs as $rleaf) {
-                        $se->operands[] = $rleaf;
-//                        if (!$this->is_operator($rleaf)) {
-//                            $se->operands[] = $rleaf;
-//                        } else {
-//                            break;
-//                        }
+
+                    if (count($right_leafs) > 1) {
+                        $concat = new qtype_preg_node_concat();
+                        foreach ($right_leafs as $rleaf) {
+                            $concat->operands[] = $rleaf;
+                        }
+                        $se->operands[] = $concat;
+                    } else {
+                        $se->operands[] = $right_leafs[0];
                     }
                 } else {
                     $se->operands[] = $current_leaf;
@@ -1094,7 +1095,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $qu->operands[] = $current_leaf;
             }
 
-            $this->normalization($qu->operands[0]);
+            $this->normalization($qu/*->operands[0]*/);
             $new_regex_string_part = $qu->get_regex_string();
         } else {
             $this->normalization($current_leaf);
@@ -1328,9 +1329,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $this->indfirst = $operand->position->indfirst;
                 }
                 $this->indlast = $operand->position->indlast;
-            } else {
+            } /*else {
                 return $repeats_count > 1;
-            }
+            }*/
         }
         return $repeats_count > 1;
     }
@@ -1559,7 +1560,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     // The 3rd rule
     protected function optimize_3($node) {
-        $this->remove_subtree($node, $this->options->problem_ids[0]);
+        $tree_root = $this->get_dst_root();
+        $this->remove_subpattern_node($tree_root, $node, $this->options->problem_ids[0]);
         $subpattern_last_number = 0;
         $this->rename_backreferences_for_subpattern($tree_root, $subpattern_last_number);
         return true;
@@ -1664,7 +1666,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             } else {
                 // TODO: fix this
-                $this->dstroot = null;
+                if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
+                    && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                    $this->dstroot = null;
+                } else if ($this->check_other_grouping_node($node->operands[0])) {
+                    $this->dstroot = null;
+                } else {
+                    $this->dstroot = $node->operands[0];
+                }
                 return true;
             }
         }
