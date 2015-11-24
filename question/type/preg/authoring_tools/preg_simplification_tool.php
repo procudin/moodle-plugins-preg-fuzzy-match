@@ -1688,6 +1688,70 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    private function remove_subpattern_node(&$tree_root, $node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            $parent = $this->get_parent_node($tree_root, $node->id);
+            if ($parent !== null) {
+                $group_operand = $node->operands[0];
+                if ($this->check_included_empty_subpattern($node)) {
+                    if (count($parent->operands) === 1) {
+                        return $this->remove_subtree($tree_root, $parent->id);
+                    }
+                    foreach ($parent->operands as $i => $operand) {
+                        if ($operand->id == $remove_node_id) {
+                            array_splice($parent->operands, $i, 1);
+                            if ($this->is_associative_commutative_operator($parent) && count($parent->operands) < 2) {
+                                $parent->operands[] = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
+                            }
+
+                            return true;
+                        }
+                    }
+                } else {
+//                    if ($parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+//                        && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+//                    ) {
+                    foreach ($parent->operands as $i => $operand) {
+                        if ($operand->id == $node->id) {
+                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT
+                            ) {
+                                $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                    $group_operand->operands,
+                                    array_slice($parent->operands, $i + 1));
+                            } else {
+                                $parent->operands[$i] = $group_operand;
+                            }
+                            return true;
+                            break;
+                        }
+                    }
+                    //}
+                }
+            } else {
+                // TODO: fix this
+                if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
+                    && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                    $this->dstroot = null;
+                } else if ($this->check_other_subpattern_node($node->operands[0])) {
+                    $this->dstroot = null;
+                } else {
+                    $this->dstroot = $node->operands[0];
+                }
+                return true;
+            }
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if($this->remove_subpattern_node($tree_root, $operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private function check_included_empty_grouping($node) {
         $group_operand = $node->operands[0];
         if ($group_operand->type == qtype_preg_node::TYPE_LEAF_META
@@ -1696,6 +1760,18 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         } else if ($group_operand->type == qtype_preg_node::TYPE_NODE_SUBEXPR
                    && $group_operand->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
             return $this->check_included_empty_grouping($group_operand);
+        }
+        return false;
+    }
+
+    private function check_included_empty_subpattern($node) {
+        $group_operand = $node->operands[0];
+        if ($group_operand->type == qtype_preg_node::TYPE_LEAF_META
+            && $group_operand->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+            return true;
+        } else if ($group_operand->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $group_operand->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+            return $this->check_included_empty_subpattern($group_operand);
         }
         return false;
     }
