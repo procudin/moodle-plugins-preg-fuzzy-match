@@ -1800,6 +1800,11 @@ class qtype_preg_leaf_backref extends qtype_preg_leaf {
             /*&& $this->name==$node->name*/
             && (($this->number!==null)?($this->number - $numberoffset):null) === $node->number;
     }
+
+    public function get_regex_string() {
+        $subexpr = $this->name !== null ? $this->name : $this->number;
+        return '\\' . $subexpr;
+    }
 }
 
 class qtype_preg_leaf_subexpr_call extends qtype_preg_leaf {
@@ -2510,11 +2515,12 @@ class qtype_preg_node_cond_subexpr extends qtype_preg_operator {
     }
 
     public function get_regex_string() {
-        $regex_string = '(?';
+        $regex_string = '(?(' . $this->number . ')';
+        $operands_count = count($this->operands);
         foreach ($this->operands as $operand) {
             $regex_string .= $operand->get_regex_string();
             if ($operand->id != $this->operands[count($this->operands)-1]->id
-                && $operand->id != $this->operands[0]->id) {
+                && $operands_count > 1) {
                 $regex_string .= '|';
             }
         }
