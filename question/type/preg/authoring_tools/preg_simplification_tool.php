@@ -39,6 +39,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private $problem_message = '';
     private $solve_message = '';
 
+    private $is_subpattern_node_searched = false;
+
     public function __construct($regex = null, $options = null) {
         parent::__construct($regex, $options);
     }
@@ -96,8 +98,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     public function data_for_accepted_regex() {
         $data = array();
         $data['errors'] = $this->get_errors_description();
-        $data['tips'] = $this->get_tips_description();
         $data['equivalences'] = $this->get_equivalences_description();
+        $data['tips'] = $this->get_tips_description();
 
         return $data;
     }
@@ -133,12 +135,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
-            $result = $this->subpattern_without_backref();
-            if ($result != array()) {
-                $tips[$i] = array();
-                $tips[$i] += $result;
-                ++$i;
-                $this->problem_ids = array();
+            if (!$this->is_subpattern_node_searched) {
+                $result = $this->subpattern_without_backref();
+                if ($result != array()) {
+                    $tips[$i] = array();
+                    $tips[$i] += $result;
+                    ++$i;
+                    $this->problem_ids = array();
+                }
             }
 
             $result = $this->exact_match();
@@ -182,6 +186,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $equivalences[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
+                $this->is_subpattern_node_searched = true;
             }
 
             $result = $this->single_charset_node();
