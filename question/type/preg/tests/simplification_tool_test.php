@@ -37,30 +37,35 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             $stooloptions->selection = new qtype_preg_position(-2, -2);
             $stooloptions->preserveallnodes = true;
 
-            $result_regex = '';
-            $st = new qtype_preg_simplification_tool($test_regex, $stooloptions);
-            $eq = $st->$function_name_for_test();
+            //try {
+                $result_regex = '';
+                $st = new qtype_preg_simplification_tool($test_regex, $stooloptions);
+                $eq = $st->$function_name_for_test();
 
-            if (count($eq) != 0) {
-                if (count($eq['problem_ids']) > 0 && $eq['problem_type'] != -2) {
-                    $stooloptions->problem_ids = $eq['problem_ids'];
-                    $stooloptions->problem_type = $eq['problem_type'];
-                    $stooloptions->indfirst = $eq['problem_indfirst'];
-                    $stooloptions->indlast = $eq['problem_indlast'];
+                if (count($eq) != 0) {
+                    if (count($eq['problem_ids']) > 0 && $eq['problem_type'] != -2) {
+                        $stooloptions->problem_ids = $eq['problem_ids'];
+                        $stooloptions->problem_type = $eq['problem_type'];
+                        $stooloptions->indfirst = $eq['problem_indfirst'];
+                        $stooloptions->indlast = $eq['problem_indlast'];
 
-                    $simplified_regex = new qtype_preg_simplification_tool($test_regex, $stooloptions);
-                    $result_regex = $simplified_regex->optimization();
+                        $simplified_regex = new qtype_preg_simplification_tool($test_regex, $stooloptions);
+                        $result_regex = $simplified_regex->optimization();
+                    }
+                } else {
+                    $result_regex = $test_regex;
                 }
-            } else {
-                $result_regex = $test_regex;
-            }
 
-            if ($result_regex !== $test_result) {
+                if ($result_regex !== $test_result) {
+                    var_dump($test_regex);
+                    var_dump($result_regex);
+                    var_dump($test_result);
+                    var_dump($result_regex === $test_result);
+                }
+            /*} catch(Exception $e) {
+                var_dump('Exception!');
                 var_dump($test_regex);
-                var_dump($result_regex);
-                var_dump($test_result);
-                var_dump($result_regex === $test_result);
-            }
+            }*/
 
             $this->assertTrue($result_regex === $test_result);
         }
@@ -1869,6 +1874,22 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a[^aa]', 'a[^aa]'),
             array('[^aa]a', '[^aa]a'),
             array('a[^aa]a', 'a[^aa]a'),
+
+            //array('[\\b]', '\\\\b'),
+            array('[\\]', '[\\]'),
+            array('[^]', '[^]'),
+            array('[$]', '\\$'),
+            array('[.]', '\\.'),
+            array('[[]', '\\['),
+            array('[]]', '\\]'),
+            array('[|]', '\\|'),
+            array('[(]', '\\('),
+            array('[)]', '\\)'),
+            array('[?]', '\\?'),
+            array('[+]', '\\+'),
+            array('[*]', '\\*'),
+            array('[{]', '\\{'),
+            array('[}]', '\\}'),
         );
     }
 
@@ -1897,6 +1918,15 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:a){3}', 'a{3}'),
             array('(?:a){3}|b', 'a{3}|b'),
             array('(?:ab){3}|b', '(?:ab){3}|b'),
+
+            array('(?:a{0,}{1,})?', '(?:a{0,}{1,})?'),
+
+            array('a(?:a|b)', 'a(?:a|b)'),
+            array('a(?:a|b)a', 'a(?:a|b)a'),
+            array('(?:a|b)a', '(?:a|b)a'),
+
+            array('(?:ab)', 'ab'),
+            array('(?:ab)|c', 'ab|c'),
         );
     }
 
@@ -1910,7 +1940,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a|()', 'a|'),
             array('()(?:aa)', '(?:aa)'),
             array('a(){3}', 'a'),
-            //array('((a))', '(a)'),
+            array('((a))', '(a)'),
             array('()\1', '()\1'),
             array('a()\1', 'a()\1'),
             array('()a\1', '()a\1'),
@@ -1919,7 +1949,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a|()\1', 'a|()\1'),
             array('()(?:aa)\1', '()(?:aa)\1'),
             array('a(){3}\1', 'a(){3}\1'),
-            array('((a))\1', '((a))\1'),
+            array('((a))\1', '(a)\1'),
             array('\1()', '\1()'),
             array('\1a()', '\1a()'),
             array('\1()a', '\1()a'),
@@ -1928,7 +1958,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('\1a|()', '\1a|()'),
             array('\1()(?:aa)', '\1()(?:aa)'),
             array('\1a(){3}', '\1a(){3}'),
-            array('\1((a))', '\1((a))'),
+            array('\1((a))', '\1(a)'),
             array('()\2', '\2'),
             array('a()\2', 'a\2'),
             array('()a\2', 'a\2'),
@@ -1937,7 +1967,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a|()\2', 'a|\2'), //?????
             array('()(?:aa)\2', '(?:aa)\2'),
             array('a(){3}\2', 'a\2'),
-            //array('((a))\2', '(a)\2'),
+            array('((a))\2', '(a)\1'),
             array('\2()', '\2'),
             array('\2a()', '\2a'),
             array('\2()a', '\2a'),
@@ -1946,7 +1976,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('\2a|()', '\2a|'),
             array('\2()(?:aa)', '\2(?:aa)'),
             array('\2a(){3}', '\2a'),
-            //array('\2((a))', '\2(a)'),
+            array('\2((a))', '\1(a)'),
             array('\2()(ab)', '\1(ab)'),
             array('\2a()(ab)', '\1a(ab)'),
             array('\2()a(ab)', '\1a(ab)'),
@@ -1998,39 +2028,39 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('()\2(?:aa)(ab(ab))\3', '\1(?:aa)(ab(ab))\2'),
             array('a(){3}\2(ab(ab))\3', 'a\1(ab(ab))\2'),
 
-            array('\1()(ab)(ab)\3', '\1()(ab)(ab)\3'),
-            array('\1a()(ab)(ab)\3', '\1a()(ab)(ab)\3'),
-            array('\1()a(ab)(ab)\3', '\1()a(ab)(ab)\3'),
-            array('\1a()a(ab)(ab)\3', '\1a()a(ab)(ab)\3'),
-            array('\1ab()ab(ab)(ab)\3', '\1ab()ab(ab)(ab)\3'),
-            array('\1a|()|(ab)(ab)\3', '\1a|()|(ab)(ab)\3'),
-            array('\1()(?:aa)(ab)(ab)\3', '\1()(?:aa)(ab)(ab)\3'),
-            array('\1a(){3}(ab)(ab)\3', '\1a(){3}(ab)(ab)\3'),
-            array('()\1(ab)(ab)\3', '()\1(ab)(ab)\3'),
-            array('a()\1(ab)(ab)\3', 'a()\1(ab)(ab)\3'),
-            array('()\1a(ab)(ab)\3', '()\1a(ab)(ab)\3'),
-            array('a()\1a(ab)(ab)\3', 'a()\1a(ab)(ab)\3'),
-            array('ab()\1ab(ab)(ab)\3', 'ab()\1ab(ab)(ab)\3'),
-            array('a|()|(ab)\1(ab)\3', 'a|()|(ab)\1(ab)\3'),
-            array('()\1(?:aa)(ab)(ab)\3', '()\1(?:aa)(ab)(ab)\3'),
-            array('a(){3}\1(ab)(ab)\3', 'a(){3}\1(ab)(ab)\3'),
+            array('\1()(ab)(ab)\3', '\1()ab(ab)\2'),
+            array('\1a()(ab)(ab)\3', '\1a()ab(ab)\2'),
+            array('\1()a(ab)(ab)\3', '\1()aab(ab)\2'),
+            array('\1a()a(ab)(ab)\3', '\1a()aab(ab)\2'),
+            array('\1ab()ab(ab)(ab)\3', '\1ab()abab(ab)\2'),
+            array('\1a|()|(ab)(ab)\3', '\1a|()|ab(ab)\2'),
+            array('\1()(?:aa)(ab)(ab)\3', '\1()(?:aa)ab(ab)\2'),
+            array('\1a(){3}(ab)(ab)\3', '\1a(){3}ab(ab)\2'),
+            array('()\1(ab)(ab)\3', '()\1ab(ab)\2'),
+            array('a()\1(ab)(ab)\3', 'a()\1ab(ab)\2'),
+            array('()\1a(ab)(ab)\3', '()\1aab(ab)\2'),
+            array('a()\1a(ab)(ab)\3', 'a()\1aab(ab)\2'),
+            array('ab()\1ab(ab)(ab)\3', 'ab()\1abab(ab)\2'),
+            array('a|()|(ab)\1(ab)\3', 'a|()|ab\1(ab)\2'),
+            array('()\1(?:aa)(ab)(ab)\3', '()\1(?:aa)ab(ab)\2'),
+            array('a(){3}\1(ab)(ab)\3', 'a(){3}\1ab(ab)\2'),
 
-            array('\1()(ab(ab))\3', '\1()(ab(ab))\3'),
-            array('\1a()(ab(ab))\3', '\1a()(ab(ab))\3'),
-            array('\1()a(ab(ab))\3', '\1()a(ab(ab))\3'),
-            array('\1a()a(ab(ab))\3', '\1a()a(ab(ab))\3'),
-            array('\1ab()ab(ab(ab))\3', '\1ab()ab(ab(ab))\3'),
-            array('\1a|()|(ab(ab))\3', '\1a|()|(ab(ab))\3'),
-            array('\1()(?:aa)(ab(ab))\3', '\1()(?:aa)(ab(ab))\3'),
-            array('\1a(){3}(ab(ab))\3', '\1a(){3}(ab(ab))\3'),
-            array('()\1(ab(ab))\3', '()\1(ab(ab))\3'),
-            array('a()\1(ab(ab))\3', 'a()\1(ab(ab))\3'),
-            array('()\1a(ab(ab))\3', '()\1a(ab(ab))\3'),
-            array('a()\1a(ab(ab))\3', 'a()\1a(ab(ab))\3'),
-            array('ab()\1ab(ab(ab))\3', 'ab()\1ab(ab(ab))\3'),
-            array('a|()|(ab(ab))\1\3', 'a|()|(ab(ab))\1\3'),
-            array('()\1(?:aa)(ab(ab))\3', '()\1(?:aa)(ab(ab))\3'),
-            array('a(){3}\1(ab(ab))\3', 'a(){3}\1(ab(ab))\3'),
+            array('\1()(ab(ab))\3', '\1()ab(ab)\2'),
+            array('\1a()(ab(ab))\3', '\1a()ab(ab)\2'),
+            array('\1()a(ab(ab))\3', '\1()aab(ab)\2'),
+            array('\1a()a(ab(ab))\3', '\1a()aab(ab)\2'),
+            array('\1ab()ab(ab(ab))\3', '\1ab()abab(ab)\2'),
+            array('\1a|()|(ab(ab))\3', '\1a|()|ab(ab)\2'),
+            array('\1()(?:aa)(ab(ab))\3', '\1()(?:aa)ab(ab)\2'),
+            array('\1a(){3}(ab(ab))\3', '\1a(){3}ab(ab)\2'),
+            array('()\1(ab(ab))\3', '()\1ab(ab)\2'),
+            array('a()\1(ab(ab))\3', 'a()\1ab(ab)\2'),
+            array('()\1a(ab(ab))\3', '()\1aab(ab)\2'),
+            array('a()\1a(ab(ab))\3', 'a()\1aab(ab)\2'),
+            array('ab()\1ab(ab(ab))\3', 'ab()\1abab(ab)\2'),
+            array('a|()|(ab(ab))\1\3', 'a|()|ab(ab)\1\2'),
+            array('()\1(?:aa)(ab(ab))\3', '()\1(?:aa)ab(ab)\2'),
+            array('a(){3}\1(ab(ab))\3', 'a(){3}\1ab(ab)\2'),
 
             array('\2()(ab)()\3', '\1(ab)()\2'),
             array('\2a()(ab)()\3', '\1a(ab)()\2'),
@@ -2066,39 +2096,39 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('()\2(?:aa)(ab())\3', '\1(?:aa)(ab())\2'),
             array('a(){3}\2(ab())\3', 'a\1(ab())\2'),
 
-            array('\1()(ab)()\3', '\1()(ab)()\3'),
-            array('\1a()(ab)()\3', '\1a()(ab)()\3'),
-            array('\1()a(ab)()\3', '\1()a(ab)()\3'),
-            array('\1a()a(ab)()\3', '\1a()a(ab)()\3'),
-            array('\1ab()ab(ab)()\3', '\1ab()ab(ab)()\3'),
-            array('\1a|()|(ab)()\3', '\1a|()|(ab)()\3'),
-            array('\1()(?:aa)(ab)()\3', '\1()(?:aa)(ab)()\3'),
-            array('\1a(){3}(ab)()\3', '\1a(){3}(ab)()\3'),
-            array('()\1(ab)()\3', '()\1(ab)()\3'),
-            array('a()\1(ab)()\3', 'a()\1(ab)()\3'),
-            array('()\1a(ab)()\3', '()\1a(ab)()\3'),
-            array('a()\1a(ab)()\3', 'a()\1a(ab)()\3'),
-            array('ab()\1ab(ab)()\3', 'ab()\1ab(ab)()\3'),
-            array('a|()|(ab)\1()\3', 'a|()|(ab)\1()\3'),
-            array('()\1(?:aa)(ab)()\3', '()\1(?:aa)(ab)()\3'),
-            array('a(){3}\1(ab)()\3', 'a(){3}\1(ab)()\3'),
+            array('\1()(ab)()\3', '\1()ab()\2'),
+            array('\1a()(ab)()\3', '\1a()ab()\2'),
+            array('\1()a(ab)()\3', '\1()aab()\2'),
+            array('\1a()a(ab)()\3', '\1a()aab()\2'),
+            array('\1ab()ab(ab)()\3', '\1ab()abab()\2'),
+            array('\1a|()|(ab)()\3', '\1a|()|ab()\2'),
+            array('\1()(?:aa)(ab)()\3', '\1()(?:aa)ab()\2'),
+            array('\1a(){3}(ab)()\3', '\1a(){3}ab()\2'),
+            array('()\1(ab)()\3', '()\1ab()\2'),
+            array('a()\1(ab)()\3', 'a()\1ab()\2'),
+            array('()\1a(ab)()\3', '()\1aab()\2'),
+            array('a()\1a(ab)()\3', 'a()\1aab()\2'),
+            array('ab()\1ab(ab)()\3', 'ab()\1abab()\2'),
+            array('a|()|(ab)\1()\3', 'a|()|ab\1()\2'),
+            array('()\1(?:aa)(ab)()\3', '()\1(?:aa)ab()\2'),
+            array('a(){3}\1(ab)()\3', 'a(){3}\1ab()\2'),
 
-            array('\1()(ab())\3', '\1()(ab())\3'),
-            array('\1a()(ab())\3', '\1a()(ab())\3'),
-            array('\1()a(ab())\3', '\1()a(ab())\3'),
-            array('\1a()a(ab())\3', '\1a()a(ab())\3'),
-            array('\1ab()ab(ab())\3', '\1ab()ab(ab())\3'),
-            array('\1a|()|(ab())\3', '\1a|()|(ab())\3'),
-            array('\1()(?:aa)(ab())\3', '\1()(?:aa)(ab())\3'),
-            array('\1a(){3}(ab())\3', '\1a(){3}(ab())\3'),
-            array('()\1(ab())\3', '()\1(ab())\3'),
-            array('a()\1(ab())\3', 'a()\1(ab())\3'),
-            array('()\1a(ab())\3', '()\1a(ab())\3'),
-            array('a()\1a(ab())\3', 'a()\1a(ab())\3'),
-            array('ab()\1ab(ab())\3', 'ab()\1ab(ab())\3'),
-            array('a|()|(ab())\1\3', 'a|()|(ab())\1\3'),
-            array('()\1(?:aa)(ab())\3', '()\1(?:aa)(ab())\3'),
-            array('a(){3}\1(ab())\3', 'a(){3}\1(ab())\3'),
+            array('\1()(ab())\3', '\1()ab()\2'),
+            array('\1a()(ab())\3', '\1a()ab()\2'),
+            array('\1()a(ab())\3', '\1()aab()\2'),
+            array('\1a()a(ab())\3', '\1a()aab()\2'),
+            array('\1ab()ab(ab())\3', '\1ab()abab()\2'),
+            array('\1a|()|(ab())\3', '\1a|()|ab()\2'),
+            array('\1()(?:aa)(ab())\3', '\1()(?:aa)ab()\2'),
+            array('\1a(){3}(ab())\3', '\1a(){3}ab()\2'),
+            array('()\1(ab())\3', '()\1ab()\2'),
+            array('a()\1(ab())\3', 'a()\1ab()\2'),
+            array('()\1a(ab())\3', '()\1aab()\2'),
+            array('a()\1a(ab())\3', 'a()\1aab()\2'),
+            array('ab()\1ab(ab())\3', 'ab()\1abab()\2'),
+            array('a|()|(ab())\1\3', 'a|()|ab()\1\2'),
+            array('()\1(?:aa)(ab())\3', '()\1(?:aa)ab()\2'),
+            array('a(){3}\1(ab())\3', 'a(){3}\1ab()\2'),
 
 
             array('\2()(ab)()\2', '\1(ab)()\1'),
@@ -2170,6 +2200,57 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a|()|(ab())\1\2', 'a|()|(ab)\1\2'),
             array('()\1(?:aa)(ab())\2', '()\1(?:aa)(ab)\2'),
             array('a(){3}\1(ab())\2', 'a(){3}\1(ab)\2'),
+
+
+            array('()(?(1)a|b)', '()(?(1)a|b)'),
+            array('(?(1)a|b)()', '(?(1)a|b)()'),
+            array('()(?(2)a|b)', '(?(2)a|b)'),
+            array('(?(2)a|b)()', '(?(2)a|b)'),
+            array('()()(?(2)a|b)', '()(?(1)a|b)'),
+            array('(?(2)a|b)()()', '(?(1)a|b)()'),
+            array('()(?(1)a|b)()', '()(?(1)a|b)'),
+            array('()(?(2)a|b)()', '(?(1)a|b)()'),
+
+            array('a()(?(1)a|b)', 'a()(?(1)a|b)'),
+            array('a(?(1)a|b)()', 'a(?(1)a|b)()'),
+            array('a()(?(2)a|b)', 'a(?(2)a|b)'),
+            array('a(?(2)a|b)()', 'a(?(2)a|b)'),
+            array('a()()(?(2)a|b)', 'a()(?(1)a|b)'),
+            array('a(?(2)a|b)()()', 'a(?(1)a|b)()'),
+            array('a()(?(1)a|b)()', 'a()(?(1)a|b)'),
+            array('a()(?(2)a|b)()', 'a(?(1)a|b)()'),
+
+            array('()(?(1)a|b)a', '()(?(1)a|b)a'),
+            array('(?(1)a|b)()a', '(?(1)a|b)()a'),
+            array('()(?(2)a|b)a', '(?(2)a|b)a'),
+            array('(?(2)a|b)()a', '(?(2)a|b)a'),
+            array('()()(?(2)a|b)a', '()(?(1)a|b)a'),
+            array('(?(2)a|b)()()a', '(?(1)a|b)()a'),
+            array('()(?(1)a|b)()a', '()(?(1)a|b)a'),
+            array('()(?(2)a|b)()a', '(?(1)a|b)()a'),
+
+            array('a()(?(1)a|b)a', 'a()(?(1)a|b)a'),
+            array('a(?(1)a|b)()a', 'a(?(1)a|b)()a'),
+            array('a()(?(2)a|b)a', 'a(?(2)a|b)a'),
+            array('a(?(2)a|b)()a', 'a(?(2)a|b)a'),
+            array('a()()(?(2)a|b)a', 'a()(?(1)a|b)a'),
+            array('a(?(2)a|b)()()a', 'a(?(1)a|b)()a'),
+            array('a()(?(1)a|b)()a', 'a()(?(1)a|b)a'),
+            array('a()(?(2)a|b)()a', 'a(?(1)a|b)()a'),
+
+            array('()a(?(1)a|b)', '()a(?(1)a|b)'),
+            array('(?(1)a|b)a()', '(?(1)a|b)a()'),
+            array('()a(?(2)a|b)', 'a(?(2)a|b)'),
+            array('(?(2)a|b)a()', '(?(2)a|b)a'),
+            array('()a()a(?(2)a|b)', 'a()a(?(1)a|b)'),
+            array('(?(2)a|b)a()a()', '(?(1)a|b)aa()'),
+            array('()(?(1)a|b)a()', '()(?(1)a|b)a'),
+            array('()(?(2)a|b)a()', '(?(1)a|b)a()'),
+
+            array('()av()\2', 'av()\1'),
+            array('(()cd|)av()\1', '(cd|)av()\1'),
+
+            array('(ab)', 'ab'),
         );
     }
 
@@ -2339,28 +2420,38 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 //            array('a|b?', '[ab]?'),
             array('a|b+', 'a|b+'),
             array('a|b*', 'a|b*'),
-            array('[aa]|b', '[ab]'),
-            array('a|[bb]', '[ab]'),
-            array('[aa]|[bb]', '[ab]'),
+            array('[aa]|b', '[aab]'),
+            array('a|[bb]', '[abb]'),
+            array('[aa]|[bb]', '[aabb]'),
             array('[^aa]|b', '[^aa]|b'),
             array('a|[^bb]', 'a|[^bb]'),
             array('[^aa]|[bb]', '[^aa]|[bb]'),
             array('[aa]|[^bb]', '[aa]|[^bb]'),
             array('[^aa]|[^bb]', '[^aa]|[^bb]'),
             array('(?:a|b)?', '(?:[ab])?'),
+
             array('a|-|b', '[a\-b]'),
-            array('a|.|b', 'a|.|b'),
+            array('a|.|b', '.|[ab]'),
             array('a|-|]|{|}|b', '[a\-\]\{\}b]'),
             array('a|\|b', 'a|\|b'),
-            array('a|^|b', 'a|^|b'),
-            array('a|$|b', 'a|$|b'),
+            array('a|^|b', '^|[ab]'),
+            array('a|$|b', '$|[ab]'),
             array('a|[|b', 'a|[|b'),
-            array('a|||b', 'a|||b'),
+            array('a|||b', '||[ab]'),
             array('a|(|b', 'a|(|b'),
             array('a|)|b', 'a|)|b'),
-            array('a|?|b', 'a|?|b'),
-            array('a|+|b', 'a|+|b'),
-            array('a|*|b', 'a|*|b'),
+            //array('a|?|b', 'a|?|b'),
+            //array('a|+|b', 'a|+|b'),
+            //array('a|*|b', 'a|*|b'),
+
+            array('[ab]|c|ab', 'ab|[abc]'),
+            array('ab|c|[ab]', 'ab|[cab]'),
+            array('[ab]|c|a', '[abca]'),
+
+            array('[ab]|dc|e', 'dc|[abe]'),
+            array('a|dc|e', 'dc|[ae]'),
+            array('a|dc|a', 'dc|[aa]'),
+            array('a|[a-c]|\^|^|[01]', '^|[aa-c\^01]'),
         );
     }
 
@@ -2379,11 +2470,17 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_subpattern_without_backref_trivial() {
         return array(
+            array('(ab)', '(?:ab)'),
             array('(ab)a', '(?:ab)a'),
             array('(ab)\1a', '(ab)\1a'),
             array('(a(b))\1a', '(a(?:b))\1a'),
             array('(a(b))\1\2a', '(a(b))\1\2a'),
             array('(a(b)(c))\1\3a', '(a(?:b)(c))\1\2a'),
+
+            array('(ab)(?(1)a|b)a', '(ab)(?(1)a|b)a'),
+            array('(a(b))(?(1)a|b)a', '(a(?:b))(?(1)a|b)a'),
+            array('(a(b))(?(1)a|b)(?(2)a|b)a', '(a(b))(?(1)a|b)(?(2)a|b)a'),
+            array('(a(b)(c))(?(1)a|b)(?(3)a|b)a', '(a(?:b)(c))(?(1)a|b)(?(2)a|b)a'),
         );
     }
 }
