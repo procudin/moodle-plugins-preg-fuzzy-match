@@ -1887,13 +1887,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function change_alternative_to_charset($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             $characters = '[';
-            $searched = false;
             $count = 0;
+
+            $alt = new qtype_preg_node_alt();
+
             foreach ($node->operands as $operand) {
-                if ($operand->position->indfirst == $this->options->indfirst) {
-                    $searched = true;
-                }
-                if ($searched) {
+                if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET && !$operand->negative
+                    && $operand->userinscription[0]->data != '.') {
+                    $count++;
                     if (count($operand->userinscription) === 1) {
                         $characters .= $this->escape_character_for_charset($operand->userinscription[0]->data);
                     } else {
@@ -1901,10 +1902,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                             $characters .= $this->escape_character_for_charset($operand->userinscription[$i]->data);
                         }
                     }
-                    $count++;
-                }
-                if ($operand->position->indlast == $this->options->indlast) {
-                    $searched = false;
+                } else {
+                    $alt->operands[] = $operand;
                 }
             }
             $characters .= ']';
@@ -1925,17 +1924,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     }
                 }
             } else {
-                $searched = false;
-                foreach ($node->operands as $i => $operand) {
-                    if ($searched) {
-                        array_splice($node->operands, $i, 1);
-                    }
-                    if ($operand->position->indfirst == $this->options->indfirst) {
-                        $node->operands[$i] = $new_node;
-                        $searched = true;
-                    }
-                    if ($operand->position->indlast == $this->options->indlast) {
-                        $searched = false;
+                $alt->operands[] = $new_node;
+                $local_root = $this->get_parent_node($this->get_dst_root(), $node->id);
+
+                if ($local_root === NULL) {
+                    $this->dstroot = $alt;
+                } else {
+                    foreach ($local_root->operands as $i => $operand) {
+                        if ($operand->id == $node->id) {
+                            $local_root->operands[$i] = $alt;
+                        }
                     }
                 }
             }
