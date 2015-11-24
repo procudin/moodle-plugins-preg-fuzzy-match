@@ -356,10 +356,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
             if ($parent !== null) {
                 $group_operand = $node->operands[0];
-                if ($parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                if (/*$parent->type != qtype_preg_node::TYPE_NODE_CONCAT
+                    &&*/ $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
                     && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
                     && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
-                    && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                    && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY
+                    && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT) {
 
                         $this->problem_ids[] = $node->id;
                         $this->problem_type = 2;
