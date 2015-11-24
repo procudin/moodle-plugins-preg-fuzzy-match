@@ -338,7 +338,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
         if ($this->is_operator($node)) {
             foreach ($node->operands as $operand) {
-                if ($this->search_grouping_node($operand)) {
+                if ($this->search_empty_grouping_node($operand)) {
                     return true;
                 }
             }
