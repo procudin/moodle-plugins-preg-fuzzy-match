@@ -450,18 +450,35 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Search empty subpattern node.
      */
     private function search_subpattern_node($node) {
-        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+        if ($node !== null) {
+            if ($this->search_not_empty_subpattern_node($node)) {
+                return true;
+            }
+            return $this->search_empty_subpattern_node($node);
+        }
+        return false;
+    }
+
+    private function search_empty_subpattern_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
             if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
-                if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
+                    && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY
+                ) {
                     $this->problem_ids[] = $node->id;
                     $this->problem_type = 3;
+                    $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_3', 'qtype_preg'));
+                    $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_3', 'qtype_preg'));
                     $this->indfirst = $node->position->indfirst;
                     $this->indlast = $node->position->indlast;
                     return true;
                 } else {
                     if ($this->check_other_subpattern_node($node->operands[0])) {
                         $this->problem_ids[] = $node->id;
-                        $this->problem_type = 2;
+                        $this->problem_type = 3;
+                        $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_3', 'qtype_preg'));
+                        $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_3', 'qtype_preg'));
                         $this->indfirst = $node->position->indfirst;
                         $this->indlast = $node->position->indlast;
                         return true;
@@ -471,7 +488,72 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
         if ($this->is_operator($node)) {
             foreach ($node->operands as $operand) {
-                if ($this->search_subpattern_node($operand)) {
+                if ($this->search_empty_subpattern_node($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function search_not_empty_subpattern_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+            if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
+                $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
+                if ($parent !== null) {
+                    $group_operand = $node->operands[0];
+                    if (/*$parent->type != qtype_preg_node::TYPE_NODE_CONCAT
+                    &&*/
+                        $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                        && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
+                        && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                    ) {
+
+                        $this->problem_ids[] = $node->id;
+                        $this->problem_type = 3;
+                        $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_3_1', 'qtype_preg'));
+                        $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_3_1', 'qtype_preg'));
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    } else if (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                            || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                    ) {
+                        $this->problem_ids[] = $node->id;
+                        $this->problem_type = 3;
+                        $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_3_1', 'qtype_preg'));
+                        $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_3_1', 'qtype_preg'));
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    }
+                } else {
+                    if ($node->position != NULL) {
+                        $this->problem_ids[] = $node->id;
+                        $this->problem_type = 3;
+                        $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_3_1', 'qtype_preg'));
+                        $this->solve_message = htmlspecialchars(get_string('simplification_equivalences_full_3_1', 'qtype_preg'));
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    }
+                }
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_not_empty_subpattern_node($operand)) {
                     return true;
                 }
             }
