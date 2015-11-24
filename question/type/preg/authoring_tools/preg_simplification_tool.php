@@ -859,7 +859,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
         $problem_exist = true;
         while($problem_exist) {
-            if ($this->search_grouping_node($tree_root)) {
+            if ($this->search_empty_grouping_node($tree_root)) {
                 $this->delete_empty_groping_node($tree_root, $tree_root, $this->problem_ids[0]);
             } else {
                 $problem_exist = false;
@@ -911,41 +911,109 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function delete_not_empty_grouping_node($tree_root, $node) {
+    private function delete_not_empty_grouping_node(&$tree_root, $node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
             && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
             $parent = $this->get_parent_node($tree_root, $node->id);
+            $group_operand = $node->operands[0];
             if ($parent !== null) {
-                if ($parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                    && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
-                    $group_operand = $node->operands[0];
+                if (/*$parent->type != qtype_preg_node::TYPE_NODE_CONCAT
+                    &&*/ $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                    && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
+                    && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY
+                    && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                    && $group_operand->id != -1) {
 
-                    if ($group_operand->type != qtype_preg_node::TYPE_LEAF_META
-                        && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
-                        $group_operand->position->indfirst = $node->position->indfirst;
-                        $group_operand->position->indlast = $node->position->indlast;
+                    $group_operand->position->indfirst = $node->position->indfirst;
+                    $group_operand->position->indlast = $node->position->indlast;
 
-                        $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+                    $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
 
-                        foreach ($parent->operands as $i => $operand) {
-                            if ($operand->id == $node->id) {
-                                if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
-                                    && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
-                                    //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
-                                    //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
+                    foreach ($parent->operands as $i => $operand) {
+                        if ($operand->id == $node->id) {
+                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                                //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
+                                //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
 
-                                    $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                                                                    $group_operand->operands,
-                                                                    array_slice($parent->operands, $i + 1));
-                                } else {
-                                    $parent->operands[$i] = $group_operand;
-                                }
-                                break;
+                                $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                    $group_operand->operands,
+                                    array_slice($parent->operands, $i + 1));
+                            } else {
+                                $parent->operands[$i] = $group_operand;
                             }
+                            break;
+                        }
+                    }
+                } else if (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                            || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                           && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
+                           && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                           && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                           && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+
+                    $group_operand->position->indfirst = $node->position->indfirst;
+                    $group_operand->position->indlast = $node->position->indlast;
+
+                    $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+
+                    foreach ($parent->operands as $i => $operand) {
+                        if ($operand->id == $node->id) {
+                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                                //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
+                                //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
+
+                                $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                    $group_operand->operands,
+                                    array_slice($parent->operands, $i + 1));
+                            } else {
+                                $parent->operands[$i] = $group_operand;
+                            }
+                            break;
                         }
                     }
                 }
+            } else {
+                /*$group_operand->position->indfirst = $node->position->indfirst;
+                $group_operand->position->indlast = $node->position->indlast;*/
+                $tree_root = $group_operand;
             }
+
+            /*if ($parent !== null) {
+                $group_operand = $node->operands[0];
+                if ($parent->type != qtype_preg_node::TYPE_NODE_CONCAT
+                    && $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                    && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
+                    && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+
+                    $group_operand->position->indfirst = $node->position->indfirst;
+                    $group_operand->position->indlast = $node->position->indlast;
+
+                    $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+
+                    foreach ($parent->operands as $i => $operand) {
+                        if ($operand->id == $node->id) {
+                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                                //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
+                                //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
+
+                                $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                                                $group_operand->operands,
+                                                                array_slice($parent->operands, $i + 1));
+                            } else {
+                                $parent->operands[$i] = $group_operand;
+                            }
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $tree_root = $node->operands[0];
+            }*/
         }
         if ($this->is_operator($node)) {
             foreach ($node->operands as $operand) {
