@@ -1386,12 +1386,22 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
             if (($node->is_single_character() && $node->userinscription[0]->data === ' ')
                 || ($this->check_many_charset_node($node) && $node->userinscription[1]->data === ' ')
-                && !$node->negative) {
+                /*&& !$node->negative*/) {
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 101;
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
                 return true;
+            } else {
+                foreach($node->userinscription as $ui) {
+                    if ($ui->data === ' ') {
+                        $this->problem_ids[] = $node->id;
+                        $this->problem_type = 101;
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    }
+                }
             }
         }
         if ($this->is_operator($node)) {
@@ -1783,13 +1793,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $tree_root->userinscription = array($tmp);
                     $tree_root->userinscription[0]->data = new qtype_poasquestion\string('*');
 
-                    if ($tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                    /*if ($tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
                         || $tree_root->operands[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
                         $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
                         $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
                         $se->operands[] = $tree_root->operands[0];
                         $tree_root->operands[0] = $se;
-                    }
+                    }*/
                     return true;
                 } else if ($tree_root->leftborder === 1 && $tree_root->userinscription[0]->data !== '+') {
                     $tmp = $tree_root->userinscription[0];
@@ -1835,7 +1845,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function change_space_to_charset_s($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
-            $node->userinscription[0]->data = '\s';
+            if ($node->is_single_character()) {
+                if (count($node->userinscription) == 1) {
+                    $node->userinscription[0]->data = '\s';
+                } else {
+                    $node->userinscription[1]->data = '\s';
+                }
+            } else {
+                foreach ($node->userinscription as $i => $ui) {
+                    if ($ui->data === ' ') {
+                        $ui->data = '\s';
+                    }
+                }
+            }
             return true;
         }
 
