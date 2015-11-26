@@ -980,40 +980,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $group_operand->position->indlast = $node->position->indlast;*/
                 $tree_root = $group_operand;
             }
-
-            /*if ($parent !== null) {
-                $group_operand = $node->operands[0];
-                if ($parent->type != qtype_preg_node::TYPE_NODE_CONCAT
-                    && $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                    && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
-                    && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
-                    && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
-
-                    $group_operand->position->indfirst = $node->position->indfirst;
-                    $group_operand->position->indlast = $node->position->indlast;
-
-                    $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
-
-                    foreach ($parent->operands as $i => $operand) {
-                        if ($operand->id == $node->id) {
-                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
-                                && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
-                                //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
-                                //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
-
-                                $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                                                                $group_operand->operands,
-                                                                array_slice($parent->operands, $i + 1));
-                            } else {
-                                $parent->operands[$i] = $group_operand;
-                            }
-                            break;
-                        }
-                    }
-                }
-            } else {
-                $tree_root = $node->operands[0];
-            }*/
         }
         if ($this->is_operator($node)) {
             foreach ($node->operands as $operand) {
@@ -1277,6 +1243,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     public function single_alternative_node() {
         $equivalences = array();
 
+        $this->indfirst = -2;
+        $this->indlast = -2;
         if ($this->search_single_alternative_node($this->get_dst_root())) {
             $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_6', 'qtype_preg'));
             $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_6', 'qtype_preg'));
@@ -1329,9 +1297,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $this->indfirst = $operand->position->indfirst;
                 }
                 $this->indlast = $operand->position->indlast;
-            } /*else {
-                return $repeats_count > 1;
-            }*/
+            }
         }
         return $repeats_count > 1;
     }
