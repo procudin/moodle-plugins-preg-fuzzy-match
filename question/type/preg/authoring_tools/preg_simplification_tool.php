@@ -478,7 +478,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $this->indfirst = $node->position->indfirst;
                     $this->indlast = $node->position->indlast;
                     return true;
-                } else {
+                } /*else {
                     if ($this->check_other_subpattern_node($node->operands[0])) {
                         $this->problem_ids[] = $node->id;
                         $this->problem_type = 3;
@@ -488,7 +488,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         $this->indlast = $node->position->indlast;
                         return true;
                     }
-                }
+                }*/
             }
         }
         if ($this->is_operator($node)) {
@@ -512,15 +512,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
                 if ($parent !== null) {
                     $group_operand = $node->operands[0];
-                    if (/*$parent->type != qtype_preg_node::TYPE_NODE_CONCAT
-                    &&*/
-                        $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    if ($parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
                         && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
                         && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
                         && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY
                         && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
                     ) {
-
                         $this->problem_ids[] = $node->id;
                         $this->problem_type = 3;
                         $this->problem_message = htmlspecialchars(get_string('simplification_equivalences_short_3_1', 'qtype_preg'));
@@ -529,11 +526,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         $this->indlast = $node->position->indlast;
                         return true;
                     } else if (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                            || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
-                        && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
-                        && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
-                        && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                        && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                                || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                               && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
+                               && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                               && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                               && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
                     ) {
                         $this->problem_ids[] = $node->id;
                         $this->problem_type = 3;
@@ -1196,13 +1193,23 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     private function search_single_charset_node($node) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET && $node->subtype == NULL) {
-            if (($node->is_single_character() || $this->check_many_charset_node($node))
-                && !$node->negative && count($node->userinscription) > 1) {
-                $this->problem_ids[] = $node->id;
-                $this->problem_type = 5;
-                $this->indfirst = $node->position->indfirst;
-                $this->indlast = $node->position->indlast;
-                return true;
+            if (!$node->negative && count($node->userinscription) > 1) {
+                if ($node->is_single_character()) {
+                    $symbol = $node->userinscription[1]->data;
+                    if (!$this->check_escaped_symbols($symbol)) {
+                        $this->problem_ids[] = $node->id;
+                        $this->problem_type = 5;
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    }
+                } else if ($this->check_many_charset_node($node)) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 5;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+                }
             }
         }
         if ($this->is_operator($node)) {
@@ -1223,8 +1230,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      * Check charset node with two and more same characters
      */
     private function check_many_charset_node($node) {
-        if (count($node->userinscription) > 1) {
+        if (count($node->userinscription) > 3) {
             $symbol = $node->userinscription[1]->data;
+            if ($this->check_escaped_symbols($symbol)) {
+                return false;
+            }
             for ($i = 2; $i < count($node->userinscription) - 1; ++$i) {
                 if ($node->userinscription[$i]->data !== $symbol) {
                     return false;
@@ -1233,6 +1243,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             return true;
         }
         return false;
+    }
+
+    private function check_escaped_symbols($symbol) {
+        return $symbol === '\\z' || $symbol === '\\Z'
+               || $symbol === '\\a' || $symbol === '\\A'
+               || $symbol === '\\b' || $symbol === '\\B';
     }
 
 
