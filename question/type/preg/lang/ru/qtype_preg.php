@@ -778,6 +778,8 @@ $string['simplification_equivalences_short_12'] = 'Лишний квантифи
 $string['simplification_equivalences_full_12'] = 'Квантификатор "?" можно убрать, т.к. альтернатива может совпадать с пустотой';
 $string['simplification_equivalences_short_13'] = 'Лишняя пустота в альтернативе';
 $string['simplification_equivalences_full_13'] = 'Пустота в альтернативе является лишней, т.к. альтернатива и так всегда совпадает с пустотой';
+$string['simplification_equivalences_short_14'] = 'Бесполезный квантификатор';
+$string['simplification_equivalences_full_14'] = 'Квантификатор не влияет на работу регулярного выражения, его можно убрать';
 
 $string['simplification_tips_short_1'] = 'Расширить список проблельных символов';
 $string['simplification_tips_full_1'] = 'Возможно вы хотите разрешить любые пробельные символы (например табуляцию), для этого следует использовать "\s"';

@@ -91,6 +91,10 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         $this->abstract_testing('quant_node', 'get_test_quant_node_trivial');
     }
 
+    public function test_quant_node_1_to_1_trivial() {
+        $this->abstract_testing('quant_node_1_to_1', 'get_test_quant_node_1_to_1_trivial');
+    }
+
     public function test_single_alternative_node_trivial() {
         $this->abstract_testing('single_alternative_node', 'get_test_single_alternative_node_trivial');
     }
@@ -2358,6 +2362,19 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a{,1}', 'a{,1}'),
             array('a{0,1}+', 'a{0,1}+'),
             array('a{0,1}?', 'a{0,1}?'),
+        );
+    }
+
+    protected function get_test_quant_node_1_to_1_trivial() {
+        return array(
+            array('a{1,1}', 'a'),
+            array('a{1,1}|b', 'a|b'),
+            array('(?:a{1,1})', '(?:a)'),
+            array('(?:a){1,1}', '(?:a)'),
+            array('(a{1,1})', '(a)'),
+            array('(a){1,1}', '(a)'),
+
+            array('a{1}', 'a'),
         );
     }
 

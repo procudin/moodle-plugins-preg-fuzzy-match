@@ -778,6 +778,8 @@ $string['simplification_equivalences_short_12'] = 'Excess quantifier "?"';
 $string['simplification_equivalences_full_12'] = 'Quantifier "?" It can be removed as an alternative may be the same emptiness';
 $string['simplification_equivalences_short_13'] = 'Excess emptiness in the alternative';
 $string['simplification_equivalences_full_13'] = 'The emptiness in the alternative, is superfluous because alternative and always coincides with emptiness';
+$string['simplification_equivalences_short_14'] = 'The useless quantifier';
+$string['simplification_equivalences_full_14'] = 'Quantifier do not affect the operation of the regular expression, they can be removed ';
 
 $string['simplification_tips_short_1'] = 'Expand the list of whitespace';
 $string['simplification_tips_full_1'] = 'You may want to allow any whitespace (such as a tab), you have to use "\s"';

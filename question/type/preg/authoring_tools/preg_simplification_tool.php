@@ -229,6 +229,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
+            $result = $this->quant_node_1_to_1();
+            if ($result != array()) {
+                $equivalences[$i] = array();
+                $equivalences[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
+
             $result = $this->common_subexpressions();
             if ($result != array()) {
                 $equivalences[$i] = array();
@@ -1407,6 +1415,52 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
+    /**
+     * Check quantifier node from 1 to 1
+     */
+    public function quant_node_1_to_1() {
+        $equivalences = array();
+
+        if ($this->search_quant_node_1_to_1($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_14', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_14', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    /**
+     * Search quantifier node from 1 to 1
+     */
+    private function search_quant_node_1_to_1($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+            && $node->leftborder === 1 && $node->rightborder === 1) {
+            $this->problem_ids[] = $node->id;
+            $this->problem_type = 14;
+            $this->indfirst = $node->position->indfirst;
+            $this->indlast = $node->position->indlast;
+            return true;
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_quant_node_1_to_1($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+
+
     //--- tips ---
     /* The 1st rule */
     public function space_charset() {
@@ -1597,7 +1651,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 || ($this->check_many_charset_node($node) && $this->check_space_charsets($node->userinscription[1]->data))
                 && !$node->negative) {
 
-
                 $qu = $this->get_quant_for_space_charset($node);
                 if ($qu !== NULL) {
                     if ($qu->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
@@ -1739,6 +1792,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->change_quant_to_equivalent($node, $this->options->problem_ids[0]);
     }
 
+    // The 14th rule
+    protected function optimize_14($node) {
+        return $this->remove_quant($node, $this->options->problem_ids[0]);
+    }
+
     protected function optimize_101($node) {
         return $this->change_space_to_charset_s($node, $this->options->problem_ids[0]);
     }
@@ -1777,6 +1835,36 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     }
 
                     return false;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function remove_quant($node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
+
+            if ($parent !== null) {
+                foreach ($parent->operands as $i => $operand) {
+                    if ($operand->id == $node->id) {
+                        $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                            $node->operands,
+                            array_slice($parent->operands, $i + 1));
+                        return true;
+                    }
+                }
+            } else {
+                $this->dstroot = $node->operands[0];
+                return true;
+            }
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if($this->remove_quant($operand, $remove_node_id)) {
+                    return true;
                 }
             }
         }
@@ -2227,27 +2315,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function add_finit_quant_to_space_charset($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
-            /*$qu = new qtype_preg_node_infinite_quant(1, false, true, true);
-            $qu->set_user_info(null, array(new qtype_preg_userinscription('+')));
-            $qu->operands[] = $node;
-
-            $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
-            if ($parent != NULL) {
-                //if (count($parent->operands) > 1) {
-                foreach ($parent->operands as $i => $operand) {
-                    if ($operand->id === $node->id) {
-                        $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                            array($qu),
-                            array_slice($parent->operands, $i + 1));
-                    }
-                }
-                /*} else {
-                    $parent->operands = array($qu);
-                }*
-            } else {
-                $this->dstroot = $qu;
-            }*/
-
             $old_qu = $this->get_quant_for_space_charset($node);
             if ($old_qu != NULL) {
                 $parent = $this->get_parent_node($this->get_dst_root(), $old_qu->id);
