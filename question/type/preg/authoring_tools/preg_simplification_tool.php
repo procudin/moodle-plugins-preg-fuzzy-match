@@ -1246,9 +1246,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     private function check_escaped_symbols($symbol) {
-        return $symbol === '\\z' || $symbol === '\\Z'
-               || $symbol === '\\a' || $symbol === '\\A'
-               || $symbol === '\\b' || $symbol === '\\B';
+        return $symbol === '\\a'
+               ||$symbol === '\\b' || $symbol === '\\e'
+               || $symbol === '\\f' || $symbol === '\\n'
+               || $symbol === '\\r' || $symbol === '\\t';
+    }
+
+    private function non_escaped_symbols($symbol) {
+        if ($symbol === '\\z' || $symbol === '\\Z'
+            /*|| $symbol === '\\a'*/ || $symbol === '\\A'
+            /*|| $symbol === '\\b'*/ || $symbol === '\\B') {
+            return $symbol[1];
+        }
+        return $symbol;
     }
 
 
@@ -1773,6 +1783,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if (count($tree_root->userinscription) > 1) {
                 $tmp = $tree_root->userinscription[1];
                 $tmp->data = $this->escape_character_for_single_charset($tmp->data);
+                $tmp->data = $this->non_escaped_symbols($tmp->data);
                 $tree_root->userinscription = array($tmp);
                 $tree_root->flags[0][0]->data = new qtype_poasquestion\string($tmp->data);
                 $tree_root->subtype = "enumerable_characters";
