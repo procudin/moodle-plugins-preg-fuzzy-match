@@ -135,6 +135,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
+            $result = $this->space_charset_without_quant();
+            if ($result != array()) {
+                $tips[$i] = array();
+                $tips[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
+
             if (!$this->is_subpattern_node_searched) {
                 $result = $this->subpattern_without_backref();
                 if ($result != array()) {
@@ -1446,6 +1454,73 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
+    /* The 2nd rule */
+    public function space_charset_without_quant() {
+        $equivalences = array();
+
+        if ($this->search_space_charset_without_quant($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_tips_short_2', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_tips_full_2', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_space_charset_without_quant($node) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
+            if ($this->check_space_charsets($node->userinscription[0]->data)
+                || (count($node->userinscription) === 3 && $this->check_space_charsets($node->userinscription[1]->data))
+                || ($this->check_many_charset_node($node) && $this->check_space_charsets($node->userinscription[1]->data))
+                && !$node->negative) {
+
+                if (!$this->check_other_quant_for_space_charset($node)) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 102;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+                }
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_space_charset_without_quant($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function check_space_charsets($charset_data) {
+        return $charset_data === ' ' || $charset_data === '\s' || $charset_data === '[:space:]';
+    }
+
+    private function check_other_quant_for_space_charset($node) {
+        $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
+        if ($parent != NULL) {
+            if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                return true;
+            } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+                       && ($parent->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR
+                           || $parent->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING)) {
+                return $this->check_other_quant_for_space_charset($parent);
+            }
+        }
+        return false;
+    }
+
+
+
     /* The 3rd rule */
     public function subpattern_without_backref() {
         $equivalences = array();
@@ -1593,6 +1668,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->change_space_to_charset_s($node, $this->options->problem_ids[0]);
     }
 
+    protected function optimize_102($node) {
+        return $this->add_quant_to_space_charset($node, $this->options->problem_ids[0]);
+    }
+
     protected function optimize_103($node) {
         return $this->change_subpattern_to_group($node, $this->options->problem_ids[0]);
     }
@@ -1661,7 +1740,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                                     $parent->operands[$i] = $group_operand;
                                 }
                                 return true;
-                                break;
+//                                break;
                             }
                         }
                     //}
@@ -2028,5 +2107,42 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             }
         }
+    }
+
+    private function add_quant_to_space_charset($node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            $qu = new qtype_preg_node_infinite_quant(1, false, true, true);
+            $qu->set_user_info(null, array(new qtype_preg_userinscription('+')));
+            $qu->operands[] = $node;
+
+            $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
+            if ($parent != NULL) {
+                //if (count($parent->operands) > 1) {
+                    foreach ($parent->operands as $i => $operand) {
+                        if ($operand->id === $node->id) {
+                            $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                array($qu),
+                                array_slice($parent->operands, $i + 1));
+                        }
+                    }
+                /*} else {
+                    $parent->operands = array($qu);
+                }*/
+            } else {
+                $this->dstroot = $qu;
+            }
+
+            return true;
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $i => $operand) {
+                if ($this->add_quant_to_space_charset($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
