@@ -124,4 +124,14 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
 
         return $feedback . $output;
     }
+
+    /**
+     * Generate two column table for teststring hint with displaying both student and teacher match results
+     */
+    public function generate_teststring_hint_result_table($studentresults, $teacherresult) {
+        $res = '<table cellpadding="5"><tr><td>' . get_string('teststringshintexplanationformode_3_student', 'qtype_writeregex') .
+            '</td><td>' .  get_string('teststringshintexplanationformode_3_correct', 'qtype_writeregex') . '</td></tr>' .
+            '<tr><td>' . $studentresults . '</td><td>' . $teacherresult . '</td></tr></table>';
+        return $res;
+    }
 }
