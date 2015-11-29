@@ -462,17 +462,18 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
+        $hinttitlestring = get_string('descriptionhintexplanationformode_' . $this->mode, 'qtype_writeregex');
 
         switch($this->mode){
             case 1:
                 $description = new qtype_preg_description_tool($response['answer'], $regexoptions);
                 $html = $description->generate_html();
-                return $html;
+                return $hinttitlestring . $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $description = new qtype_preg_description_tool($answer['answer']->answer, $regexoptions);
                 $html = $description->generate_html();
-                return $html;
+                return $hinttitlestring . $html;
             case 3:
                 $json2 = array();
                 $description = new qtype_preg_description_tool($response['answer'], $regexoptions);
