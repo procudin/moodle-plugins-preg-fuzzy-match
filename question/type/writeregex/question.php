@@ -274,26 +274,32 @@ class qtype_writeregex_question extends question_graded_automatically
                            "regex" => new compare_regex_analyzer($this),
                            "automata" => new compare_regex_automata_analyzer($this));
 
-        $bestfitanswer = null;
+		// Finding initial answer with fraction, that is bigger then hint grade border.
         $bestfitness = 0.0;
+        reset($this->answers);
+        $bestfitanswer = current($this->answers);
+        foreach ($this->answers as $answer) {
+            if ($answer->fraction >= $this->hintgradeborder) {
+                $bestfitanswer = $answer;
+                break;// Any one that fits border helps.
+            }
+        }
 
         foreach ($this->answers as $answer) {
-            if ($answer->feedbackformat == 1) {
-                $fitnesses = array();
-                foreach ($analyzers as $key => $analyzer) {
-                    $fitnesses[] = $analyzer->get_fitness($answer->answer, $response['answer']);
-                }
+            $fitnesses = array();
+            foreach ($analyzers as $key => $analyzer) {
+                $fitnesses[] = $analyzer->get_fitness($answer->answer, $response['answer']);
+            }
 
-                $teststringfiness = $fitnesses[0] * $this->compareregexpteststrings / 100;
-                $compregexfitness = $fitnesses[1] * $this->compareregexpercentage / 100;
-                $compregexafitness = $fitnesses[2] * $this->compareautomatapercentage / 100;
+            $teststringfiness = $fitnesses[0] * $this->compareregexpteststrings / 100;
+            $compregexfitness = $fitnesses[1] * $this->compareregexpercentage / 100;
+            $compregexafitness = $fitnesses[2] * $this->compareautomatapercentage / 100;
 
-                $fraction = $teststringfiness + $compregexfitness + $compregexafitness;
+            $fraction = $teststringfiness + $compregexfitness + $compregexafitness;
 
-                if ( $fraction > $bestfitness and $fraction > $this->hintgradeborder ) {
-                    $bestfitness = $teststringfiness + $compregexfitness + $compregexafitness;
-                    $bestfitanswer = $answer;
-                }
+            if ( $fraction > $bestfitness and $fraction > $this->hintgradeborder ) {
+                $bestfitness = $teststringfiness + $compregexfitness + $compregexafitness;
+                $bestfitanswer = $answer;
             }
         }
 
