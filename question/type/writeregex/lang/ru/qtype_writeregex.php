@@ -133,6 +133,9 @@ $string['descriptionhinttype_help'] = "<p>Значение отображени�
 $string['descriptionhintpenalty_title'] = 'Объяснение выражения: штраф';
 $string['descriptionhintpenalty'] = 'Объяснение выражения: штраф';
 $string['descriptionhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде объяснения выражения.</p>";
+$string['descriptionhintexplanationformode_1'] = "<h5>Описание ответа студента:</h5>";
+$string['descriptionhintexplanationformode_2'] = "<h5>Описание ответа преподавателя:</h5>";
+$string['descriptionhintexplanationformode_3'] = "<h5>Описание ответов студента и преподавателя:</h5>";
 
 $string['teststringshinttype_title'] = 'Тестовые строки';
 $string['teststringshinttype'] = 'Тестовые строки';
