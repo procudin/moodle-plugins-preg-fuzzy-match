@@ -643,7 +643,16 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
                 $json = $tool->generate_json();
                 return $hinttitlestring . $json['regex_test'];
             case 3:
-                return 'Hint stack analyzer: the student\'s answer and the correct answer (both)';
+                $studentsregex = $response['answer'];
+                $tool = new qtype_preg_regex_testing_tool($studentsregex, $strings, $usecase, $exactmatch, $engine,
+                    $notation, new qtype_preg_position());
+                $studentsjson = $tool->generate_json();
+                $answer = $this->question->get_best_fit_answer($response);
+                $correctregex = $answer['answer']->answer;
+                $tool = new qtype_preg_regex_testing_tool($correctregex, $strings, $usecase, $exactmatch, $engine,
+                    $notation, new qtype_preg_position());
+                $correctjson = $tool->generate_json();
+                return $hinttitlestring . $renderer->generate_teststring_hint_result_table($studentsjson['regex_test'], $correctjson['regex_test']);
             default:
                 return '';
         }
