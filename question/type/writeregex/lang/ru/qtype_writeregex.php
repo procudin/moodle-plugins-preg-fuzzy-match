@@ -125,6 +125,9 @@ $string['explgraphhinttype_help'] = "<p>Значение отображения 
 $string['explgraphhintpenalty_title'] = 'Граф объяснения: штраф';
 $string['explgraphhintpenalty'] = 'Граф объяснения: штраф';
 $string['explgraphhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде графа объяснения.</p>";
+$string['explgraphhintexplanationformode_1'] = "<h5>Граф объяснения ответа студента:</h5>";
+$string['explgraphhintexplanationformode_2'] = "<h5>Граф объяснения ответа преподавателя:</h5>";
+$string['explgraphhintexplanationformode_3'] = "<h5>Граф объяснения ответов студента и преподавателя:</h5>";
 
 $string['descriptionhinttype_title'] = 'Объяснение выражения';
 $string['descriptionhinttype'] = 'Объяснение выражения';
