@@ -117,6 +117,9 @@ $string['syntaxtreehinttype_help'] = "<p>Значение отображения
 $string['syntaxtreehintpenalty_title'] = 'Синтаксическое дерево: штраф';
 $string['syntaxtreehintpenalty'] = 'Синтаксическое дерево: штраф';
 $string['syntaxtreehintpenalty_help'] = "<p>Значение штрафа за использование подсказки в виде синтаксического дерева</p>";
+$string['syntaxtreehintexplanationformode_1'] = "<h5>Синтаксическое дерево ответа студента:</h5>";
+$string['syntaxtreehintexplanationformode_2'] = "<h5>Синтаксическое дерево ответа преподавателя:</h5>";
+$string['syntaxtreehintexplanationformode_3'] = "<h5>Синтаксическое дерево ответов студента и преподавателя:</h5>";
 
 $string['explgraphhinttype_title'] = 'Граф объяснения';
 $string['explgraphhinttype'] = 'Граф объяснения';

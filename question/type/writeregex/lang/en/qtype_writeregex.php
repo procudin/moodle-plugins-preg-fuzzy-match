@@ -118,6 +118,9 @@ $string['syntaxtreehinttype_help'] = "<p>Value display hints as syntax tree.</p>
 $string['syntaxtreehintpenalty_title'] = 'Syntax tree: penalty';
 $string['syntaxtreehintpenalty'] = 'Syntax tree: prnalty';
 $string['syntaxtreehintpenalty_help'] = "<p>Meaning usage penalty hints as syntax tree</p>";
+$string['syntaxtreehintexplanationformode_1'] = "<h5>Syntax tree for student's answer:</h5>";
+$string['syntaxtreehintexplanationformode_2'] = "<h5>Syntax tree for teacher's answer:</h5>";
+$string['syntaxtreehintexplanationformode_3'] = "<h5>Syntax tree for both student's and teacher's answers:</h5>";
 
 $string['explgraphhinttype_title'] = 'Count explanation';
 $string['explgraphhinttype'] = 'Count explanation';
