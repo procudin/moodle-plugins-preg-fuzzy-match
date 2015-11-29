@@ -134,6 +134,11 @@ $string['descriptionhintpenalty_help'] = "<p>Величина штрафа за 
 $string['teststringshinttype_title'] = 'Тестовые строки';
 $string['teststringshinttype'] = 'Тестовые строки';
 $string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
+$string['teststringshintexplanationformode_1'] = "<p>Результаты совпадения тестовых строк с Вашим ответом:</p>";
+$string['teststringshintexplanationformode_2'] = "<p>Результаты совпадения тестовых строк с правильным ответом:</p>";
+$string['teststringshintexplanationformode_3'] = "<p>Результаты совпадения тестовых строк с Вашим и правильным ответами:</p>";
+$string['teststringshintexplanationformode_3_student'] = "<p>Ответ студента</p>";
+$string['teststringshintexplanationformode_3_correct'] = "<p>Правильный ответ</p>";
 
 $string['teststringshintpenalty_title'] = 'Тестовые строки: штраф';
 $string['teststringshintpenalty'] = 'Тестовые строки: штраф';
