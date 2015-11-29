@@ -156,17 +156,18 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
+        $hinttitlestring = get_string('syntaxtreehintexplanationformode_' . $this->mode, 'qtype_writeregex');
 
         switch($this->mode){
             case 1:
                 $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
                 $html = $tree->generate_html();
-                return $html;
+                return $hinttitlestring . $html;
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree = new qtype_preg_syntax_tree_tool($answer['answer']->answer, $regexoptions);
                 $html = $tree->generate_html();
-                return $html;
+                return $hinttitlestring . $html;
             case 3:
                 $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
                 $tree->generate_json($json);
