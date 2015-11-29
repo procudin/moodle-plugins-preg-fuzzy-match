@@ -126,6 +126,9 @@ $string['explgraphhinttype_help'] = "<p>Value to display a tooltip as a graph ex
 $string['explgraphhintpenalty_title'] = 'Count explanation: fine';
 $string['explgraphhintpenalty'] = 'Count explanation: fine';
 $string['explgraphhintpenalty_help'] = "<p>The amount of penalty for the use of tips as a graph explanation.</p>";
+$string['explgraphhintexplanationformode_1'] = "<h5>Explanation graph for student's answer:</h5>";
+$string['explgraphhintexplanationformode_2'] = "<h5>Explanation graph for teacher's answer:</h5>";
+$string['explgraphhintexplanationformode_3'] = "<h5>Explanation graph for both student's and teacher's answers:</h5>";
 
 $string['descriptionhinttype_title'] = 'Explanation of the expression';
 $string['descriptionhinttype'] = 'Explanation of the expression';
