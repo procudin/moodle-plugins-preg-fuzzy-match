@@ -107,6 +107,9 @@ $string['compareinvalidvalue'] = 'Значение должно быть в ди
 $string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
 $string['invalidcomparets'] = 'Значение проверки по тестовым строкам выставлена в 0, удалите тестовые строки';
 
+$string['hintdescriptionstudentsanswer'] = "Ответ студента";
+$string['hintdescriptionteachersanswer'] = "Ответ преподавателя";
+
 $string['syntaxtreehinttype_title'] = 'Синтаксическое дерево';
 $string['syntaxtreehinttype'] = 'Синтаксическое дерево';
 $string['syntaxtreehinttype_help'] = "<p>Значение отображения подсказки в виде синтаксического дерева</p>";
@@ -134,11 +137,9 @@ $string['descriptionhintpenalty_help'] = "<p>Величина штрафа за 
 $string['teststringshinttype_title'] = 'Тестовые строки';
 $string['teststringshinttype'] = 'Тестовые строки';
 $string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
-$string['teststringshintexplanationformode_1'] = "<p>Результаты совпадения тестовых строк с Вашим ответом:</p>";
-$string['teststringshintexplanationformode_2'] = "<p>Результаты совпадения тестовых строк с правильным ответом:</p>";
-$string['teststringshintexplanationformode_3'] = "<p>Результаты совпадения тестовых строк с Вашим и правильным ответами:</p>";
-$string['teststringshintexplanationformode_3_student'] = "<p>Ответ студента</p>";
-$string['teststringshintexplanationformode_3_correct'] = "<p>Правильный ответ</p>";
+$string['teststringshintexplanationformode_1'] = "<h5>Результаты совпадения тестовых строк с ответом студента:</h5>";
+$string['teststringshintexplanationformode_2'] = "<h5>Результаты совпадения тестовых строк с ответом преподавателя:</h5>";
+$string['teststringshintexplanationformode_3'] = "<h5>Результаты совпадения тестовых строк с ответами студента и преподавателя:</h5>";
 
 $string['teststringshintpenalty_title'] = 'Тестовые строки: штраф';
 $string['teststringshintpenalty'] = 'Тестовые строки: штраф';

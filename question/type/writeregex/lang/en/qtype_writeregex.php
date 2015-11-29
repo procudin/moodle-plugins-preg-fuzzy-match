@@ -108,6 +108,9 @@ $string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
 $string['invalidcomparets'] = 'Check value for the test string is set to 0, remove the test strings';
 
+$string['hintdescriptionstudentsanswer'] = "Student's answer";
+$string['hintdescriptionteachersanswer'] = "Teacher's answer";
+
 $string['syntaxtreehinttype_title'] = 'Syntax tree';
 $string['syntaxtreehinttype'] = 'Syntax tree';
 $string['syntaxtreehinttype_help'] = "<p>Value display hints as syntax tree.</p>";
@@ -135,11 +138,9 @@ $string['descriptionhintpenalty_help'] = "<p>The amount of penalty for using hin
 $string['teststringshinttype_title'] = 'Test string';
 $string['teststringshinttype'] = 'Test string';
 $string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
-$string['teststringshintexplanationformode_1'] = "<p>Teststrings match results for student's answer:</p>";
-$string['teststringshintexplanationformode_2'] = "<p>Teststrings match results for correct answer:</p>";
-$string['teststringshintexplanationformode_3'] = "<p>Teststrings match results for both student's and correct answers:</p>";
-$string['teststringshintexplanationformode_3_student'] = "<p>Student's answer</p>";
-$string['teststringshintexplanationformode_3_correct'] = "<p>Correct answer</p>";
+$string['teststringshintexplanationformode_1'] = "<h5>Teststrings match results for student's answer:</h5>";
+$string['teststringshintexplanationformode_2'] = "<h5>Teststrings match results for teacher's answer:</h5>";
+$string['teststringshintexplanationformode_3'] = "<h5>Teststrings match results for both student's and teacher's answers:</h5>";
 
 $string['teststringshintpenalty_title'] = 'Test string: fine';
 $string['teststringshintpenalty'] = 'Test string: fine';
