@@ -134,6 +134,9 @@ $string['descriptionhinttype_help'] = "<p>Display value in the form of tips expl
 $string['descriptionhintpenalty_title'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty_help'] = "<p>The amount of penalty for using hints as explanations of expression.</p>";
+$string['descriptionhintexplanationformode_1'] = "<h5>Description for student's answer:</h5>";
+$string['descriptionhintexplanationformode_2'] = "<h5>Description for teacher's answer:</h5>";
+$string['descriptionhintexplanationformode_3'] = "<h5>Description for both student's and teacher's answers:</h5>";
 
 $string['teststringshinttype_title'] = 'Test string';
 $string['teststringshinttype'] = 'Test string';
