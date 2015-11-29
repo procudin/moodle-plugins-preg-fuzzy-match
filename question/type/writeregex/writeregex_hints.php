@@ -457,7 +457,6 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
      */
     public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
 
-        $json = array();
         $regexoptions = new qtype_preg_authoring_tools_options();
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
@@ -475,13 +474,12 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
                 $html = $description->generate_html();
                 return $hinttitlestring . $html;
             case 3:
-                $json2 = array();
                 $description = new qtype_preg_description_tool($response['answer'], $regexoptions);
-                $description->generate_json($json);
                 $answer = $this->question->get_best_fit_answer($response);
                 $description2 = new qtype_preg_description_tool($answer['answer']->answer, $regexoptions);
-                $description2->generate_json($json2);
-                return 'student: ' . $json['description'] . "\nteacher: " . $json2['description'];
+                return $hinttitlestring .
+                    get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ' . $description->generate_html() . "<br>" .
+                    get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ' . $description2->generate_html();
             default:
                 return '';
         }
