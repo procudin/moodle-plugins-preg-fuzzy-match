@@ -626,6 +626,7 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
         $exactmatch = false;
         $engine = $this->question->engine;
         $notation = $this->question->notation;
+        $hinttitlestring = get_string('teststringshintexplanationformode_' . $this->mode, 'qtype_writeregex');
 
         switch($this->mode){
             case 1:
@@ -633,14 +634,14 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
                 $tool = new qtype_preg_regex_testing_tool($regex, $strings, $usecase, $exactmatch, $engine,
                     $notation, new qtype_preg_position());
                 $json = $tool->generate_json();
-                return $json['regex_test'];
+                return $hinttitlestring . $json['regex_test'];
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $regex = $answer['answer']->answer;
                 $tool = new qtype_preg_regex_testing_tool($regex, $strings, $usecase, $exactmatch, $engine,
                     $notation, new qtype_preg_position());
                 $json = $tool->generate_json();
-                return $json['regex_test'];
+                return $hinttitlestring . $json['regex_test'];
             case 3:
                 return 'Hint stack analyzer: the student\'s answer and the correct answer (both)';
             default:
