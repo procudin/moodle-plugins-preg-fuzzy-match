@@ -151,7 +151,6 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
      */
     public function render_hint ($renderer, question_attempt $qa = null,
                                  question_display_options $options = null, $response = null) {
-        $json = array();
         $regexoptions = new qtype_preg_authoring_tools_options();
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
@@ -170,12 +169,11 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
                 return $hinttitlestring . $html;
             case 3:
                 $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
-                $tree->generate_json($json);
-                $json2 = array();
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree2 = new qtype_preg_syntax_tree_tool($answer['answer']->answer, $regexoptions);
-                $tree2->generate_json($json2);
-                return '<img src="' . $json['tree']['img'] . '" /><br /><img src="' . $json2['tree']['img'] . '" />';
+                return $hinttitlestring .
+                    get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ':<br>' . $tree->generate_html() . "<br>" .
+                    get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ':<br>' . $tree2->generate_html();
             default:
                 return '';
         }
