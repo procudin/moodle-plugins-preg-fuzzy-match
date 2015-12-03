@@ -94,7 +94,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
      * @return bool hint response based.
      */
     public function hint_response_based() {
-        return true;
+        return $this->mode != 2;
     }
 
     /**
@@ -248,7 +248,7 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
      * @return bool hint response based.
      */
     public function hint_response_based() {
-        return true;
+        return $this->mode != 2;
     }
 
     /**
@@ -402,7 +402,7 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
      * @return bool hint response based.
      */
     public function hint_response_based() {
-        return true;
+        return $this->mode != 2;
     }
 
     /**
@@ -554,7 +554,7 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
      * @return bool hint response based.
      */
     public function hint_response_based() {
-        return true;
+        return $this->mode != 2;
     }
 
     /**
