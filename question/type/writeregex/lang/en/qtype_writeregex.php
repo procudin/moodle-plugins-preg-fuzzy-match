@@ -108,8 +108,11 @@ $string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
 $string['invalidcomparets'] = 'Check value for the test string is set to 0, remove the test strings';
 
-$string['hintdescriptionstudentsanswer'] = "Student's answer";
-$string['hintdescriptionteachersanswer'] = "Teacher's answer";
+$string['hintdescriptionstudentsanswer'] = "Your answer";
+$string['hintdescriptionteachersanswer'] = "Correct answer";
+$string['hinttitleadditionformode_1'] = "(for your answer)";
+$string['hinttitleadditionformode_2'] = "(for correct answer)";
+$string['hinttitleadditionformode_3'] = "(for your and correct answers)";
 
 $string['syntaxtreehinttype_title'] = 'Syntax tree';
 $string['syntaxtreehinttype'] = 'Syntax tree';
@@ -118,9 +121,9 @@ $string['syntaxtreehinttype_help'] = "<p>Value display hints as syntax tree.</p>
 $string['syntaxtreehintpenalty_title'] = 'Syntax tree: penalty';
 $string['syntaxtreehintpenalty'] = 'Syntax tree: prnalty';
 $string['syntaxtreehintpenalty_help'] = "<p>Meaning usage penalty hints as syntax tree</p>";
-$string['syntaxtreehintexplanationformode_1'] = "<h5>Syntax tree for student's answer:</h5>";
-$string['syntaxtreehintexplanationformode_2'] = "<h5>Syntax tree for teacher's answer:</h5>";
-$string['syntaxtreehintexplanationformode_3'] = "<h5>Syntax tree for both student's and teacher's answers:</h5>";
+$string['syntaxtreehintexplanationformode_1'] = "<h5>Syntax tree for your answer:</h5>";
+$string['syntaxtreehintexplanationformode_2'] = "<h5>Syntax tree for correct answer:</h5>";
+$string['syntaxtreehintexplanationformode_3'] = "<h5>Syntax tree for both your and correct answers:</h5>";
 
 $string['explgraphhinttype_title'] = 'Count explanation';
 $string['explgraphhinttype'] = 'Count explanation';
@@ -129,9 +132,9 @@ $string['explgraphhinttype_help'] = "<p>Value to display a tooltip as a graph ex
 $string['explgraphhintpenalty_title'] = 'Count explanation: fine';
 $string['explgraphhintpenalty'] = 'Count explanation: fine';
 $string['explgraphhintpenalty_help'] = "<p>The amount of penalty for the use of tips as a graph explanation.</p>";
-$string['explgraphhintexplanationformode_1'] = "<h5>Explanation graph for student's answer:</h5>";
-$string['explgraphhintexplanationformode_2'] = "<h5>Explanation graph for teacher's answer:</h5>";
-$string['explgraphhintexplanationformode_3'] = "<h5>Explanation graph for both student's and teacher's answers:</h5>";
+$string['explgraphhintexplanationformode_1'] = "<h5>Explanation graph for your answer:</h5>";
+$string['explgraphhintexplanationformode_2'] = "<h5>Explanation graph for correct answer:</h5>";
+$string['explgraphhintexplanationformode_3'] = "<h5>Explanation graph for both your and correct answers:</h5>";
 
 $string['descriptionhinttype_title'] = 'Explanation of the expression';
 $string['descriptionhinttype'] = 'Explanation of the expression';
@@ -140,16 +143,16 @@ $string['descriptionhinttype_help'] = "<p>Display value in the form of tips expl
 $string['descriptionhintpenalty_title'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty_help'] = "<p>The amount of penalty for using hints as explanations of expression.</p>";
-$string['descriptionhintexplanationformode_1'] = "<h5>Description for student's answer:</h5>";
-$string['descriptionhintexplanationformode_2'] = "<h5>Description for teacher's answer:</h5>";
-$string['descriptionhintexplanationformode_3'] = "<h5>Description for both student's and teacher's answers:</h5>";
+$string['descriptionhintexplanationformode_1'] = "<h5>Description for your answer:</h5>";
+$string['descriptionhintexplanationformode_2'] = "<h5>Description for correct answer:</h5>";
+$string['descriptionhintexplanationformode_3'] = "<h5>Description for both your and correct answers:</h5>";
 
 $string['teststringshinttype_title'] = 'Test string';
 $string['teststringshinttype'] = 'Test string';
 $string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
-$string['teststringshintexplanationformode_1'] = "<h5>Teststrings match results for student's answer:</h5>";
-$string['teststringshintexplanationformode_2'] = "<h5>Teststrings match results for teacher's answer:</h5>";
-$string['teststringshintexplanationformode_3'] = "<h5>Teststrings match results for both student's and teacher's answers:</h5>";
+$string['teststringshintexplanationformode_1'] = "<h5>Teststrings match results for your answer:</h5>";
+$string['teststringshintexplanationformode_2'] = "<h5>Teststrings match results for correct answer:</h5>";
+$string['teststringshintexplanationformode_3'] = "<h5>Teststrings match results for both your and correct answers:</h5>";
 
 $string['teststringshintpenalty_title'] = 'Test string: fine';
 $string['teststringshintpenalty'] = 'Test string: fine';
