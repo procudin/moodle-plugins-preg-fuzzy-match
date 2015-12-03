@@ -86,7 +86,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
      * @return string hint description.
      */
     public function hint_description() {
-        return get_string('wre_st', 'qtype_writeregex');
+        return \qtype_poasquestion\string::strtolower(get_string('wre_st', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
     }
 
     /**
@@ -238,7 +238,7 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
      * @return string Hint description.
      */
     public function hint_description() {
-        return get_string('wre_eg', 'qtype_writeregex');
+        return \qtype_poasquestion\string::strtolower(get_string('wre_eg', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
     }
 
     /**
@@ -390,7 +390,7 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
      * @return string hint description.
      */
     public function hint_description() {
-        return get_string('wre_d', 'qtype_writeregex');
+        return \qtype_poasquestion\string::strtolower(get_string('wre_d', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
     }
 
     /**
@@ -542,7 +542,7 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
      * @return string hint description.
      */
     public function hint_description() {
-        return get_string('teststrings', 'qtype_writeregex');
+        return \qtype_poasquestion\string::strtolower(get_string('teststrings', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
     }
 
     /**
