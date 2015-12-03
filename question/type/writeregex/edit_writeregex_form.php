@@ -31,6 +31,8 @@ global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/edit_shortanswer_form.php');
 require_once($CFG->dirroot . '/question/type/preg/questiontype.php');
 require_once($CFG->dirroot . '/question/type/writeregex/questiontype.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_syntax_tree_tool.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_explaining_graph_tool.php');
 
 /**
  * Edited form for question type Write Regex.
@@ -321,6 +323,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $errors = $this->validate_regexp($data, $errors);
 
+        $errors = $this->validate_dot_using_hints($data, $errors);
+
         return $errors;
     }
 
@@ -423,6 +427,51 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $errors['compareregexpercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
         }
 
+        return $errors;
+    }
+
+    public function validate_dot_using_hints($data, $errors) {
+
+        $hinttools = array('syntaxtreehinttype' => 'qtype_preg_syntax_tree_tool',
+                            'explgraphhinttype' => 'qtype_preg_explaining_graph_tool');
+        foreach($hinttools as $hintname => $hinttool) {
+            if ($data[$hintname] != 0) {
+                $regexoptions = new qtype_preg_authoring_tools_options();
+                $regexoptions->engine = $data['engine'];
+                $regexoptions->usecase = $data['usecase'];
+                $regexoptions->notation = $data['notation'];
+
+                // Check possibility of using tool
+                try {
+                    $tree = new $hinttool('.', $regexoptions);
+                    $var = $tree->data_for_accepted_regex();
+                } catch (Exception $e) {
+                    $a = new stdClass;
+                    $a->name = core_text::strtolower(get_string($tree->name(), 'qtype_preg'));
+                    if (is_a($e, 'qtype_preg_pathtodot_empty')) {
+                        $errors[$hintname] = get_string('pathtodotempty', 'qtype_preg', $a);
+                    } else if (is_a($e, 'qtype_preg_pathtodot_incorrect')) {
+                        $errors[$hintname] = get_string('pathtodotincorrect', 'qtype_preg', $a);
+                    }
+                    continue;
+                }
+
+                // Check possibility of using tool for concrete answers
+                $answers = $data['answer'];
+                foreach ($answers as $key => $answer) {
+                    if (array_key_exists('answer['.$key.']', $errors))
+                        continue;
+                    $tree = new $hinttool($answer, $regexoptions);
+                    if (count($tree->get_errors()) > 0) {
+                        $a = new stdClass;
+                        $a->name = core_text::strtolower(get_string($tree->name(), 'qtype_preg'));
+                        $a->index = $key + 1;
+                        $errors[$hintname] = get_string('doterror', 'qtype_writeregex', $a);
+                        break;
+                    }
+                }
+            }
+        }
         return $errors;
     }
 
