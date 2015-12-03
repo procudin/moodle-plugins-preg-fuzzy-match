@@ -86,6 +86,30 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
+        // Add compare regex percentage.
+        $mform->addElement('text', 'compareregexpercentage',
+            get_string('wre_cre_percentage', 'qtype_writeregex'));
+        $mform->setType('compareregexpercentage', PARAM_FLOAT);
+        $mform->setDefault('compareregexpercentage', '0');
+        $mform->addHelpButton('compareregexpercentage', 'compareregexpercentage', 'qtype_writeregex');
+
+        // Add compare regexps automata percentage.
+        $mform->addElement('text', 'compareautomatapercentage',
+            get_string('compareautomatapercentage', 'qtype_writeregex'));
+        $mform->setType('compareautomatapercentage', PARAM_FLOAT);
+        $mform->setDefault('compareautomatapercentage', '0');
+        $mform->addHelpButton('compareautomatapercentage', 'compareautomatapercentage', 'qtype_writeregex');
+
+        // Add compare regexp by test strings.
+        $mform->addElement('text', 'compareregexpteststrings',
+            get_string('compareregexpteststrings', 'qtype_writeregex'));
+        $mform->setType('compareregexpteststrings', PARAM_FLOAT);
+        $mform->setDefault('compareregexpteststrings', '100');
+        $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
+
+        // Add hints
+        $mform->addElement('header', 'hintshdr', get_string('wre_hintsheader', 'qtype_writeregex'), '');
+        $mform->setExpanded('hintshdr', 1);
         // Add syntax tree options.
         $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
             $this->hintsoptions);
@@ -125,27 +149,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setType('teststringshintpenalty', PARAM_FLOAT);
         $mform->setDefault('teststringshintpenalty', '0.0000000');
         $mform->addHelpButton('teststringshintpenalty', 'teststringshintpenalty', 'qtype_writeregex');
-
-        // Add compare regex percentage.
-        $mform->addElement('text', 'compareregexpercentage',
-            get_string('wre_cre_percentage', 'qtype_writeregex'));
-        $mform->setType('compareregexpercentage', PARAM_FLOAT);
-        $mform->setDefault('compareregexpercentage', '0');
-        $mform->addHelpButton('compareregexpercentage', 'compareregexpercentage', 'qtype_writeregex');
-
-        // Add compare regexps automata percentage.
-        $mform->addElement('text', 'compareautomatapercentage',
-            get_string('compareautomatapercentage', 'qtype_writeregex'));
-        $mform->setType('compareautomatapercentage', PARAM_FLOAT);
-        $mform->setDefault('compareautomatapercentage', '0');
-        $mform->addHelpButton('compareautomatapercentage', 'compareautomatapercentage', 'qtype_writeregex');
-
-        // Add compare regexp by test strings.
-        $mform->addElement('text', 'compareregexpteststrings',
-            get_string('compareregexpteststrings', 'qtype_writeregex'));
-        $mform->setType('compareregexpteststrings', PARAM_FLOAT);
-        $mform->setDefault('compareregexpteststrings', '100');
-        $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
 
         // Add answers fields.
         $this->add_per_answer_fields($mform, 'wre_regexp_answers', question_bank::fraction_options(), 1);
