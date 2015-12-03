@@ -48,6 +48,8 @@ $string['wre_notation_simple'] = 'Простая';
 $string['wre_notation_extended'] = 'Расширенная';
 $string['wre_notation_moodle'] = 'Moodle Short Answer';
 
+$string['wre_hintsheader'] = 'Подсказки';
+
 $string['wre_st'] = 'Синтаксическое дерево';
 $string['wre_st_penalty'] = 'Штраф';
 $string['wre_st_none'] = 'Не показывать';
