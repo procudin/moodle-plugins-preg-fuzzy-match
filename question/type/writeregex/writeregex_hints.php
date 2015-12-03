@@ -160,20 +160,22 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
         switch($this->mode){
             case 1:
                 $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
-                $html = $tree->generate_html();
-                return $hinttitlestring . $html;
+                $json = $tree->generate_json();
+                return $hinttitlestring . $json['tree']['img'];
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree = new qtype_preg_syntax_tree_tool($answer['answer']->answer, $regexoptions);
-                $html = $tree->generate_html();
-                return $hinttitlestring . $html;
+                $json = $tree->generate_json();
+                return $hinttitlestring . $json['tree']['img'];
             case 3:
                 $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
+                $json = $tree->generate_json();
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree2 = new qtype_preg_syntax_tree_tool($answer['answer']->answer, $regexoptions);
+                $json2 = $tree2->generate_json();
                 return $hinttitlestring .
-                    get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ':<br>' . $tree->generate_html() . "<br>" .
-                    get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ':<br>' . $tree2->generate_html();
+                    get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ':<br>' . $json['tree']['img'] . "<br>" .
+                    get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ':<br>' . $json2['tree']['img'];
             default:
                 return '';
         }
@@ -312,20 +314,22 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
         switch($this->mode){
             case 1:
                 $tree = new qtype_preg_explaining_graph_tool($response['answer'], $regexoptions);
-                $html = $tree->generate_html();
-                return $hinttitlestring . $html;
+                $json = $tree->generate_json();
+                return $hinttitlestring . $json['graph']['img'];
             case 2:
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree = new qtype_preg_explaining_graph_tool($answer['answer']->answer, $regexoptions);
-                $html = $tree->generate_html();
-                return $hinttitlestring . $html;
+                $json = $tree->generate_json();
+                return $hinttitlestring . $json['graph']['img'];
             case 3:
                 $tree = new qtype_preg_explaining_graph_tool($response['answer'], $regexoptions);
+                $json = $tree->generate_json();
                 $answer = $this->question->get_best_fit_answer($response);
                 $tree2 = new qtype_preg_explaining_graph_tool($answer['answer']->answer, $regexoptions);
+                $json2 = $tree2->generate_json();
                 return $hinttitlestring .
-                    get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ':<br>' . $tree->generate_html() . "<br>" .
-                    get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ':<br>' . $tree2->generate_html();
+                    get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ':<br>' . $json['graph']['img'] . "<br>" .
+                    get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ':<br>' . $json2['graph']['img'];
             default:
                 return '';
         }
