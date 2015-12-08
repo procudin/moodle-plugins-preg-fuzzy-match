@@ -87,8 +87,24 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         $this->abstract_testing('single_charset_node', 'get_test_single_charset_trivial');
     }
 
+    public function test_alt_without_question_quant_trivial() {
+        $this->abstract_testing('alt_without_question_quant', 'get_test_alt_without_question_quant_trivial');
+    }
+
+    public function test_alt_with_question_quant_trivial() {
+        $this->abstract_testing('alt_with_question_quant', 'get_test_alt_with_question_quant_trivial');
+    }
+
     public function test_quant_node_trivial() {
         $this->abstract_testing('quant_node', 'get_test_quant_node_trivial');
+    }
+
+    public function test_question_quant_for_alternative_node_trivial() {
+        $this->abstract_testing('question_quant_for_alternative_node', 'get_test_question_quant_for_alternative_node_trivial');
+    }
+
+    public function test_nullable_alternative_node_trivial() {
+        $this->abstract_testing('nullable_alternative_node', 'get_test_nullable_alternative_node_trivial');
     }
 
     public function test_quant_node_1_to_1_trivial() {
@@ -113,6 +129,10 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     public function test_space_charset_with_finit_quant_trivial() {
         $this->abstract_testing('space_charset_with_finit_quant', 'get_test_space_charset_with_finit_quant_trivial');
+    }
+
+    public function test_consecutive_quant_nodes_trivial() {
+        $this->abstract_testing('consecutive_quant_nodes', 'get_test_consecutive_quant_nodes_trivial');
     }
 
     protected function get_test_common_subexpressions_trivial() {
@@ -1863,6 +1883,13 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('ab|[^a]b|a', 'ab|[^a]b|a', true),
             array('ab|a[^b]|a', 'ab|a[^b]|a', true),
             array('ab|[^ab]|a', 'ab|[^ab]|a', true),
+
+            array('a{2}ba{2}b', '(?:a{2}b){2}'),
+            array('ab{2}ab{2}', '(?:ab{2}){2}'),
+            array('ca{2}bca{2}b', '(?:ca{2}b){2}'),
+            array('a{2}bca{2}bc', '(?:a{2}bc){2}'),
+            array('cab{2}cab{2}', '(?:cab{2}){2}'),
+            array('ab{2}cab{2}c', '(?:ab{2}c){2}'),
         );
     }
 
@@ -2305,6 +2332,33 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         );
     }
 
+    protected function get_test_alt_without_question_quant_trivial() {
+        return array(
+            array('a|', '(?:a)?'),
+            array('a|b|', '(?:a|b)?'),
+
+            array('(?:a|b|)?', '(?:a|b|)?'),
+            array('(?:a|b|)+', '(?:(?:a|b)?)+'),
+            array('(?:a|b|)*', '(?:a|b|)*'),
+            array('(?:a|b|)?|c', '(?:a|b|)?|c'),
+            array('(?:a|b|)+|c', '(?:(?:a|b)?)+|c'),
+            array('(?:a|b|)*|c', '(?:a|b|)*|c'),
+            array('(?:(?:a|b|)|c)?', '(?:(?:a|b|)|c)?'),
+            array('(?:(?:a|b|)|c)+', '(?:(?:a|b)?|c)+'),
+            array('(?:(?:a|b|)|c)*', '(?:(?:a|b|)|c)*'),
+        );
+    }
+
+    protected function get_test_alt_with_question_quant_trivial() {
+        return array(
+            array('(?:a|b)?', '(?:a|b|)'),
+            array('(?:a|b){0,1}', '(?:a|b|)'),
+
+            array('(?:a||b)?', '(?:a||b)?'),
+            array('(?:a||b){0,1}', '(?:a||b){0,1}'),
+        );
+    }
+
     protected function get_test_quant_node_trivial() {
         return array(
             array('a{0,}', 'a*'),
@@ -2362,6 +2416,36 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a{,1}', 'a{,1}'),
             array('a{0,1}+', 'a{0,1}+'),
             array('a{0,1}?', 'a{0,1}?'),
+        );
+    }
+
+    protected function get_test_question_quant_for_alternative_node_trivial() {
+        return array(
+            array('(?:a|)?', '(?:a|)'),
+            array('(?:a|)+', '(?:a|)+'),
+            array('(?:a|)*', '(?:a|)*'),
+            array('(?:a|){2,3}', '(?:a|){2,3}'),
+
+            array('(?:a|)?|c', '(?:a|)|c'),
+        );
+    }
+
+    protected function get_test_nullable_alternative_node_trivial() {
+        return array(
+            array('a|', 'a|'),
+            array('a*|', 'a*'),
+            array('(?:a*|)', '(?:a*)'),
+            array('(?:a*|)c', '(?:a*)c'),
+            array('(?:a*|)|c', '(?:a*)|c'),
+            array('a*|b+|', 'a*|b+|'),
+            array('a*|b*|', 'a*|b*'),
+            array('a*||b*|', 'a*|b*'),
+            array('a*|||b*', 'a*|b*'),
+            array('a*|||b*|', 'a*|b*'),
+            array('(?:a*|b+|)', '(?:a*|b+|)'),
+            array('(?:a*|b+|)|', '(?:a*|b+|)'),
+            array('(?:a*|b*|)|c', '(?:a*|b*)|c'),
+            array('(?:a*|b+|)|c', '(?:a*|b+|)|c'),
         );
     }
 
@@ -2976,22 +3060,22 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:(?:(?:[[:space:]])))+', '(?:(?:(?:[[:space:]])))+'),
 
             array(' ?', ' *'),
-            array('\s', '\s+'),
+            array('\s?', '\s*'),
             array('[ ]?', '[ ]*'),
             array('[\s]?', '[\s]*'),
             array('[[:space:]]?', '[[:space:]]*'),
             array('( ?)', '( *)'),
-            array('(\s)', '(\s+)'),
+            array('(\s?)', '(\s*)'),
             array('([ ]?)', '([ ]*)'),
             array('([\s]?)', '([\s]*)'),
             array('([[:space:]]?)', '([[:space:]]*)'),
             array('(?: ?)', '(?: *)'),
-            array('(?:\s)', '(?:\s+)'),
+            array('(?:\s?)', '(?:\s*)'),
             array('(?:[ ]?)', '(?:[ ]*)'),
             array('(?:[\s]?)', '(?:[\s]*)'),
             array('(?:[[:space:]]?)', '(?:[[:space:]]*)'),
             array('((( ?)))', '((( *)))'),
-            array('(((\s?)))', '(((\s+)))'),
+            array('(((\s?)))', '(((\s*)))'),
             array('((([ ]?)))', '((([ ]*)))'),
             array('((([\s]?)))', '((([\s]*)))'),
             array('((([[:space:]]?)))', '((([[:space:]]*)))'),
@@ -3022,8 +3106,8 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:(?:(?:[[:space:]]))?)', '(?:(?:(?:[[:space:]]))*)'),
             array('((( )))?', '((( )))*'),
             array('(((\s)))?', '(((\s)))*'),
-            array('((([ ]?)))?', '((([ ]?)))*'),
-            array('((([\s])))?', '((([\s]?)))*'),
+            array('((([ ]?)))?', '((([ ]*)))?'),
+            array('((([\s])))?', '((([\s])))*'),
             array('((([[:space:]])))?', '((([[:space:]])))*'),
             array('(?:(?:(?: )))?', '(?:(?:(?: )))*'),
             array('(?:(?:(?:\s)))?', '(?:(?:(?:\s)))*'),
@@ -3086,6 +3170,82 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:(?:(?:[ ]))){2,5}', '(?:(?:(?:[ ]))){2,5}'),
             array('(?:(?:(?:[\s]))){2,5}', '(?:(?:(?:[\s]))){2,5}'),
             array('(?:(?:(?:[[:space:]]))){2,5}', '(?:(?:(?:[[:space:]]))){2,5}'),
+        );
+    }
+
+    protected function get_test_consecutive_quant_nodes_trivial() {
+        return array(
+            array('(?:a?)?', '(?:a?)'),
+            array('(?:a?)+', '(?:a*)'),
+            array('(?:a?)*', '(?:a*)'),
+            array('(?:a+)?', '(?:a*)'),
+            array('(?:a+)+', '(?:a+)'),
+            array('(?:a+)*', '(?:a*)'),
+            array('(?:a*)?', '(?:a*)'),
+            array('(?:a*)+', '(?:a*)'),
+            array('(?:a*)*', '(?:a*)'),
+            array('(?:a?){0,1}', '(?:a?)'),
+            array('(?:a?){0,}', '(?:a*)'),
+            array('(?:a?){1,2}', '(?:a{0,2})'),
+            array('(?:a?){1,}', '(?:a*)'),
+            array('(?:a?){2,4}', '(?:a{0,4})'),
+            array('(?:a+){0,1}', '(?:a*)'),
+            array('(?:a+){0,}', '(?:a*)'),
+            array('(?:a+){1,2}', '(?:a+)'),
+            array('(?:a+){1,}', '(?:a+)'),
+            array('(?:a+){2,4}', '(?:a+)'),
+            array('(?:a*){0,1}', '(?:a*)'),
+            array('(?:a*){0,}', '(?:a*)'),
+            array('(?:a*){1,2}', '(?:a*)'),
+            array('(?:a*){1,}', '(?:a*)'),
+            array('(?:a*){2,4}', '(?:a*)'),
+
+            array('(?:a{0,1})?', '(?:a?)'),
+            array('(?:a{0,})?', '(?:a*)'),
+            array('(?:a{1,2})?', '(?:a{0,2})'),
+            array('(?:a{1,})?', '(?:a*)'),
+            array('(?:a{2,4})?', '(?:a{0,4})'),
+            array('(?:a{0,1})+', '(?:a*)'),
+            array('(?:a{0,})+', '(?:a*)'),
+            array('(?:a{1,2})+', '(?:a+)'),
+            array('(?:a{1,})+', '(?:a+)'),
+            array('(?:a{2,4})+', '(?:a+)'),
+            array('(?:a{0,1})*', '(?:a*)'),
+            array('(?:a{0,})*', '(?:a*)'),
+            array('(?:a{1,2})*', '(?:a*)'),
+            array('(?:a{1,})*', '(?:a*)'),
+            array('(?:a{2,4})*', '(?:a*)'),
+
+            array('(?:a{2,}){5,}', '(?:a{2,})'),
+            array('(?:a{5,}){2,}', '(?:a{2,})'),
+            array('(?:a{2,}){2,}', '(?:a{2,})'),
+            array('(?:a{2,3}){2,3}', '(?:a{2,3})'),
+
+            array('(?:a{2,3}){4,5}', '(?:a{2,5})'),
+            array('(?:a{4,5}){2,3}', '(?:a{2,5})'),
+            array('(?:a{2,3}){3,4}', '(?:a{2,4})'),
+            array('(?:a{3,4}){2,3}', '(?:a{2,4})'),
+
+            array('(?:a?)?|c', '(?:a?)|c'),
+
+            array('(?:a?b?)?|c', '(?:a?b?)?|c'), //TODO
+
+            array('a??', 'a??'),
+            array('a?+', 'a?+'),
+            array('a?*', 'a*'),
+            array('a?{0,1}', 'a?'),
+            array('a+?', 'a+?'),
+            array('a++', 'a++'),
+            array('a+*', 'a*'),
+            array('a+{0,1}', 'a*'),
+            array('a*?', 'a*?'),
+            array('a*+', 'a*+'),
+            array('a**', 'a*'),
+            array('a*{0,1}', 'a*'),
+
+            array('a{1,2}{3,4}', 'a{1,4}'),
+//            array('a{2,3}{4,5}', 'a{2,3}{4,5}'),
+            array('a{2,3}{3,5}', 'a{2,5}'),
         );
     }
 }
