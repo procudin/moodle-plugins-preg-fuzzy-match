@@ -228,7 +228,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 ++$i;
                 $this->problem_ids = array();
             }
-			
+
             $result = $this->nullable_alternative_node();
             if ($result != array()) {
                 $equivalences[$i] = array();
@@ -236,16 +236,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 ++$i;
                 $this->problem_ids = array();
             }
-			
-			$result = $this->alt_without_question_quant();
+
+            $result = $this->alt_without_question_quant();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
             }
-			
-			$result = $this->alt_with_question_quant();
+
+            $result = $this->alt_with_question_quant();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
@@ -260,7 +260,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 ++$i;
                 $this->problem_ids = array();
             }
-			
+
             $result = $this->question_quant_for_alternative_node();
             if ($result != array()) {
                 $equivalences[$i] = array();
@@ -268,7 +268,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 ++$i;
                 $this->problem_ids = array();
             }
-			
+
             $result = $this->consecutive_quant_nodes();
             if ($result != array()) {
                 $equivalences[$i] = array();
@@ -2432,9 +2432,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($parent !== null) {
                 foreach ($parent->operands as $i => $operand) {
                     if ($operand->id == $node->id) {
-                        $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                            $node->operands,
-                            array_slice($parent->operands, $i + 1));
+                        $parent->operands[$i] = $node->operands[0];
                         return true;
                     }
                 }
@@ -3078,9 +3076,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 //if (count($parent->operands) > 1) {
                     foreach ($parent->operands as $i => $operand) {
                         if ($operand->id === $node->id) {
-                            $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                                array($qu),
-                                array_slice($parent->operands, $i + 1));
+                            $parent->operands[$i] = $qu;
+
+//                            $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+//                                array($qu),
+//                                array_slice($parent->operands, $i + 1));
                         }
                     }
                 /*} else {
@@ -3117,9 +3117,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 if ($parent != NULL) {
                     foreach ($parent->operands as $i => $operand) {
                         if ($operand->id === $old_qu->id) {
-                            $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                                array($qu),
-                                array_slice($parent->operands, $i + 1));
+                            $parent->operands[$i] = $qu;
+
+//                            $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+//                                array($qu),
+//                                array_slice($parent->operands, $i + 1));
                         }
                     }
                 } else {
