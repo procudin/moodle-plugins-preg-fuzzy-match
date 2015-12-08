@@ -228,6 +228,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 ++$i;
                 $this->problem_ids = array();
             }
+			
+			$result = $this->alt_without_question_quant();
+            if ($result != array()) {
+                $equivalences[$i] = array();
+                $equivalences[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
 
             $result = $this->quant_node_1_to_1();
             if ($result != array()) {
@@ -1379,6 +1387,73 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
         return $repeats_count > 1;
     }
+
+
+
+    /**
+     * Check alternative node with empty operand without question quant
+     */
+    public function alt_without_question_quant() {
+        $equivalences = array();
+
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        if ($this->search_alt_without_question_quant($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_8', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_8', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    /**
+     * Check alternative node with empty operand without question quant
+     */
+    private function search_alt_without_question_quant($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_ALT) {
+            if ($this->check_empty_node_for_alt($node)) {
+                if (!$this->check_quant_with_zero_left_border_for_node($node)) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 8;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+                }
+            }
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_alt_without_question_quant($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function check_quant_with_zero_left_border_for_node($node) {
+        $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
+        if ($parent == null) {
+            return false;
+        } else if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                   || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+            if ($parent->leftborder == 0) {
+                return true;
+            }
+        }
+
+        return $this->check_quant_with_zero_left_border_for_node($parent);
+    }
+
 
 
     /**
