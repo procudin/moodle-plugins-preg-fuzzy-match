@@ -1062,19 +1062,38 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     // Get right leafs from current node
                     $is_fount = false;
                     $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, $this->options->problem_ids[0], $is_fount);
-                    // Add this nodes while node is not operator
 
+                    // Add this nodes while node is not operator
                     if (count($right_leafs) > 1) {
                         $concat = new qtype_preg_node_concat();
-                        foreach ($right_leafs as $rleaf) {
-                            $concat->operands[] = $rleaf;
+
+                        for ($i = 0; $i < $this->options->problem_ids[0];) {
+                            $concat->operands[] = $right_leafs[$i];
+
+                            $count_nodes = 0;
+                            $this->get_subtree_nodes_count($right_leafs[$i], $count_nodes);
+                            $i += $count_nodes;
                         }
+
                         $se->operands[] = $concat;
                     } else {
                         $se->operands[] = $right_leafs[0];
                     }
                 } else {
-                    $se->operands[] = $current_leaf;
+                    $is_fount = false;
+                    $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, $this->options->problem_ids[0], $is_fount);
+
+                    if (count($right_leafs) > 1) {
+                        for ($i = 0; $i < $this->options->problem_ids[0];) {
+                            $se->operands[] = $right_leafs[$i];
+
+                            $count_nodes = 0;
+                            $this->get_subtree_nodes_count($right_leafs[$i], $count_nodes);
+                            $i += $count_nodes;
+                        }
+                    } else {
+                        $se->operands[] = $right_leafs[0];
+                    }
                 }
 
                 $qu->operands[] = $se;
@@ -1117,6 +1136,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return $this->regex_from_tree;
+    }
+
+    private function get_subtree_nodes_count($node, &$count_operands) {
+        $count_operands++;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                $this->get_subtree_nodes_count($operand, $count_operands);
+            }
+        }
     }
 
     /**
