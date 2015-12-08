@@ -2253,6 +2253,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->change_quant_to_equivalent($node, $this->options->problem_ids[0]);
     }
 
+    // The 12th rule
+    protected function optimize_12($node) {
+        return $this->remove_quant($node, $this->options->problem_ids[0]);
+    }
+
     // The 14th rule
     protected function optimize_14($node) {
         return $this->remove_quant($node, $this->options->problem_ids[0]);
