@@ -229,6 +229,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 			
+            $result = $this->nullable_alternative_node();
+            if ($result != array()) {
+                $equivalences[$i] = array();
+                $equivalences[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
+			
 			$result = $this->alt_without_question_quant();
             if ($result != array()) {
                 $equivalences[$i] = array();
@@ -1785,6 +1793,69 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return true;
             }
         }
+        return false;
+    }
+
+
+
+    /**
+     * Check alternative with empty node and all operands may coincide with emptiness
+     */
+    public function nullable_alternative_node() {
+        $equivalences = array();
+
+        if ($this->search_nullable_alternative_node($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_13', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_13', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    /**
+     * Search alternative with empty node and all operands may coincide with emptiness
+     */
+    private function search_nullable_alternative_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_ALT) {
+            if ($this->check_nullable_alternative_with_empty_node($node)) {
+                $this->problem_ids[] = $node->id;
+                $this->problem_type = 13;
+                $this->indfirst = $node->position->indfirst;
+                $this->indlast = $node->position->indlast;
+                return true;
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_nullable_alternative_node($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function check_nullable_alternative_with_empty_node($alt) {
+        foreach ($alt->operands as $operand) {
+            if ($operand->type == qtype_preg_node::TYPE_LEAF_META
+                && $operand->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                foreach ($alt->operands as $tmp_operand) {
+                    if (!$tmp_operand->nullable) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
         return false;
     }
 
