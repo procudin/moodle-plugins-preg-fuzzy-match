@@ -252,6 +252,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 ++$i;
                 $this->problem_ids = array();
             }
+			
+            $result = $this->consecutive_quant_nodes();
+            if ($result != array()) {
+                $equivalences[$i] = array();
+                $equivalences[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
 
             $result = $this->common_subexpressions();
             if ($result != array()) {
@@ -1587,6 +1595,110 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 return ($node->leftborder === 0 && $node->rightborder === 1 && $node->userinscription[0]->data !== '?');
             }
         }
+        return false;
+    }
+
+
+
+    /**
+     * Check consecutive quantifier nodes
+     */
+    public function consecutive_quant_nodes() {
+        $equivalences = array();
+
+        if ($this->search_consecutive_quant_nodes($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_10', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_10', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    /**
+     * Search consecutive quantifier nodes
+     */
+    private function search_consecutive_quant_nodes($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+            || $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+
+            if ($this->check_other_quant_for_quant($node->operands[0])) {
+                $oq = $this->get_other_quant_for_quant($node->operands[0]);
+
+                if ($oq != null) {
+                    $is_found = false;
+                    if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                        if ($oq->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                            $is_found = true;
+                        } else {
+                            if ($oq->rightborder >= $node->leftborder) {
+                                $is_found = true;
+                            }
+                        }
+                    } else {
+                        if ($oq->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                            if ($node->rightborder >= $oq->leftborder) {
+                                $is_found = true;
+                            }
+                        } else {
+                            if (($node->leftborder <= $oq->leftborder && $node->rightborder >= $oq->rightborder)
+                                || ($node->leftborder <= $oq->leftborder && $node->rightborder <= $oq->rightborder
+                                    && $node->rightborder >= $oq->leftborder)
+                                || ($node->leftborder >= $oq->leftborder && $node->rightborder >= $oq->rightborder
+                                    && $node->leftborder <= $oq->rightborder)
+                                || ($node->leftborder <= $oq->leftborder && $node->rightborder <= $oq->rightborder
+                                    && $node->rightborder + 1 == $oq->leftborder)
+                                || ($node->leftborder >= $oq->leftborder && $node->rightborder >= $oq->rightborder
+                                    && $node->leftborder == $oq->rightborder + 1)
+                            ) {
+                                $is_found = true;
+                            }
+                        }
+                    }
+
+                    if ($is_found) {
+                        $this->problem_ids[] = $node->id;
+                        $this->problem_type = 10;
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    }
+                }
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_consecutive_quant_nodes($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function check_other_quant_for_quant($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+            || $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+            return true;
+        } else if (!($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR)) {
+            return false;
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->check_other_quant_for_quant($operand)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
