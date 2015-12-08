@@ -2238,6 +2238,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->add_question_quant_to_alt($node, $this->options->problem_ids[0]);
     }
 
+    // The 9th rule
+    protected function optimize_9($node) {
+        return $this->remove_question_quant_for_alt($node, $this->options->problem_ids[0]);
+    }
+
     // The 11th rule
     protected function optimize_11($node) {
         return $this->change_quant_to_equivalent($node, $this->options->problem_ids[0]);
@@ -2568,6 +2573,28 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($this->is_operator($tree_root)) {
             foreach ($tree_root->operands as $operand) {
                 if ($this->add_question_quant_to_alt($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    private function remove_question_quant_for_alt($tree_root, $remove_node_id) {
+        if ($tree_root->id == $remove_node_id) {
+            // Search quant
+            $qu = $this->get_question_quant_for_node($tree_root);
+            // Remove quant
+            $this->remove_quant($this->get_dst_root(), $qu->id);
+            // Add empty node to alt
+            $tree_root->operands[] = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
+        }
+
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                if ($this->remove_question_quant_for_alt($operand, $remove_node_id)) {
                     return true;
                 }
             }
