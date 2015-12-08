@@ -2232,6 +2232,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     protected function optimize_6($node) {
         return $this->change_alternative_to_charset($node, $this->options->problem_ids[0]);
     }
+	
+    // The 8th rule
+    protected function optimize_8($node) {
+        return $this->add_question_quant_to_alt($node, $this->options->problem_ids[0]);
+    }
 
     // The 11th rule
     protected function optimize_11($node) {
@@ -2502,6 +2507,73 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             return '\\' . $character;
         }
         return $character;
+    }
+
+
+    private function add_question_quant_to_alt($tree_root, $remove_node_id) {
+        if ($tree_root->id == $remove_node_id) {
+            $this->delete_empty_node_from_alternative($tree_root);
+
+            $qu = new qtype_preg_node_finite_quant(0, 1);
+            $qu->set_user_info(null, array(new qtype_preg_userinscription('?')));
+
+            $parent = $this->get_parent_node($this->get_dst_root(), $tree_root->id);
+            if ($parent == null) {
+                $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                $se->operands[] = $tree_root;
+                $qu->operands[] = $se;
+
+                $this->dstroot = $qu;
+            } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+                $new_parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                if ($new_parent == null) {
+                    $qu->operands[] = $parent;
+                    $this->dstroot = $qu;
+                } else if ($new_parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                           || $new_parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                    $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                    $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                    $se->operands[] = $tree_root;
+                    $qu->operands[] = $se;
+
+                    $parent->operands[0] = $qu;
+                } else {
+                    $qu->operands[] = $parent;
+
+                    foreach ($new_parent->operands as $i => $operand) {
+                        if ($parent->id == $operand->id) {
+                            $new_parent->operands[$i] = $qu;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                $se->operands[] = $tree_root;
+                $qu->operands[] = $se;
+
+                foreach ($parent->operands as $i => $operand) {
+                    if ($tree_root->id == $operand->id) {
+                        $parent->operands[$i] = $qu;
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                if ($this->add_question_quant_to_alt($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function change_quant_to_equivalent($tree_root, $remove_node_id) {
