@@ -1423,6 +1423,118 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
     /**
+     * Check partial match alternative operands
+     */
+    public function partial_match_alternative_operands() {
+        $equivalences = array();
+
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        if ($this->search_partial_match_alternative_operands($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_7', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_7', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    /**
+     * Search partial match alternative operands
+     */
+    private function search_partial_match_alternative_operands($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_ALT) {
+            $is_left_part_match = -1; // 1 if left part is match, 0 if right part is match
+            $count = $this->partial_match_operands_count($node, $is_left_part_match);
+            if ($count > 0) {
+                $this->problem_ids[] = $count;
+                $this->problem_ids[] = $is_left_part_match;
+                $this->problem_ids[] = $node->id;
+                $this->problem_type = 7;
+                $this->indfirst = $node->position->indfirst;
+                $this->indlast = $node->position->indlast;
+                return true;
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_partial_match_alternative_operands($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    /**
+     * Check found alternative node with partial match alternative operands
+     */
+    private function partial_match_operands_count($node, &$is_left_part_match) {
+        $leafs = array();
+        foreach ($node->operands as $i => $operand) {
+            $leafs[$i] = array();
+            $this->leafs_list($operand, $leafs[$i]);
+        }
+
+        $repeats_count = 0;
+        for ($i = 1; $i < count ($leafs[0]); $i++) {
+            if ($this->is_left_partial_match_leafs($leafs, $i)) {
+                $repeats_count++;
+                $is_left_part_match = 1;
+            }
+        }
+
+        if ($repeats_count == 0) {
+            for ($i = 1; $i < count ($leafs[0]); $i++) {
+                if ($this->is_right_partial_match_leafs($leafs, $i)) {
+                    $repeats_count++;
+                    $is_left_part_match = 0;
+                }
+            }
+        }
+
+        return $repeats_count;
+    }
+
+    private function leafs_list($node, &$leafs) {
+        $leafs[] = $node;
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                $this->leafs_list($operand, $leafs);
+            }
+        }
+    }
+
+    private function is_left_partial_match_leafs($leafs, $index) {
+        $j = 1;
+        for (; $j < count($leafs); $j++) {
+            if (!$leafs[0][$index]->is_equal($leafs[$j][$index], null)) {
+                break;
+            }
+        }
+        return $j == count($leafs);
+    }
+
+    private function is_right_partial_match_leafs($leafs, $index) {
+        $j = 1;
+//        for (; $j < count($leafs); $j++) {
+//            if (!$leafs[0][$index]->is_equal($leafs[$j][$index], null)) {
+//                break;
+//            }
+//        }
+        return $j == count($leafs);
+    }
+
+
+
+    /**
      * Check alternative node with empty operand without question quant
      */
     public function alt_without_question_quant() {
