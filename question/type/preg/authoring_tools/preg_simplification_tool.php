@@ -2258,6 +2258,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->remove_quant($node, $this->options->problem_ids[0]);
     }
 
+    // The 13th rule
+    protected function optimize_13($node) {
+        return $this->remove_empty_node_from_alternative($node, $this->options->problem_ids[0]);
+    }
+
     // The 14th rule
     protected function optimize_14($node) {
         return $this->remove_quant($node, $this->options->problem_ids[0]);
@@ -2336,6 +2341,34 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return false;
+    }
+
+    private function remove_empty_node_from_alternative($node, $remove_node_id) {
+        if ($node->id == $remove_node_id) {
+            return $this->delete_empty_node_from_alternative($node);
+        }
+
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if($this->remove_empty_node_from_alternative($operand, $remove_node_id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function delete_empty_node_from_alternative(&$node) {
+        if ($this->check_empty_node_for_alt($node)) {
+            foreach ($node->operands as $i => $operand) {
+                if ($operand->type == qtype_preg_node::TYPE_LEAF_META
+                    && $operand->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                    $node->operands = array_merge(array_slice($node->operands, 0, $i), array_slice($node->operands, $i + 1));
+                    $this->delete_empty_node_from_alternative($node);
+                }
+            }
+        }
+        return true;
     }
 
     private function remove_grouping_node(&$tree_root, $node, $remove_node_id) {
