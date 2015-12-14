@@ -127,17 +127,27 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
      */
     public function hint_available ($response = null) {
 
-        if ($this->question->syntaxtreehinttype > 0) {
-            return true;
-        }
+        switch ($this->question->syntaxtreehinttype) {
+            case 0:
+                return false;
+            case 2:
+                return true;
+            default:
+                if ($response === null)
+                    return true;
 
-        if ($response !== null) {
-            $bestfit = $this->question->get_best_fit_answer($response);
-            $isavailableforanswer = $this->can_available_hint_for_answer($bestfit);
-            $isavailableforresponse = $this->can_available_hint_for_answer($response);
-            return ($isavailableforanswer && $isavailableforresponse);
-        }
+                // Check for possibility of using hint for current student response.
+                $regexoptions = new qtype_preg_authoring_tools_options();
+                $regexoptions->engine = $this->question->engine;
+                $regexoptions->usecase = $this->question->usecase;
+                $regexoptions->notation = $this->question->notation;
 
+                $tree = new qtype_preg_syntax_tree_tool($response['answer'], $regexoptions);
+                if (count($tree->get_errors()) > 0) {
+                    return false;
+                }
+                return true;
+        }
         return true;
     }
 
@@ -281,17 +291,27 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
      */
     public function hint_available ($response = null) {
 
-        if ($this->question->explgraphhinttype > 0) {
-            return true;
-        }
+        switch ($this->question->explgraphhinttype) {
+            case 0:
+                return false;
+            case 2:
+                return true;
+            default:
+                if ($response === null)
+                    return true;
 
-        if ($response !== null) {
-            $bestfit = $this->question->get_best_fit_answer($response);
-            $isavailableforanswer = $this->can_available_hint_for_answer($bestfit);
-            $isavailableforresponse = $this->can_available_hint_for_answer($response);
-            return ($isavailableforanswer && $isavailableforresponse);
-        }
+                // Check for possibility of using hint for current student response.
+                $regexoptions = new qtype_preg_authoring_tools_options();
+                $regexoptions->engine = $this->question->engine;
+                $regexoptions->usecase = $this->question->usecase;
+                $regexoptions->notation = $this->question->notation;
 
+                $tree = new qtype_preg_explaining_graph_tool($response['answer'], $regexoptions);
+                if (count($tree->get_errors()) > 0) {
+                    return false;
+                }
+                return true;
+        }
         return true;
     }
 
@@ -435,17 +455,27 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
      */
     public function hint_available ($response = null) {
 
-        if ($this->question->descriptionhinttype > 0) {
-            return true;
-        }
+        switch ($this->question->descriptionhinttype) {
+            case 0:
+                return false;
+            case 2:
+                return true;
+            default:
+                if ($response === null)
+                    return true;
 
-        if ($response !== null) {
-            $bestfit = $this->question->get_best_fit_answer($response);
-            $isavailableforanswer = $this->can_available_hint_for_answer($bestfit);
-            $isavailableforresponse = $this->can_available_hint_for_answer($response);
-            return ($isavailableforanswer && $isavailableforresponse);
-        }
+                // Check for possibility of using hint for current student response.
+                $regexoptions = new qtype_preg_authoring_tools_options();
+                $regexoptions->engine = $this->question->engine;
+                $regexoptions->usecase = $this->question->usecase;
+                $regexoptions->notation = $this->question->notation;
 
+                $tree = new qtype_preg_description_tool($response['answer'], $regexoptions);
+                if (count($tree->get_errors()) > 0) {
+                    return false;
+                }
+                return true;
+        }
         return true;
     }
 
@@ -587,15 +617,39 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
      */
     public function hint_available ($response = null) {
 
-        if ($this->question->teststringshinttype > 0) {
-            return true;
-        }
+        switch ($this->question->teststringshinttype) {
+            case 0:
+                return false;
+            case 2:
+                return true;
+            default:
+                if ($response === null)
+                    return true;
 
-        if ($response !== null) {
-            $bestfit = $this->question->get_best_fit_answer($response);
-            $isavailableforanswer = $this->can_available_hint_for_answer($bestfit);
-            $isavailableforresponse = $this->can_available_hint_for_answer($response);
-            return ($isavailableforanswer && $isavailableforresponse);
+                // Check for possibility of using hint for current student response.
+                $strings = '';
+                $key = 0;
+                foreach ($this->question->teststrings as $item) {
+
+                    if ($key == count($this->question->teststrings) - 1) {
+                        $strings .= $item->teststring;
+                    } else {
+                        $strings .= $item->teststring . "\n";
+                        $key++;
+                    }
+                }
+                $usecase = $this->question->usecase;
+                $exactmatch = false;
+                $engine = $this->question->engine;
+                $notation = $this->question->notation;
+                $regex = $response['answer'];
+
+                $tool = new qtype_preg_regex_testing_tool($regex, $strings, $usecase, $exactmatch, $engine,
+                        $notation, new qtype_preg_position());
+                if ($tool->errors_exist())
+                    return false;
+
+                return true;
         }
 
         return true;
