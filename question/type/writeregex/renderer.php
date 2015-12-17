@@ -134,4 +134,11 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
             '<tr><td>' . $studentresults . '</td><td>' . $teacherresult . '</td></tr></table>';
         return $res;
     }
+
+    /**
+     * Puts hint title into h-tag.
+     */
+    public function render_hint_title($hint_title) {
+        return html_writer::tag('h5', $hint_title);
+    }
 }
