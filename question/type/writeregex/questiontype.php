@@ -203,10 +203,16 @@ class qtype_writeregex extends qtype_shortanswer {
             'descriptionhintpenalty',    // Description hint penalty.
             'teststringshinttype',       // Test strings hint type.
             'teststringshintpenalty',    // Test strings hint penalty.
-            'compareregexpercentage',    // Percentage value of compare regex (0-100).
+            'comparetreepercentage',     // Percentage value of compare regex by tree (0-100).
             'compareautomatapercentage', // Percentage value of compare regex by automata (0-100).
-            'compareregexpteststrings'   // Percentage value of compare regex by testing strings (0-100).
+            'comparestringspercentage'   // Percentage value of compare regex by test strings (0-100).
         );
+    }
+
+    public function available_analyzers() {
+        return array("tree" => get_string('comparetreepercentage_title', 'qtype_writeregex'),
+                     "automata" => get_string('compareautomatapercentage_title', 'qtype_writeregex'),
+                     "strings" => get_string('comparestringspercentage_title', 'qtype_writeregex'));
     }
 
     /**

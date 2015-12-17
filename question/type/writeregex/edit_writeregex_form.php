@@ -88,26 +88,20 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
-        // Add compare regex percentage.
-        $mform->addElement('text', 'compareregexpercentage',
-            get_string('wre_cre_percentage', 'qtype_writeregex'));
-        $mform->setType('compareregexpercentage', PARAM_FLOAT);
-        $mform->setDefault('compareregexpercentage', '0');
-        $mform->addHelpButton('compareregexpercentage', 'compareregexpercentage', 'qtype_writeregex');
 
-        // Add compare regexps automata percentage.
-        $mform->addElement('text', 'compareautomatapercentage',
-            get_string('compareautomatapercentage', 'qtype_writeregex'));
-        $mform->setType('compareautomatapercentage', PARAM_FLOAT);
-        $mform->setDefault('compareautomatapercentage', '0');
-        $mform->addHelpButton('compareautomatapercentage', 'compareautomatapercentage', 'qtype_writeregex');
-
-        // Add compare regexp by test strings.
-        $mform->addElement('text', 'compareregexpteststrings',
-            get_string('compareregexpteststrings', 'qtype_writeregex'));
-        $mform->setType('compareregexpteststrings', PARAM_FLOAT);
-        $mform->setDefault('compareregexpteststrings', '100');
-        $mform->addHelpButton('compareregexpteststrings', 'compareregexpteststrings', 'qtype_writeregex');
+        // Add all analizers percentages
+        $questiontype = new qtype_writeregex();
+        $analyzers = $questiontype->available_analyzers();
+        foreach ($analyzers as $name => $description) {
+            $constantstringname = 'compare' . $name . 'percentage';
+            $mform->addElement('text', $constantstringname,
+                get_string($constantstringname, 'qtype_writeregex'));
+            $mform->setType($constantstringname, PARAM_FLOAT);
+            $mform->setDefault($constantstringname, '0');
+            $mform->addHelpButton($constantstringname, $constantstringname, 'qtype_writeregex');
+        }
+        // Set as default 100% to teststrings analizer
+        $mform->setDefault($constantstringname, '100');
 
         // Add hints
         $mform->addElement('header', 'hintshdr', get_string('wre_hintsheader', 'qtype_writeregex'), '');
@@ -319,7 +313,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $errors = $this->validate_compare_values($data, $errors);
 
-        $errors = $this->validate_test_strings($data, $errors, $data['compareregexpteststrings']);
+        $errors = $this->validate_test_strings($data, $errors, $data['comparestringspercentage']);
 
         $errors = $this->validate_regexp($data, $errors);
 
@@ -337,7 +331,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     private function validate_regexp ($data, $errors) {
 
         global $CFG;
-        $test = $data['compareregexpteststrings'];
+        $test = $data['comparestringspercentage'];
 
         if ($test > 0 && $test <= 100) {
 
@@ -391,7 +385,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         }
 
         if ($answercount > 0 and $test == 0) {
-            $errors['compareregexpteststrings'] = get_string('invalidcomparets', 'qtype_writeregex');
+            $errors['comparestringspercentage'] = get_string('invalidcomparets', 'qtype_writeregex');
         }
 
         return $errors;
@@ -405,26 +399,21 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      */
     private function validate_compare_values ($data, $errors) {
 
-        $regex = $data['compareregexpercentage'];
-        $automata = $data['compareautomatapercentage'];
-        $test = $data['compareregexpteststrings'];
-        $flag = false;
+        $questiontype = new qtype_writeregex();
+        $analyzers = $questiontype->available_analyzers();
+        $sum = 0;
 
-        if ($regex < 0 || $regex > 100) {
-            $errors['compareregexpercentage'] = get_string('compareinvalidvalue', 'qtype_writeregex');
-            $flag = true;
+        foreach($analyzers as $name => $description) {
+            $constantstringname = 'compare' . $name . 'percentage';
+
+            if ($data[$constantstringname] < 0 || $data[$constantstringname] > 100) {
+                $errors[$constantstringname] = get_string('compareinvalidvalue', 'qtype_writeregex');
+            }
+            $sum += $data[$constantstringname];
         }
 
-        if ($automata < 0 || $automata > 100) {
-            $errors['compareautomatapercentage'] = get_string('compareinvalidvalue', 'qtype_writeregex');
-        }
-
-        if ($test < 0 || $test > 100) {
-            $errors['compareregexpteststrings'] = get_string('compareinvalidvalue', 'qtype_writeregex');
-        }
-
-        if ($regex + $automata + $test != 100 and !$flag) {
-            $errors['compareregexpercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+        if ($sum != 100 and !array_key_exists('comparetreepercentage', $errors)) {
+            $errors['comparetreepercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
         }
 
         return $errors;

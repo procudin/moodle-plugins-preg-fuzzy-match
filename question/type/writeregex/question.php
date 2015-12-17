@@ -80,13 +80,13 @@ class qtype_writeregex_question extends question_graded_automatically
 
     // Types of compare.
     /** @var  float Value of compare regexps in %. */
-    public $compareregexpercentage;
+    public $comparetreepercentage;
 
     /** @var  float Value of compare by automates in %. */
     public $compareautomatapercentage;
 
     /** @var  float Value of compare by test strings in %. */
-    public $compareregexpteststrings;
+    public $comparestringspercentage;
 
     /** @var number Only answers with fraction >= hintgradeborder would be used for hinting. */
     public $hintgradeborder = 0.1;
@@ -270,8 +270,8 @@ class qtype_writeregex_question extends question_graded_automatically
             return $this->bestfitanswer;
         }
 
-        $analyzers = array("string" => new test_strings_analyser($this),
-                           "regex" => new compare_regex_analyzer($this),
+        $analyzers = array("strings" => new test_strings_analyser($this),
+                           "tree" => new compare_regex_analyzer($this),
                            "automata" => new compare_regex_automata_analyzer($this));
 
 		// Finding initial answer with fraction, that is bigger then hint grade border.
@@ -286,19 +286,15 @@ class qtype_writeregex_question extends question_graded_automatically
         }
 
         foreach ($this->answers as $answer) {
-            $fitnesses = array();
+            $fraction = 0;
             foreach ($analyzers as $key => $analyzer) {
-                $fitnesses[] = $analyzer->get_fitness($answer->answer, $response['answer']);
+                $fitness = $analyzer->get_fitness($answer->answer, $response['answer']);
+                $percentagefield = 'compare' . $key . 'percentage';
+                $fraction += $fitness * $this->$percentagefield / 100.0;
             }
 
-            $teststringfiness = $fitnesses[0] * $this->compareregexpteststrings / 100;
-            $compregexfitness = $fitnesses[1] * $this->compareregexpercentage / 100;
-            $compregexafitness = $fitnesses[2] * $this->compareautomatapercentage / 100;
-
-            $fraction = $teststringfiness + $compregexfitness + $compregexafitness;
-
-            if ( $fraction > $bestfitness and $fraction > $this->hintgradeborder ) {
-                $bestfitness = $teststringfiness + $compregexfitness + $compregexafitness;
+            if ($fraction > $bestfitness and $fraction > $this->hintgradeborder) {
+                $bestfitness = $fraction;
                 $bestfitanswer = $answer;
             }
         }

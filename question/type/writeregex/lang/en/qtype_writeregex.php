@@ -154,14 +154,14 @@ $string['teststringshintpenalty_title'] = 'Test string: fine';
 $string['teststringshintpenalty'] = 'Test string: fine';
 $string['teststringshintpenalty_help'] = "<p>The amount of penalty for the use of clues in the form of test strings.</p>";
 
-$string['compareregexpercentage_title'] = 'Based on regular expression match';
-$string['compareregexpercentage'] = 'Based on regular expression match';
-$string['compareregexpercentage_help'] = "<p>The value (in%) of the share estimates for regular expression matching.</p>";
+$string['comparetreepercentage_title'] = 'Based on regular expression match';
+$string['comparetreepercentage'] = 'Based on regular expression match';
+$string['comparetreepercentage_help'] = "<p>The value (in%) of the share estimates for regular expression matching.</p>";
 
 $string['compareautomatapercentage_title'] = 'Rating coincidentally automata regular expressions';
 $string['compareautomatapercentage'] = 'Rating coincidentally automata regular expressions';
 $string['compareautomatapercentage_help'] = "<p>Value (in%) of the share estimates coincidentally automata regular expressions.</p>";
 
-$string['compareregexpteststrings_title'] = 'Based on testing on the test lines of regular expressions';
-$string['compareregexpteststrings'] = 'Based on testing on the test lines of regular expressions';
-$string['compareregexpteststrings_help'] = "<p>Value (in%) of the share valuation verification test on the lines of regular expressions.</p>";
+$string['comparestringspercentage_title'] = 'Based on testing on the test lines of regular expressions';
+$string['comparestringspercentage'] = 'Based on testing on the test lines of regular expressions';
+$string['comparestringspercentage_help'] = "<p>Value (in%) of the share valuation verification test on the lines of regular expressions.</p>";
