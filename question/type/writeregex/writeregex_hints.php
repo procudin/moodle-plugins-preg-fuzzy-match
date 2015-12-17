@@ -165,7 +165,7 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
-        $hinttitlestring = get_string('syntaxtreehintexplanationformode_' . $this->mode, 'qtype_writeregex');
+        $hinttitlestring = $renderer->render_hint_title(get_string('syntaxtreehintexplanationformode_' . $this->mode, 'qtype_writeregex'));
 
         switch($this->mode){
             case 1:
@@ -329,7 +329,7 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
-        $hinttitlestring = get_string('explgraphhintexplanationformode_' . $this->mode, 'qtype_writeregex');
+        $hinttitlestring = $renderer->render_hint_title(get_string('explgraphhintexplanationformode_' . $this->mode, 'qtype_writeregex'));
 
         switch($this->mode){
             case 1:
@@ -493,7 +493,7 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
-        $hinttitlestring = get_string('descriptionhintexplanationformode_' . $this->mode, 'qtype_writeregex');
+        $hinttitlestring = $renderer->render_hint_title(get_string('descriptionhintexplanationformode_' . $this->mode, 'qtype_writeregex'));
 
         switch($this->mode){
             case 1:
@@ -681,7 +681,7 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
         $exactmatch = false;
         $engine = $this->question->engine;
         $notation = $this->question->notation;
-        $hinttitlestring = get_string('teststringshintexplanationformode_' . $this->mode, 'qtype_writeregex');
+        $hinttitlestring = $renderer->render_hint_title(get_string('teststringshintexplanationformode_' . $this->mode, 'qtype_writeregex'));
 
         switch($this->mode){
             case 1:
