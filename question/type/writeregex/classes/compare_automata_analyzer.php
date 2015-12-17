@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_writeregex;
+
 /**
- * Class analyser fot compare regex.
+ * Class analyser fot compare regex by automata.
  *
  * @package qtype
  * @subpackage writeregex
@@ -23,7 +25,7 @@
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class compare_regex_analyzer {
+class compare_automata_analyzer {
 
     /** @var  object Question object. */
     protected $question;
