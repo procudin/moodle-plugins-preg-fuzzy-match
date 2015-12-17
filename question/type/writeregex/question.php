@@ -22,9 +22,6 @@ require_once($CFG->dirroot . '/question/type/questionbase.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 require_once($CFG->dirroot . '/question/type/writeregex/writeregex_hints.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex_automata_analyzer.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_test_strings_analyser.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex_analyzer.php');
 
 /**
  * Represents a write regex question.
@@ -270,10 +267,6 @@ class qtype_writeregex_question extends question_graded_automatically
             return $this->bestfitanswer;
         }
 
-        $analyzers = array("strings" => new test_strings_analyser($this),
-                           "tree" => new compare_regex_analyzer($this),
-                           "automata" => new compare_regex_automata_analyzer($this));
-
 		// Finding initial answer with fraction, that is bigger then hint grade border.
         $bestfitness = 0.0;
         reset($this->answers);
@@ -285,9 +278,14 @@ class qtype_writeregex_question extends question_graded_automatically
             }
         }
 
+        $questiontype = new qtype_writeregex();
+        $analyzers = $questiontype->available_analyzers();
+
         foreach ($this->answers as $answer) {
             $fraction = 0;
-            foreach ($analyzers as $key => $analyzer) {
+            foreach ($analyzers as $key => $description) {
+                $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
+                $analyzer = new $analyzername($this);
                 $fitness = $analyzer->get_fitness($answer->answer, $response['answer']);
                 $percentagefield = 'compare' . $key . 'percentage';
                 $fraction += $fitness * $this->$percentagefield / 100.0;

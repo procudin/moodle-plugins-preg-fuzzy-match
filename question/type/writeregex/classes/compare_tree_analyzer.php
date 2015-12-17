@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_writeregex;
+
 /**
- * Class analyser fot test strings.
+ * Class analyser fot compare regex.
  *
  * @package qtype
  * @subpackage writeregex
@@ -23,7 +25,7 @@
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class test_strings_analyser {
+class compare_tree_analyzer {
 
     /** @var  object Question object. */
     protected $question;
@@ -33,41 +35,16 @@ class test_strings_analyser {
      * @param $question object Question object.
      */
     public function __construct($question) {
-        $this->question = $question;
+
     }
 
     /**
      * Get equality for user response.
      * @param $answer string Regex answer.
-     * @param $response string User response.
+     * @param $respose string User response.
      * @return float Value of compare.
      */
-    public function get_fitness($answer, $response) {
-
-        $totalfraction = 0;
-
-        $pregquestionstd = new qtype_preg_question();
-        $studentmatcher = $pregquestionstd->get_matcher($this->question->engine, $answer, false,
-            $pregquestionstd->get_modifiers($this->question->usecase), 0, $this->question->notation);
-
-        $pregquestiont = new qtype_preg_question();
-        $teachermatcher = $pregquestiont->get_matcher($this->question->engine, $response, false,
-            $pregquestiont->get_modifiers($this->question->usecase), 0, $this->question->notation);
-
-        foreach ($this->question->teststrings as $string) {
-
-            if (!$studentmatcher->errors_exist() and !$teachermatcher->errors_exist()) {
-                $resulltstd = $studentmatcher->match($string->teststring);
-                $resulltt = $teachermatcher->match($string->teststring);
-
-                if ($resulltstd->indexfirst == $resulltt->indexfirst and
-                    $resulltstd->length == $resulltt->length) {
-                    $totalfraction += $string->fraction;
-                }
-            }
-        }
-
-        return $totalfraction;
+    public function get_fitness ($answer, $respose) {
+        return 0;
     }
-
 }
