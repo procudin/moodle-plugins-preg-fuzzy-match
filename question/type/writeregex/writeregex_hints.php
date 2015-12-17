@@ -86,7 +86,9 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
      * @return string hint description.
      */
     public function hint_description() {
-        return \qtype_poasquestion\string::strtolower(get_string('wre_st', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
+        // Description for hint using mode (e.g. '(for correct answer)')
+        $additionformode = get_string('hinttitleaddition', 'qtype_writeregex', get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
+        return \qtype_poasquestion\string::strtolower(get_string('wre_st', 'qtype_writeregex')) . ' ' . $additionformode;
     }
 
     /**
@@ -165,7 +167,8 @@ class qtype_writeregex_syntaxtreehint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
-        $hinttitlestring = $renderer->render_hint_title(get_string('syntaxtreehintexplanationformode_' . $this->mode, 'qtype_writeregex'));
+        $hinttitlestring = $renderer->render_hint_title(get_string('syntaxtreehintexplanation', 'qtype_writeregex',
+            get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex')));
 
         switch($this->mode){
             case 1:
@@ -250,7 +253,9 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
      * @return string Hint description.
      */
     public function hint_description() {
-        return \qtype_poasquestion\string::strtolower(get_string('wre_eg', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
+        // Description for hint using mode (e.g. '(for correct answer)')
+        $additionformode = get_string('hinttitleaddition', 'qtype_writeregex', get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
+        return \qtype_poasquestion\string::strtolower(get_string('wre_eg', 'qtype_writeregex')) . ' ' . $additionformode;
     }
 
     /**
@@ -329,7 +334,8 @@ class qtype_writeregex_explgraphhint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
-        $hinttitlestring = $renderer->render_hint_title(get_string('explgraphhintexplanationformode_' . $this->mode, 'qtype_writeregex'));
+        $hinttitlestring = $renderer->render_hint_title(get_string('explgraphhintexplanation', 'qtype_writeregex',
+            get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex')));
 
         switch($this->mode){
             case 1:
@@ -414,7 +420,9 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
      * @return string hint description.
      */
     public function hint_description() {
-        return \qtype_poasquestion\string::strtolower(get_string('wre_d', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
+        // Description for hint using mode (e.g. '(for correct answer)')
+        $additionformode = get_string('hinttitleaddition', 'qtype_writeregex', get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
+        return \qtype_poasquestion\string::strtolower(get_string('wre_d', 'qtype_writeregex')) . ' ' . $additionformode;
     }
 
     /**
@@ -493,7 +501,8 @@ class qtype_writeregex_descriptionhint extends qtype_poasquestion\hint {
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
         $regexoptions->notation = $this->question->notation;
-        $hinttitlestring = $renderer->render_hint_title(get_string('descriptionhintexplanationformode_' . $this->mode, 'qtype_writeregex'));
+        $hinttitlestring = $renderer->render_hint_title(get_string('descriptionhintexplanation', 'qtype_writeregex',
+            get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex')));
 
         switch($this->mode){
             case 1:
@@ -576,7 +585,9 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
      * @return string hint description.
      */
     public function hint_description() {
-        return \qtype_poasquestion\string::strtolower(get_string('teststrings', 'qtype_writeregex')) . ' ' . get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
+        // Description for hint using mode (e.g. '(for correct answer)')
+        $additionformode = get_string('hinttitleaddition', 'qtype_writeregex', get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
+        return \qtype_poasquestion\string::strtolower(get_string('teststrings', 'qtype_writeregex')) . ' ' . $additionformode;
     }
 
     /**
@@ -681,7 +692,8 @@ class qtype_writeregex_teststringshint extends qtype_poasquestion\hint {
         $exactmatch = false;
         $engine = $this->question->engine;
         $notation = $this->question->notation;
-        $hinttitlestring = $renderer->render_hint_title(get_string('teststringshintexplanationformode_' . $this->mode, 'qtype_writeregex'));
+        $hinttitlestring = $renderer->render_hint_title(get_string('teststringshintexplanation', 'qtype_writeregex',
+            get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex')));
 
         switch($this->mode){
             case 1:
