@@ -153,14 +153,14 @@ $string['teststringshintpenalty_title'] = 'Тестовые строки: штр
 $string['teststringshintpenalty'] = 'Тестовые строки: штраф';
 $string['teststringshintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде тестовых строк.</p>";
 
-$string['compareregexpercentage_title'] = 'Оценка по совпадению регулярных выражений';
-$string['compareregexpercentage'] = 'Оценка по свопадению регулярных выражений';
-$string['compareregexpercentage_help'] = "<p>Значение (в %) доли оценки по совпадению регулярных выражений .</p>";
+$string['comparetreepercentage_title'] = 'Оценка по совпадению регулярных выражений';
+$string['comparetreepercentage'] = 'Оценка по свопадению регулярных выражений';
+$string['comparetreepercentage_help'] = "<p>Значение (в %) доли оценки по совпадению регулярных выражений .</p>";
 
 $string['compareautomatapercentage_title'] = 'Оценка по совпадению автоматов регулярных выражений';
 $string['compareautomatapercentage'] = 'Оценка по свопадению автоматов регулярных выражений';
 $string['compareautomatapercentage_help'] = "<p>Значение (в %) доли оценки по совпадению автоматов регулярных выражений .</p>";
 
-$string['compareregexpteststrings_title'] = 'Оценка по проверке на тестовых строках регулярных выражений';
-$string['compareregexpteststrings'] = 'Оценка по проверке на тестовых строках регулярных выражений';
-$string['compareregexpteststrings_help'] = "<p>Значение (в %) доли оценки по проверке на тестовых строках регулярных выражений .</p>";
+$string['comparestringspercentage_title'] = 'Оценка по проверке на тестовых строках регулярных выражений';
+$string['comparestringspercentage'] = 'Оценка по проверке на тестовых строках регулярных выражений';
+$string['comparestringspercentage_help'] = "<p>Значение (в %) доли оценки по проверке на тестовых строках регулярных выражений .</p>";

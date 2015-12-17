@@ -15,9 +15,9 @@
                 <FIELD NAME="descriptionhintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="teststringshinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="teststringshintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
-                <FIELD NAME="compareregexpercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
+                <FIELD NAME="comparetreepercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="compareautomatapercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
-                <FIELD NAME="compareregexpteststrings" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
+                <FIELD NAME="comparestringspercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
