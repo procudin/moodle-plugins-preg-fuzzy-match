@@ -112,9 +112,10 @@ $string['invalidcomparets'] = 'Значение проверки по тесто
 
 $string['hintdescriptionstudentsanswer'] = "Ваш ответ";
 $string['hintdescriptionteachersanswer'] = "Правильный ответ";
-$string['hinttitleadditionformode_1'] = "(для Вашего ответа)";
-$string['hinttitleadditionformode_2'] = "(для правильного ответа)";
-$string['hinttitleadditionformode_3'] = "(для Вашего и правильного ответов)";
+$string['hinttitleaddition'] = '(для {$a})';
+$string['hinttitleadditionformode_1'] = 'Вашего ответа';
+$string['hinttitleadditionformode_2'] = 'правильного ответа';
+$string['hinttitleadditionformode_3'] = 'Вашего и правильного ответов';
 
 $string['syntaxtreehinttype_title'] = 'Синтаксическое дерево';
 $string['syntaxtreehinttype'] = 'Синтаксическое дерево';
@@ -123,9 +124,7 @@ $string['syntaxtreehinttype_help'] = "<p>Значение отображения
 $string['syntaxtreehintpenalty_title'] = 'Синтаксическое дерево: штраф';
 $string['syntaxtreehintpenalty'] = 'Синтаксическое дерево: штраф';
 $string['syntaxtreehintpenalty_help'] = "<p>Значение штрафа за использование подсказки в виде синтаксического дерева</p>";
-$string['syntaxtreehintexplanationformode_1'] = "Синтаксическое дерево Вашего ответа:";
-$string['syntaxtreehintexplanationformode_2'] = "Синтаксическое дерево правильного ответа:";
-$string['syntaxtreehintexplanationformode_3'] = "Синтаксическое дерево Вашего и правильного ответов:";
+$string['syntaxtreehintexplanation'] = 'Синтаксическое дерево {$a}:';
 
 $string['explgraphhinttype_title'] = 'Граф объяснения';
 $string['explgraphhinttype'] = 'Граф объяснения';
@@ -134,9 +133,7 @@ $string['explgraphhinttype_help'] = "<p>Значение отображения 
 $string['explgraphhintpenalty_title'] = 'Граф объяснения: штраф';
 $string['explgraphhintpenalty'] = 'Граф объяснения: штраф';
 $string['explgraphhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде графа объяснения.</p>";
-$string['explgraphhintexplanationformode_1'] = "Граф объяснения Вашего ответа:";
-$string['explgraphhintexplanationformode_2'] = "Граф объяснения правильного ответа:";
-$string['explgraphhintexplanationformode_3'] = "Граф объяснения Вашего и правильного ответов:";
+$string['explgraphhintexplanation'] = 'Граф объяснения {$a}:';
 
 $string['descriptionhinttype_title'] = 'Объяснение выражения';
 $string['descriptionhinttype'] = 'Объяснение выражения';
@@ -145,16 +142,12 @@ $string['descriptionhinttype_help'] = "<p>Значение отображени�
 $string['descriptionhintpenalty_title'] = 'Объяснение выражения: штраф';
 $string['descriptionhintpenalty'] = 'Объяснение выражения: штраф';
 $string['descriptionhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде объяснения выражения.</p>";
-$string['descriptionhintexplanationformode_1'] = "Описание Вашего ответа:";
-$string['descriptionhintexplanationformode_2'] = "Описание правильного ответа:";
-$string['descriptionhintexplanationformode_3'] = "Описание Вашего и правильного ответов:";
+$string['descriptionhintexplanation'] = 'Описание {$a}:';
 
 $string['teststringshinttype_title'] = 'Тестовые строки';
 $string['teststringshinttype'] = 'Тестовые строки';
 $string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
-$string['teststringshintexplanationformode_1'] = "Результаты совпадения тестовых строк с Вашим ответом:";
-$string['teststringshintexplanationformode_2'] = "Результаты совпадения тестовых строк с правильным ответом:";
-$string['teststringshintexplanationformode_3'] = "Результаты совпадения тестовых строк с Вашим и правильным ответами:";
+$string['teststringshintexplanation'] = 'Результаты совпадения {$a} с тестовыми строками:';
 
 $string['teststringshintpenalty_title'] = 'Тестовые строки: штраф';
 $string['teststringshintpenalty'] = 'Тестовые строки: штраф';
