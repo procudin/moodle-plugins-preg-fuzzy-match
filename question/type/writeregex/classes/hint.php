@@ -29,6 +29,15 @@ defined('MOODLE_INTERNAL') || die();
  */
 abstract class hint extends \qtype_poasquestion\hint {
 
+    /** Mode, when hint is disabled */
+    const HINT_DISABLED = 0;
+    /** Mode, when hint is enabled for students answer */
+    const HINT_FOR_STUDENTS_ANSWER = 1;
+    /** Mode, when hint is enabled for teachers answer */
+    const HINT_FOR_TEACHERS_ANSWER = 2;
+    /** Mode, when hint is enabled for both students and teachers answers */
+    const HINT_FOR_BOTH_STUDENTS_AND_TEACHERS_ANSWERS = 3;
+
     /** @var  int Mode of hint. */
     protected $mode;
     /** @var  object Object on question. */
@@ -101,21 +110,7 @@ abstract class hint extends \qtype_poasquestion\hint {
      * @return bool hint response based.
      */
     public function hint_response_based() {
-        return $this->mode != 2;
-    }
-
-    /**
-     * Return true if can available hint for answer.
-     * @param $answer User answer.
-     * @return bool Can available hint for answer?
-     */
-    public function can_available_hint_for_answer ($answer) {
-
-        if ($this->mode == 3) {
-            return false;
-        } else {
-            return true;
-        }
+        return $this->mode == $this::HINT_FOR_STUDENTS_ANSWER || $this->mode == $this::HINT_FOR_BOTH_STUDENTS_AND_TEACHERS_ANSWERS;
     }
 
     /**
@@ -147,9 +142,9 @@ abstract class hint extends \qtype_poasquestion\hint {
 
         $hinttypefield = $this->short_key() . 'hinttype';
         switch ($this->question->$hinttypefield) {
-            case 0:
+            case $this::HINT_DISABLED:
                 return false;
-            case 2:
+            case $this::HINT_FOR_TEACHERS_ANSWER:
                 return true;
             default:
                 if ($response === null)
@@ -194,12 +189,12 @@ abstract class hint extends \qtype_poasquestion\hint {
             get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex')));
 
         switch($this->mode){
-            case 1:
+            case $this::HINT_FOR_STUDENTS_ANSWER:
                 return $hinttitlestring . $this->render_hint_for_answer($response['answer']);
-            case 2:
+            case $this::HINT_FOR_TEACHERS_ANSWER:
                 $answer = $this->question->get_best_fit_answer($response);
                 return $hinttitlestring . $this->render_hint_for_answer($answer['answer']->answer);
-            case 3:
+            case $this::HINT_FOR_BOTH_STUDENTS_AND_TEACHERS_ANSWERS:
                 $answer = $this->question->get_best_fit_answer($response);
                 return $hinttitlestring . $this->render_hint_for_both_students_and_teachers_answers($response['answer'], $answer['answer']->answer, $renderer);
             default:
