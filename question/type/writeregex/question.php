@@ -21,7 +21,6 @@ global $CFG;
 require_once($CFG->dirroot . '/question/type/questionbase.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_hints.php');
 
 /**
  * Represents a write regex question.
@@ -318,22 +317,22 @@ class qtype_writeregex_question extends question_graded_automatically
             return new qtype_poasquestion\hintmoodle($this, $hintkey);
         }
 
-        $hintclass = 'qtype_writeregex_'.$hintkey;
+        $hintclass = '\qtype_writeregex\\'.$hintkey;
 
         $analysermode = 0;
-        if ($hintkey == 'syntaxtreehint') {
+        if ($hintkey == 'syntax_tree_hint') {
             $analysermode = $this->syntaxtreehinttype;
         }
 
-        if ($hintkey == 'explgraphhint') {
+        if ($hintkey == 'explanation_graph_hint') {
             $analysermode = $this->explgraphhinttype;
         }
 
-        if ($hintkey == 'descriptionhint') {
+        if ($hintkey == 'description_hint') {
             $analysermode = $this->descriptionhinttype;
         }
 
-        if ($hintkey == 'teststringshint') {
+        if ($hintkey == 'test_strings_hint') {
             $analysermode = $this->teststringshinttype;
         }
 
@@ -353,19 +352,19 @@ class qtype_writeregex_question extends question_graded_automatically
         }
 
         if ($this->syntaxtreehinttype > 0) {
-            $hinttypes[] = 'syntaxtreehint';
+            $hinttypes[] = 'syntax_tree_hint';
         }
 
         if ($this->explgraphhinttype > 0) {
-            $hinttypes[] = 'explgraphhint';
+            $hinttypes[] = 'explanation_graph_hint';
         }
 
         if ($this->descriptionhinttype > 0) {
-            $hinttypes[] = 'descriptionhint';
+            $hinttypes[] = 'description_hint';
         }
 
         if ($this->teststringshinttype > 0) {
-            $hinttypes[] = 'teststringshint';
+            $hinttypes[] = 'test_strings_hint';
         }
 
         return $hinttypes;
