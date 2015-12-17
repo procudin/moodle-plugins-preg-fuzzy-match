@@ -128,10 +128,21 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
     /**
      * Generate two column table for teststring hint with displaying both student and teacher match results
      */
-    public function generate_teststring_hint_result_table($studentresults, $teacherresult) {
-        $res = '<table cellpadding="5"><tr><td>' . get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') .
-            '</td><td>' .  get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . '</td></tr>' .
-            '<tr><td>' . $studentresults . '</td><td>' . $teacherresult . '</td></tr></table>';
+    public function generate_teststring_hint_result_table($studentresults, $teacherresults) {
+        // Generating cell for students result
+        $studentresultscell = html_writer::tag('td', $studentresults);
+        // Generating cell for teachers result
+        $teacherresultscell = html_writer::tag('td', $teacherresults);
+        // Generating row for results
+        $resultsrow = html_writer::tag('tr', $studentresultscell . $teacherresultscell);
+        // Generating cell for students result title
+        $studenttitlecell = html_writer::tag('td', get_string('hintdescriptionstudentsanswer', 'qtype_writeregex'));
+        // Generating cell for teachers result title
+        $teachertitlecell = html_writer::tag('td', get_string('hintdescriptionteachersanswer', 'qtype_writeregex'));
+        // Generating row for result titles
+        $titlerow = html_writer::tag('tr', $studenttitlecell . $teachertitlecell);
+        // Generating table
+        $res = html_writer::tag('table', $titlerow . $resultsrow, array('cellpadding' => '5'));
         return $res;
     }
 
