@@ -320,20 +320,13 @@ class qtype_writeregex_question extends question_graded_automatically
         $hintclass = '\qtype_writeregex\\'.$hintkey;
 
         $analysermode = 0;
-        if ($hintkey == 'syntax_tree_hint') {
-            $analysermode = $this->syntaxtreehinttype;
-        }
-
-        if ($hintkey == 'explanation_graph_hint') {
-            $analysermode = $this->explgraphhinttype;
-        }
-
-        if ($hintkey == 'description_hint') {
-            $analysermode = $this->descriptionhinttype;
-        }
-
-        if ($hintkey == 'test_strings_hint') {
-            $analysermode = $this->teststringshinttype;
+        $questiontype = new qtype_writeregex();
+        $availablehinttypes = $questiontype->available_hint_types();
+        foreach ($availablehinttypes as $key => $classname) {
+            if ($classname == $hintkey) {
+                $fieldname = $key . 'hinttype';
+                $analysermode = $this->$fieldname;
+            }
         }
 
         return new $hintclass($this, $hintkey, $analysermode);
@@ -351,20 +344,13 @@ class qtype_writeregex_question extends question_graded_automatically
             $hinttypes[] = 'hintmoodle#';
         }
 
-        if ($this->syntaxtreehinttype > 0) {
-            $hinttypes[] = 'syntax_tree_hint';
-        }
-
-        if ($this->explgraphhinttype > 0) {
-            $hinttypes[] = 'explanation_graph_hint';
-        }
-
-        if ($this->descriptionhinttype > 0) {
-            $hinttypes[] = 'description_hint';
-        }
-
-        if ($this->teststringshinttype > 0) {
-            $hinttypes[] = 'test_strings_hint';
+        $questiontype = new qtype_writeregex();
+        $availablehinttypes = $questiontype->available_hint_types();
+        foreach ($availablehinttypes as $key => $classname) {
+            $fieldname = $key . 'hinttype';
+            if ($this->$fieldname > 0) {
+                $hinttypes[] = $classname;
+            }
         }
 
         return $hinttypes;
