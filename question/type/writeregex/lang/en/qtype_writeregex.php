@@ -127,12 +127,12 @@ $string['syntaxtreehintpenalty'] = 'Syntax tree: prnalty';
 $string['syntaxtreehintpenalty_help'] = "<p>Meaning usage penalty hints as syntax tree</p>";
 $string['syntaxtreehintexplanation'] = 'Syntax tree {$a}:';
 
-$string['explgraphhinttype_title'] = 'Count explanation';
-$string['explgraphhinttype'] = 'Count explanation';
+$string['explgraphhinttype_title'] = 'Explanation graph';
+$string['explgraphhinttype'] = 'Explanation graph';
 $string['explgraphhinttype_help'] = "<p>Value to display a tooltip as a graph explanation.</p>";
 
-$string['explgraphhintpenalty_title'] = 'Count explanation: fine';
-$string['explgraphhintpenalty'] = 'Count explanation: fine';
+$string['explgraphhintpenalty_title'] = 'Explanation graph: fine';
+$string['explgraphhintpenalty'] = 'Explanation graph: fine';
 $string['explgraphhintpenalty_help'] = "<p>The amount of penalty for the use of tips as a graph explanation.</p>";
 $string['explgraphhintexplanation'] = 'Explanation graph {$a}:';
 
