@@ -49,6 +49,14 @@ class test_strings_hint extends hint {
     }
 
     /**
+     * Returns the hint explanation string to show after hint usage.
+     * @return string hint explanation
+     */
+    public function hint_explanation_title() {
+        return get_string('teststringshintexplanation', 'qtype_writeregex', get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
+    }
+
+    /**
      * @return qtype_preg_authoring_tool tool used for hint
      */
     function tool($regex) {

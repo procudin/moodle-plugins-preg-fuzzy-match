@@ -176,6 +176,17 @@ abstract class hint extends \qtype_poasquestion\hint {
     public abstract function render_hint_for_both_students_and_teachers_answers($studentsanswer, $teachersanswer, $renderer);
 
     /**
+     * Returns the hint explanation string to show after hint usage.
+     * @return string hint explanation
+     */
+    public function hint_explanation_title() {
+        $a = new \stdClass;
+        $a->type = get_string($this->short_key() . 'hinttype', 'qtype_writeregex');
+        $a->mode = get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex');
+        return get_string('hintexplanation', 'qtype_writeregex', $a);
+    }
+
+    /**
      * Render hint function.
      * @param question $renderer
      * @param question_attempt $qa
@@ -185,8 +196,7 @@ abstract class hint extends \qtype_poasquestion\hint {
      */
     public function render_hint($renderer, \question_attempt $qa = null, \question_display_options $options = null, $response = null) {
 
-        $hinttitlestring = $renderer->render_hint_title(get_string($this->short_key() . 'hintexplanation', 'qtype_writeregex',
-            get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex')));
+        $hinttitlestring = $renderer->render_hint_title($this->hint_explanation_title());
 
         switch($this->mode){
             case $this::HINT_FOR_STUDENTS_ANSWER:
