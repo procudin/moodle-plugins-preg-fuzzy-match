@@ -117,6 +117,7 @@ $string['hinttitleaddition'] = '({$a})';
 $string['hinttitleadditionformode_1'] = 'for your answer';
 $string['hinttitleadditionformode_2'] = 'for correct answer';
 $string['hinttitleadditionformode_3'] = 'for your and correct answers';
+$string['hintexplanation'] = '{$a->type} {$a->mode}:';
 
 $string['syntaxtreehinttype_title'] = 'Syntax tree';
 $string['syntaxtreehinttype'] = 'Syntax tree';
@@ -125,7 +126,6 @@ $string['syntaxtreehinttype_help'] = "<p>Value display hints as syntax tree.</p>
 $string['syntaxtreehintpenalty_title'] = 'Syntax tree: penalty';
 $string['syntaxtreehintpenalty'] = 'Syntax tree: prnalty';
 $string['syntaxtreehintpenalty_help'] = "<p>Meaning usage penalty hints as syntax tree</p>";
-$string['syntaxtreehintexplanation'] = 'Syntax tree {$a}:';
 
 $string['explgraphhinttype_title'] = 'Explanation graph';
 $string['explgraphhinttype'] = 'Explanation graph';
@@ -134,7 +134,6 @@ $string['explgraphhinttype_help'] = "<p>Value to display a tooltip as a graph ex
 $string['explgraphhintpenalty_title'] = 'Explanation graph: fine';
 $string['explgraphhintpenalty'] = 'Explanation graph: fine';
 $string['explgraphhintpenalty_help'] = "<p>The amount of penalty for the use of tips as a graph explanation.</p>";
-$string['explgraphhintexplanation'] = 'Explanation graph {$a}:';
 
 $string['descriptionhinttype_title'] = 'Explanation of the expression';
 $string['descriptionhinttype'] = 'Explanation of the expression';
@@ -143,12 +142,11 @@ $string['descriptionhinttype_help'] = "<p>Display value in the form of tips expl
 $string['descriptionhintpenalty_title'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty_help'] = "<p>The amount of penalty for using hints as explanations of expression.</p>";
-$string['descriptionhintexplanation'] = 'Description {$a}:';
 
 $string['teststringshinttype_title'] = 'Test string';
 $string['teststringshinttype'] = 'Test string';
 $string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
-$string['teststringshintexplanation'] = 'Teststrings match results {$a}:';
+$string['teststringshintexplanation'] = 'Test strings match results {$a}:';
 
 $string['teststringshintpenalty_title'] = 'Test string: fine';
 $string['teststringshintpenalty'] = 'Test string: fine';
