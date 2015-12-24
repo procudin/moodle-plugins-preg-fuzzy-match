@@ -66,10 +66,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         // Init hints options.
         $this->hintsoptions = array(
-            '0' => get_string('none', 'qtype_writeregex'),
-            '1' => get_string('student', 'qtype_writeregex'),
-            '2' => get_string('answer', 'qtype_writeregex'),
-            '3' => get_string('both', 'qtype_writeregex')
+            \qtype_writeregex\hint::HINT_DISABLED => get_string('none', 'qtype_writeregex'),
+            \qtype_writeregex\hint::HINT_FOR_STUDENTS_ANSWER => get_string('student', 'qtype_writeregex'),
+            \qtype_writeregex\hint::HINT_FOR_TEACHERS_ANSWER => get_string('answer', 'qtype_writeregex'),
+            \qtype_writeregex\hint::HINT_FOR_BOTH_STUDENTS_AND_TEACHERS_ANSWERS => get_string('both', 'qtype_writeregex')
         );
 
         // Include preg.

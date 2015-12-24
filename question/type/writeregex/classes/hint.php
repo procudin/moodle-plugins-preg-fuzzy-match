@@ -44,8 +44,6 @@ abstract class hint extends \qtype_poasquestion\hint {
     protected $question;
     /** @var  string Hint key. */
     protected $hintkey;
-    /** @var array Options of hint. */
-    protected $hintoptions = array();
 
     /**
      * Init all fields.
@@ -58,20 +56,6 @@ abstract class hint extends \qtype_poasquestion\hint {
         $this->question = $question;
         $this->hintkey = $hintkey;
         $this->mode = $mode;
-        $this->hintoptions = array(
-            '0' => get_string('none', 'qtype_writeregex'),
-            '1' => get_string('student', 'qtype_writeregex'),
-            '2' => get_string('answer', 'qtype_writeregex'),
-            '3' => get_string('both', 'qtype_writeregex')
-        );
-    }
-
-    /**
-     * Get options of text description hint.
-     * @return array Options of text description hint.
-     */
-    public function descriptionhintoptions() {
-        return $this->descriptionhintoptions;
     }
 
     /**
