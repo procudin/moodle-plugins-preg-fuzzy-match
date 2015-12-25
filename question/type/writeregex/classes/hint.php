@@ -84,8 +84,9 @@ abstract class hint extends \qtype_poasquestion\hint {
      * @return string hint description.
      */
     public function hint_description() {
-        // Description for hint using mode (e.g. '(for correct answer)')
-        $additionformode = get_string('hinttitleaddition', 'qtype_writeregex', get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
+        // Description for hint using mode (e.g. '(for correct answer)').
+        $additionformode = get_string('hinttitleaddition', 'qtype_writeregex',
+            get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
         return \qtype_poasquestion\string::strtolower($this->hint_title()) . ' ' . $additionformode;
     }
 
@@ -115,8 +116,7 @@ abstract class hint extends \qtype_poasquestion\hint {
     /**
      * @return \qtype_preg_authoring_tools_options regexoptions for current question
      */
-    public function getRegexOptions()
-    {
+    public function get_regex_options() {
         $regexoptions = new \qtype_preg_authoring_tools_options();
         $regexoptions->engine = $this->question->engine;
         $regexoptions->usecase = $this->question->usecase;
@@ -143,8 +143,9 @@ abstract class hint extends \qtype_poasquestion\hint {
             case $this::HINT_FOR_TEACHERS_ANSWER:
                 return true;
             default:
-                if ($response === null)
+                if ($response == null) {
                     return true;
+                }
 
                 // Check for possibility of using hint for current student response.
                 $tree = $this->tool($response['answer']);
@@ -199,7 +200,8 @@ abstract class hint extends \qtype_poasquestion\hint {
      * @param null $response
      * @return string Template code value.
      */
-    public function render_hint($renderer, \question_attempt $qa = null, \question_display_options $options = null, $response = null) {
+    public function render_hint($renderer, \question_attempt $qa = null,
+                                \question_display_options $options = null, $response = null) {
 
         $hinttitlestring = $renderer->render_hint_title($this->hint_explanation_title());
 
@@ -211,7 +213,8 @@ abstract class hint extends \qtype_poasquestion\hint {
                 return $hinttitlestring . $this->render_hint_for_answer($answer['answer']->answer);
             case $this::HINT_FOR_BOTH_STUDENTS_AND_TEACHERS_ANSWERS:
                 $answer = $this->question->get_best_fit_answer($response);
-                return $hinttitlestring . $this->render_hint_for_both_students_and_teachers_answers($response['answer'], $answer['answer']->answer, $renderer);
+                return $hinttitlestring . $this->render_hint_for_both_students_and_teachers_answers($response['answer'],
+                    $answer['answer']->answer, $renderer);
             default:
                 return '';
         }

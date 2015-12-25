@@ -43,15 +43,15 @@ class description_hint extends hint {
     /**
      * @return string key for lang strings and field names
      */
-    function short_key() {
+    public function short_key() {
         return 'description';
     }
 
     /**
      * @return qtype_preg_authoring_tool tool used for hint
      */
-    function tool($regex) {
-        return new \qtype_preg_description_tool($regex, $this->getRegexOptions());
+    public function tool($regex) {
+        return new \qtype_preg_description_tool($regex, $this->get_regex_options());
     }
 
     /**

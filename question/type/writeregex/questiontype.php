@@ -54,7 +54,7 @@ class qtype_writeregex extends qtype_shortanswer {
         $result = parent::get_question_options($question);
 
         foreach ($question->options->answers as $key => $answer) {
-            if ($answer->answerformat == qtype_writeregex::TEST_STRING_ANSWER_FORMAT_VALUE) {
+            if ($answer->answerformat == self::TEST_STRING_ANSWER_FORMAT_VALUE) {
                 $question->options->teststrings[$key] = $answer;
                 unset($question->options->answers[$key]);
             }
