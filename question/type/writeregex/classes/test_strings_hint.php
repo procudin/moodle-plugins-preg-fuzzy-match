@@ -38,7 +38,7 @@ class test_strings_hint extends hint {
      * @return string hint title.
      */
     public function hint_title() {
-        return get_string('teststrings', 'qtype_writeregex');
+        return get_string('teststringshinttype', 'qtype_writeregex');
     }
 
     /**

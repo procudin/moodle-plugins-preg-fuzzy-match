@@ -24,15 +24,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['addmoreanswerblanks'] = 'Blanks for {no} More Answers';
-$string['answer'] = 'Answer: {$a}';
-$string['answermustbegiven'] = 'You must enter an answer if there is a grade or feedback.';
-$string['answerno'] = 'Answer {$a}';
-$string['caseno'] = 'No, case is unimportant';
-$string['casesensitive'] = 'Case sensitivity';
-$string['caseyes'] = 'Yes, case must match';
-$string['correctansweris'] = 'The correct answer is: {$a}';
-$string['correctanswers'] = 'Correct answers';
 $string['doterror'] = 'Can\'t draw {$a->name} for regex #{$a->index}';
 $string['filloutoneanswer'] = 'You must provide at least one possible answer. Answers left blank will not be used. \'*\' can be used as a wildcard to match any characters. The first matching answer will be used to determine the score and feedback.';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';
@@ -43,69 +34,20 @@ $string['pluginname_link'] = 'question/type/writeregex';
 $string['pluginnameadding'] = 'Adding a Write RegEx question';
 $string['pluginnameediting'] = 'Editing a Write RegEx question';
 $string['pluginnamesummary'] = 'Question to monitor student\'s knowledge of compiling regular expressions (regexp).';
-$string['wre_notation'] = 'Notation';
-
-$string['wre_notation_simple'] = 'Simple';
-$string['wre_notation_extended'] = 'Extended';
-$string['wre_notation_moodle'] = 'Moodle Short Answer';
 
 $string['wre_hintsheader'] = 'Hints';
 
-$string['wre_st'] = 'Syntax tree';
-$string['wre_st_penalty'] = 'Penalty';
-$string['wre_st_none'] = 'None';
-$string['wre_st_student'] = 'Show the student\'s answer';
-$string['wre_st_answer'] = 'Show the correct answer';
-$string['wre_st_both'] = 'Show the student\'s answer and the correct answer (both)';
-
-$string['wre_eg'] = 'Explaining graph';
-$string['wre_eg_penalty'] = 'Penalty';
-$string['wre_eg_none'] = 'None';
-$string['wre_eg_student'] = 'Show the student\'s answer';
-$string['wre_eg_answer'] = 'Show the correct answer';
-$string['wre_eg_both'] = 'Show the student\'s answer and the correct answer (both)';
-
-$string['wre_d'] = 'Description';
-$string['wre_d_penalty'] = 'Penalty';
-$string['wre_d_none'] = 'None';
-$string['wre_d_student'] = 'Show the student\'s answer';
-$string['wre_d_answer'] = 'Show the correct answer';
-$string['wre_d_both'] = 'Show the student\'s answer and the correct answer (both)';
-
-$string['teststrings'] = 'Test string';
 $string['penalty'] = 'Penalty';
 $string['none'] = 'None';
 $string['student'] = 'Show the student\'s answer';
 $string['answer'] = 'Show the correct answer';
 $string['both'] = 'Show the student\'s answer and the correct answer (both)';
 
-$string['wre_cre'] = 'Compare regexp';
-$string['wre_cre_no'] = 'No';
-$string['wre_cre_yes'] = 'Yes';
-$string['wre_cre_percentage'] = 'Percentage';
-
-$string['wre_acre'] = 'Compare regexp\'s automats';
-$string['wre_acre_percentage'] = 'Percentage';
-$string['compareautomatapercentage'] = 'Checking regular expression matching (in %) for automata';
-
-$string['compareregexpteststrings'] = 'Checking regular expression matching (in %) in test strings';
-
 $string['wre_regexp_answers'] = 'Regular expression {no}';
 $string['wre_regexp_ts'] = 'Test string {no}';
 $string['wre_regexp_ts_header'] = 'Test strings';
 
 $string['wre_error_matching'] = 'Sum of all matching type is not equal 100%';
-
-$string['wre_regexp_answers_count'] = 'Must be at least one answer';
-$string['wre_regexp_fractions_count'] = 'At least one of the answers must have a fraction 100%';
-
-$string['wre_ts_answers_count'] = 'Must be at least one answer';
-$string['wre_ts_fractions_count'] = 'At least one of the answers must have a fraction 100%';
-
-$string['compare'] = 'You can specify a weight check in regexps and automata';
-$string['compare_title'] = 'You can specify a weight check in regexps and automata';
-$string['compare_help'] = 'Comparison is carried out directly in regexps and automata. If you specify a value for
-regexps 1, the value for automatic turn 0 (total value = comparison of regexp + comparison of engines).';
 
 $string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
@@ -119,47 +61,36 @@ $string['hinttitleadditionformode_2'] = 'for correct answer';
 $string['hinttitleadditionformode_3'] = 'for your and correct answers';
 $string['hintexplanation'] = '{$a->type} {$a->mode}:';
 
-$string['syntaxtreehinttype_title'] = 'Syntax tree';
 $string['syntaxtreehinttype'] = 'Syntax tree';
 $string['syntaxtreehinttype_help'] = "<p>Value display hints as syntax tree.</p>";
 
-$string['syntaxtreehintpenalty_title'] = 'Syntax tree: penalty';
 $string['syntaxtreehintpenalty'] = 'Syntax tree: prnalty';
 $string['syntaxtreehintpenalty_help'] = "<p>Meaning usage penalty hints as syntax tree</p>";
 
-$string['explgraphhinttype_title'] = 'Explanation graph';
 $string['explgraphhinttype'] = 'Explanation graph';
 $string['explgraphhinttype_help'] = "<p>Value to display a tooltip as a graph explanation.</p>";
 
-$string['explgraphhintpenalty_title'] = 'Explanation graph: fine';
 $string['explgraphhintpenalty'] = 'Explanation graph: fine';
 $string['explgraphhintpenalty_help'] = "<p>The amount of penalty for the use of tips as a graph explanation.</p>";
 
-$string['descriptionhinttype_title'] = 'Explanation of the expression';
 $string['descriptionhinttype'] = 'Explanation of the expression';
 $string['descriptionhinttype_help'] = "<p>Display value in the form of tips explaining expression.</p>";
 
-$string['descriptionhintpenalty_title'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty'] = 'Explanation of the expression: fine';
 $string['descriptionhintpenalty_help'] = "<p>The amount of penalty for using hints as explanations of expression.</p>";
 
-$string['teststringshinttype_title'] = 'Test string';
 $string['teststringshinttype'] = 'Test string';
 $string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
 $string['teststringshintexplanation'] = 'Test strings match results {$a}:';
 
-$string['teststringshintpenalty_title'] = 'Test string: fine';
 $string['teststringshintpenalty'] = 'Test string: fine';
 $string['teststringshintpenalty_help'] = "<p>The amount of penalty for the use of clues in the form of test strings.</p>";
 
-$string['comparetreepercentage_title'] = 'Based on regular expression match';
 $string['comparetreepercentage'] = 'Based on regular expression match';
 $string['comparetreepercentage_help'] = "<p>The value (in%) of the share estimates for regular expression matching.</p>";
 
-$string['compareautomatapercentage_title'] = 'Rating coincidentally automata regular expressions';
 $string['compareautomatapercentage'] = 'Rating coincidentally automata regular expressions';
 $string['compareautomatapercentage_help'] = "<p>Value (in%) of the share estimates coincidentally automata regular expressions.</p>";
 
-$string['comparestringspercentage_title'] = 'Based on testing on the test lines of regular expressions';
 $string['comparestringspercentage'] = 'Based on testing on the test lines of regular expressions';
 $string['comparestringspercentage_help'] = "<p>Value (in%) of the share valuation verification test on the lines of regular expressions.</p>";

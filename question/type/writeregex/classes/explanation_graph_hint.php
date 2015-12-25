@@ -37,7 +37,7 @@ class explanation_graph_hint extends hint {
      * @return string Hint title.
      */
     public function hint_title() {
-        return get_string('wre_eg', 'qtype_writeregex');
+        return get_string('explgraphhinttype', 'qtype_writeregex');
     }
 
     /**
