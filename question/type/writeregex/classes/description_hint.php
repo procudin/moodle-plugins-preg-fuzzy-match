@@ -51,11 +51,7 @@ class description_hint extends hint {
      * @return qtype_preg_authoring_tool tool used for hint
      */
     function tool($regex) {
-        $regexoptions = new \qtype_preg_authoring_tools_options();
-        $regexoptions->engine = $this->question->engine;
-        $regexoptions->usecase = $this->question->usecase;
-        $regexoptions->notation = $this->question->notation;
-        return new \qtype_preg_description_tool($regex, $regexoptions);
+        return new \qtype_preg_description_tool($regex, $this->getRegexOptions());
     }
 
     /**
@@ -67,19 +63,5 @@ class description_hint extends hint {
         $description = $this->tool($answer);
         $html = $description->generate_html();
         return $html;
-    }
-
-    /**
-     * Render hint for both students and teachers answers.
-     * @param string $studentsanswer students answer
-     * @param string $teachersanswer teachers answer
-     * @param question $renderer
-     * @return string hint display result for given answers.
-     */
-    public function render_hint_for_both_students_and_teachers_answers($studentsanswer, $teachersanswer, $renderer) {
-        $hintforstudent = $this->render_hint_for_answer($studentsanswer);
-        $hintforteacher = $this->render_hint_for_answer($teachersanswer);
-        return get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ' . $hintforstudent . "<br>" .
-               get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ' . $hintforteacher;
     }
 }
