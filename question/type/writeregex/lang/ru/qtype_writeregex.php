@@ -24,9 +24,39 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['answer'] = 'Демонстрация для правильного ответа';
+$string['both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
+$string['compareautomatapercentage'] = 'Оценка по свопадению автоматов регулярных выражений';
+$string['compareautomatapercentage_help'] = "<p>Значение (в %) доли оценки по совпадению автоматов регулярных выражений .</p>";
+$string['compareinvalidvalue'] = 'Значение должно быть в диапазоне от 0 до 100';
+$string['comparestringspercentage'] = 'Оценка по проверке на тестовых строках регулярных выражений';
+$string['comparestringspercentage_help'] = "<p>Значение (в %) доли оценки по проверке на тестовых строках регулярных выражений .</p>";
+$string['comparetreepercentage'] = 'Оценка по свопадению регулярных выражений';
+$string['comparetreepercentage_help'] = "<p>Значение (в %) доли оценки по совпадению регулярных выражений .</p>";
+$string['descriptionhintpenalty'] = 'Объяснение выражения: штраф';
+$string['descriptionhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде объяснения выражения.</p>";
+$string['descriptionhinttype'] = 'Объяснение выражения';
+$string['descriptionhinttype_help'] = "<p>Значение отображения подсказки в виде объяснения выражения.</p>";
 $string['doterror'] = 'Невозможно отрисовать {$a->name} для регулярного выражения №{$a->index}';
+$string['explgraphhintpenalty'] = 'Граф объяснения: штраф';
+$string['explgraphhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде графа объяснения.</p>";
+$string['explgraphhinttype'] = 'Граф объяснения';
+$string['explgraphhinttype_help'] = "<p>Значение отображения подсказки в виде графа объяснения.</p>";
 $string['filloutoneanswer'] = 'You must provide at least one possible answer. Answers left blank will not be used. \'*\' can be used as a wildcard to match any characters. The first matching answer will be used to determine the score and feedback.';
+$string['hintdescriptionstudentsanswer'] = "Ваш ответ";
+$string['hintdescriptionteachersanswer'] = "Правильный ответ";
+$string['hintexplanation'] = '{$a->type} {$a->mode}:';
+$string['hintsheader'] = 'Подсказки';
+$string['hinttitleaddition'] = '(для {$a})';
+$string['hinttitleadditionformode_1'] = 'Вашего ответа';
+$string['hinttitleadditionformode_2'] = 'правильного ответа';
+$string['hinttitleadditionformode_3'] = 'Вашего и правильного ответов';
+$string['invalidcomparets'] = 'Значение проверки по тестовым строкам выставлена в 0, удалите тестовые строки';
+$string['invalidmatchingtypessumvalue'] = 'Сумма всех типов проверок не равна 100%';
+$string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
+$string['none'] = 'Не показывать';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';
+$string['penalty'] = 'Штраф';
 $string['pleaseenterananswer'] = 'Please enter an answer.';
 $string['pluginname'] = 'Write RegEx';
 $string['pluginname_help'] = 'In response to a question (that may include a image) the respondent types a word or short phrase. There may be several possible correct answers, each with a different grade. If the "Case sensitive" option is selected, then you can have different scores for "Word" or "word".';
@@ -34,63 +64,16 @@ $string['pluginname_link'] = 'question/type/writeregex';
 $string['pluginnameadding'] = 'Добавить вопрос Write RegEx';
 $string['pluginnameediting'] = 'Изменение вопроса Write RegEx';
 $string['pluginnamesummary'] = 'Вопрос для контроля знаний студентов по составлению регулярных выражений (regexp).';
-
-$string['hintsheader'] = 'Подсказки';
-
-$string['penalty'] = 'Штраф';
-$string['none'] = 'Не показывать';
-$string['student'] = 'Демонстрация для ответа студента';
-$string['answer'] = 'Демонстрация для правильного ответа';
-$string['both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
-
 $string['regexp_answers'] = "Регулярное\nвыражение {no}";
 $string['regexp_ts'] = 'Тестовая строка {no}';
 $string['regexp_ts_header'] = 'Тестовые строки';
-
-$string['invalidmatchingtypessumvalue'] = 'Сумма всех типов проверок не равна 100%';
-
-$string['compareinvalidvalue'] = 'Значение должно быть в диапазоне от 0 до 100';
-$string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
-$string['invalidcomparets'] = 'Значение проверки по тестовым строкам выставлена в 0, удалите тестовые строки';
-
-$string['hintdescriptionstudentsanswer'] = "Ваш ответ";
-$string['hintdescriptionteachersanswer'] = "Правильный ответ";
-$string['hinttitleaddition'] = '(для {$a})';
-$string['hinttitleadditionformode_1'] = 'Вашего ответа';
-$string['hinttitleadditionformode_2'] = 'правильного ответа';
-$string['hinttitleadditionformode_3'] = 'Вашего и правильного ответов';
-$string['hintexplanation'] = '{$a->type} {$a->mode}:';
-
-$string['syntaxtreehinttype'] = 'Синтаксическое дерево';
-$string['syntaxtreehinttype_help'] = "<p>Значение отображения подсказки в виде синтаксического дерева</p>";
-
+$string['student'] = 'Демонстрация для ответа студента';
 $string['syntaxtreehintpenalty'] = 'Синтаксическое дерево: штраф';
 $string['syntaxtreehintpenalty_help'] = "<p>Значение штрафа за использование подсказки в виде синтаксического дерева</p>";
-
-$string['explgraphhinttype'] = 'Граф объяснения';
-$string['explgraphhinttype_help'] = "<p>Значение отображения подсказки в виде графа объяснения.</p>";
-
-$string['explgraphhintpenalty'] = 'Граф объяснения: штраф';
-$string['explgraphhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде графа объяснения.</p>";
-
-$string['descriptionhinttype'] = 'Объяснение выражения';
-$string['descriptionhinttype_help'] = "<p>Значение отображения подсказки в виде объяснения выражения.</p>";
-
-$string['descriptionhintpenalty'] = 'Объяснение выражения: штраф';
-$string['descriptionhintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде объяснения выражения.</p>";
-
-$string['teststringshinttype'] = 'Тестовые строки';
-$string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
+$string['syntaxtreehinttype'] = 'Синтаксическое дерево';
+$string['syntaxtreehinttype_help'] = "<p>Значение отображения подсказки в виде синтаксического дерева</p>";
 $string['teststringshintexplanation'] = 'Результаты совпадения {$a} с тестовыми строками:';
-
 $string['teststringshintpenalty'] = 'Тестовые строки: штраф';
 $string['teststringshintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде тестовых строк.</p>";
-
-$string['comparetreepercentage'] = 'Оценка по свопадению регулярных выражений';
-$string['comparetreepercentage_help'] = "<p>Значение (в %) доли оценки по совпадению регулярных выражений .</p>";
-
-$string['compareautomatapercentage'] = 'Оценка по свопадению автоматов регулярных выражений';
-$string['compareautomatapercentage_help'] = "<p>Значение (в %) доли оценки по совпадению автоматов регулярных выражений .</p>";
-
-$string['comparestringspercentage'] = 'Оценка по проверке на тестовых строках регулярных выражений';
-$string['comparestringspercentage_help'] = "<p>Значение (в %) доли оценки по проверке на тестовых строках регулярных выражений .</p>";
+$string['teststringshinttype'] = 'Тестовые строки';
+$string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
