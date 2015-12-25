@@ -37,7 +37,7 @@ class description_hint extends hint {
      * @return string hint title.
      */
     public function hint_title() {
-        return get_string('wre_d', 'qtype_writeregex');
+        return get_string('descriptionhinttype', 'qtype_writeregex');
     }
 
     /**

@@ -37,7 +37,7 @@ class syntax_tree_hint extends hint {
      * @return string hint title.
      */
     public function hint_title() {
-        return get_string('wre_st', 'qtype_writeregex');
+        return get_string('syntaxtreehinttype', 'qtype_writeregex');
     }
 
     /**

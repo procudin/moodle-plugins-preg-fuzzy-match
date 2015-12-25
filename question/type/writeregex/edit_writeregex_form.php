@@ -107,7 +107,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addElement('header', 'hintshdr', get_string('wre_hintsheader', 'qtype_writeregex'), '');
         $mform->setExpanded('hintshdr', 1);
         // Add syntax tree options.
-        $mform->addElement('select', 'syntaxtreehinttype', get_string('wre_st', 'qtype_writeregex'),
+        $mform->addElement('select', 'syntaxtreehinttype', get_string('syntaxtreehinttype', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('syntaxtreehinttype', 'syntaxtreehinttype', 'qtype_writeregex');
         $mform->addElement('text', 'syntaxtreehintpenalty',
@@ -117,7 +117,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('syntaxtreehintpenalty', 'syntaxtreehintpenalty', 'qtype_writeregex');
 
         // Add explaining graph options.
-        $mform->addElement('select', 'explgraphhinttype', get_string('wre_eg', 'qtype_writeregex'),
+        $mform->addElement('select', 'explgraphhinttype', get_string('explgraphhinttype', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('explgraphhinttype', 'explgraphhinttype', 'qtype_writeregex');
         $mform->addElement('text', 'explgraphhintpenalty',
@@ -127,7 +127,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('explgraphhintpenalty', '0.0000000');
 
         // Add description options.
-        $mform->addElement('select', 'descriptionhinttype', get_string('wre_d', 'qtype_writeregex'),
+        $mform->addElement('select', 'descriptionhinttype', get_string('descriptionhinttype', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('descriptionhinttype', 'descriptionhinttype', 'qtype_writeregex');
         $mform->addElement('text', 'descriptionhintpenalty',
@@ -137,7 +137,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('descriptionhintpenalty', 'descriptionhintpenalty', 'qtype_writeregex');
 
         // Add test string option.
-        $mform->addElement('select', 'teststringshinttype', get_string('teststrings', 'qtype_writeregex'),
+        $mform->addElement('select', 'teststringshinttype', get_string('teststringshinttype', 'qtype_writeregex'),
             $this->hintsoptions);
         $mform->addHelpButton('teststringshinttype', 'teststringshinttype', 'qtype_writeregex');
         $mform->addElement('text', 'teststringshintpenalty',
@@ -246,19 +246,19 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $count = count($parentresult[0]);
 
         // Add syntax tree options.
-        $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint', get_string('wre_st', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint', get_string('syntaxtreehinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // Add explaining graph options.
-        $repeated[$count++] = $mform->createElement('select', 'explgraphhint', get_string('wre_eg', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'explgraphhint', get_string('explgraphhinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // Add description options.
-        $repeated[$count++] = $mform->createElement('select', 'descriptionhint', get_string('wre_d', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'descriptionhint', get_string('descriptionhinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // Add test string option.
-        $repeated[$count] = $mform->createElement('select', 'teststringshint', get_string('teststrings', 'qtype_writeregex'),
+        $repeated[$count] = $mform->createElement('select', 'teststringshint', get_string('teststringshinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         $parentresult[0] = array_merge($parentresult[0], $repeated);
