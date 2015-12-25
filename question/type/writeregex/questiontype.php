@@ -80,7 +80,7 @@ class qtype_writeregex extends qtype_shortanswer {
         // Remove all answers.
         $DB->delete_records('question_answers', array('question' => $question->id));
 
-        if (!isset($question->wre_regexp_ts_answer)) {
+        if (!isset($question->regexp_ts_answer)) {
 
             $answers = array();
             $answersstrings = array();
@@ -99,22 +99,22 @@ class qtype_writeregex extends qtype_shortanswer {
 
             $question->answer = $answers;
             $question->fraction = $fraction;
-            $question->wre_regexp_ts_answer = $answersstrings;
-            $question->wre_regexp_ts_fraction = $fractionstrings;
+            $question->regexp_ts_answer = $answersstrings;
+            $question->regexp_ts_fraction = $fractionstrings;
         }
 
         // Insert regexp answers.
         parent::save_question_options($question);
 
         // Insert test string answers.
-        foreach ($question->wre_regexp_ts_answer as $key => $answer) {
+        foreach ($question->regexp_ts_answer as $key => $answer) {
 
-            if (trim($answer) == '' && $question->wre_regexp_ts_fraction[$key] == 0) {
+            if (trim($answer) == '' && $question->regexp_ts_fraction[$key] == 0) {
                 continue;
             }
 
             $record = $this->get_test_string_answer_object($answer,
-                $question->wre_regexp_ts_fraction[$key], $question->id);
+                $question->regexp_ts_fraction[$key], $question->id);
 
             $DB->insert_record('question_answers', $record);
         }

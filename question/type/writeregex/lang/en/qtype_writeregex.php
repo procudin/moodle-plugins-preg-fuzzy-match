@@ -35,7 +35,7 @@ $string['pluginnameadding'] = 'Adding a Write RegEx question';
 $string['pluginnameediting'] = 'Editing a Write RegEx question';
 $string['pluginnamesummary'] = 'Question to monitor student\'s knowledge of compiling regular expressions (regexp).';
 
-$string['wre_hintsheader'] = 'Hints';
+$string['hintsheader'] = 'Hints';
 
 $string['penalty'] = 'Penalty';
 $string['none'] = 'None';
@@ -43,11 +43,11 @@ $string['student'] = 'Show the student\'s answer';
 $string['answer'] = 'Show the correct answer';
 $string['both'] = 'Show the student\'s answer and the correct answer (both)';
 
-$string['wre_regexp_answers'] = 'Regular expression {no}';
-$string['wre_regexp_ts'] = 'Test string {no}';
-$string['wre_regexp_ts_header'] = 'Test strings';
+$string['regexp_answers'] = 'Regular expression {no}';
+$string['regexp_ts'] = 'Test string {no}';
+$string['regexp_ts_header'] = 'Test strings';
 
-$string['wre_error_matching'] = 'Sum of all matching type is not equal 100%';
+$string['invalidmatchingtypessumvalue'] = 'Sum of all matching types is not equal 100%';
 
 $string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
