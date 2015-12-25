@@ -113,6 +113,18 @@ abstract class hint extends \qtype_poasquestion\hint {
     }
 
     /**
+     * @return \qtype_preg_authoring_tools_options regexoptions for current question
+     */
+    public function getRegexOptions()
+    {
+        $regexoptions = new \qtype_preg_authoring_tools_options();
+        $regexoptions->engine = $this->question->engine;
+        $regexoptions->usecase = $this->question->usecase;
+        $regexoptions->notation = $this->question->notation;
+        return $regexoptions;
+    }
+
+    /**
      * @return qtype_preg_authoring_tool tool used for hint
      */
     public abstract function tool($regex);
@@ -149,7 +161,11 @@ abstract class hint extends \qtype_poasquestion\hint {
      * @param string $regex regex for which hint is to be shown
      * @return string hint display result for given regex.
      */
-    public abstract function render_hint_for_answer($answer);
+    public function render_hint_for_answer($answer) {
+        $tool = $this->tool($answer);
+        $json = $tool->generate_json();
+        return $json[$tool->json_key()]['img'];
+    }
 
     /**
      * Render hint for both students and teachers answers.
@@ -157,7 +173,12 @@ abstract class hint extends \qtype_poasquestion\hint {
      * @param string $teachersanswer teachers answer
      * @return string hint display result for given answers.
      */
-    public abstract function render_hint_for_both_students_and_teachers_answers($studentsanswer, $teachersanswer, $renderer);
+    public function render_hint_for_both_students_and_teachers_answers($studentsanswer, $teachersanswer, $renderer) {
+        $hintforstudent = $this->render_hint_for_answer($studentsanswer);
+        $hintforteacher = $this->render_hint_for_answer($teachersanswer);
+        return get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ':<br>' . $hintforstudent . "<br>" .
+        get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ':<br>' . $hintforteacher;
+    }
 
     /**
      * Returns the hint explanation string to show after hint usage.
