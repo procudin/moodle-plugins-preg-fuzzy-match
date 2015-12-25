@@ -43,14 +43,14 @@ class explanation_graph_hint extends hint {
     /**
      * @return string key for lang strings and field names
      */
-    function short_key() {
+    public function short_key() {
         return 'explgraph';
     }
 
     /**
      * @return qtype_preg_authoring_tool tool used for hint
      */
-    function tool($regex) {
-        return new \qtype_preg_explaining_graph_tool($regex, $this->getRegexOptions());
+    public function tool($regex) {
+        return new \qtype_preg_explaining_graph_tool($regex, $this->get_regex_options());
     }
 }

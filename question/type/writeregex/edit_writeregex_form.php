@@ -88,8 +88,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
-
-        // Add all analizers percentages
+        // Add all analizers percentages.
         $questiontype = new qtype_writeregex();
         $analyzers = $questiontype->available_analyzers();
         foreach ($analyzers as $name => $description) {
@@ -100,10 +99,10 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $mform->setDefault($constantstringname, '0');
             $mform->addHelpButton($constantstringname, $constantstringname, 'qtype_writeregex');
         }
-        // Set as default 100% to teststrings analizer
+        // Set as default 100% to teststrings analizer.
         $mform->setDefault($constantstringname, '100');
 
-        // Add hints
+        // Add hints.
         $mform->addElement('header', 'hintshdr', get_string('hintsheader', 'qtype_writeregex'), '');
         $mform->setExpanded('hintshdr', 1);
         // Add syntax tree options.
@@ -246,19 +245,23 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $count = count($parentresult[0]);
 
         // Add syntax tree options.
-        $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint', get_string('syntaxtreehinttype', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'syntaxtreehint',
+            get_string('syntaxtreehinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // Add explaining graph options.
-        $repeated[$count++] = $mform->createElement('select', 'explgraphhint', get_string('explgraphhinttype', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'explgraphhint',
+            get_string('explgraphhinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // Add description options.
-        $repeated[$count++] = $mform->createElement('select', 'descriptionhint', get_string('descriptionhinttype', 'qtype_writeregex'),
+        $repeated[$count++] = $mform->createElement('select', 'descriptionhint',
+            get_string('descriptionhinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         // Add test string option.
-        $repeated[$count] = $mform->createElement('select', 'teststringshint', get_string('teststringshinttype', 'qtype_writeregex'),
+        $repeated[$count] = $mform->createElement('select', 'teststringshint',
+            get_string('teststringshinttype', 'qtype_writeregex'),
             $this->hintsoptions);
 
         $parentresult[0] = array_merge($parentresult[0], $repeated);
@@ -372,14 +375,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $sumgrade = 0;
 
         foreach ($strings as $key => $item) {
-			$trimdata = trim($item);
+            $trimdata = trim($item);
             if ($trimdata !== '') {
                 $answercount++;
                 $sumgrade = $sumgrade + $data['regexp_ts_fraction'][$key];
             }
         }
-	
-		$sumgrade = round($sumgrade, 2);
+
+        $sumgrade = round($sumgrade, 2);
         if ($sumgrade != 1 and $test > 0) {
             $errors["regexp_ts_answer[0]"] = get_string('invalidtssumvalue', 'qtype_writeregex');
         }
@@ -403,7 +406,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $analyzers = $questiontype->available_analyzers();
         $sum = 0;
 
-        foreach($analyzers as $name => $description) {
+        foreach ($analyzers as $name => $description) {
             $constantstringname = 'compare' . $name . 'percentage';
 
             if ($data[$constantstringname] < 0 || $data[$constantstringname] > 100) {
@@ -423,14 +426,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $hinttools = array('syntaxtreehinttype' => 'qtype_preg_syntax_tree_tool',
                             'explgraphhinttype' => 'qtype_preg_explaining_graph_tool');
-        foreach($hinttools as $hintname => $hinttool) {
+        foreach ($hinttools as $hintname => $hinttool) {
             if ($data[$hintname] != 0) {
                 $regexoptions = new qtype_preg_authoring_tools_options();
                 $regexoptions->engine = $data['engine'];
                 $regexoptions->usecase = $data['usecase'];
                 $regexoptions->notation = $data['notation'];
 
-                // Check possibility of using tool
+                // Check possibility of using tool.
                 try {
                     $tree = new $hinttool('.', $regexoptions);
                     $var = $tree->data_for_accepted_regex();
@@ -445,11 +448,12 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                     continue;
                 }
 
-                // Check possibility of using tool for concrete answers
+                // Check possibility of using tool for concrete answers.
                 $answers = $data['answer'];
                 foreach ($answers as $key => $answer) {
-                    if (array_key_exists('answer['.$key.']', $errors))
+                    if (array_key_exists('answer['.$key.']', $errors)) {
                         continue;
+                    }
                     $tree = new $hinttool($answer, $regexoptions);
                     if (count($tree->get_errors()) > 0) {
                         $a = new stdClass;

@@ -44,7 +44,7 @@ class test_strings_hint extends hint {
     /**
      * @return string key for lang strings and field names
      */
-    function short_key() {
+    public function short_key() {
         return 'teststrings';
     }
 
@@ -53,13 +53,14 @@ class test_strings_hint extends hint {
      * @return string hint explanation
      */
     public function hint_explanation_title() {
-        return get_string('teststringshintexplanation', 'qtype_writeregex', get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
+        return get_string('teststringshintexplanation', 'qtype_writeregex',
+            get_string('hinttitleadditionformode_' . $this->mode, 'qtype_writeregex'));
     }
 
     /**
      * @return qtype_preg_authoring_tool tool used for hint
      */
-    function tool($regex) {
+    public function tool($regex) {
         $strings = '';
         $key = 0;
         foreach ($this->question->teststrings as $item) {

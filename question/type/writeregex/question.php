@@ -266,7 +266,7 @@ class qtype_writeregex_question extends question_graded_automatically
             return $this->bestfitanswer;
         }
 
-		// Finding initial answer with fraction, that is bigger then hint grade border.
+        // Finding initial answer with fraction, that is bigger then hint grade border.
         $bestfitness = 0.0;
         reset($this->answers);
         $bestfitanswer = current($this->answers);
