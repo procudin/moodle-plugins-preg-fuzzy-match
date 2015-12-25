@@ -24,9 +24,39 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['answer'] = 'Show the correct answer';
+$string['both'] = 'Show the student\'s answer and the correct answer (both)';
+$string['compareautomatapercentage'] = 'Rating coincidentally automata regular expressions';
+$string['compareautomatapercentage_help'] = "<p>Value (in%) of the share estimates coincidentally automata regular expressions.</p>";
+$string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
+$string['comparestringspercentage'] = 'Based on testing on the test lines of regular expressions';
+$string['comparestringspercentage_help'] = "<p>Value (in%) of the share valuation verification test on the lines of regular expressions.</p>";
+$string['comparetreepercentage'] = 'Based on regular expression match';
+$string['comparetreepercentage_help'] = "<p>The value (in%) of the share estimates for regular expression matching.</p>";
+$string['descriptionhintpenalty'] = 'Explanation of the expression: fine';
+$string['descriptionhintpenalty_help'] = "<p>The amount of penalty for using hints as explanations of expression.</p>";
+$string['descriptionhinttype'] = 'Explanation of the expression';
+$string['descriptionhinttype_help'] = "<p>Display value in the form of tips explaining expression.</p>";
 $string['doterror'] = 'Can\'t draw {$a->name} for regex #{$a->index}';
+$string['explgraphhintpenalty'] = 'Explanation graph: fine';
+$string['explgraphhintpenalty_help'] = "<p>The amount of penalty for the use of tips as a graph explanation.</p>";
+$string['explgraphhinttype'] = 'Explanation graph';
+$string['explgraphhinttype_help'] = "<p>Value to display a tooltip as a graph explanation.</p>";
 $string['filloutoneanswer'] = 'You must provide at least one possible answer. Answers left blank will not be used. \'*\' can be used as a wildcard to match any characters. The first matching answer will be used to determine the score and feedback.';
+$string['hintdescriptionstudentsanswer'] = "Your answer";
+$string['hintdescriptionteachersanswer'] = "Correct answer";
+$string['hintexplanation'] = '{$a->type} {$a->mode}:';
+$string['hintsheader'] = 'Hints';
+$string['hinttitleaddition'] = '({$a})';
+$string['hinttitleadditionformode_1'] = 'for your answer';
+$string['hinttitleadditionformode_2'] = 'for correct answer';
+$string['hinttitleadditionformode_3'] = 'for your and correct answers';
+$string['invalidcomparets'] = 'Check value for the test string is set to 0, remove the test strings';
+$string['invalidmatchingtypessumvalue'] = 'Sum of all matching types is not equal 100%';
+$string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
+$string['none'] = 'None';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';
+$string['penalty'] = 'Penalty';
 $string['pleaseenterananswer'] = 'Please enter an answer.';
 $string['pluginname'] = 'Write RegEx';
 $string['pluginname_help'] = 'In response to a question (that may include a image) the respondent types a word or short phrase. There may be several possible correct answers, each with a different grade. If the "Case sensitive" option is selected, then you can have different scores for "Word" or "word".';
@@ -34,63 +64,16 @@ $string['pluginname_link'] = 'question/type/writeregex';
 $string['pluginnameadding'] = 'Adding a Write RegEx question';
 $string['pluginnameediting'] = 'Editing a Write RegEx question';
 $string['pluginnamesummary'] = 'Question to monitor student\'s knowledge of compiling regular expressions (regexp).';
-
-$string['hintsheader'] = 'Hints';
-
-$string['penalty'] = 'Penalty';
-$string['none'] = 'None';
-$string['student'] = 'Show the student\'s answer';
-$string['answer'] = 'Show the correct answer';
-$string['both'] = 'Show the student\'s answer and the correct answer (both)';
-
 $string['regexp_answers'] = 'Regular expression {no}';
 $string['regexp_ts'] = 'Test string {no}';
 $string['regexp_ts_header'] = 'Test strings';
-
-$string['invalidmatchingtypessumvalue'] = 'Sum of all matching types is not equal 100%';
-
-$string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
-$string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
-$string['invalidcomparets'] = 'Check value for the test string is set to 0, remove the test strings';
-
-$string['hintdescriptionstudentsanswer'] = "Your answer";
-$string['hintdescriptionteachersanswer'] = "Correct answer";
-$string['hinttitleaddition'] = '({$a})';
-$string['hinttitleadditionformode_1'] = 'for your answer';
-$string['hinttitleadditionformode_2'] = 'for correct answer';
-$string['hinttitleadditionformode_3'] = 'for your and correct answers';
-$string['hintexplanation'] = '{$a->type} {$a->mode}:';
-
-$string['syntaxtreehinttype'] = 'Syntax tree';
-$string['syntaxtreehinttype_help'] = "<p>Value display hints as syntax tree.</p>";
-
+$string['student'] = 'Show the student\'s answer';
 $string['syntaxtreehintpenalty'] = 'Syntax tree: prnalty';
 $string['syntaxtreehintpenalty_help'] = "<p>Meaning usage penalty hints as syntax tree</p>";
-
-$string['explgraphhinttype'] = 'Explanation graph';
-$string['explgraphhinttype_help'] = "<p>Value to display a tooltip as a graph explanation.</p>";
-
-$string['explgraphhintpenalty'] = 'Explanation graph: fine';
-$string['explgraphhintpenalty_help'] = "<p>The amount of penalty for the use of tips as a graph explanation.</p>";
-
-$string['descriptionhinttype'] = 'Explanation of the expression';
-$string['descriptionhinttype_help'] = "<p>Display value in the form of tips explaining expression.</p>";
-
-$string['descriptionhintpenalty'] = 'Explanation of the expression: fine';
-$string['descriptionhintpenalty_help'] = "<p>The amount of penalty for using hints as explanations of expression.</p>";
-
-$string['teststringshinttype'] = 'Test string';
-$string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
+$string['syntaxtreehinttype'] = 'Syntax tree';
+$string['syntaxtreehinttype_help'] = "<p>Value display hints as syntax tree.</p>";
 $string['teststringshintexplanation'] = 'Test strings match results {$a}:';
-
 $string['teststringshintpenalty'] = 'Test string: fine';
 $string['teststringshintpenalty_help'] = "<p>The amount of penalty for the use of clues in the form of test strings.</p>";
-
-$string['comparetreepercentage'] = 'Based on regular expression match';
-$string['comparetreepercentage_help'] = "<p>The value (in%) of the share estimates for regular expression matching.</p>";
-
-$string['compareautomatapercentage'] = 'Rating coincidentally automata regular expressions';
-$string['compareautomatapercentage_help'] = "<p>Value (in%) of the share estimates coincidentally automata regular expressions.</p>";
-
-$string['comparestringspercentage'] = 'Based on testing on the test lines of regular expressions';
-$string['comparestringspercentage_help'] = "<p>Value (in%) of the share valuation verification test on the lines of regular expressions.</p>";
+$string['teststringshinttype'] = 'Test string';
+$string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
