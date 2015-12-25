@@ -104,7 +104,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault($constantstringname, '100');
 
         // Add hints
-        $mform->addElement('header', 'hintshdr', get_string('wre_hintsheader', 'qtype_writeregex'), '');
+        $mform->addElement('header', 'hintshdr', get_string('hintsheader', 'qtype_writeregex'), '');
         $mform->setExpanded('hintshdr', 1);
         // Add syntax tree options.
         $mform->addElement('select', 'syntaxtreehinttype', get_string('syntaxtreehinttype', 'qtype_writeregex'),
@@ -147,9 +147,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('teststringshintpenalty', 'teststringshintpenalty', 'qtype_writeregex');
 
         // Add answers fields.
-        $this->add_per_answer_fields($mform, 'wre_regexp_answers', question_bank::fraction_options(), 1);
+        $this->add_per_answer_fields($mform, 'regexp_answers', question_bank::fraction_options(), 1);
 
-        $this->add_per_test_string_fields($mform, 'wre_regexp_ts', question_bank::fraction_options(), 5);
+        $this->add_per_test_string_fields($mform, 'regexp_ts', question_bank::fraction_options(), 5);
 
         $this->add_interactive_settings();
     }
@@ -293,8 +293,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         }
         foreach ($question->options->teststrings as $teststring) {
 
-            $question->wre_regexp_ts_answer[$index] = $teststring->answer;
-            $question->wre_regexp_ts_fraction[$index] = $teststring->fraction;
+            $question->regexp_ts_answer[$index] = $teststring->answer;
+            $question->regexp_ts_fraction[$index] = $teststring->fraction;
             $index++;
         }
 
@@ -367,7 +367,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @return array Errors array.
      */
     private function validate_test_strings ($data, $errors, $test) {
-        $strings = $data['wre_regexp_ts_answer'];
+        $strings = $data['regexp_ts_answer'];
         $answercount = 0;
         $sumgrade = 0;
 
@@ -375,13 +375,13 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 			$trimdata = trim($item);
             if ($trimdata !== '') {
                 $answercount++;
-                $sumgrade = $sumgrade + $data['wre_regexp_ts_fraction'][$key];
+                $sumgrade = $sumgrade + $data['regexp_ts_fraction'][$key];
             }
         }
 	
 		$sumgrade = round($sumgrade, 2);
         if ($sumgrade != 1 and $test > 0) {
-            $errors["wre_regexp_ts_answer[0]"] = get_string('invalidtssumvalue', 'qtype_writeregex');
+            $errors["regexp_ts_answer[0]"] = get_string('invalidtssumvalue', 'qtype_writeregex');
         }
 
         if ($answercount > 0 and $test == 0) {
@@ -413,7 +413,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         }
 
         if ($sum != 100 and !array_key_exists('comparetreepercentage', $errors)) {
-            $errors['comparetreepercentage'] = get_string('wre_error_matching', 'qtype_writeregex');
+            $errors['comparetreepercentage'] = get_string('invalidmatchingtypessumvalue', 'qtype_writeregex');
         }
 
         return $errors;
