@@ -318,7 +318,7 @@ class qtype_writeregex extends qtype_shortanswer {
     }
 
     /**
-     * Initialise question_definition::teststring field.
+     * Initialise question_definition::teststring field (public for testing).
      * @param question_definition $question the question_definition we are creating.
      * @param object $questiondata the question data loaded from the database.
      * @param bool $forceplaintextanswers most qtypes assume that answers are
@@ -327,7 +327,7 @@ class qtype_writeregex extends qtype_shortanswer {
      *      ingores answerformat. Pass false here to use answerformat. For example
      *      multichoice does this.
      */
-    protected function initialise_question_teststrings(question_definition $question,
+    public function initialise_question_teststrings(question_definition $question,
                                                    $questiondata, $forceplaintextanswers = true) {
         $question->teststrings = array();
         if (empty($questiondata->options->teststrings)) {
