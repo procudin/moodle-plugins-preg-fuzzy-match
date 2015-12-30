@@ -338,13 +338,13 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         if ($test > 0 && $test <= 100) {
 
-            $pregquestionobj = new qtype_preg_question();
             $answers = $data['answer'];
             $i = 0;
 
             foreach ($answers as $key => $answer) {
                 $trimmedanswer = trim($answer);
                 if ($trimmedanswer !== '') {
+					$pregquestionobj = new qtype_preg_question();
                     $matcher = $pregquestionobj->get_matcher($data['engine'], $trimmedanswer, false,
                         $pregquestionobj->get_modifiers($data['usecase']), (-1) * $i, $data['notation']);
 
