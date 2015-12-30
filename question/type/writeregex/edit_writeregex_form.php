@@ -326,12 +326,12 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
-     * Validate regexp answers.
+     * Validate regexp answers (public for testing).
      * @param $data array Forms data.
      * @param $errors array Errors array.
      * @return array Errors array.
      */
-    private function validate_regexp ($data, $errors) {
+    public function validate_regexp ($data, $errors) {
 
         global $CFG;
         $test = $data['comparestringspercentage'];
@@ -363,13 +363,13 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
-     * Validation test string answer.
+     * Validation test string answer (public for testing).
      * @param $data array Data from form.
      * @param $errors array Errors array.
      * @param $test string Value of compare by test strings.
      * @return array Errors array.
      */
-    private function validate_test_strings ($data, $errors, $test) {
+    public function validate_test_strings ($data, $errors, $test) {
         $strings = $data['regexp_ts_answer'];
         $answercount = 0;
         $sumgrade = 0;
@@ -395,12 +395,12 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     }
 
     /**
-     * Validation values of compare values.
+     * Validation values of compare values (public for testing).
      * @param $data array Data from form.
      * @param $errors array Errors array.
      * @return array Errors array.
      */
-    private function validate_compare_values ($data, $errors) {
+    public function validate_compare_values ($data, $errors) {
 
         $questiontype = new qtype_writeregex();
         $analyzers = $questiontype->available_analyzers();
