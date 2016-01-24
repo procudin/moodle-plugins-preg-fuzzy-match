@@ -58,7 +58,7 @@ class JLexBase {
 
     function __construct($stream) {
         $this->yy_reader = $stream;
-        $this->yy_buffer = new qtype_poasquestion\string();
+        $this->yy_buffer = new qtype_poasquestion\utf8_string();
 
         $meta = stream_get_meta_data($stream);
         if (!isset($meta['uri'])) {

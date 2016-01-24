@@ -26,7 +26,7 @@
 namespace qtype_poasquestion;
 defined('MOODLE_INTERNAL') || die();
 
-class string extends \core_text implements \ArrayAccess {
+class utf8_string extends \core_text implements \ArrayAccess {
     /** @var string the utf-8 string itself. */
     private $fstring;
     /**@var int length of the string, calculated when the string is modified. */
@@ -112,7 +112,7 @@ class string extends \core_text implements \ArrayAccess {
      * Returns a substring of this string.
      * @param int start starting index of the substring.
      * @param int length length of the substring.
-     * @return object an instance of qtype_poasquestion\string.
+     * @return object an instance of qtype_poasquestion\utf8_string.
      */
     public function substring($start, $length = null) {
         return new string(self::substr($this->fstring, $start, $length));
@@ -145,10 +145,10 @@ class string extends \core_text implements \ArrayAccess {
 
     /**
      * Concatenates a string to this string.
-     * @param mixed a string to concatenate (can be either an instance of qtype_poasquestion\string or a simple native string).
+     * @param mixed a string to concatenate (either an instance of qtype_poasquestion\utf8_string or a simple native string).
      */
     public function concatenate($str) {
-        if (is_a($str, 'qtype_poasquestion\string')) {
+        if (is_a($str, 'qtype_poasquestion\utf8_string')) {
             $this->fstring .= $str->fstring;
             $this->flength += $str->flength;
         } else {
