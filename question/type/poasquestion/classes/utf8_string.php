@@ -115,7 +115,7 @@ class utf8_string extends \core_text implements \ArrayAccess {
      * @return object an instance of qtype_poasquestion\utf8_string.
      */
     public function substring($start, $length = null) {
-        return new string(self::substr($this->fstring, $start, $length));
+        return new utf8_string(self::substr($this->fstring, $start, $length));
     }
 
     /**
