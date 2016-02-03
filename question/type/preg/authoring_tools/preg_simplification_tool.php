@@ -161,6 +161,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
+            $result = $this->nullable_regex();
+            if ($result != array()) {
+                $tips[$i] = array();
+                $tips[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
+
             $result = $this->exact_match();
             if ($result != array()) {
                 $tips[$i] = array();
@@ -719,6 +727,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     for ($i = 0; $i < count($leafs); $i++) {
                         array_push($leafs[$i], $operand);
                     }
+
                     if ($this->search_common_subexpressions($operand, $leafs)) {
                         return true;
                     }
@@ -734,42 +743,181 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     private function search_subexpr($leafs, $current_leaf, $tree_root) {
         foreach ($leafs as $leaf) {
-            $tmp_root = $this->get_parent_node($this->get_dst_root(), $leaf[0]->id);
-            if ($leaf[0]->is_equal($current_leaf, null) && $this->compare_parent_nodes($tmp_root, $tree_root)) {
-                if($this->get_right_set_of_leafs($leaf, $current_leaf, $tree_root)) {
-                    return true;
+            if ($leaf[0]->is_equal($current_leaf, null) /*|| $this->compare_quants($leaf[0], $current_leaf)*/) {
+                $count_nodes = 0;
+                $tmp_leafs = $this->delete_useles_nodes($current_leaf, $leaf, $count_nodes);
+
+                $tmp_root = $this->get_parent_node($this->get_dst_root(), $leaf[0]->id);
+
+                if ($this->compare_parent_nodes($tmp_root, $tree_root, $count_nodes)) {
+                    if ($this->compare_right_set_of_leafs($tmp_leafs, $current_leaf, $tree_root, $count_nodes)) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
 
+    private function delete_useles_nodes($current_leaf, $leaf, &$count_nodes, $operand = null) {
+        $parent = $this->get_parent_node($this->get_dst_root(), $current_leaf->id);
+        $count_nodes = count($leaf);
+        $tmp_leafs = null;
+        if ($parent != null && $leaf[$count_nodes - 1]->id == $parent->id
+            && ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+                || $parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                || $parent->type == qtype_preg_node::TYPE_NODE_CONCAT)) {
+            $count_nodes--;
+            $tmp_leafs = array_slice($leaf, 0, $count_nodes);
+
+            if ($operand === null && isset($leaf[$count_nodes - 1]->operands)) {
+                $operand = $current_leaf;
+            }
+
+            if ($operand !== null) {
+                if ($operand->position->indfirst > $leaf[$count_nodes - 1]->position->indfirst) {
+                    $operand->position->indfirst = $leaf[$count_nodes - 1]->position->indfirst;
+                }
+
+                if ($operand->position->indlast < $leaf[$count_nodes - 1]->position->indlast) {
+                    $operand->position->indlast = $leaf[$count_nodes - 1]->position->indlast;
+                }
+            }
+
+            $tmp_leafs = $this->delete_useles_nodes($parent, $tmp_leafs, $count_nodes, $operand);
+        } else {
+            $tmp_leafs = $leaf;
+        }
+
+        return $tmp_leafs;
+    }
+
+    // TODO
+    private function compare_quants($quant1, $quant2) {
+        if (($quant1->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+             || $quant1->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+            && ($quant2->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+             || $quant2->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    private function get_next1($tree_root, $next_leaf, $count1, $is_fount2) {
+        $right_leafs = null;
+        if (($next_leaf->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $next_leaf->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING)
+            || $next_leaf->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+            $next_leaf->operands[0]->position->indfirst = $next_leaf->position->indfirst;
+            $next_leaf->operands[0]->position->indlast = $next_leaf->position->indlast;
+            $right_leafs = $this->get_next1($tree_root, $next_leaf->operands[0], $count1, $is_fount2);
+        } else {
+            $right_leafs = $this->get_next_right_leafs($tree_root, $next_leaf, $count1, $is_fount2);
+        }
+        return $right_leafs;
+    }
+
     /**
      * Trying to get a set of equivalent $leafs nodes from $current_leaf.
      */
-    private function get_right_set_of_leafs($leafs, $current_leaf, $tree_root) {
-        $is_fount = false;
-        $right_leafs = $this->get_right_leafs($tree_root, $current_leaf, count($leafs), $is_fount);
+    private function compare_right_set_of_leafs($leafs, $current_leaf, $tree_root, $count_nodes) {
+        $is_found = false;
+        $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, count($leafs), $is_found);
         $right_leafs_tmp = $right_leafs;
         if ($this->leafs_compare($leafs, $right_leafs)) {
-            $this->problem_ids[] = count($leafs);//length
+            if ($leafs[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $leafs[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+
+                $node_counts = 0;
+                $this->get_subtree_nodes_count($leafs[0], $node_counts);
+
+                if ($node_counts < count($leafs)) {
+                    $this->problem_ids[] = count($leafs);//count($leafs);//length
+                } else {
+                    $this->problem_ids[] = count($leafs) - 1;
+                }
+            } else {
+                $this->problem_ids[] = $count_nodes;//count($leafs);//length
+            }
+
+//            $this->problem_ids[] = count($leafs);
+
+//            foreach ($leafs as $lf) {
+//                if ($lf->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+//                    && $lf->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+//                    $this->problem_ids[] = $lf->id;
+//                    break;
+//                }
+//            }
             $this->problem_ids[] = $leafs[0]->id;
             $is_found = true;
             while ($is_found) {
+//                foreach ($right_leafs_tmp as $lf) {
+//                    if ($lf->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+//                        && $lf->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+//                        $this->problem_ids[] = $lf->id;
+//                        break;
+//                    }
+//                }
                 $this->problem_ids[] = $right_leafs_tmp[0]->id;
+
                 $right_leafs_tmp = $right_leafs;
                 $is_fount1 = false;
-                $next_leafs = $this->get_right_leafs($tree_root, $right_leafs_tmp[count($right_leafs_tmp) - 1], 2, $is_fount1);
+                $next_leafs = $this->get_right_leafs($this->get_dst_root(),
+                                                     $right_leafs_tmp[count($right_leafs_tmp) - 1], 2, $is_fount1);
+
                 $next_leaf = null;
                 if (count($next_leafs) > 1) {
                     $next_leaf = $next_leafs[1];
                 }
-                $is_fount2 = false;
-                $right_leafs = $this->get_right_leafs($tree_root, $next_leaf, count($leafs), $is_fount2);
+
+                if ($next_leaf != null
+                    && ($next_leaf->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $next_leaf->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)) {
+
+                    $parent = $this->get_parent_node($this->get_dst_root(), $leafs[0]->id);
+                    $parent_curcur = $this->get_parent_node($this->get_dst_root(), $next_leaf->id);
+                    if ($parent != null && $parent_curcur != null && $parent_curcur->id == $parent->id) {
+                        $is_fount2 = false;
+//                        $right_leafs = $this->get_next_right_leafs($this->get_dst_root()/*$tree_root*/, $next_leaf->operands[0], count($leafs), $is_fount2);
+                        $next_leaf->operands[0]->position->indfirst = $next_leaf->position->indfirst;
+                        $next_leaf->operands[0]->position->indlast = $next_leaf->position->indlast;
+                        $right_leafs = $this->get_next1($this->get_dst_root(),
+                                                        $next_leaf->operands[0], count($leafs), $is_fount2);
+                    } else {
+                        if ($parent != null
+                            && ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                                || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)) {
+
+                            $parent_cur = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                            if ($parent_cur != null && $parent_curcur != null && $parent_curcur->id == $parent_cur->id) {
+                                $is_fount2 = false;
+                                $right_leafs = $this->get_next_right_leafs($this->get_dst_root(),
+                                                                           $next_leaf->operands[0], count($leafs), $is_fount2);
+                            } else {
+                                $right_leafs = array();
+                            }
+                        } else {
+                            $right_leafs = array();
+//                          $is_fount2 = false;
+//                          $right_leafs = $this->get_next_right_leafs($this->get_dst_root()/*$tree_root*/, $next_leaf->operands[0], count($leafs), $is_fount2);
+                        }
+                    }
+                } else {
+                    $is_fount2 = false;
+                    $right_leafs = $this->get_right_leafs($this->get_dst_root(),
+                                                          $next_leaf, /*count($leafs)*/$this->problem_ids[0], $is_fount2);
+                }
+
+                $this->get_subexpression_regex_position_for_nodes($leafs, $right_leafs_tmp);
+
+                $right_leafs_tmp = $right_leafs;
+
                 $is_found = $this->leafs_compare($leafs, $right_leafs);
             }
             $this->problem_type = 4;
-            $this->get_subexpression_regex_position_for_nodes($leafs, $right_leafs_tmp);
             return true;
         }
 
@@ -782,6 +930,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     private function get_parent_node($tree_root, $node_id) {
         $local_root = null;
+        /*if ($tree_root->id == $node_id) {
+            return $tree_root;
+        }*/
         if ($this->is_operator($tree_root)) {
             foreach ($tree_root->operands as $operand) {
                 if ($operand->id == $node_id) {
@@ -828,10 +979,49 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $leafs;
     }
 
+    private function get_next_right_leafs($tree_root, $current_leaf, $size, &$is_found, &$leafs = null) {
+        if ($current_leaf == NULL) {
+            return array();
+        }
+        if ($leafs == NULL) {
+            $leafs = array();
+        }
+
+        if ($current_leaf->id == $tree_root->id){
+            $is_found = false;
+            $leafs = $this->get_right_leafs($this->get_parent_node($this->get_dst_root(), $tree_root->id), $current_leaf, $size, $is_found, $leafs);
+            return $leafs;
+        }
+
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                $this->get_next_right_leafs($operand, $current_leaf, $size, $is_found, $leafs);
+            }
+        }
+
+        return $leafs;
+    }
+
     /**
      * Compare two arrays with nodes
      */
     private function leafs_compare($leafs1, $leafs2) {
+        if (count($leafs1) > 0) {
+            if ($leafs1[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $leafs1[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+            ) {
+                $leafs1 = array_slice($leafs1, 1, count($leafs1));
+            }
+        }
+
+        if (count($leafs2) > 0) {
+            if ($leafs2[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $leafs2[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+            ) {
+                $leafs2 = array_slice($leafs2, 1, count($leafs2));
+            }
+        }
+
         if (count($leafs1) != count($leafs2)) {
             return false;
         }
@@ -847,19 +1037,80 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Compare two nodes who are parents
      */
-    private function compare_parent_nodes($local_root1, $local_root2) {
-        if ($local_root1 != null && $local_root2 != null && $local_root1->is_equal($local_root2, null)) {
-            //return $this->is_can_parent_node($local_root1) && $this->is_can_parent_node($local_root2);
-            return true;
+    private function compare_parent_nodes($local_root1, $local_root2, $count_leafs) {
+        if ($local_root1 != null && $local_root2 != null) {
+            if ($local_root1->is_equal($local_root2, null)) {
+                //return $this->is_can_parent_node($local_root1) && $this->is_can_parent_node($local_root2);
+                return true;
+            } else if (($local_root1->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $local_root1->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                       && ($local_root2->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $local_root2->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)) {
+                return $this->compare_quants($local_root1, $local_root2);
+            } else if (($local_root1->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $local_root1->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                       && ($local_root2->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $local_root2->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT)) {
+                $new_local_root1 = $this->get_parent_node($this->get_dst_root(), $local_root1->id);
+                if ($new_local_root1 != null && $count_leafs == 1) {
+                    return $this->compare_parent_nodes($new_local_root1, $local_root2, $count_leafs);
+                } else {
+                    return false;
+                }
+            } else if (($local_root1->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $local_root1->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                       && ($local_root2->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $local_root2->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)) {
+                $new_local_root2 = $this->get_parent_node($this->get_dst_root(), $local_root2->id);
+                if ($new_local_root2 != null && $count_leafs == 1) {
+                    return $this->compare_parent_nodes($local_root1, $new_local_root2, $count_leafs);
+                } else {
+                    return false;
+                }
+            } else if ($local_root1->type == qtype_preg_node::TYPE_NODE_CONCAT
+                        && $local_root2->type == qtype_preg_node::TYPE_NODE_CONCAT
+                        && count($local_root1->operands) > 1 && count($local_root2->operands) > 1) {
+                return $this->compare_concats($local_root1, $local_root2);
+            }
         }
         return false;
+    }
+
+    // TODO: delete
+    private function compare_concats($node1, $node2) {
+        if (is_a($node1, get_class($node2)) // subclass?
+                && $node1->type == $node2->type
+                && $node1->subtype == $node2->subtype) {
+            if (count($node1->operands) < count($node2->operands)) {
+                foreach ($node1->operands as $i => $operand) {
+                    if ($operand->is_equal($node2->operands[$i], null) === false) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                foreach ($node2->operands as $i => $operand) {
+                    if ($operand->is_equal($node1->operands[$i], null) === false) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+        } else {
+            return false;
+        }
+        return true;
     }
 
     /**
      * Whether the node is a parent for common sybexpression
      */
     private function is_can_parent_node($local_root) {
-        return !($local_root->type == qtype_preg_node::TYPE_NODE_ALT);
+        if ($local_root !== null) {
+            return !($local_root->type == qtype_preg_node::TYPE_NODE_ALT);
+        }
+        return true;
     }
 
     /**
@@ -1146,7 +1397,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
                 $qu->operands[] = $se;
             } else {
-                $qu->operands[] = $current_leaf;
+                if ($current_leaf->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    || $current_leaf->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                    $qu->operands[] = $current_leaf->operands[0];
+                } else {
+                    $qu->operands[] = $current_leaf;
+                }
             }
 
             $this->normalization($qu/*->operands[0]*/);
@@ -1195,10 +1451,364 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
     }
 
+
+    private function get_current_node_repeats($current_root, $node, $current_problem_id) {
+        $counts = array(0,0);
+        $node = $this->get_node_from_id($this->get_dst_root(), $current_problem_id);
+        if ($node != null) {
+            if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                $node_counts = 0;
+                $this->get_subtree_nodes_count($node, $node_counts);
+                if ($node_counts < $this->options->problem_ids[0]) {
+                    $counts[0] += 1;
+                    $counts[1] += 1;
+                } else {
+                    $counts[0] += $node->leftborder;
+                    $counts[1] += $node->rightborder;
+                }
+            } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                $node_counts = 0;
+                $this->get_subtree_nodes_count($node, $node_counts);
+                if ($node_counts < $this->options->problem_ids[0]) {
+                    $counts[0] += 1;
+                    $counts[1] += 1;
+                } else {
+                    $counts[0] += $node->leftborder;
+                    $counts[1] = -999;
+                }
+            } else {
+//                $parent = $this->get_parent_node($this->get_dst_root(), $current_problem_id);
+//                $tmp_counts = $this->get_repeats($current_root, $node, $parent->id);
+//                $counts[0] += $tmp_counts[0];
+//                $counts[1] += $tmp_counts[1];
+                $counts[0] += 1;
+                $counts[1] += 1;
+            }
+        } else {
+            $counts[0] += 1;
+            $counts[1] += 1;
+        }
+        return $counts;
+    }
+
+    private function get_repeats($current_root, $node, $current_problem_id) {
+        $counts = array(0,0);
+        $parent = $this->get_parent_node($this->get_dst_root(), $current_problem_id);
+
+        if ($this->is_can_parent_node($parent)) {
+            if ($parent != null) {
+                if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                    $counts[0] += $parent->leftborder;
+                    $counts[1] += $parent->rightborder;
+                } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                    $counts[0] += $parent->leftborder;
+                    $counts[1] = -999;
+                } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+
+                    $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                    if ($parent_tmp != null) {
+                        if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                            $counts[0] += $parent_tmp->leftborder;
+                            $counts[1] += $parent_tmp->rightborder;
+                        } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                            $counts[0] += $parent_tmp->leftborder;
+                            $counts[1] = -999;
+                        } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                            if ($this->options->problem_ids[0] > 1) {
+                                $tmp_counts = $this->get_repeats($current_root, $node, $parent_tmp->id);
+                                $counts[0] += $tmp_counts[0];
+                                $counts[1] += $tmp_counts[1];
+                            } else {
+                                $tmp_counts = $this->get_current_node_repeats($current_root, $node, $current_problem_id);
+                                $counts[0] += $tmp_counts[0];
+                                $counts[1] += $tmp_counts[1];
+                            }
+                        } else {
+                            $counts[0] += 1;
+                            $counts[1] += 1;
+                        }
+                    } else {
+                        $counts[0] += 1;
+                        $counts[1] += 1;
+                    }
+                    //------------------------------------------------
+                } else if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+
+                    if ($this->options->problem_ids[0] > 1) {
+                        $tmp_counts = $this->get_repeats($current_root, $node, $parent->id);
+                        $counts[0] += $tmp_counts[0];
+                        $counts[1] += $tmp_counts[1];
+                    } else {
+                        $tmp_counts = $this->get_current_node_repeats($current_root, $node, $current_problem_id);
+                        $counts[0] += $tmp_counts[0];
+                        $counts[1] += $tmp_counts[1];
+                    }
+
+                    /*$node = $this->get_node_from_id($this->get_dst_root(), $current_problem_id);
+                    if ($node != null) {
+                        if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                            $node_counts = 0;
+                            $this->get_subtree_nodes_count($node, $node_counts);
+                            if ($node_counts < $this->options->problem_ids[0]) {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            } else {
+                                $counts[0] += $node->leftborder;
+                                $counts[1] += $node->rightborder;
+                            }
+                        } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                            $node_counts = 0;
+                            $this->get_subtree_nodes_count($node, $node_counts);
+                            if ($node_counts < $this->options->problem_ids[0]) {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            } else {
+                                $counts[0] += $node->leftborder;
+                                $counts[1] = -999;
+                            }
+                        } else {
+                            $counts[0] += 1;
+                            $counts[1] += 1;
+                        }
+                    } else {
+
+                        if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                            $parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                            if ($parent != null) {
+                                if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                    $counts[0] += $parent->leftborder;
+                                    $counts[1] += $parent->rightborder;
+                                } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                    $counts[0] += $parent->leftborder;
+                                    $counts[1] = -999;
+                                } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+
+                                    $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                                    if ($parent_tmp != null) {
+                                        if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                            $counts[0] += $parent_tmp->leftborder;
+                                            $counts[1] += $parent_tmp->rightborder;
+                                        } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                            $counts[0] += $parent_tmp->leftborder;
+                                            $counts[1] = -999;
+                                        } else {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        }
+                                    } else {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    }
+                                } else {
+                                    $node = $this->get_node_from_id($this->get_dst_root(), $current_problem_id);
+                                    if ($node != null) {
+                                        if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                            $node_counts = 0;
+                                            $this->get_subtree_nodes_count($node, $node_counts);
+                                            if ($node_counts < $this->options->problem_ids[0]) {
+                                                $counts[0] += 1;
+                                                $counts[1] += 1;
+                                            } else {
+                                                $counts[0] += $node->leftborder;
+                                                $counts[1] += $node->rightborder;
+                                            }
+                                        } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                            $node_counts = 0;
+                                            $this->get_subtree_nodes_count($node, $node_counts);
+                                            if ($node_counts < $this->options->problem_ids[0]) {
+                                                $counts[0] += 1;
+                                                $counts[1] += 1;
+                                            } else {
+                                                $counts[0] += $node->leftborder;
+                                                $counts[1] = -999;
+                                            }
+                                        } else {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        }
+                                    } else {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    }
+                                }
+                            } else {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            }
+                        } else {
+                            $counts[0] += 1;
+                            $counts[1] += 1;
+                        }
+                    }*
+
+                    *$parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                    if ($parent != null) {
+                        if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                            $counts[0] += $parent->leftborder;
+                            $counts[1] += $parent->rightborder;
+                        } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                            $counts[0] += $parent->leftborder;
+                            $counts[1] = -999;
+                        } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+                            $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                            if ($parent_tmp != null) {
+                                if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                    $counts[0] += $parent_tmp->leftborder;
+                                    $counts[1] += $parent_tmp->rightborder;
+                                } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                    $counts[0] += $parent_tmp->leftborder;
+                                    $counts[1] = -999;
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            } else {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            }
+                        } else {
+                            $node = $this->get_node_from_id($this->get_dst_root(), $this->options->problem_ids[$i]);
+                            if ($node != null) {
+                                if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                    $node_counts = 0;
+                                    $this->get_subtree_nodes_count($node, $node_counts);
+                                    if ($node_counts < $this->options->problem_ids[0]) {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    } else {
+                                        $counts[0] += $node->leftborder;
+                                        $counts[1] += $node->rightborder;
+                                    }
+                                } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                    $node_counts = 0;
+                                    $this->get_subtree_nodes_count($node, $node_counts);
+                                    if ($node_counts < $this->options->problem_ids[0]) {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    } else {
+                                        $counts[0] += $node->leftborder;
+                                        $counts[1] = -999;
+                                    }
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            } else {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            }
+                        }
+                    } else {
+                        $counts[0] += 1;
+                        $counts[1] += 1;
+                    }*/
+                    //------------------------------------------------
+                } else {
+                    $tmp_counts = $this->get_current_node_repeats($current_root, $node, $current_problem_id);
+                    $counts[0] += $tmp_counts[0];
+                    $counts[1] += $tmp_counts[1];
+
+                    /*if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                        $parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                        if ($parent != null) {
+                            if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                $counts[0] += $parent->leftborder;
+                                $counts[1] += $parent->rightborder;
+                            } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                $counts[0] += $parent->leftborder;
+                                $counts[1] = -999;
+                            } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+
+                                $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                                if ($parent_tmp != null) {
+                                    if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                        $counts[0] += $parent_tmp->leftborder;
+                                        $counts[1] += $parent_tmp->rightborder;
+                                    } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                        $counts[0] += $parent_tmp->leftborder;
+                                        $counts[1] = -999;
+                                    } else {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    }
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            } else {
+                                $node = $this->get_node_from_id($this->get_dst_root(), $this->options->problem_ids[$i]);
+                                if ($node != null) {
+                                    if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                        $node_counts = 0;
+                                        $this->get_subtree_nodes_count($node, $node_counts);
+                                        if ($node_counts < $this->options->problem_ids[0]) {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        } else {
+                                            $counts[0] += $node->leftborder;
+                                            $counts[1] += $node->rightborder;
+                                        }
+                                    } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                        $node_counts = 0;
+                                        $this->get_subtree_nodes_count($node, $node_counts);
+                                        if ($node_counts < $this->options->problem_ids[0]) {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        } else {
+                                            $counts[0] += $node->leftborder;
+                                            $counts[1] = -999;
+                                        }
+                                    } else {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    }
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            }
+                        } else {
+                            $counts[0] += 1;
+                            $counts[1] += 1;
+                        }
+                    } else {
+                        $counts[0] += 1;
+                        $counts[1] += 1;
+                    }*/
+                }
+            } else {
+                $tmp_counts = $this->get_current_node_repeats($current_root, $node, $current_problem_id);
+                $counts[0] += $tmp_counts[0];
+                $counts[1] += $tmp_counts[1];
+//                $counts[0] += 1;
+//                $counts[1] += 1;
+            }
+        } else {
+            $counts[0] -= 1;
+        }
+
+        return $counts;
+    }
+
+    private function subexpressions_repeats($current_root, $node) {
+        $counts = array(0,0);
+        for($i = 1; $i < count($this->options->problem_ids); $i++) {
+            $tmp_counts = $this->get_repeats($current_root, $node, $this->options->problem_ids[$i]);
+//            var_dump($tmp_counts);
+            $counts[0] += $tmp_counts[0];
+            $counts[1] = $tmp_counts[1] === -999 ? $tmp_counts[1] : $counts[1] + $tmp_counts[1];
+        }
+
+        return $counts;
+    }
+
     /**
      * Calculate repeats of subexpression
      */
-    private function subexpressions_repeats($current_root, $nodes) {
+    private function subexpressions_repeats1($current_root, $node) {
         $counts = array(0,0);
 //        foreach ($nodes as $node) {
 //            $tmp_counts = $this->subexpression_repeats($current_root, $node);
@@ -1210,12 +1820,321 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $parent = $this->get_parent_node($this->get_dst_root(), $this->options->problem_ids[$i]);
 
             if ($this->is_can_parent_node($parent)) {
-                $counts[0] += 1;
-                $counts[1] += 1;
+                if ($parent != null) {
+                    if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                        $counts[0] += $parent->leftborder;
+                        $counts[1] += $parent->rightborder;
+                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                        $counts[0] += $parent->leftborder;
+                        $counts[1] = -999;
+                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+
+                        $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                        if ($parent_tmp != null) {
+                            if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                $counts[0] += $parent_tmp->leftborder;
+                                $counts[1] += $parent_tmp->rightborder;
+                            } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                $counts[0] += $parent_tmp->leftborder;
+                                $counts[1] = -999;
+                            } else {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            }
+                        } else {
+                            $counts[0] += 1;
+                            $counts[1] += 1;
+                        }
+                    //------------------------------------------------
+                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+
+                        $node = $this->get_node_from_id($this->get_dst_root(), $this->options->problem_ids[$i]);
+                        if ($node != null) {
+                            if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                $node_counts = 0;
+                                $this->get_subtree_nodes_count($node, $node_counts);
+                                if ($node_counts < $this->options->problem_ids[0]) {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                } else {
+                                    $counts[0] += $node->leftborder;
+                                    $counts[1] += $node->rightborder;
+                                }
+                            } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                $node_counts = 0;
+                                $this->get_subtree_nodes_count($node, $node_counts);
+                                if ($node_counts < $this->options->problem_ids[0]) {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                } else {
+                                    $counts[0] += $node->leftborder;
+                                    $counts[1] = -999;
+                                }
+                            } else {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            }
+                        } else {
+
+                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                                $parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                                if ($parent != null) {
+                                    if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                        $counts[0] += $parent->leftborder;
+                                        $counts[1] += $parent->rightborder;
+                                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                        $counts[0] += $parent->leftborder;
+                                        $counts[1] = -999;
+                                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+
+                                        $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                                        if ($parent_tmp != null) {
+                                            if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                                $counts[0] += $parent_tmp->leftborder;
+                                                $counts[1] += $parent_tmp->rightborder;
+                                            } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                                $counts[0] += $parent_tmp->leftborder;
+                                                $counts[1] = -999;
+                                            } else {
+                                                $counts[0] += 1;
+                                                $counts[1] += 1;
+                                            }
+                                        } else {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        }
+                                    } else {
+                                        $node = $this->get_node_from_id($this->get_dst_root(), $this->options->problem_ids[$i]);
+                                        if ($node != null) {
+                                            if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                                $node_counts = 0;
+                                                $this->get_subtree_nodes_count($node, $node_counts);
+                                                if ($node_counts < $this->options->problem_ids[0]) {
+                                                    $counts[0] += 1;
+                                                    $counts[1] += 1;
+                                                } else {
+                                                    $counts[0] += $node->leftborder;
+                                                    $counts[1] += $node->rightborder;
+                                                }
+                                            } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                                $node_counts = 0;
+                                                $this->get_subtree_nodes_count($node, $node_counts);
+                                                if ($node_counts < $this->options->problem_ids[0]) {
+                                                    $counts[0] += 1;
+                                                    $counts[1] += 1;
+                                                } else {
+                                                    $counts[0] += $node->leftborder;
+                                                    $counts[1] = -999;
+                                                }
+                                            } else {
+                                                $counts[0] += 1;
+                                                $counts[1] += 1;
+                                            }
+                                        } else {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        }
+                                    }
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            } else {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            }
+                        }
+
+                        /*$parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                        if ($parent != null) {
+                            if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                $counts[0] += $parent->leftborder;
+                                $counts[1] += $parent->rightborder;
+                            } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                $counts[0] += $parent->leftborder;
+                                $counts[1] = -999;
+                            } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+                                $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                                if ($parent_tmp != null) {
+                                    if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                        $counts[0] += $parent_tmp->leftborder;
+                                        $counts[1] += $parent_tmp->rightborder;
+                                    } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                        $counts[0] += $parent_tmp->leftborder;
+                                        $counts[1] = -999;
+                                    } else {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    }
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            } else {
+                                $node = $this->get_node_from_id($this->get_dst_root(), $this->options->problem_ids[$i]);
+                                if ($node != null) {
+                                    if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                        $node_counts = 0;
+                                        $this->get_subtree_nodes_count($node, $node_counts);
+                                        if ($node_counts < $this->options->problem_ids[0]) {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        } else {
+                                            $counts[0] += $node->leftborder;
+                                            $counts[1] += $node->rightborder;
+                                        }
+                                    } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                        $node_counts = 0;
+                                        $this->get_subtree_nodes_count($node, $node_counts);
+                                        if ($node_counts < $this->options->problem_ids[0]) {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        } else {
+                                            $counts[0] += $node->leftborder;
+                                            $counts[1] = -999;
+                                        }
+                                    } else {
+                                        $counts[0] += 1;
+                                        $counts[1] += 1;
+                                    }
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            }
+                        } else {
+                            $counts[0] += 1;
+                            $counts[1] += 1;
+                        }*/
+                        //------------------------------------------------
+                    } else {
+                        /*$node = $this->get_node_from_id($this->get_dst_root(), $this->options->problem_ids[$i]);
+                        if ($node != null) {
+                            if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                $node_counts = 0;
+                                $this->get_subtree_nodes_count($node, $node_counts);
+                                if ($node_counts < $this->options->problem_ids[0]) {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                } else {
+                                    $counts[0] += $node->leftborder;
+                                    $counts[1] += $node->rightborder;
+                                }
+                            } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                $node_counts = 0;
+                                $this->get_subtree_nodes_count($node, $node_counts);
+                                if ($node_counts < $this->options->problem_ids[0]) {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                } else {
+                                    $counts[0] += $node->leftborder;
+                                    $counts[1] = -999;
+                                }
+                            } else {
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            }
+                        } else {*/
+
+                            /*if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT) {
+                                $parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
+
+                                if ($parent != null) {
+                                    if ($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                        $counts[0] += $parent->leftborder;
+                                        $counts[1] += $parent->rightborder;
+                                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                        $counts[0] += $parent->leftborder;
+                                        $counts[1] = -999;
+                                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+
+                                        $parent_tmp = $this->get_parent_node($this->get_dst_root(), $parent->id);
+                                        if ($parent_tmp != null) {
+                                            if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                                $counts[0] += $parent_tmp->leftborder;
+                                                $counts[1] += $parent_tmp->rightborder;
+                                            } else if ($parent_tmp->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                                $counts[0] += $parent_tmp->leftborder;
+                                                $counts[1] = -999;
+                                            } else {
+                                                $counts[0] += 1;
+                                                $counts[1] += 1;
+                                            }
+                                        } else {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        }
+                                    } else {
+                                        $node = $this->get_node_from_id($this->get_dst_root(), $this->options->problem_ids[$i]);
+                                        if ($node != null) {
+                                            if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                                                $node_counts = 0;
+                                                $this->get_subtree_nodes_count($node, $node_counts);
+                                                if ($node_counts < $this->options->problem_ids[0]) {
+                                                    $counts[0] += 1;
+                                                    $counts[1] += 1;
+                                                } else {
+                                                    $counts[0] += $node->leftborder;
+                                                    $counts[1] += $node->rightborder;
+                                                }
+                                            } else if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                                                $node_counts = 0;
+                                                $this->get_subtree_nodes_count($node, $node_counts);
+                                                if ($node_counts < $this->options->problem_ids[0]) {
+                                                    $counts[0] += 1;
+                                                    $counts[1] += 1;
+                                                } else {
+                                                    $counts[0] += $node->leftborder;
+                                                    $counts[1] = -999;
+                                                }
+                                            } else {
+                                                $counts[0] += 1;
+                                                $counts[1] += 1;
+                                            }
+                                        } else {
+                                            $counts[0] += 1;
+                                            $counts[1] += 1;
+                                        }
+                                    }
+                                } else {
+                                    $counts[0] += 1;
+                                    $counts[1] += 1;
+                                }
+                            } else {*/
+                                $counts[0] += 1;
+                                $counts[1] += 1;
+                            /*}*/
+                        /*}*/
+                    }
+                } else {
+                    $counts[0] += 1;
+                    $counts[1] += 1;
+                }
             }
         }
 
         return $counts;
+    }
+
+    private function get_node_from_id($tree_root, $node_id) {
+        $local_root = null;
+        if ($tree_root->id == $node_id) {
+            return $tree_root;
+        }
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                if ($operand->id == $node_id) {
+                    return $operand;
+                }
+                $local_root = $this->get_node_from_id($operand, $node_id);
+                if ($local_root !== null) {
+                    return $local_root;
+                }
+            }
+        }
+        return $local_root;
     }
 
     private function subexpression_repeats($current_root, $node) {
@@ -1254,16 +2173,75 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->indlast = $leaf->position->indlast;
             }
         }
+
+        $parent = $this->get_parent_node($this->get_dst_root(), $leafs1[0]->id);
+        $parent_cur = $this->get_parent_node($this->get_dst_root(), $leafs2[0]->id);
+        if ($parent_cur != null
+            && ($parent_cur->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $parent_cur->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)) {
+
+            $parent_curcur = $this->get_parent_node($this->get_dst_root(), $parent_cur->id);
+            if ($parent != null && $parent_curcur != null && $parent_curcur->id == $parent->id) {
+                $this->indlast = $parent_cur->position->indlast;
+            } else {
+                $this->indlast = $parent_cur->position->indlast;
+                /*foreach($leafs2 as $leaf) {
+                    if ($leaf->position->indfirst < $this->indfirst){
+                        $this->indfirst = $leaf->position->indfirst;
+                    }
+                    if ($leaf->position->indlast > $this->indlast){
+                        $this->indlast = $leaf->position->indlast;
+                    }
+                }*/
+            }
+        } else {
+            foreach($leafs2 as $leaf) {
+                if ($leaf->position->indfirst < $this->indfirst){
+                    $this->indfirst = $leaf->position->indfirst;
+                }
+                if ($leaf->position->indlast > $this->indlast){
+                    $this->indlast = $leaf->position->indlast;
+                }
+            }
+        }
     }
 
     /**
      * Get quantifier regex text from borders
      */
     private function get_quant_text_from_borders($left_border, $right_border) {
-        if (($left_border !== 1 && $right_border !== 1)
-            && ($left_border !== 0 && $right_border !== 0)) {
-            return '{' . $left_border . ($left_border == $right_border ? '' : ',' . $right_border) . '}';
+        if ($left_border == 1 && $right_border == 1) {
+            return '';
         }
+
+        if ($left_border < 0) {
+            return '';
+        }
+
+        if ($left_border == 0 && $right_border == 0) {
+            return '';
+        }
+
+        if ($right_border < 0) {
+            if ($left_border == 0) {
+                return '*';
+            } else if ($left_border == 1) {
+                return '+';
+            }
+            return '{' . $left_border . ',}';
+        }
+        if ($left_border == 0 && $right_border == 1) {
+            return '?';
+        }
+        return '{' . $left_border . ($left_border == $right_border ? '' : ',' . $right_border) . '}';
+
+//        if (($left_border !== 1 && $right_border !== 1)
+//            && ($left_border !== 0 && $right_border !== 0)) {
+//            if ($right_border < 0) {
+//                return '{' . $left_border . ',}';
+//            }
+//            return '{' . $left_border . ($left_border == $right_border ? '' : ',' . $right_border) . '}';
+//        }
         return '';
     }
 
@@ -1786,9 +2764,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                                 || ($node->leftborder >= $oq->leftborder && $node->rightborder >= $oq->rightborder
                                     && $node->leftborder <= $oq->rightborder)
                                 || ($node->leftborder <= $oq->leftborder && $node->rightborder <= $oq->rightborder
-                                    && $node->rightborder + 1 == $oq->leftborder)
+                                    && $node->rightborder + 1 == $oq->leftborder
+                                    && ($node->leftborder == 1 || ($node->leftborder == 0 && $node->rightborder > 0)))
                                 || ($node->leftborder >= $oq->leftborder && $node->rightborder >= $oq->rightborder
-                                    && $node->leftborder == $oq->rightborder + 1)
+                                    && $node->leftborder == $oq->rightborder + 1
+                                    && ($oq->leftborder == 1 || ($oq->leftborder == 0 && $oq->rightborder > 0)))
                             ) {
                                 $is_found = true;
                             }
