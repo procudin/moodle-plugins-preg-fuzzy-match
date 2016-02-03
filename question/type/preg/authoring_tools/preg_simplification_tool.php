@@ -221,6 +221,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
+//            $result = $this->partial_match_alternative_operands();
+//            if ($result != array()) {
+//                $equivalences[$i] = array();
+//                $equivalences[$i] += $result;
+//                ++$i;
+//                $this->problem_ids = array();
+//            }
+
             $result = $this->quant_node();
             if ($result != array()) {
                 $equivalences[$i] = array();
@@ -2344,7 +2352,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     protected function optimize_6($node) {
         return $this->change_alternative_to_charset($node, $this->options->problem_ids[0]);
     }
-	
+
+    // The 7th rule
+    protected function optimize_7($node) {
+        return $this->bracketing_common_subexpr_from_alt($node);
+    }
+
     // The 8th rule
     protected function optimize_8($node) {
         return $this->add_question_quant_to_alt($node, $this->options->problem_ids[0]);
@@ -2665,6 +2678,48 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             return '\\' . $character;
         }
         return $character;
+    }
+
+    private function bracketing_common_subexpr_from_alt($tree_root) {
+//        if ($tree_root->id == $this->problem_ids[2]) {
+//            if ($this->problem_ids[1] == 1) {
+//                $leafs = array();
+//
+//                $this->get_left_part_of_operands_from_alt($tree_root->operands, $this->problem_ids[0], $leafs);
+//
+//
+//            } else if ($this->problem_ids[1] == 0) {
+//                $this->get_right_part_of_operands_from_alt($tree_root, $this->problem_ids[0]);
+//            } else {
+//                return false;
+//            }
+//        }
+//
+//        if ($this->is_operator($tree_root)) {
+//            foreach ($tree_root->operands as $operand) {
+//                if ($this->change_consecutive_quants($operand, $remove_node_id)) {
+//                    return true;
+//                }
+//            }
+//        }
+
+        return false;
+    }
+
+    private function get_left_part_of_operands_from_alt($node, &$count, &$leafs) {
+        if ($count > 0) {
+            $leafs[] = $node;
+            $count--;
+            if ($this->is_operator($node)) {
+                foreach ($node->operands as $operand) {
+                    $this->leafs_list($operand, $leafs);
+                }
+            }
+        }
+    }
+
+    private function get_right_part_of_operands_from_alt($node, $count) {
+        return true;
     }
 
 
