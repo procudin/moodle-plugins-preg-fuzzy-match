@@ -2301,6 +2301,69 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 
 
+    /* The 9th rule */
+    public function nested_subpatterns() {
+        $equivalences = array();
+
+        if ($this->search_nested_subpatterns($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_tips_short_9', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_tips_full_9_alt', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_nested_subpatterns($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR
+            && $node->operand[0]->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->operand[0]->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+
+            $this->problem_ids[] = $node->id;
+            $this->problem_type = 109;
+            $this->indfirst = $node->position->indfirst;
+            $this->indlast = $node->position->indlast;
+            return true;
+
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_nested_subpatterns($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    /**
+     * Check included empty subpattern node in empty subpattern node.
+     */
+    /*private function check_other_subpattern_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+            && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+            return $this->check_other_subpattern_node($node->operand[0]);
+            /*if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
+                && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                if (!$this->check_backref_to_subexpr($this->get_dst_root(), $node->number)) {
+                    return true;
+                }
+            } else {
+                return $this->check_other_subpattern_node($node->operands[0]);
+            }*
+        }
+        return false;
+    }*/
+
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
