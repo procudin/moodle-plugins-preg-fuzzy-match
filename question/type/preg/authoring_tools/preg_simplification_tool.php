@@ -2260,6 +2260,25 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
 
+
+    /* The 5th rule */
+    public function nullable_regex() {
+        $equivalences = array();
+
+        if ($this->get_dst_root()->nullable === true) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_tips_short_5', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_tips_full_5', 'qtype_preg'));
+            $equivalences['problem_ids'] = array($this->get_dst_root()->id);
+            $equivalences['problem_type'] = 105;
+            $equivalences['problem_indfirst'] = $this->get_dst_root()->position->indfirst;
+            $equivalences['problem_indlast'] = $this->get_dst_root()->position->indlast;
+        }
+
+        return $equivalences;
+    }
+
+
+
     /* The 8th rule */
     public function exact_match() {
         $equivalences = array();
