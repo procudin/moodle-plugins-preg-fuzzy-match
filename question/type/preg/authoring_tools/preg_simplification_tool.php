@@ -1163,7 +1163,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Tree normalization
      */
-    protected function normalization(&$tree_root) {
+    protected function normalization($tree_root) {
         $this->deleted_grouping_positions = array();
         $this->delete_not_empty_grouping_node($tree_root, $tree_root);
 
@@ -1203,7 +1203,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }
 
     // TODO: delete
-    private function delete_empty_groping_node(&$tree_root, &$node, $remove_node_id) {
+    private function delete_empty_groping_node($tree_root, $node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             if ($node->id == $tree_root->id) {
                 $tree_root = null;
@@ -1231,7 +1231,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function delete_not_empty_grouping_node(&$tree_root, $node) {
+    private function delete_not_empty_grouping_node($tree_root, $node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
             && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
             $parent = $this->get_parent_node($tree_root, $node->id);
@@ -3543,7 +3543,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function delete_empty_node_from_alternative(&$node) {
+    private function delete_empty_node_from_alternative($node) {
         if ($this->check_empty_node_for_alt($node)) {
             foreach ($node->operands as $i => $operand) {
                 if ($operand->type == qtype_preg_node::TYPE_LEAF_META
@@ -3556,7 +3556,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return true;
     }
 
-    private function remove_grouping_node(&$tree_root, $node, $remove_node_id) {
+    private function remove_grouping_node($tree_root, $node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             $parent = $this->get_parent_node($tree_root, $node->id);
             if ($parent !== null) {
@@ -3620,7 +3620,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function remove_subpattern_node(&$tree_root, $node, $remove_node_id) {
+    private function remove_subpattern_node($tree_root, $node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             $parent = $this->get_parent_node($tree_root, $node->id);
             if ($parent !== null) {
@@ -4146,7 +4146,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function rename_backreferences_for_subpattern(&$node, &$subpattern_last_number) {
+    private function rename_backreferences_for_subpattern($node, &$subpattern_last_number) {
         if ($node !== null) {
             if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
                 ++$subpattern_last_number;
