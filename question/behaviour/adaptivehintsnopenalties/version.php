@@ -1,5 +1,5 @@
 <?PHP // $Id: version.php,v 1.1.2.3 2009/10/04 19:49:58 oasychev Exp $
-// This file is part of POAS question and related behaviours - https://code.google.com/p/oasychev-moodle-plugins/
+// This file is part of POAS question and related behaviours - https://bitbucket.org/oasychev/moodle-plugins/overview
 //
 // POAS question is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
