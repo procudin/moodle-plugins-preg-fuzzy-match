@@ -243,7 +243,7 @@ class qtype_preg_handling_options {
 
 class qtype_preg_regex_handler {
 
-    /** Regular expression as an object of qtype_poasquestion\string. */
+    /** Regular expression as an object of qtype_poasquestion\utf8_string. */
     protected $regex;
     /** Regular expression handling options, may be different for different handlers. */
     protected $options;
@@ -277,7 +277,7 @@ class qtype_preg_regex_handler {
         }
 
         if ($regex == '' || $regex === null) {
-            $this->regex = new qtype_poasquestion\string('');
+            $this->regex = new qtype_poasquestion\utf8_string('');
             $this->options = $options;
             return;
         }
@@ -291,7 +291,7 @@ class qtype_preg_regex_handler {
             $options = $notationobj->convert_options($usednotation);
         }
 
-        $this->regex = new qtype_poasquestion\string($regex);
+        $this->regex = new qtype_poasquestion\utf8_string($regex);
         $this->options = $options;
 
         // Do parsing.
@@ -701,7 +701,7 @@ class qtype_preg_regex_handler {
                 // Parsing is finished.
                 $this->parser->doParse(0, 0);
 
-                $this->regex = new qtype_poasquestion\string($resultregex);
+                $this->regex = new qtype_poasquestion\utf8_string($resultregex);
                 $this->astroot = $this->parser->get_root();
 
                 // Look for unsupported modifiers.

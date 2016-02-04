@@ -88,7 +88,7 @@ class qtype_preg_php_preg_matcher extends qtype_preg_matcher {
             $regex = implode('\/', explode('/', $regex));
         }
         if (!$this->options->is_modifier_set(qtype_preg_handling_options::MODIFIER_EXTENDED)) { // Avoid newlines in non-extended mode.
-            $regex = qtype_poasquestion\string::replace("\n", '', $regex);
+            $regex = qtype_poasquestion\utf8_string::replace("\n", '', $regex);
         }
         $regex = '/' . $regex . '/u';
 
@@ -124,7 +124,7 @@ class qtype_preg_php_preg_matcher extends qtype_preg_matcher {
             $regex = '^(?:' . $regex . "\n)$";
         }
         if (!$this->options->is_modifier_set(qtype_preg_handling_options::MODIFIER_EXTENDED)) { // Avoid newlines in non-extended mode.
-            $regex = qtype_poasquestion\string::replace("\n", '', $regex);
+            $regex = qtype_poasquestion\utf8_string::replace("\n", '', $regex);
         }
         $regex = '/' . $regex . '/u';
         $regex .= $this->options->modifiers_to_string();

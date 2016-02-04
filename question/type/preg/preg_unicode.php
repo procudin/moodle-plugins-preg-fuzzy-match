@@ -8506,7 +8506,7 @@ class qtype_preg_unicode extends core_text {
     }
 
     /**
-     * @param $charset object of qtype_poasquestion\string.
+     * @param $charset object of qtype_poasquestion\utf8_string.
      * @return a sorted array of trivial ranges corresponding to the given charset.
      */
     public static function get_ranges_from_charset($charset, $caseless = false) {

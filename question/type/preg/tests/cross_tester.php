@@ -240,7 +240,7 @@ abstract class qtype_preg_cross_tester extends PHPUnit_Framework_TestCase {
         $lexer = new qtype_preg_lexer($pseudofile);
         $token = $lexer->nextToken();
         $leaf = is_array($token) ? $token[0]->value : $token->value;
-        $res = $leaf->match(new qtype_poasquestion\string($char), 0, $length, false);
+        $res = $leaf->match(new qtype_poasquestion\utf8_string($char), 0, $length, false);
         fclose($pseudofile);
         return $res;
     }
