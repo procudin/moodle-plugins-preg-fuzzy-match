@@ -45,7 +45,7 @@ class qtype_preg_unicode_huge_test extends PHPUnit_Framework_TestCase {
         $lexer = $this->create_lexer('\pL\pLl');
         $node1 = $lexer->nextToken()->value;
         $node2 = $lexer->nextToken()->value;
-        $str = new qtype_poasquestion\string($ch);
+        $str = new qtype_poasquestion\utf8_string($ch);
         $length = 0;
         $start = time();
         $node = $node1->intersect($node2);

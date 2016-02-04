@@ -192,15 +192,15 @@ class qtype_preg_fa_transition {
             // There are end string assertions.
             if (qtype_preg_unicode::is_in_range("\n", $ranges)) {
                 return $capz['before']
-                    ? array(qtype_preg_leaf::NEXT_CHAR_END_HERE, new qtype_poasquestion\string("\n"))
-                    : array(qtype_preg_leaf::NEXT_CHAR_OK, new qtype_poasquestion\string("\n"));
+                    ? array(qtype_preg_leaf::NEXT_CHAR_END_HERE, new qtype_poasquestion\utf8_string("\n"))
+                    : array(qtype_preg_leaf::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string("\n"));
             } else {
                 return array(qtype_preg_leaf::NEXT_CHAR_CANNOT_GENERATE, null);
             }
         } else if ($circumflex['after']) {
             // There are start string assertions.
             if (qtype_preg_unicode::is_in_range("\n", $ranges)) {
-                return array(qtype_preg_leaf::NEXT_CHAR_OK, new qtype_poasquestion\string("\n"));
+                return array(qtype_preg_leaf::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string("\n"));
             } else {
                 return array(qtype_preg_leaf::NEXT_CHAR_CANNOT_GENERATE, null);
             }
@@ -229,7 +229,7 @@ class qtype_preg_fa_transition {
             }
         }
 
-        return array(qtype_preg_leaf::NEXT_CHAR_OK, new qtype_poasquestion\string(core_text::code2utf8($result_ranges[0][0])));
+        return array(qtype_preg_leaf::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(core_text::code2utf8($result_ranges[0][0])));
     }
 
     public function is_start_anchor() {
@@ -495,7 +495,7 @@ class qtype_preg_fa_transition {
         $otherhastags = $other->has_tags();
         $resulttran = null;
         $flag = new qtype_preg_charset_flag();
-        $flag->set_data(qtype_preg_charset_flag::TYPE_SET, new qtype_poasquestion\string("\n"));
+        $flag->set_data(qtype_preg_charset_flag::TYPE_SET, new qtype_poasquestion\utf8_string("\n"));
         $charset = new qtype_preg_leaf_charset();
         $charset->flags = array(array($flag));
         $charset->userinscription = array(new qtype_preg_userinscription("\n"));
@@ -2900,7 +2900,7 @@ class qtype_preg_fa {
         $intersection = null;
         $transitionadded = false;
         $flag = new qtype_preg_charset_flag();
-        $flag->set_data(qtype_preg_charset_flag::TYPE_SET, new qtype_poasquestion\string("\n"));
+        $flag->set_data(qtype_preg_charset_flag::TYPE_SET, new qtype_poasquestion\utf8_string("\n"));
         $charset = new qtype_preg_leaf_charset();
         $charset->flags = array(array($flag));
         $charset->userinscription = array(new qtype_preg_userinscription("\n"));

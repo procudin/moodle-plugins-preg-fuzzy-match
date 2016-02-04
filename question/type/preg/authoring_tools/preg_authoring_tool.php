@@ -107,7 +107,7 @@ abstract class qtype_preg_authoring_tool extends qtype_preg_regex_handler implem
      */
     public static function string_to_html($string) {
         $result = '';
-        $string = new qtype_poasquestion\string($string);
+        $string = new qtype_poasquestion\utf8_string($string);
         for ($i = 0; $i < $string->length(); ++$i) {
             $result .= self::char_to_html($string[$i]);
         }
@@ -116,7 +116,7 @@ abstract class qtype_preg_authoring_tool extends qtype_preg_regex_handler implem
 
     public static function escape_characters($string, $chars) {
         $result = '';
-        $string = new qtype_poasquestion\string($string);
+        $string = new qtype_poasquestion\utf8_string($string);
         for ($i = 0; $i < $string->length(); ++$i) {
             $char = $string[$i];
             $result .= in_array($char, $chars) ? "\\$char" : $char;
@@ -126,7 +126,7 @@ abstract class qtype_preg_authoring_tool extends qtype_preg_regex_handler implem
 
     public static function replace_special_characters($string) {
         $result = '';
-        $string = new qtype_poasquestion\string($string);
+        $string = new qtype_poasquestion\utf8_string($string);
         for ($i = 0; $i < $string->length(); ++$i) {
             $char = $string[$i];
             $code = core_text::utf8ord($char);
@@ -141,7 +141,7 @@ abstract class qtype_preg_authoring_tool extends qtype_preg_regex_handler implem
     }
 
     public static function userinscription_to_string($ui, $explaincodes = true) {
-        $data = new qtype_poasquestion\string($ui->data);
+        $data = new qtype_poasquestion\utf8_string($ui->data);
 
         // Is it a range?
         if ($ui->is_character_range()) {

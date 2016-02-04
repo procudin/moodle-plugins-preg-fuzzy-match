@@ -213,7 +213,7 @@ class qtype_preg_description_tool extends qtype_preg_authoring_tool {
             $string = preg_replace('%;((?:</span>)?)]%u', '\1]', $string);   // Postprocessing
         }
         if (!empty($wholepattern)) {
-            $string = qtype_poasquestion\string::replace('%content', $string, $wholepattern);
+            $string = qtype_poasquestion\utf8_string::replace('%content', $string, $wholepattern);
         }
         $this->options = $backupoptions; // restore original options
         return $string;

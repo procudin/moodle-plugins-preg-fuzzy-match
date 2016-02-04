@@ -551,7 +551,7 @@ abstract class qtype_preg_leaf extends qtype_preg_node {
     public function intersect_leafs($other, $thishastags, $otherhastags) {
         $result = null;
         $length = 0;
-        $str = new qtype_poasquestion\string("\n");
+        $str = new qtype_poasquestion\utf8_string("\n");
         if ($this->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
             if ($other->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
                 $result = $this->intersect_with_ranges($other);
@@ -911,7 +911,7 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         	return array(self::NEXT_CHAR_CANNOT_GENERATE, null);
         }
 
-        return array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(qtype_preg_unicode::code2utf8($ranges[0][0])));
+        return array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(qtype_preg_unicode::code2utf8($ranges[0][0])));
     }
 
     /*public function tohr() {
@@ -1274,7 +1274,7 @@ class qtype_preg_leaf_meta extends qtype_preg_leaf {
     }
 
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
-        return array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''));
+        return array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''));
     }
 
     public function tohr() {
@@ -1384,7 +1384,7 @@ class qtype_preg_leaf_assert_esc_b extends qtype_preg_leaf_assert {
     }
 
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
-        return array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''));  // TODO
+        return array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''));  // TODO
     }
 
     public function tohr() {
@@ -1409,7 +1409,7 @@ class qtype_preg_leaf_assert_esc_a extends qtype_preg_leaf_assert {
 
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
         if ($pos == 0) {
-            return array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''));
+            return array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''));
         }
         return array(self::NEXT_CHAR_CANNOT_GENERATE, null);
     }
@@ -1480,7 +1480,7 @@ class qtype_preg_leaf_assert_esc_g extends qtype_preg_leaf_assert {
 
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
         if ($pos == $matcherstateobj->start_pos()) {
-            return array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''));
+            return array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''));
         }
         return array(self::NEXT_CHAR_CANNOT_GENERATE, null);
     }
@@ -1507,7 +1507,7 @@ class qtype_preg_leaf_assert_circumflex extends qtype_preg_leaf_assert_esc_a {
 
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
         if ($pos == 0 || $newstr[$pos - 1] == "\n") {
-            return array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''));
+            return array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''));
         }
         return array(self::NEXT_CHAR_CANNOT_GENERATE, null);
     }
@@ -1567,7 +1567,7 @@ class qtype_preg_leaf_assert_subexpr extends qtype_preg_leaf_assert {
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
         $subexpr = $this->name !== null ? $this->name : $this->number;
         $ok = ($matcherstateobj->is_subexpr_captured($subexpr) xor $this->negative);
-        return $ok ? array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''))
+        return $ok ? array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''))
                    : array(self::NEXT_CHAR_CANNOT_GENERATE, null);
     }
 
@@ -1610,7 +1610,7 @@ class qtype_preg_leaf_assert_recursion extends qtype_preg_leaf_assert {
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
         $subexpr = $this->name !== null ? $this->name : $this->number;
         $ok = ($matcherstateobj->is_recursion($subexpr) xor $this->negative);
-        return $ok ? array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''))
+        return $ok ? array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''))
                    : array(self::NEXT_CHAR_CANNOT_GENERATE, null);
     }
 
@@ -1644,7 +1644,7 @@ class qtype_preg_leaf_assert_truefalse extends qtype_preg_leaf_assert {
 
     public function next_character($originalstr, $newstr, $pos, $length = 0, $matcherstateobj = null) {
         $ok = !$this->negative;
-        return $ok ? array(self::NEXT_CHAR_OK, new qtype_poasquestion\string(''))
+        return $ok ? array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(''))
                    : array(self::NEXT_CHAR_CANNOT_GENERATE, null);
     }
 
