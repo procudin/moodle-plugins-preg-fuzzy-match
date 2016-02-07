@@ -3382,7 +3382,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     // The 1st rule
     protected function optimize_1($node) {
-        return $this->remove_subtree($node, $this->options->problem_ids[0]);
+        return $this->remove_subtree($this->get_dst_root(), $node, $this->options->problem_ids[0]);
     }
 
     // The 2nd rule
@@ -3471,9 +3471,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->add_finit_quant_to_space_charset($node, $this->options->problem_ids[0]);
     }
 
-    private function remove_subtree($node, $remove_node_id) {
+    private function remove_subtree($tree_root, $node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
-            if ($node->id == $this->get_dst_root()->id) {
+            if ($node->id == /*$this->get_dst_root()*/$tree_root->id) {
                 // TODO: fix this
                 $this->dstroot = null;
             }
@@ -3482,9 +3482,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
         if ($this->is_operator($node)) {
             foreach ($node->operands as $i => $operand) {
-                if ($this->remove_subtree($operand, $remove_node_id)) {
+                if ($this->remove_subtree($tree_root, $operand, $remove_node_id)) {
                     if (count($node->operands) === 1) {
-                        return $this->remove_subtree($this->get_dst_root(), $node->id);
+                        return $this->remove_subtree(/*$this->get_dst_root()*/$tree_root, $tree_root, $node->id);
                     }
 
                     array_splice($node->operands, $i, 1);
@@ -3563,7 +3563,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $group_operand = $node->operands[0];
                 if ($this->check_included_empty_grouping($node)) {
                     if (count($parent->operands) === 1) {
-                        return $this->remove_subtree($tree_root, $parent->id);
+                        return $this->remove_subtree($tree_root, $tree_root, $parent->id);
                     }
                     foreach ($parent->operands as $i => $operand) {
                         if ($operand->id == $remove_node_id) {
@@ -3625,9 +3625,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $parent = $this->get_parent_node($tree_root, $node->id);
             if ($parent !== null) {
                 $group_operand = $node->operands[0];
+                $group_operand->position->indfirst = $node->position->indfirst;
+                $group_operand->position->indlast = $node->position->indlast;
                 if ($this->check_included_empty_subpattern($node)) {
                     if (count($parent->operands) === 1) {
-                        return $this->remove_subtree($tree_root, $parent->id);
+                        return $this->remove_subtree($tree_root, $tree_root, $parent->id);
                     }
                     foreach ($parent->operands as $i => $operand) {
                         if ($operand->id == $remove_node_id) {
