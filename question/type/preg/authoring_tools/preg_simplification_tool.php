@@ -3759,6 +3759,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $new_node = new qtype_preg_leaf_charset();
             $new_node->set_user_info(null, array(new qtype_preg_userinscription($characters, null)));
 
+            $new_node->position = new qtype_preg_position($node->position->indfirst, $node->position->indlast, null, null, null, null);
+
             if ($count == count($node->operands)) {
                 if ($node->id == $this->get_dst_root()->id) {
                     $this->dstroot = $new_node;
