@@ -3501,51 +3501,62 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($tree_root->id == $remove_node_id) {
             $this->delete_empty_node_from_alternative($tree_root);
 
-            $qu = new qtype_preg_node_finite_quant(0, 1);
-            $qu->set_user_info(null, array(new qtype_preg_userinscription('?')));
+            $alt_match_empty = false;
+            foreach ($tree_root->operands as $operand) {
+                if ($operand->nullable === true) {
+                    $alt_match_empty = true;
+                    break;
+                }
+            }
 
-            $parent = $this->get_parent_node($this->get_dst_root(), $tree_root->id);
-            if ($parent == null) {
-                $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
-                $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
-                $se->operands[] = $tree_root;
-                $qu->operands[] = $se;
+            if (!$alt_match_empty) {
+                $qu = new qtype_preg_node_finite_quant(0, 1);
+                $qu->set_user_info(null, array(new qtype_preg_userinscription('?')));
 
-                $this->dstroot = $qu;
-            } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
-                $new_parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
-
-                if ($new_parent == null) {
-                    $qu->operands[] = $parent;
-                    $this->dstroot = $qu;
-                } else if ($new_parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
-                           || $new_parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+                $parent = $this->get_parent_node($this->get_dst_root(), $tree_root->id);
+                if ($parent == null) {
                     $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
                     $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
                     $se->operands[] = $tree_root;
                     $qu->operands[] = $se;
 
-                    $parent->operands[0] = $qu;
-                } else {
-                    $qu->operands[] = $parent;
+                    $this->dstroot = $qu;
+                } else if ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR) {
+                    $new_parent = $this->get_parent_node($this->get_dst_root(), $parent->id);
 
-                    foreach ($new_parent->operands as $i => $operand) {
-                        if ($parent->id == $operand->id) {
-                            $new_parent->operands[$i] = $qu;
-                            break;
+                    if ($new_parent == null) {
+                        $qu->operands[] = $parent;
+                        $this->dstroot = $qu;
+                    } else if ($new_parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                        || $new_parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    ) {
+                        $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                        $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                        $se->operands[] = $tree_root;
+                        $qu->operands[] = $se;
+
+                        $parent->operands[0] = $qu;
+                    } else {
+                        $qu->operands[] = $parent;
+
+                        foreach ($new_parent->operands as $i => $operand) {
+                            if ($parent->id == $operand->id) {
+                                $new_parent->operands[$i] = $qu;
+                                break;
+                            }
                         }
                     }
-                }
-            } else {
-                $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
-                $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
-                $se->operands[] = $tree_root;
-                $qu->operands[] = $se;
+                } else {
+                    $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
+                    $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
+                    $se->operands[] = $tree_root;
+                    $qu->operands[] = $se;
 
-                foreach ($parent->operands as $i => $operand) {
-                    if ($tree_root->id == $operand->id) {
-                        $parent->operands[$i] = $qu;
-                        break;
+                    foreach ($parent->operands as $i => $operand) {
+                        if ($tree_root->id == $operand->id) {
+                            $parent->operands[$i] = $qu;
+                            break;
+                        }
                     }
                 }
             }
