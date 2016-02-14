@@ -1206,8 +1206,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         while($problem_exist && $count < 999) {
             if ($this->search_not_empty_subpattern_node($tree_root)) {
                 $this->remove_subpattern_node($tree_root, $tree_root, $this->problem_ids[0]);
-                $subpattern_last_number = 0;
-                $this->rename_backreferences_for_subpattern($tree_root, $subpattern_last_number);
+                $this->rename_backreferences_for_subpattern($tree_root, $tree_root);
                 $count++;
             } else {
                 $problem_exist = false;
@@ -3105,8 +3104,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     protected function optimize_3($node) {
         $tree_root = $this->get_dst_root();
         $this->remove_subpattern_node($tree_root, $node, $this->options->problem_ids[0]);
-        $subpattern_last_number = 0;
-        $this->rename_backreferences_for_subpattern($tree_root, $subpattern_last_number);
+        $this->rename_backreferences_for_subpattern($tree_root, $tree_root);
         return true;
     }
 
@@ -3335,8 +3333,28 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $parent = $this->get_parent_node($tree_root, $node->id);
             if ($parent !== null) {
                 $group_operand = $node->operands[0];
-                $group_operand->position->indfirst = $node->position->indfirst;
-                $group_operand->position->indlast = $node->position->indlast;
+                if ($group_operand->type === qtype_preg_node::TYPE_NODE_CONCAT) {
+                    if ($group_operand->operands[0]->type === qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        || $group_operand->operands[0]->type === qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                        $group_operand->operands[0]->position->indfirst = $node->position->indfirst;
+                        $group_operand->operands[0]->position->indlast = $node->position->indlast;
+                        $group_operand->operands[0]->operands[0]->position->indfirst = $node->position->indfirst;
+                        $group_operand->operands[0]->operands[0]->position->indlast = $node->position->indlast;
+                    } else {
+                        $group_operand->operands[0]->position->indfirst = $node->position->indfirst;
+                        $group_operand->operands[0]->position->indlast = $node->position->indlast;
+                    }
+                } else if ($group_operand->type === qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                           || $group_operand->type === qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                    $group_operand->position->indfirst = $node->position->indfirst;
+                    $group_operand->position->indlast = $node->position->indlast;
+                    $group_operand->operands[0]->position->indfirst = $node->position->indfirst;
+                    $group_operand->operands[0]->position->indlast = $node->position->indlast;
+                } else {
+                    $group_operand->position->indfirst = $node->position->indfirst;
+                    $group_operand->position->indlast = $node->position->indlast;
+                }
+
                 if ($this->check_included_empty_subpattern($node)) {
                     if (count($parent->operands) === 1) {
                         return $this->remove_subtree($tree_root, $tree_root, $parent->id);
@@ -3854,9 +3872,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private function change_subpattern_to_group($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
             $node->subtype = qtype_preg_node_subexpr::SUBTYPE_GROUPING;
-            $subpattern_last_number = 0;
+            //$subpattern_last_number = 0;
             $tree_root = $this->get_dst_root();
-            $this->rename_backreferences_for_subpattern($tree_root, $subpattern_last_number);
+            $this->rename_backreferences_for_subpattern($tree_root, $tree_root/*, $subpattern_last_number*/);
             return true;
         }
 
@@ -3871,16 +3889,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function rename_backreferences_for_subpattern($node, &$subpattern_last_number) {
+    private function rename_backreferences_for_subpattern($tree_root, $node, &$subpattern_last_number = 0) {
         if ($node !== null) {
             if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
                 ++$subpattern_last_number;
-                $tree_root = $this->get_dst_root();
                 $this->rename_backref($tree_root, $node->number, $subpattern_last_number);
             }
             if ($this->is_operator($node)) {
                 foreach ($node->operands as $operand) {
-                    if ($this->rename_backreferences_for_subpattern($operand, $subpattern_last_number)) {
+                    if ($this->rename_backreferences_for_subpattern($tree_root, $operand, $subpattern_last_number)) {
                         return true;
                     }
                 }
@@ -3896,6 +3913,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $old_number)
                 || ($node->type == qtype_preg_node::TYPE_NODE_COND_SUBEXPR
                     && $node->subtype == qtype_preg_node_cond_subexpr::SUBTYPE_SUBEXPR && $node->number == $old_number)
+                || ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+                    && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR && $node->number == $old_number)
             ) {
                 $node->number = $new_number;
             }
