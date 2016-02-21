@@ -67,11 +67,18 @@ class qtype_preg_regex_testing_tool implements qtype_preg_i_authoring_tool {
         $matchingoptions->mergeassertions = $CFG->qtype_preg_assertfailmode;
         $engineclass = 'qtype_preg_' . $engine;
         $matcher = new $engineclass($regex, $matchingoptions);
+        $this->matcher = $matcher;
         if ($matcher->errors_exist()) {
             $this->errormsgs = $matcher->get_error_messages();
-        } else {
-            $this->matcher = $matcher;
         }
+    }
+
+    public function errors_exist() {
+        return $this->matcher->errors_exist();
+    }
+
+    public function get_error_messages() {
+        return $this->errormsgs();
     }
 
     public function json_key() {
