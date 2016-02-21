@@ -16,6 +16,9 @@
 
 namespace qtype_writeregex;
 
+global $CFG;
+require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
+
 /**
  * Class analyser fot compare regex by automata.
  *
@@ -26,6 +29,8 @@ namespace qtype_writeregex;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class compare_automata_analyzer {
+
+    const MISMATCH_PENALTY = 0.2;
 
     /** @var  object Question object. */
     protected $question;
@@ -44,7 +49,20 @@ class compare_automata_analyzer {
      * @param $respose string User response.
      * @return float Value of compare.
      */
-    public function get_fitness ($answer, $respose) {
-        return 0;
+    public function get_fitness ($answer, $response)
+    {
+        $answermatcher = new \qtype_preg_fa_matcher($answer);
+        $answerautomaton = $answermatcher->automaton;
+        $responsematcher = new \qtype_preg_fa_matcher($response);
+        $responseautomaton = $responsematcher->automaton;
+
+        $differences = array();
+        $fitness = 1;
+
+        if (!$answerautomaton->equal($responseautomaton, $differences)) {
+            $fitness = max(0, 1 - count($differences) * compare_automata_analyzer::MISMATCH_PENALTY);
+        }
+
+        return $fitness;
     }
 }
