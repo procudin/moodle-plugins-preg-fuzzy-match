@@ -2534,7 +2534,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $oq = $this->get_other_quant_for_quant($node->operands[0]);
 
                 if ($oq != null) {
-                    $is_found = false;
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 10;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+
+                    /*$is_found = false;
                     if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
                         if ($oq->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
                             $is_found = true;
@@ -2572,7 +2578,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         $this->indfirst = $node->position->indfirst;
                         $this->indlast = $node->position->indlast;
                         return true;
-                    }
+                    }*/
                 }
             }
         }
