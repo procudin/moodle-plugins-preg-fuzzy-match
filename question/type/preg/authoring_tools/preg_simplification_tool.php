@@ -32,6 +32,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     private $indlast = -2;
 
     private $deleted_grouping_positions = array();
+    private $deleted_subpattern_positions = array();
 
     private $regex_from_tree = '';
 
@@ -1449,6 +1450,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
         }
 
+        foreach($this->deleted_subpattern_positions as $deleted_grouping_position) {
+            if ($deleted_grouping_position[1] > $this->options->indlast
+                && $deleted_grouping_position[0] < $this->options->indlast
+                && $deleted_grouping_position[0] > $this->options->indfirst) {
+                $regex_string = substr($regex_string, 0, $deleted_grouping_position[1])
+                                . substr($regex_string, $deleted_grouping_position[1] + 1);
+            }
+        }
+
         // Generate new regex
         $this->regex_from_tree = substr_replace($regex_string, $new_regex_string_part, $this->options->indfirst,
                                                 $this->options->indlast - $this->options->indfirst + 1);
@@ -1460,6 +1470,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 && $deleted_grouping_position[1] < $this->options->indlast) {
                 $this->regex_from_tree = substr($this->regex_from_tree, 0, $deleted_grouping_position[0])
                                          . substr($this->regex_from_tree, $deleted_grouping_position[0] + 3);
+            }
+        }
+
+        foreach($this->deleted_subpattern_positions as $deleted_grouping_position) {
+            if ($deleted_grouping_position[0] < $this->options->indfirst
+                && $deleted_grouping_position[1] > $this->options->indfirst
+                && $deleted_grouping_position[1] < $this->options->indlast) {
+                $this->regex_from_tree = substr($this->regex_from_tree, 0, $deleted_grouping_position[0])
+                                         . substr($this->regex_from_tree, $deleted_grouping_position[0] + 1);
             }
         }
 
