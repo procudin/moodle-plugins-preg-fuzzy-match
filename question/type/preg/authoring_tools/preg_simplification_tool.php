@@ -3599,8 +3599,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $qu = $this->get_question_quant_for_node($tree_root);
             // Remove quant
             $this->remove_quant($this->get_dst_root(), $qu->id);
-            // Add empty node to alt
-            $tree_root->operands[] = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
+            if ($tree_root->nullable === false) {
+                // Add empty node to alt
+                $tree_root->operands[] = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
+            }
         }
 
         if ($this->is_operator($tree_root)) {
