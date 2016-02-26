@@ -1434,7 +1434,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         // New fixed regex
         // Delete ')' for deleted "(?:)"
         $tmp_dst_root = $this->get_dst_root();
+
+        // Rename all backreference
+        $this->rename_all_backreference($tmp_dst_root, $regex_string);
+
         $this->normalization($tmp_dst_root);
+
         foreach($this->deleted_grouping_positions as $deleted_grouping_position) {
             if ($deleted_grouping_position[1] > $this->options->indlast
                 && $deleted_grouping_position[0] < $this->options->indlast
@@ -1459,6 +1464,64 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return $this->regex_from_tree;
+    }
+
+    private function rename_backref_in_regex($tree_root, &$regex_string) {
+        if ($tree_root->type == qtype_preg_node::TYPE_LEAF_BACKREF) {
+            $regex_string = substr_replace($regex_string, $tree_root->get_regex_string(), $tree_root->position->indfirst,
+                $tree_root->position->indlast - $tree_root->position->indfirst + 1);
+        }
+
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                $this->rename_backref_in_regex($operand, $regex_string);
+            }
+        }
+    }
+
+    private function rename_all_backreference($tree_root, &$regex_string, &$backrefnumb = 0) {
+        if ($tree_root->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $tree_root->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
+            /*if (($tree_root->position->indfirst < $this->options->indfirst && $tree_root->position->indlast < $this->options->indfirst)
+               || ($tree_root->position->indfirst > $this->options->indlast && $tree_root->position->indlast > $this->options->indlast)
+               || ($tree_root->position->indfirst < $this->options->indlast && $tree_root->position->indlast > $this->options->indlast)
+               /*|| ($tree_root->position->indfirst > $this->options->indlast && $tree_root->position->indlast < $this->options->indlast)*) {*/
+            if (!($tree_root->position->indlast > $this->options->indlast
+                && $tree_root->position->indfirst < $this->options->indlast
+                && $tree_root->position->indfirst > $this->options->indfirst)
+                && !($tree_root->position->indfirst < $this->options->indfirst
+                    && $tree_root->position->indlast > $this->options->indfirst
+                    && $tree_root->position->indlast < $this->options->indlast)
+                && !(($tree_root->position->indfirst > $this->options->indfirst
+                    && $tree_root->position->indlast < $this->options->indlast))) {
+                ++$backrefnumb;
+                if ($tree_root->number !== $backrefnumb) {
+                    // Rename all backref, linked with this subexpr
+                    $this->rename_backref1($this->get_dst_root(), $regex_string, $tree_root->number, $backrefnumb);
+                    $tree_root->number = $backrefnumb;
+                }
+            } else {
+                $this->deleted_subpattern_positions[] = array($tree_root->position->indfirst, $tree_root->position->indlast);
+            }
+        }
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                $this->rename_all_backreference($operand, $regex_string, $backrefnumb);
+            }
+        }
+    }
+
+    private function rename_backref1($tree_root, &$regex_string, $oldbackrefnumb, $newbackrefnumb) {
+        if ($tree_root->type == qtype_preg_node::TYPE_LEAF_BACKREF && $tree_root->number === $oldbackrefnumb) {
+            $tree_root->number = $newbackrefnumb;
+            $regex_string = substr_replace($regex_string, "\\{$newbackrefnumb}", $tree_root->position->indfirst,
+                $tree_root->position->indlast - $tree_root->position->indfirst + 1);
+        }
+
+        if ($this->is_operator($tree_root)) {
+            foreach ($tree_root->operands as $operand) {
+                $this->rename_backref1($operand, $regex_string, $oldbackrefnumb, $newbackrefnumb);
+            }
+        }
     }
 
     private function get_subtree_nodes_count($node, &$count_operands) {
@@ -3334,7 +3397,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($parent !== null) {
                 $group_operand = $node->operands[0];
                 if ($group_operand->type === qtype_preg_node::TYPE_NODE_CONCAT) {
-                    if ($group_operand->operands[0]->type === qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    /*if ($group_operand->operands[0]->type === qtype_preg_node::TYPE_NODE_FINITE_QUANT
                         || $group_operand->operands[0]->type === qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
                         $group_operand->operands[0]->position->indfirst = $node->position->indfirst;
                         $group_operand->operands[0]->position->indlast = $node->position->indlast;
@@ -3343,14 +3406,20 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     } else {
                         $group_operand->operands[0]->position->indfirst = $node->position->indfirst;
                         $group_operand->operands[0]->position->indlast = $node->position->indlast;
-                    }
+                    }*/
+                    //$this->deleted_subpattern_positions[] = array($node->position->indfirst, $node->position->indlast);
+                    $a=1;
                 } else if ($group_operand->type === qtype_preg_node::TYPE_NODE_FINITE_QUANT
                            || $group_operand->type === qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
-                    $group_operand->position->indfirst = $node->position->indfirst;
+                    //$this->deleted_subpattern_positions[] = array($node->position->indfirst, $node->position->indlast);
+
+                    /*$group_operand->position->indfirst = $node->position->indfirst;
                     $group_operand->position->indlast = $node->position->indlast;
                     $group_operand->operands[0]->position->indfirst = $node->position->indfirst;
-                    $group_operand->operands[0]->position->indlast = $node->position->indlast;
+                    $group_operand->operands[0]->position->indlast = $node->position->indlast;*/
+                    $a=1;
                 } else {
+                    //$this->deleted_subpattern_positions[] = array($node->position->indfirst, $node->position->indlast);
                     $group_operand->position->indfirst = $node->position->indfirst;
                     $group_operand->position->indlast = $node->position->indlast;
                 }
@@ -3391,6 +3460,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     //}
                 }
             } else {
+                //$this->deleted_subpattern_positions[] = array($node->position->indfirst, $node->position->indlast);
                 // TODO: fix this
                 if ($node->operands[0]->type == qtype_preg_node::TYPE_LEAF_META
                     && $node->operands[0]->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
