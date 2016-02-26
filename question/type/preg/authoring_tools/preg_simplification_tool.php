@@ -3652,22 +3652,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
             $oq->set_user_info(null, array(new qtype_preg_userinscription($text)));
 
-//            $lazy = false;
-//            $greedy = true;
-//            $possessive = false;
-//            $node = $infinite
-//                ? new qtype_preg_node_infinite_quant($leftborder, $lazy, $greedy, $possessive)
-//                : new qtype_preg_node_finite_quant($leftborder, $rightborder, $lazy, $greedy, $possessive);
-//            $node->set_user_info(null, array(new qtype_preg_userinscription($text)));
-//
-//            $node->operands[] = $oq->operands[0];
-//            $parentoq = $this->get_parent_node($this->get_dst_root(), $oq->id);
-//            foreach ($parentoq->operands as $i => $operand) {
-//                if ($operand->id == $node->id) {
-//                    $parentoq->operands[$i] = $node;
-//                }
-//            }
-
             $parenttr = $this->get_parent_node($this->get_dst_root(), $tree_root->id);
 
             if ($parenttr != null) {
