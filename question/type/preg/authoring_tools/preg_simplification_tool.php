@@ -3620,33 +3620,44 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($tree_root->id == $remove_node_id) {
             $oq = $this->get_other_quant_for_quant($tree_root->operands[0]);
 
-            $leftborder = ($tree_root->leftborder < $oq->leftborder) ? $tree_root->leftborder : $oq->leftborder;
-            $rightborder = 0;
-
-            $infinite = false;
-            if ($tree_root->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
-                || $oq->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
-                $infinite = true;
-            } else {
-                $rightborder = ($tree_root->rightborder > $oq->rightborder) ? $tree_root->rightborder : $oq->rightborder;
-            }
-
             $text = '';
-            if ($infinite) {
-                if ($leftborder === 0) {
-                    $text = '*';
-                } else if ($leftborder === 1) {
-                    $text = '+';
-                } else {
-                    $text = '{' . $leftborder . ',}';
-                }
+            if ($tree_root->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                && $tree_root->leftborder === 0 && $tree_root->rightborder === 0) {
+                $text = '{0}';
+            } else if ($oq->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                && $oq->leftborder === 0 && $oq->rightborder === 0) {
+                $text = '{0}';
             } else {
-                if ($leftborder === 0 && $rightborder === 1) {
-                    $text = '?';
-                } else if ($leftborder === $rightborder) {
-                    $text = '{' . $leftborder . '}';
+                //$leftborder = ($tree_root->leftborder < $oq->leftborder) ? $tree_root->leftborder : $oq->leftborder;
+                $leftborder = $tree_root->leftborder * $oq->leftborder;
+                $rightborder = 0;
+
+                $infinite = false;
+                if ($tree_root->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                    || $oq->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                ) {
+                    $infinite = true;
                 } else {
-                    $text = '{' . $leftborder . ',' . $rightborder . '}';
+                    //$rightborder = ($tree_root->rightborder > $oq->rightborder) ? $tree_root->rightborder : $oq->rightborder;
+                    $rightborder = $tree_root->rightborder * $oq->rightborder;
+                }
+
+                if ($infinite) {
+                    if ($leftborder === 0) {
+                        $text = '*';
+                    } else if ($leftborder === 1) {
+                        $text = '+';
+                    } else {
+                        $text = '{' . $leftborder . ',}';
+                    }
+                } else {
+                    if ($leftborder === 0 && $rightborder === 1) {
+                        $text = '?';
+                    } else if ($leftborder === $rightborder) {
+                        $text = '{' . $leftborder . '}';
+                    } else {
+                        $text = '{' . $leftborder . ',' . $rightborder . '}';
+                    }
                 }
             }
 
