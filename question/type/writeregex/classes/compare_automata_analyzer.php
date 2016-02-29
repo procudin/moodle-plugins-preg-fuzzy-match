@@ -28,20 +28,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class compare_automata_analyzer {
+class compare_automata_analyzer extends analyzer {
 
     const MISMATCH_PENALTY = 0.2;
-
-    /** @var  object Question object. */
-    protected $question;
-
-    /**
-     * Init analyzer object.
-     * @param $question object Question object.
-     */
-    public function __construct($question) {
-
-    }
 
     /**
      * Get equality for user response.

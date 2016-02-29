@@ -28,18 +28,7 @@ require_once($CFG->dirroot . '/question/type/preg/question.php');
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class compare_strings_analyzer {
-
-    /** @var  object Question object. */
-    protected $question;
-
-    /**
-     * Init analyzer object.
-     * @param $question object Question object.
-     */
-    public function __construct($question) {
-        $this->question = $question;
-    }
+class compare_strings_analyzer extends analyzer {
 
     /**
      * Get equality for user response.
