@@ -216,6 +216,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $repeatsatstart = $minoptions;
         }
 
+        if ($repeatsatstart == 0)
+            $repeatsatstart = $minoptions;
+
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
             'noteststrings', 'addteststrings', $addoptions,
             $this->get_more_choices_string(), true);
