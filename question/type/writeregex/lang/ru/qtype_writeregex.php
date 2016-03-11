@@ -77,3 +77,10 @@ $string['teststringshintpenalty'] = 'Тестовые строки: штраф';
 $string['teststringshintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде тестовых строк.</p>";
 $string['teststringshinttype'] = 'Тестовые строки';
 $string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
+
+$string['extracharactermismatchfrombeginning'] = 'В Вашем ответе в отличие от правильного возможно совпадение символа \'{$a->character}\' с начала строки';
+$string['missingcharactermismatchfrombeginning'] = 'В Вашем ответе в отличие от правильного невозможно совпадение символа \'{$a->character}\' с начала строки';
+$string['extracharactermismatch'] = 'В Вашем ответе в отличие от правильного после совпадения строки \'{$a->matchedstring}\' возможно совпадение символа \'{$a->character}\'';
+$string['missingcharactermismatch'] = 'В Вашем ответе в отличие от правильного после совпадения строки \'{$a->matchedstring}\' невозможно совпадение символа \'{$a->character}\'';
+$string['extrafinalstatemismatch'] = 'Ваш ответ в отличие от правильного допускает строку \'{$a}\'';
+$string['missingfinalstatemismatch'] = 'Ваш ответ в отличие от правильного не допускает строку \'{$a}\'';
