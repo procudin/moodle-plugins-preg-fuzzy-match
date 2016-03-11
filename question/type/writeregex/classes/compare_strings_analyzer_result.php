@@ -32,6 +32,6 @@ class compare_strings_analyzer_result extends analyzer_result {
      * @return string Feedback about mismatches to show to student.
      */
     public function get_feedback() {
-        // TODO: Implement get_feedback() method.
+        return '';
     }
 }
