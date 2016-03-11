@@ -77,3 +77,10 @@ $string['teststringshintpenalty'] = 'Test string: penalty';
 $string['teststringshintpenalty_help'] = "<p>The amount of penalty for the use of clues in the form of test strings.</p>";
 $string['teststringshinttype'] = 'Test string';
 $string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
+
+$string['extracharactermismatchfrombeginning'] = 'Your answer unlike the correct one accepts character \'{$a->character}\' at the beginning';
+$string['missingcharactermismatchfrombeginning'] = 'Your answer unlike the correct one doesn\'t accept character \'{$a->character}\'  at the beginning';
+$string['extracharactermismatch'] = 'Your answer unlike the correct one after matching the string \'{$a->matchedstring}\' accepts character \'{$a->character}\'';
+$string['missingcharactermismatch'] = 'Your answer unlike the correct one after matching the string \'{$a->matchedstring}\' doesn\'t accept character \'{$a->character}\'';
+$string['extrafinalstatemismatch'] = 'Your answer unlike the correct one accepts the string \'{$a}\'';
+$string['missingfinalstatemismatch'] = 'Your answer unlike the correct one doesn\'t accept the string \'{$a}\'';
