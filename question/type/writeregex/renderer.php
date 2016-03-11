@@ -152,4 +152,11 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
     public function render_hint_title($hinttitle) {
         return html_writer::tag('h5', $hinttitle);
     }
+
+    /**
+     * Adds <br> tag to given sring
+     */
+    public function add_break($string) {
+        return $string . html_writer::empty_tag('br');
+    }
 }
