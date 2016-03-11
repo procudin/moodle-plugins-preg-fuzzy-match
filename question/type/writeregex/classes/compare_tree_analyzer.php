@@ -31,9 +31,9 @@ class compare_tree_analyzer extends analyzer {
      * Get equality for user response.
      * @param $answer string Regex answer.
      * @param $respose string User response.
-     * @return float Value of compare.
+     * @return compare_tree_analyzer_result Result of compare.
      */
     public function get_fitness ($answer, $respose) {
-        return 0;
+        return new compare_tree_analyzer_result();
     }
 }

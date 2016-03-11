@@ -270,6 +270,7 @@ class qtype_writeregex_question extends question_graded_automatically
         $bestfitness = 0.0;
         reset($this->answers);
         $bestfitanswer = current($this->answers);
+        $bestfitresults = array();
         foreach ($this->answers as $answer) {
             if ($answer->fraction >= $this->hintgradeborder) {
                 $bestfitanswer = $answer;
@@ -282,21 +283,25 @@ class qtype_writeregex_question extends question_graded_automatically
 
         foreach ($this->answers as $answer) {
             $fraction = 0;
+            // Compare results for each analyzer for current answer
+            $results = array();
             foreach ($analyzers as $key => $description) {
                 $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
                 $analyzer = new $analyzername($this);
-                $fitness = $analyzer->get_fitness($answer->answer, $response['answer']);
+                $result = $analyzer->get_fitness($answer->answer, $response['answer']);
                 $percentagefield = 'compare' . $key . 'percentage';
-                $fraction += $fitness * $this->$percentagefield / 100.0;
+                $fraction += $result->fitness * $this->$percentagefield / 100.0;
+                $results[$key] = $result;
             }
 
             if ($fraction > $bestfitness and $fraction > $this->hintgradeborder) {
                 $bestfitness = $fraction;
                 $bestfitanswer = $answer;
+                $bestfitresults = $results;
             }
         }
 
-        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfitness);
+        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfitness, 'results' => $bestfitresults);
 
         $this->bestfitanswer = $bestfit;
         $this->responseforbestfit = $response['answer'];
