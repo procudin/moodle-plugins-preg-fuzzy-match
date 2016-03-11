@@ -44,5 +44,5 @@ abstract class analyzer {
      * @param $response string User response.
      * @return analyzer_result Result of compare.
      */
-    public abstract function get_fitness($answer, $response);
+    public abstract function analyze($answer, $response);
 }

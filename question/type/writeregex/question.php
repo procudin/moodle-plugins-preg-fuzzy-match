@@ -288,7 +288,7 @@ class qtype_writeregex_question extends question_graded_automatically
             foreach ($analyzers as $key => $description) {
                 $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
                 $analyzer = new $analyzername($this);
-                $result = $analyzer->get_fitness($answer->answer, $response['answer']);
+                $result = $analyzer->analyze($answer->answer, $response['answer']);
                 $percentagefield = 'compare' . $key . 'percentage';
                 $fraction += $result->fitness * $this->$percentagefield / 100.0;
                 $results[$key] = $result;

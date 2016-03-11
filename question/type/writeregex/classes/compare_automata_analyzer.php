@@ -38,7 +38,7 @@ class compare_automata_analyzer extends analyzer {
      * @param $respose string User response.
      * @return compare_automata_analyzer_result Result of compare.
      */
-    public function get_fitness ($answer, $response)
+    public function analyze ($answer, $response)
     {
         $answermatcher = new \qtype_preg_fa_matcher($answer);
         $answerautomaton = $answermatcher->automaton;
