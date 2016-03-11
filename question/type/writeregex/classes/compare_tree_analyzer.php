@@ -33,7 +33,7 @@ class compare_tree_analyzer extends analyzer {
      * @param $respose string User response.
      * @return compare_tree_analyzer_result Result of compare.
      */
-    public function get_fitness ($answer, $respose) {
+    public function analyze ($answer, $respose) {
         return new compare_tree_analyzer_result();
     }
 }

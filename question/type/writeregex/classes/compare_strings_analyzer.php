@@ -36,7 +36,7 @@ class compare_strings_analyzer extends analyzer {
      * @param $response string User response.
      * @return compare_strings_analyzer_result Result of compare.
      */
-    public function get_fitness($answer, $response) {
+    public function analyze($answer, $response) {
 
         $totalfraction = 0;
 
