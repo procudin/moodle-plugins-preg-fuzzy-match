@@ -93,6 +93,9 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
         if (!$currentanswer) {
             $currentanswer = '';
         }
+        else {
+            $feedback = $question->bestfitanswer['results']['tree']->get_feedback() . $question->bestfitanswer['results']['automata']->get_feedback() . $question->bestfitanswer['results']['strings']->get_feedback();
+        }
 
         $br = html_writer::empty_tag('br');
 
