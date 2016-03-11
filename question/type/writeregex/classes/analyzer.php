@@ -42,7 +42,7 @@ abstract class analyzer {
      * Get equality for user response.
      * @param $answer string Regex answer.
      * @param $response string User response.
-     * @return float Value of compare.
+     * @return analyzer_result Result of compare.
      */
     public abstract function get_fitness($answer, $response);
 }

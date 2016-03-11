@@ -36,7 +36,7 @@ class compare_automata_analyzer extends analyzer {
      * Get equality for user response.
      * @param $answer string Regex answer.
      * @param $respose string User response.
-     * @return float Value of compare.
+     * @return compare_automata_analyzer_result Result of compare.
      */
     public function get_fitness ($answer, $response)
     {
@@ -52,6 +52,10 @@ class compare_automata_analyzer extends analyzer {
             $fitness = max(0, 1 - count($differences) * compare_automata_analyzer::MISMATCH_PENALTY);
         }
 
-        return $fitness;
+        // Generate result
+        $result = new compare_automata_analyzer_result();
+        $result->fitness = $fitness;
+        $result->differences = $differences;
+        return $result;
     }
 }

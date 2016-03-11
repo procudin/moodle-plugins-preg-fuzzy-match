@@ -34,7 +34,7 @@ class compare_strings_analyzer extends analyzer {
      * Get equality for user response.
      * @param $answer string Regex answer.
      * @param $response string User response.
-     * @return float Value of compare.
+     * @return compare_strings_analyzer_result Result of compare.
      */
     public function get_fitness($answer, $response) {
 
@@ -61,7 +61,10 @@ class compare_strings_analyzer extends analyzer {
             }
         }
 
-        return $totalfraction;
+        // Generate result
+        $result = new compare_strings_analyzer_result();
+        $result->fitness = $totalfraction;
+        return $result;
     }
 
 }
