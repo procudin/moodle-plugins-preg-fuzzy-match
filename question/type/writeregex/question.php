@@ -196,8 +196,8 @@ class qtype_writeregex_question extends question_graded_automatically
 
         $bestfitanswer = $this->get_best_fit_answer($response);
         $grade = $bestfitanswer['fitness'];
-        question_state::graded_state_for_fraction($bestfitanswer['fitness']);
-        $state = question_state::$gradedwrong;
+        $state = question_state::graded_state_for_fraction($bestfitanswer['fitness']);
+
 
         return array($grade, $state);
     }
