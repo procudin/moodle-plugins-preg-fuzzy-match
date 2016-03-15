@@ -157,7 +157,7 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
     }
 
     /**
-     * Adds <br> tag to given sring
+     * Adds <br> tag to given string
      */
     public function add_break($string) {
         return $string . html_writer::empty_tag('br');
