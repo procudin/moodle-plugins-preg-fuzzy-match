@@ -367,16 +367,6 @@ class block_formal_langs_comparing_options {
 }
 
 /**
- * Class for options, controlling strings comparison process.
- */
-class block_formal_langs_comparing_options {
-    /**
-     * @var bool true if comparing is case sensitive, false if insensitive
-     */
-    public $usecase;
-}
-
-/**
  * Class for base tokens.
  *
  * Class for storing tokens. Class - token, object of the token class
