@@ -319,7 +319,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $errors = $this->validate_compare_values($data, $errors);
 
-        $errors = $this->validate_test_strings($data, $errors, $data['comparestringspercentage']);
+        $errors = $this->validate_test_strings($data, $errors);
 
         $errors = $this->validate_regexp($data, $errors);
 
@@ -369,10 +369,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * Validation test string answer (public for testing).
      * @param $data array Data from form.
      * @param $errors array Errors array.
-     * @param $test string Value of compare by test strings.
      * @return array Errors array.
      */
-    public function validate_test_strings ($data, $errors, $test) {
+    public function validate_test_strings ($data, $errors) {
         $strings = $data['regexp_ts_answer'];
         $answercount = 0;
         $sumgrade = 0;
@@ -386,12 +385,18 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         }
 
         $sumgrade = round($sumgrade, 2);
-        if ($sumgrade != 1 and $test > 0) {
+        if ($sumgrade != 1 and $data['comparestringspercentage'] > 0) {
             $errors["regexp_ts_answer[0]"] = get_string('invalidtssumvalue', 'qtype_writeregex');
         }
 
-        if ($answercount > 0 and $test == 0) {
+        // If test stings are set but they are not used.
+        if ($answercount > 0 and $data['comparestringspercentage'] == 0 and $data['teststringshinttype'] == '0') {
             $errors['comparestringspercentage'] = get_string('invalidcomparets', 'qtype_writeregex');
+        }
+
+        // If test string hint is enabled but no test strings found.
+        if ($data['teststringshinttype'] != '0' && $sumgrade == 0) {
+            $errors['teststringshinttype'] = get_string('noteststringsforhint', 'qtype_writeregex');
         }
 
         return $errors;

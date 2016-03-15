@@ -56,6 +56,7 @@ $string['invalidmatchingtypessumvalue'] = 'Сумма всех типов про
 $string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
 $string['none'] = 'Не показывать';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';
+$string['noteststringsforhint'] = 'Отсутствуют тестовые строки для подсказки';
 $string['penalty'] = 'Штраф';
 $string['pleaseenterananswer'] = 'Please enter an answer.';
 $string['pluginname'] = 'Write RegEx';
