@@ -65,6 +65,9 @@ class qtype_writeregex extends qtype_shortanswer {
         $question->descriptionhint = array();
         $question->teststringshint = array();
 
+        if (!isset($question->options->teststrings))
+            $question->options->teststrings = array();
+
         return $result;
     }
 
