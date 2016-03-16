@@ -32,7 +32,8 @@ abstract class analyzer_result {
 
     /**
      * Get feedback for analyzing results.
+     * @param qtype_writeregex_renderer renderer Renderer
      * @return string Feedback about mismatches to show to student.
      */
-    public abstract function get_feedback();
+    public abstract function get_feedback($renderer);
 }

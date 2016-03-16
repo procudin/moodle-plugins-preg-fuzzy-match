@@ -29,9 +29,10 @@ class compare_tree_analyzer_result extends analyzer_result {
 
     /**
      * Get feedback for analyzing results.
+     * @param qtype_writeregex_renderer renderer Renderer
      * @return string Feedback about mismatches to show to student.
      */
-    public function get_feedback() {
+    public function get_feedback($renderer) {
         return '';
     }
 }
