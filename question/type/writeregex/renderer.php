@@ -162,4 +162,36 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
     public function add_break($string) {
         return $string . html_writer::empty_tag('br');
     }
+
+    /**
+     * Adds <span> tag to given string.
+     */
+    public function add_span($string) {
+        return html_writer::tag('span', $string);
+    }
+
+    /**
+     * Render matched string in automaton.
+     * @param string str matched or mismatched string
+     * @param bool $matched true, if string matched, false otherwise
+     */
+    public function render_automaton_matched_string($str, $matched) {
+        if ($str == '')
+            return $str;
+        if ($matched)
+            return html_writer::tag('span', htmlspecialchars($str), array('class' => question_state::graded_state_for_fraction(1)->get_feedback_class()));
+        return html_writer::tag('span', htmlspecialchars($str), array('class' => question_state::graded_state_for_fraction(0)->get_feedback_class()));
+    }
+
+    /**
+     * Render matched string in automaton with automaton author.
+     * @param string author matched or mismatched string
+     * @param string str matched or mismatched string
+     * @param bool $matched true, if string matched, false otherwise
+     */
+    public function render_automaton_matched_string_with_author($author, $str) {
+        $result = html_writer::tag('div', $author, array('id' => 'mismatch_description_title'));
+        $result .= html_writer::tag('div', $str, array('id' => 'qtype-preg-colored-string'));
+        return html_writer::tag('div', $result . html_writer::empty_tag('br'));
+    }
 }
