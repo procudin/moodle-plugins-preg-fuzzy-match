@@ -94,7 +94,7 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
             $currentanswer = '';
         }
         else {
-            $feedback = $question->bestfitanswer['results']['tree']->get_feedback() . $question->bestfitanswer['results']['automata']->get_feedback() . $question->bestfitanswer['results']['strings']->get_feedback();
+            $feedback = $question->bestfitanswer['results']['tree']->get_feedback($this) . $question->bestfitanswer['results']['automata']->get_feedback($this) . $question->bestfitanswer['results']['strings']->get_feedback($this);
         }
 
         $br = html_writer::empty_tag('br');
