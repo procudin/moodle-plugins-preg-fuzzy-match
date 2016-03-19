@@ -143,25 +143,25 @@ class transition {
     }
 
     /**
-     * Divides two arrays of transitions to noncrossed with tags
-     * @param firstgroup - first array of transitions
-     * @param secondgroup - second array of transitions
-     * @param indexes - array of two arrays of indexes of given transitions, completing each result transition condition
-     * @param withtags - flag of nessesity to divide transitions with tags or not
-     * @return result intervals, containing noncrossed transition conditions
+     * Divides pair of groups to noncrossed with tags
+     * @param oldpair groups_pair Pair of groups of states to divide transitions from
+     * @param mismatches array of mismatches
+     * @param withtags bool flag of necessity to divide transitions with tags or not
+     * @return result Array of pairs of group after dividing
      */
-    public static function divide_intervals($firstgroup, $secondgroup, $firstfa, $secondfa, $matchedstring, &$mismatches, $withtags = false) {
+    public static function divide_intervals($oldpair, &$mismatches, $withtags = false) {
         $result = array();
         $mismatches = array();
-        $charsetranges = array();
 
         // Divide charsets
         $firstgroupcharsets = array();
         $secondgroupcharsets = array();
-        foreach ($firstgroup as $curtransition) {
+        $firstgrouptransitions = $oldpair->first->get_outgoing_transitions();
+        $secondgrouptransitions = $oldpair->second->get_outgoing_transitions();
+        foreach ($firstgrouptransitions as $curtransition) {
             $firstgroupcharsets[] = $curtransition->pregleaf;
         }
-        foreach ($secondgroup as $curtransition) {
+        foreach ($secondgrouptransitions as $curtransition) {
             $secondgroupcharsets[] = $curtransition->pregleaf;
         }
         $charsetranges = \qtype_preg_leaf_charset::divide_intervals($firstgroupcharsets, $secondgroupcharsets, $charsetindexes);
@@ -169,75 +169,105 @@ class transition {
             // Creating initial pair of groups for current charset range
             $firststates = array();
             foreach ($charsetindexes[$i][0] as $transitionind) {
-                $firststates[] = $firstgroup[$transitionind]->to;
+                if (!in_array($firstgrouptransitions[$transitionind]->to, $firststates)) {
+                    $firststates[] = $firstgrouptransitions[$transitionind]->to;
+                }
             }
             $secondstates = array();
             foreach ($charsetindexes[$i][1] as $transitionind) {
-                $secondstates[] = $secondgroup[$transitionind]->to;
+                if (!in_array($secondgrouptransitions[$transitionind]->to, $secondstates)) {
+                    $secondstates[] = $secondgrouptransitions[$transitionind]->to;
+                }
             }
-            $pair = equivalence\groups_pair::generate_pair(new equivalence\states_group($firstfa, $firststates),
-                                                            new equivalence\states_group($secondfa, $secondstates),
-                                                            $matchedstring . $charsetranges[$i][1]);
+            $newpair = equivalence\groups_pair::generate_pair(new equivalence\states_group($oldpair->first->fa, $firststates),
+                                                            new equivalence\states_group($oldpair->second->fa, $secondstates),
+                                                            $oldpair->matchedstring . $charsetranges[$i][1], $oldpair->tagmismatch);
 
             // Check for character mismatch
-            if ($pair->first->is_empty() != $pair->second->is_empty()) {
+            if ($newpair->first->is_empty() != $newpair->second->is_empty()) {
                 $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::CHARACTER,
-                                                                $pair->first->is_empty() ? 1 : 0, $pair);
+                    $newpair->first->is_empty() ? 1 : 0, $newpair);
                 continue;
             }
 
             // Check for final state mismatch
-            if ($pair->first->has_end_states() != $pair->second->has_end_states()) {
+            if ($newpair->first->has_end_states() != $newpair->second->has_end_states()) {
                 $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE,
-                                                                $pair->first->has_end_states() ? 0 : 1, $pair);
+                    $newpair->first->has_end_states() ? 0 : 1, $newpair);
                 continue;
             }
 
-            if ($withtags)
+            if ($withtags && $newpair->tagmismatch == false)
             {
-                /*// Divide tagsets
-                $firstgrouptagsets = array();
-                $secondgrouptagsets = array();
+                // Compare tagsets
+                $tags = array(array(), array());  // All tags: [group ind][transition ind][open or close][tag ind]
+                // Combine first group tags
                 for ($j = 0; $j < count($charsetindexes[$i][0]); ++$j) {
                     $transitionind = $charsetindexes[$i][0][$j];
-                    $firstgrouptagsets[] = array($firstgroup[$transitionind]->opentags, $firstgroup[$transitionind]->closetags);
+                    $tags[0][] = array(array(), array());
+                    foreach ($firstgrouptransitions[$transitionind]->opentags as $tag) {
+                        $tags[0][$j][0][] = $tag->subpattern;
+                    }
+                    foreach ($firstgrouptransitions[$transitionind]->closetags as $tag) {
+                        $tags[0][$j][1][] = $tag->subpattern;
+                    }
                 }
+                // Combine second group tags
                 for ($j = 0; $j < count($charsetindexes[$i][1]); ++$j) {
                     $transitionind = $charsetindexes[$i][1][$j];
-                    $secondgrouptagsets[] = array($secondgroup[$transitionind]->opentags, $secondgroup[$transitionind]->closetags);
+                    $tags[1][] = array(array(), array());
+                    foreach ($secondgrouptransitions[$transitionind]->opentags as $tag) {
+                        $tags[1][$j][0][] = $tag->subpattern;
+                    }
+                    foreach ($secondgrouptransitions[$transitionind]->closetags as $tag) {
+                        $tags[1][$j][1][] = $tag->subpattern;
+                    }
                 }
-                $tagsets = \qtype_preg_leaf_meta::divide_tagsets($firstgrouptagsets, $secondgrouptagsets, $tagsetindexes);
 
-                // Generate results
-                for ($j = 0; $j < count($tagsets); ++$j) {
-                    $curtransition = new transition(1, \qtype_preg_leaf_charset::by_regex($charsetranges[$i]), 2);
+                // Check for mismatches
 
-                    foreach ($tagsets[$j][0] as $opentagvalue) {
-                        $meta = new \qtype_preg_leaf_meta();
-                        $meta->subpattern = $opentagvalue;
-                        $curtransition->opentags[] = $meta;
-                    }
-                    foreach ($tagsets[$j][1] as $opentagvalue) {
-                        $meta = new \qtype_preg_leaf_meta();
-                        $meta->subpattern = $opentagvalue;
-                        $curtransition->closetags[] = $meta;
-                    }
-                    $result[] = $curtransition;
+                // For each group (first and second)
+                for ($groupind = 0; $groupind <= 1; ++$groupind) {
+                    // For each pair of tagsets of different groups
+                    for ($onegrouptransitionind = 0; $onegrouptransitionind < count($tags[$groupind]); ++$onegrouptransitionind) {
+                        $matchfound = false;
+                        for ($othergrouptransitionind = 0; $othergrouptransitionind < count($tags[($groupind + 1) % 2]) && !$matchfound; ++$othergrouptransitionind) {
+                            // Check for situation with empty tagsets
+                            if (count($tags[$groupind][$onegrouptransitionind][0]) + count($tags[$groupind][$onegrouptransitionind][1]) == 0) {
+                                if (count($tags[($groupind + 1) % 2][$othergrouptransitionind][0]) + count($tags[($groupind + 1) % 2][$othergrouptransitionind][1]) == 0) {
+                                    $matchfound = true;
+                                }
+                                continue;
+                            }
+                            $mismatchfound = false;
+                            // For both open and close tags
+                            for ($tagtype = 0; $tagtype <= 1 && !$mismatchfound; ++$tagtype) {
+                                // Check, if tag from one group has no equivalent in other group
+                                foreach ($tags[$groupind][$onegrouptransitionind][$tagtype] as $onegrouptag) {
+                                    if (!in_array($onegrouptag, $tags[($groupind + 1) % 2][$othergrouptransitionind][$tagtype])) {
+                                        $mismatchfound = true;
+                                        break;
+                                    }
+                                }
+                            }
 
-                    // Tagset indexes are true for given subarrays of remaining groups.
-                    // Translating this local indexes to global ones.
-                    $indexes[] = array(array(), array());
-                    for ($k = 0; $k <= 1; ++$k) {
-                        foreach ($tagsetindexes[$j][$k] as $curindex) {
-                            $indexes[count($indexes) - 1][$k][] = $charsetindexes[$i][$k][$curindex];
+                            // If all tags from transition of one group found in one of transitions of other group, then match found
+                            if (!$mismatchfound) {
+                                $matchfound = true;
+                            }
+                        }
+                        if (!$matchfound) {
+                            $newpair->tagmismatch = true;
+                            $mismatch  = new equivalence\mismatched_pair(equivalence\mismatched_pair::SUBPATTERN, $groupind, $newpair);
+                            $mismatch->opentags = $tags[$groupind][$onegrouptransitionind][0];
+                            $mismatch->closetags = $tags[$groupind][$onegrouptransitionind][1];
+                            $mismatches[] = $mismatch;
                         }
                     }
                 }
-                */
             }
-            else {
-                $result[] = $pair;
-            }
+
+            $result[] = $newpair;
         }
 
         return $result;

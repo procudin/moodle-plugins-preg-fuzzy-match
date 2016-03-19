@@ -906,9 +906,7 @@ class fa {
 
             // Genereta array of new qtype_preg_fa_pair_of_groups from current pair
             $curmismatches = array();
-            $groups = transition::divide_intervals($groupspair->first->get_outgoing_transitions(),
-                                        $groupspair->second->get_outgoing_transitions(),
-                                        $this, $another, $groupspair->matchedstring, $curmismatches, $withtags);
+            $groups = transition::divide_intervals($groupspair, $curmismatches, $withtags);
 
             // Adding mismatches to final array
             foreach ($curmismatches as $mismatch) {
