@@ -33,7 +33,7 @@ class groups_pair {
     public $first;
     /** @var states_group for second automaton */
     public $second;
-    /** @var path two current groups */
+    /** @var path to current groups */
     public $matchedstring;
     /** @var bool true, if there was tag mismatch for this path, otherwise false */
     public $tagmismatch;
