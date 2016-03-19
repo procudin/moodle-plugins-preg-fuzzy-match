@@ -35,23 +35,24 @@ class groups_pair {
     public $second;
     /** @var path two current groups */
     public $matchedstring;
-    /** @var mismatched_pair variable, if there was tag mismatch for this path, otherwise null */
-    public $tag_mismatch;
+    /** @var bool true, if there was tag mismatch for this path, otherwise false */
+    public $tagmismatch;
 
     public function __construct($other = null) {
         if ($other != null) {
             $this->first = $other->first;
             $this->second = $other->second;
             $this->matchedstring = $other->matchedstring;
-            $this->tag_mismatch = $other->tag_mismatch;
+            $this->tagmismatch = $other->tagmismatch;
         }
     }
 
-    public static function generate_pair($firstgroup, $secondgroup, $matchedstring) {
+    public static function generate_pair($firstgroup, $secondgroup, $matchedstring, $tagmismatch = false) {
         $pair = new groups_pair();
         $pair->first = $firstgroup;
         $pair->second = $secondgroup;
         $pair->matchedstring = $matchedstring;
+        $pair->tagmismatch = $tagmismatch;
 
         return $pair;
     }
