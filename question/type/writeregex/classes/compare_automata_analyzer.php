@@ -58,4 +58,13 @@ class compare_automata_analyzer extends analyzer {
         $result->differences = $differences;
         return $result;
     }
+
+    /**
+     * Get analyzer name
+     * @return analyzer name, understandable for user
+     */
+    public function name()
+    {
+        return get_string('compareautomataanalyzername', 'qtype_writeregex');
+    }
 }

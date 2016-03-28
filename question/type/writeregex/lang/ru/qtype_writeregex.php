@@ -26,9 +26,11 @@
 
 $string['answer'] = 'Демонстрация для правильного ответа';
 $string['both'] = 'Демонстрация для ответа студента и правильного ответа (оба)';
+$string['compareautomataanalyzername'] = 'Анализатор конечных автоматов';
 $string['compareautomatapercentage'] = 'Оценка по свопадению автоматов регулярных выражений';
 $string['compareautomatapercentage_help'] = "<p>Значение (в %) доли оценки по совпадению автоматов регулярных выражений .</p>";
 $string['compareinvalidvalue'] = 'Значение должно быть в диапазоне от 0 до 100';
+$string['comparestringsanalyzername'] = 'Анализатор тестовых строк';
 $string['comparestringspercentage'] = 'Оценка по проверке на тестовых строках регулярных выражений';
 $string['comparestringspercentage_help'] = "<p>Значение (в %) доли оценки по проверке на тестовых строках регулярных выражений .</p>";
 $string['comparetreepercentage'] = 'Оценка по свопадению регулярных выражений';

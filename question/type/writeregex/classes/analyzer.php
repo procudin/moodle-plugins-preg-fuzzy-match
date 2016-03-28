@@ -45,4 +45,10 @@ abstract class analyzer {
      * @return analyzer_result Result of compare.
      */
     public abstract function analyze($answer, $response);
+
+    /**
+     * Get analyzer name
+     * @return analyzer name, understandable for user
+     */
+    public abstract function name();
 }
