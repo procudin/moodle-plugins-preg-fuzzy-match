@@ -36,4 +36,13 @@ class compare_tree_analyzer extends analyzer {
     public function analyze ($answer, $respose) {
         return new compare_tree_analyzer_result();
     }
+
+    /**
+     * Get analyzer name
+     * @return analyzer name, understandable for user
+     */
+    public function name()
+    {
+        return '';
+    }
 }

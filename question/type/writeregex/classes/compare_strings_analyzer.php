@@ -67,4 +67,12 @@ class compare_strings_analyzer extends analyzer {
         return $result;
     }
 
+    /**
+     * Get analyzer name
+     * @return analyzer name, understandable for user
+     */
+    public function name()
+    {
+        return get_string('comparestringsanalyzername', 'qtype_writeregex');
+    }
 }

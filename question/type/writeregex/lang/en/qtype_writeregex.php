@@ -26,9 +26,11 @@
 
 $string['answer'] = 'Show the correct answer';
 $string['both'] = 'Show the student\'s answer and the correct answer (both)';
+$string['compareautomataanalyzername'] = 'Automata analyzer';
 $string['compareautomatapercentage'] = 'Rating coincidentally automata regular expressions';
 $string['compareautomatapercentage_help'] = "<p>Value (in%) of the share estimates coincidentally automata regular expressions.</p>";
 $string['compareinvalidvalue'] = 'The value must be in the range from 0 to 100';
+$string['comparestringsanalyzername'] = 'Test strings analyzer';
 $string['comparestringspercentage'] = 'Based on testing on the test lines of regular expressions';
 $string['comparestringspercentage_help'] = "<p>Value (in%) of the share valuation verification test on the lines of regular expressions.</p>";
 $string['comparetreepercentage'] = 'Based on regular expression match';
