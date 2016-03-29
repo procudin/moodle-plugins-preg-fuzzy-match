@@ -923,7 +923,7 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         }
         while (count($ranges)) {
             // Searching current minimal character
-            $curchar = 257;
+            $curchar = 1114113;
             foreach ($ranges as $curranges) {
                 $curchar = min($curchar, current(current($curranges[0])));
             }
