@@ -102,11 +102,23 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             case qtype_preg_node::TYPE_LEAF_META:
             case qtype_preg_node::TYPE_LEAF_ASSERT:
             case qtype_preg_node::TYPE_LEAF_BACKREF:
-            case qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL:
             case qtype_preg_node::TYPE_LEAF_TEMPLATE:
             case qtype_preg_node::TYPE_NODE_TEMPLATE:
             case qtype_preg_node::TYPE_NODE_ERROR:
                 return true;
+            case qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL:
+                // Equivalence checking doesn't support subexpression recursion for now.
+                if ($this->get_options()->equivalencecheck && $pregnode->isrecursive) {
+                    $str = '';
+                    if ($pregnode->number == 0) { // Whole regex recursive call.
+                        $str = get_string('description_leaf_subexpr_call_all_recursive', 'qtype_preg');
+                    } else { // Particular subexpression recursive call.
+                        $str = get_string('description_leaf_subexpr_call_recursive', 'qtype_preg', $pregnode->number);
+                    }
+                    return $str;
+                } else {
+                    return true;
+                }
             default:
                 return get_string($pregnode->type, 'qtype_preg');
         }
