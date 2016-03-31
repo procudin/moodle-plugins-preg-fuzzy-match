@@ -62,6 +62,7 @@ $string['lexemusername'] = 'Student-visible name for lexem';
 $string['lexemusername_help'] = 'Your students probably won\'t know that an atomic part of the language they learn is called <b>lexem</b>. They may prefer to call it "word" or "number" or something. You may define a name for lexem that would be shown on the "Hint next lexem" button there.';
 $string['maxerrorsshowndescription'] = 'Maximum number of errors shown for each regular expression in the question editing form';
 $string['maxerrorsshownlabel'] = 'Maximum number of errors shown';
+$string['mergemodeforassertion'] = 'Please select full assertion support in the settings. In fast mode {$a}';
 $string['nocorrectanswermatch'] = 'No maximum grade regular expression matches the correct answer';
 $string['nohintgradeborderpass'] = 'No answer has a grade greater or equal the hint grade border. This disables hinting.';
 $string['notation'] = 'Regular expression notation';
