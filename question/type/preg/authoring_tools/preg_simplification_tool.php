@@ -246,21 +246,21 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->problem_ids = array();
             }
 
-            $result = $this->nullable_alternative_node();
-            if ($result != array()) {
-                $equivalences[$i] = array();
-                $equivalences[$i] += $result;
-                ++$i;
-                $this->problem_ids = array();
-            }
-
             $result = $this->alt_without_question_quant();
             if ($result != array()) {
                 $equivalences[$i] = array();
                 $equivalences[$i] += $result;
                 ++$i;
                 $this->problem_ids = array();
-            }
+            } /*else {
+                $result = $this->nullable_alternative_node();
+                if ($result != array()) {
+                    $equivalences[$i] = array();
+                    $equivalences[$i] += $result;
+                    ++$i;
+                    $this->problem_ids = array();
+                }
+            }*/
 
             $result = $this->alt_with_question_quant();
             if ($result != array()) {
@@ -2320,8 +2320,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $this->indfirst = -2;
         $this->indlast = -2;
         if ($this->search_alt_without_question_quant($this->get_dst_root())) {
-            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_8', 'qtype_preg'));
-            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_8', 'qtype_preg'));
+            if ($this->problem_type == 8) {
+                $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_8', 'qtype_preg'));
+                $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_8', 'qtype_preg'));
+            } else {
+                $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_13', 'qtype_preg'));
+                $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_13', 'qtype_preg'));
+            }
             $equivalences['problem_ids'] = $this->problem_ids;
             $equivalences['problem_type'] = $this->problem_type;
             $equivalences['problem_indfirst'] = $this->indfirst;
@@ -2339,7 +2344,21 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($this->check_empty_node_for_alt($node)) {
                 if (!$this->check_quant_with_zero_left_border_for_node($node)) {
                     $this->problem_ids[] = $node->id;
-                    $this->problem_type = 8;
+
+                    $alt_empty = false;
+                    foreach ($node->operands as $tmp_operand) {
+                        if ($tmp_operand->nullable
+                            && $tmp_operand->type != qtype_preg_leaf::TYPE_LEAF_META
+                            && $tmp_operand->type != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                            $alt_empty = true;
+                            break;
+                        }
+                    }
+                    if ($alt_empty) {
+                        $this->problem_type = 13;
+                    } else {
+                        $this->problem_type = 8;
+                    }
                     $this->indfirst = $node->position->indfirst;
                     $this->indlast = $node->position->indlast;
                     return true;
@@ -2697,7 +2716,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     /**
      * Check alternative with empty node and all operands may coincide with emptiness
-     */
+     *
     public function nullable_alternative_node() {
         $equivalences = array();
 
@@ -2715,7 +2734,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     /**
      * Search alternative with empty node and all operands may coincide with emptiness
-     */
+     *
     private function search_nullable_alternative_node($node) {
         if ($node->type == qtype_preg_node::TYPE_NODE_ALT) {
             if ($this->check_nullable_alternative_with_empty_node($node)) {
@@ -2754,7 +2773,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return false;
-    }
+    }*/
 
 
 
