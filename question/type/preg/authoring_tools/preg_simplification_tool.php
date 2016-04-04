@@ -1288,28 +1288,34 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     }
                 } else if (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
                             || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
-                           && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
-                           && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
-                           && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                           && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                    ) {
 
-                    $group_operand->position->indfirst = $node->position->indfirst;
-                    $group_operand->position->indlast = $node->position->indlast;
+                        if ($node->position !== null) {
+                            $group_operand->position->indfirst = $node->position->indfirst;
+                            $group_operand->position->indlast = $node->position->indlast;
 
-                    $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+                            $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+                        }
 
-                    foreach ($parent->operands as $i => $operand) {
-                        if ($operand->id == $node->id) {
-                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
-                                && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
-                                //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
-                                //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
+                        foreach ($parent->operands as $i => $operand) {
+                            if ($operand->id == $node->id) {
+                                if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                    && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                ) {
+                                    //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
+                                    //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
 
-                                $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                                    $group_operand->operands,
-                                    array_slice($parent->operands, $i + 1));
-                            } else {
-                                $parent->operands[$i] = $group_operand;
+                                    $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                        $group_operand->operands,
+                                        array_slice($parent->operands, $i + 1));
+                                } else {
+                                    $parent->operands[$i] = $group_operand;
+                                }
+                                break;
                             }
                             break;
                         }
@@ -3905,7 +3911,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function change_alternative_to_charset($node, $remove_node_id) {
         if ($node->id == $remove_node_id) {
-            $characters = '[';
+            $uicharacters = array();
+            $uicharacters[] = new qtype_preg_userinscription('[', null);
+//            $characters = '[';
+            $characters = '';
             $count = 0;
 
             $alt = new qtype_preg_node_alt();
@@ -3915,9 +3924,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     && $operand->userinscription[0]->data != '.') {
                     $count++;
                     if (count($operand->userinscription) === 1) {
+                        $uicharacters[] = new qtype_preg_userinscription($this->escape_character_for_charset($operand->userinscription[0]->data), null);
                         $characters .= $this->escape_character_for_charset($operand->userinscription[0]->data);
                     } else {
                         for ($i = 1; $i < count($operand->userinscription) - 1; ++$i) {
+                            $uicharacters[] = new qtype_preg_userinscription($this->escape_character_for_charset($operand->userinscription[$i]->data), null);
                             $characters .= $this->escape_character_for_charset($operand->userinscription[$i]->data);
                         }
                     }
@@ -3925,10 +3936,21 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $alt->operands[] = $operand;
                 }
             }
-            $characters .= ']';
+//            $characters .= ']';
+            $uicharacters[] = new qtype_preg_userinscription(']', null);
 
             $new_node = new qtype_preg_leaf_charset();
-            $new_node->set_user_info(null, array(new qtype_preg_userinscription($characters, null)));
+            $new_node->set_user_info(null, $uicharacters);
+            $new_node->id = $remove_node_id; //$this->parser->get_max_id() + 1;
+            //$this->parser->set_max_id($new_node->id + 1);
+
+            if ($characters !== null) {
+                $flag = new qtype_preg_charset_flag;
+                $flag->negative = false;
+//                $characters = new qtype_poasquestion\string($characters);
+                $flag->set_data(qtype_preg_charset_flag::TYPE_SET, new qtype_poasquestion\string($characters));
+                $new_node->flags = array(array($flag));
+            }
 
             $new_node->position = new qtype_preg_position($node->position->indfirst, $node->position->indlast, null, null, null, null);
 
@@ -3938,9 +3960,12 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 } else {
                     $local_root = $this->get_parent_node($this->get_dst_root(), $node->id);
 
-                    foreach ($local_root->operands as $i => $operand) {
-                        if ($operand->id == $node->id) {
-                            $local_root->operands[$i] = $new_node;
+                    if ($local_root !== NULL) {
+                        foreach ($local_root->operands as $i => $operand) {
+                            if ($operand->id == $node->id) {
+                                $local_root->operands[$i] = $new_node;
+                                break;
+                            }
                         }
                     }
                 }
@@ -3954,6 +3979,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     foreach ($local_root->operands as $i => $operand) {
                         if ($operand->id == $node->id) {
                             $local_root->operands[$i] = $alt;
+                            break;
                         }
                     }
                 }
