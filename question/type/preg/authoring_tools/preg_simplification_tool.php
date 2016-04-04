@@ -1073,19 +1073,47 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 && $node1->type == $node2->type
                 && $node1->subtype == $node2->subtype) {
             if (count($node1->operands) < count($node2->operands)) {
+                $is_match = true;
                 foreach ($node1->operands as $i => $operand) {
                     if ($operand->is_equal($node2->operands[$i], null) === false) {
-                        return false;
+                        $is_match = false;
+                        break;
                     }
                 }
-                return true;
+
+                if ($is_match === false) {
+                    $is_match = true;
+                    for ($j = 0, $i = count($node1->operands) - 1; $i > -1; $i--) {
+                        $j++;
+                        if ($node1->operands[$i]->is_equal($node2->operands[count($node2->operands) - $j], null) === false) {
+                            $is_match = false;
+                            break;
+                        }
+                    }
+                }
+
+                return $is_match;
             } else {
+                $is_match = true;
                 foreach ($node2->operands as $i => $operand) {
                     if ($operand->is_equal($node1->operands[$i], null) === false) {
-                        return false;
+                        $is_match = false;
+                        break;
                     }
                 }
-                return true;
+
+                if ($is_match === false) {
+                    $is_match = true;
+                    for ($j = 0, $i = count($node2->operands) - 1; $i > -1; $i--) {
+                        $j++;
+                        if ($node2->operands[$i]->is_equal($node1->operands[count($node1->operands) - $j], null) === false) {
+                            $is_match = false;
+                            break;
+                        }
+                    }
+                }
+
+                return $is_match;
             }
 
         } else {
