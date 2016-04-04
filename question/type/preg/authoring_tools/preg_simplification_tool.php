@@ -755,7 +755,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $tmp_root = $this->get_parent_node($this->get_dst_root(), $leaf[0]->id);
 
                 if ($this->compare_parent_nodes($tmp_root, $tree_root, $count_nodes)) {
-                    if ($this->compare_right_set_of_leafs($tmp_leafs, $current_leaf, $tree_root, $count_nodes)) {
+                    if ($this->compare_right_set_of_leafs(/*$leaf*/$tmp_leafs, $current_leaf, $tree_root, $count_nodes)) {
                         return true;
                     }
                 }
@@ -766,14 +766,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function delete_useless_nodes($current_leaf, $leaf, &$count_nodes, $operand = null) {
         $parent = $this->get_parent_node($this->get_dst_root(), $current_leaf->id);
+
         $count_nodes = count($leaf);
+
         $tmp_leafs = null;
         if ($parent != null && $leaf[$count_nodes - 1]->id == $parent->id
-            && ($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR
-                || $parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+            && (($parent->type == qtype_preg_node::TYPE_NODE_SUBEXPR
+                 && $parent->operands[0]->type == qtype_preg_node::TYPE_NODE_CONCAT)
+                || (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
+                    /*&& $parent->operands[0]->type != qtype_preg_node::TYPE_NODE_SUBEXPR*/)
                 || $parent->type == qtype_preg_node::TYPE_NODE_CONCAT)) {
             $count_nodes--;
+
             $tmp_leafs = array_slice($leaf, 0, $count_nodes);
 
             if ($operand === null && isset($leaf[$count_nodes - 1]->operands)) {
@@ -830,6 +835,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $is_found = false;
         $right_leafs = $this->get_right_leafs($this->get_dst_root(), $current_leaf, count($leafs), $is_found);
         $right_leafs_tmp = $right_leafs;
+
         if ($this->leafs_compare($leafs, $right_leafs)) {
             if ($leafs[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
                 || $leafs[0]->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
@@ -855,6 +861,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
                 $right_leafs_tmp = $right_leafs;
                 $is_fount1 = false;
+
                 $next_leafs = $this->get_right_leafs($this->get_dst_root(),
                                                      $right_leafs_tmp[count($right_leafs_tmp) - 1], 2, $is_fount1);
 
@@ -907,6 +914,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $right_leafs_tmp = $right_leafs;
 
                 $is_found = $this->leafs_compare($leafs, $right_leafs);
+                //$is_found = false;
             }
             $this->problem_type = 4;
             return true;
@@ -1062,6 +1070,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         && $local_root2->type == qtype_preg_node::TYPE_NODE_CONCAT
                         && count($local_root1->operands) > 1 && count($local_root2->operands) > 1) {
                 return $this->compare_concats($local_root1, $local_root2);
+            } else {
+                return true;
             }
         }
         return false;
@@ -1317,40 +1327,46 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $parent = $this->get_parent_node($tree_root, $node->id);
             $group_operand = $node->operands[0];
             if ($parent !== null) {
-                if (/*$parent->type != qtype_preg_node::TYPE_NODE_CONCAT
-                    &&*/ $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                    && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
-                    && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
-                    && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY
-                    && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
-                    && $group_operand->id != -1) {
+                if ($node->operands[0]->type !== qtype_preg_node::TYPE_LEAF_META
+                    && $node->operands[0]->subtype !== qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                    if (/*$parent->type != qtype_preg_node::TYPE_NODE_CONCAT
+                    &&*/
+                        $parent->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        && $parent->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                        && $group_operand->type != qtype_preg_node::TYPE_LEAF_META
+                        && $group_operand->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
+                        && $group_operand->id != -1
+                    ) {
 
-                    $group_operand->position->indfirst = $node->position->indfirst;
-                    $group_operand->position->indlast = $node->position->indlast;
+                        $group_operand->position->indfirst = $node->position->indfirst;
+                        $group_operand->position->indlast = $node->position->indlast;
 
-                    $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+                        $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
 
-                    foreach ($parent->operands as $i => $operand) {
-                        if ($operand->id == $node->id) {
-                            if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
-                                && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT) {
-                                //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
-                                //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
+                        foreach ($parent->operands as $i => $operand) {
+                            if ($operand->id == $node->id) {
+                                if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                    && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                ) {
+                                    //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
+                                    //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
 
-                                $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
-                                    $group_operand->operands,
-                                    array_slice($parent->operands, $i + 1));
-                            } else {
-                                $parent->operands[$i] = $group_operand;
+                                    $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                        $group_operand->operands,
+                                        array_slice($parent->operands, $i + 1));
+                                } else {
+                                    $parent->operands[$i] = $group_operand;
+                                }
+                                break;
                             }
-                            break;
                         }
-                    }
-                } else if (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                    } else if (($parent->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
                             || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
                         && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
                         && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
-                        && $group_operand->id != -1
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                        && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
                     ) {
 
                         if ($node->position !== null) {
@@ -1376,7 +1392,31 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                                 }
                                 break;
                             }
-                            break;
+                        }
+                    } else if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                        && $group_operand->type != qtype_preg_node::TYPE_LEAF_CHARSET) {
+
+                        $group_operand->position->indfirst = $node->position->indfirst;
+                        $group_operand->position->indlast = $node->position->indlast;
+
+                        $this->deleted_grouping_positions[] = array($node->position->indfirst, $node->position->indlast);
+
+                        foreach ($parent->operands as $i => $operand) {
+                            if ($operand->id == $node->id) {
+                                if ($parent->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                    && $group_operand->type == qtype_preg_node::TYPE_NODE_CONCAT
+                                ) {
+                                    //$group_operand->operands[0]->position->indfirst = $group_operand->position->indfirst;
+                                    //$group_operand->operands[count($group_operand->operands) - 1]->position->indlast = $group_operand->position->indlast;
+
+                                    $parent->operands = array_merge(array_slice($parent->operands, 0, $i),
+                                        $group_operand->operands,
+                                        array_slice($parent->operands, $i + 1));
+                                } else {
+                                    $parent->operands[$i] = $group_operand;
+                                }
+                                break;
+                            }
                         }
                     }
                 }
@@ -1437,7 +1477,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $qu->set_user_info(null, array(new qtype_preg_userinscription($text)));
 
             // Current operand is operand of quantifier node
-            if ($this->options->problem_ids[0] > 1 && $current_leaf->type != qtype_preg_node::TYPE_NODE_SUBEXPR) {
+            if (/*$this->options->problem_ids[0] > 1 &&*/ $current_leaf->type != qtype_preg_node::TYPE_NODE_SUBEXPR) {
                 $se = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_GROUPING, -1, '', false);
                 $se->set_user_info(null, array(new qtype_preg_userinscription('(?:...)')));
 
@@ -1461,7 +1501,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
                         $se->operands[] = $concat;
                     } else {
-                        $se->operands[] = $right_leafs[0];
+                        //$se->operands[] = $right_leafs[0];
+                        if ($right_leafs[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                            || $current_leaf->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                            $se->operands[] = $right_leafs[0]->operands[0];
+                        } else {
+                            $se->operands[] = $right_leafs[0];
+                        }
                     }
                 } else {
                     $is_fount = false;
@@ -1476,7 +1522,13 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                             $i += $count_nodes;
                         }
                     } else {
-                        $se->operands[] = $right_leafs[0];
+                        //$se->operands[] = $right_leafs[0];
+                        if ($right_leafs[0]->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                            || $current_leaf->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+                            $se->operands[] = $right_leafs[0]->operands[0];
+                        } else {
+                            $se->operands[] = $right_leafs[0];
+                        }
                     }
                 }
 
@@ -1523,6 +1575,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                                 . substr($regex_string, $deleted_grouping_position[1] + 1);
             }
         }
+
+        //$old_regex = $regex_string;
 
         // Generate new regex
         $this->regex_from_tree = substr_replace($regex_string, $new_regex_string_part, $this->options->indfirst,
@@ -2047,7 +2101,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
         }
 
-        $parent = $this->get_parent_node($this->get_dst_root(), $leafs1[0]->id);
+        $this->aaa($leafs1, $leafs2);
+        $this->bbb1($leafs1, $leafs2);
+
+        /*$parent = $this->get_parent_node($this->get_dst_root(), $leafs1[0]->id);
         $parent_cur = $this->get_parent_node($this->get_dst_root(), $leafs2[0]->id);
         if ($parent_cur != null
             && ($parent_cur->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
@@ -2065,7 +2122,77 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     if ($leaf->position->indlast > $this->indlast){
                         $this->indlast = $leaf->position->indlast;
                     }
+                }*
+            }
+        } else {
+            foreach($leafs2 as $leaf) {
+                if ($leaf->position->indfirst < $this->indfirst){
+                    $this->indfirst = $leaf->position->indfirst;
+                }
+                if ($leaf->position->indlast > $this->indlast){
+                    $this->indlast = $leaf->position->indlast;
+                }
+            }
+        }*/
+    }
+
+    private function aaa($leafs1, $leafs2) {
+        $parent = $this->get_parent_node($this->get_dst_root(), $leafs2[0]->id);
+        $parent_cur = $this->get_parent_node($this->get_dst_root(), $leafs1[0]->id);
+        if ($parent_cur != null
+            && ($parent_cur->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $parent_cur->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                || $parent_cur->type == qtype_preg_node::TYPE_NODE_SUBEXPR)) {
+
+            $parent_curcur = $this->get_parent_node($this->get_dst_root(), $parent_cur->id);
+            if ($parent != null && $parent_curcur != null && $parent_curcur->id == $parent->id) {
+                $this->indlast = $parent_cur->position->indlast;
+            } else {
+                $this->indlast = $parent_cur->position->indlast;
+                /*foreach($leafs1 as $leaf) {
+                    if ($leaf->position->indfirst < $this->indfirst){
+                        $this->indfirst = $leaf->position->indfirst;
+                    }
+                    if ($leaf->position->indlast > $this->indlast){
+                        $this->indlast = $leaf->position->indlast;
+                    }
                 }*/
+                $this->aaa($leafs2, array($parent_cur));
+            }
+        } else {
+            foreach($leafs1 as $leaf) {
+                if ($leaf->position->indfirst < $this->indfirst){
+                    $this->indfirst = $leaf->position->indfirst;
+                }
+                if ($leaf->position->indlast > $this->indlast){
+                    $this->indlast = $leaf->position->indlast;
+                }
+            }
+        }
+    }
+
+    private function bbb1($leafs1, $leafs2) {
+        $parent = $this->get_parent_node($this->get_dst_root(), $leafs1[0]->id);
+        $parent_cur = $this->get_parent_node($this->get_dst_root(), $leafs2[0]->id);
+        if ($parent_cur != null
+            && ($parent_cur->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT
+                || $parent_cur->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                || $parent_cur->type == qtype_preg_node::TYPE_NODE_SUBEXPR)) {
+
+            $parent_curcur = $this->get_parent_node($this->get_dst_root(), $parent_cur->id);
+            if ($parent != null && $parent_curcur != null && $parent_curcur->id == $parent->id) {
+                $this->indlast = $parent_cur->position->indlast;
+            } else {
+                $this->indlast = $parent_cur->position->indlast;
+                /*foreach($leafs2 as $leaf) {
+                    if ($leaf->position->indfirst < $this->indfirst){
+                        $this->indfirst = $leaf->position->indfirst;
+                    }
+                    if ($leaf->position->indlast > $this->indlast){
+                        $this->indlast = $leaf->position->indlast;
+                    }
+                }*/
+                $this->bbb1($leafs1, array($parent_cur));
             }
         } else {
             foreach($leafs2 as $leaf) {
@@ -2266,9 +2393,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     private function is_single_alternative($node) {
         $repeats_count = 0;
-        foreach ($node->operands as $operand) {
+        foreach ($node->operands as $i => $operand) {
             if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET && !$operand->negative
                 && $operand->userinscription[0]->data != '.') {
+
                 $repeats_count++;
                 if ($this->indfirst == -2) {
                     $this->indfirst = $operand->position->indfirst;
@@ -3715,7 +3843,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         if ($tree_root->id == $remove_node_id) {
             $this->delete_empty_node_from_alternative($tree_root);
 
-            $alt_match_empty = false;
+            /*$alt_match_empty = false;
             foreach ($tree_root->operands as $operand) {
                 if ($operand->nullable === true) {
                     $alt_match_empty = true;
@@ -3723,7 +3851,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             }
 
-            if (!$alt_match_empty) {
+            if (!$alt_match_empty) {*/
                 $qu = new qtype_preg_node_finite_quant(0, 1);
                 $qu->set_user_info(null, array(new qtype_preg_userinscription('?')));
 
@@ -3773,7 +3901,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         }
                     }
                 }
-            }
+            //}
             return true;
         }
 
