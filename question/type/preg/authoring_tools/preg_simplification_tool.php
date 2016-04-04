@@ -750,7 +750,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         foreach ($leafs as $leaf) {
             if ($leaf[0]->is_equal($current_leaf, null) /*|| $this->compare_quants($leaf[0], $current_leaf)*/) {
                 $count_nodes = 0;
-                $tmp_leafs = $this->delete_useles_nodes($current_leaf, $leaf, $count_nodes);
+                $tmp_leafs = $this->delete_useless_nodes($current_leaf, $leaf, $count_nodes);
 
                 $tmp_root = $this->get_parent_node($this->get_dst_root(), $leaf[0]->id);
 
@@ -764,7 +764,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
-    private function delete_useles_nodes($current_leaf, $leaf, &$count_nodes, $operand = null) {
+    private function delete_useless_nodes($current_leaf, $leaf, &$count_nodes, $operand = null) {
         $parent = $this->get_parent_node($this->get_dst_root(), $current_leaf->id);
         $count_nodes = count($leaf);
         $tmp_leafs = null;
@@ -790,7 +790,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 }
             }
 
-            $tmp_leafs = $this->delete_useles_nodes($parent, $tmp_leafs, $count_nodes, $operand);
+            $tmp_leafs = $this->delete_useless_nodes($parent, $tmp_leafs, $count_nodes, $operand);
         } else {
             $tmp_leafs = $leaf;
         }
