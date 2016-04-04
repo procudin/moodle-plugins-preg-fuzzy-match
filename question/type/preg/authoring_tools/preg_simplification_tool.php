@@ -848,23 +848,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
 //            $this->problem_ids[] = count($leafs);
 
-//            foreach ($leafs as $lf) {
-//                if ($lf->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-//                    && $lf->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
-//                    $this->problem_ids[] = $lf->id;
-//                    break;
-//                }
-//            }
             $this->problem_ids[] = $leafs[0]->id;
             $is_found = true;
             while ($is_found) {
-//                foreach ($right_leafs_tmp as $lf) {
-//                    if ($lf->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-//                        && $lf->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
-//                        $this->problem_ids[] = $lf->id;
-//                        break;
-//                    }
-//                }
                 $this->problem_ids[] = $right_leafs_tmp[0]->id;
 
                 $right_leafs_tmp = $right_leafs;
@@ -1191,16 +1177,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
             $this->problem_ids = array();
         }
-
-        /*$problem_exist = true;
-        while($problem_exist) {
-            if ($this->search_single_alternative_node($tree_root)) {
-                $this->change_alternative_to_charset($tree_root,  $this->problem_ids[0]);
-            } else {
-                $problem_exist = false;
-            }
-            $this->problem_ids = array();
-        }*/
 
         $problem_exist = true;
         $count = 0;
