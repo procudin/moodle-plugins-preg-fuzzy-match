@@ -1350,8 +1350,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                             || $parent->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT)
                         && $group_operand->type != qtype_preg_node::TYPE_NODE_CONCAT
                         && $group_operand->type != qtype_preg_node::TYPE_NODE_ALT
-                        && $group_operand->type != qtype_preg_node::TYPE_NODE_FINITE_QUANT
-                        && $group_operand->type != qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+                        && $group_operand->id != -1
                     ) {
 
                         if ($node->position !== null) {
@@ -1546,6 +1545,23 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->regex_from_tree = substr($this->regex_from_tree, 0, $deleted_grouping_position[0])
                                          . substr($this->regex_from_tree, $deleted_grouping_position[0] + 1);
             }
+        }
+
+        $tmp_regex = substr($this->regex_from_tree, $this->options->indfirst - 3, 3);
+
+//        var_dump($regex_string);
+
+        /*$flag = (strlen($regex_string) <= $this->options->indlast + 1
+            || $regex_string[$this->options->indlast + 1] !== ')');*/
+
+//        var_dump($flag);
+
+
+
+        if ($tmp_regex === '(?:'
+            && substr_count($this->regex_from_tree, '(') !== substr_count($this->regex_from_tree, ')')) {
+            $this->regex_from_tree = substr($this->regex_from_tree, 0, $this->options->indfirst - 3)
+                . substr($this->regex_from_tree, $this->options->indfirst);
         }
 
         return $this->regex_from_tree;
