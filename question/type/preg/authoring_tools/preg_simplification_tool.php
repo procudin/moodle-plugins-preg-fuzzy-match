@@ -1215,9 +1215,65 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             $this->problem_ids = array();
         }
 
+        $problem_exist = true;
+        $count = 0;
+        while($problem_exist && $count < 999) {
+            if ($this->search_single_not_repeat_alternative_node($tree_root)) {
+                $this->change_alternative_to_charset($tree_root, $this->problem_ids[0]);
+                $count++;
+            } else {
+                $problem_exist = false;
+            }
+            $this->problem_ids = array();
+        }
+
+        //$this->delete_not_empty_grouping_node($tree_root, $tree_root);
+
         $this->associative_commutative_operator_sort($tree_root);
 
         $this->problem_ids = array();
+    }
+
+    /**
+     * Search alternative node with only charsets operands with one character
+     */
+    private function search_single_not_repeat_alternative_node($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_ALT) {
+            if ($this->is_single_not_repeat_alternative($node)) {
+                $this->problem_ids[] = $node->id;
+                return true;
+            }
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_single_not_repeat_alternative_node($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check found alternative node with only charsets operands with one character
+     */
+    private function is_single_not_repeat_alternative($node) {
+        $repeats_count = 0;
+        foreach ($node->operands as $i => $operand) {
+            if ($operand->type == qtype_preg_node::TYPE_LEAF_CHARSET && !$operand->negative
+                && $operand->userinscription[0]->data != '.') {
+
+                foreach ($node->operands as $j => $tmpoperand) {
+                    if ($i !== $j && $tmpoperand->is_equal($operand, null)) {
+                        return false;
+                    }
+                }
+
+                $repeats_count++;
+            }
+        }
+        return $repeats_count > 1;
     }
 
     // TODO: delete
