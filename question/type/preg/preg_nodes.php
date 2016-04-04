@@ -34,9 +34,9 @@ require_once($CFG->dirroot . '/question/type/preg/preg_unicode.php');
  * and "relative" (considering lines and columns).
  */
 class qtype_preg_position {
-    /** First index of something (absolute positioning). */
+    /** First index of something in regex string (absolute positioning). */
     public $indfirst = -1;
-    /** Last index of something (absolute positioning). */
+    /** Last index of something in regex string (absolute positioning). */
     public $indlast = -1;
     /** Index of the line where something begins. */
     public $linefirst = -1;
@@ -498,6 +498,11 @@ abstract class qtype_preg_node {
      */
     public abstract function find_all_subtrees($node, $numberoffset);
 
+    /**
+     * Return string of regex
+     * @return string string of regex
+     */
+    public abstract function get_regex_string();
 }
 
 /**
@@ -650,6 +655,10 @@ abstract class qtype_preg_leaf extends qtype_preg_node {
             return array();
         }
     }
+
+    public function get_regex_string() {
+        return '';
+    }
 }
 
 /**
@@ -726,7 +735,7 @@ abstract class qtype_preg_operator extends qtype_preg_node {
         // Update operands of this node.
         $this->operands = $operands;
         if ($expandsubtree) {
-        	$newnode->expand(0, count($newnode->operands) - 2, $idcounter);
+            $newnode->expand(0, count($newnode->operands) - 2, $idcounter);
         }
 
         // Fix the new node position.
@@ -777,6 +786,14 @@ abstract class qtype_preg_operator extends qtype_preg_node {
             $result = array_merge($result, $operand->find_all_subtrees($node, $nextnumberoffset));
         }
         return $result;
+    }
+
+    public function get_regex_string() {
+        $regex_string = '';
+        foreach ($this->operands as $operand) {
+            $regex_string .= $operand->get_regex_string();
+        }
+        return $regex_string;
     }
 }
 
@@ -908,7 +925,7 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         $ranges = $this->ranges();
 
         if (empty($ranges)) {
-        	return array(self::NEXT_CHAR_CANNOT_GENERATE, null);
+            return array(self::NEXT_CHAR_CANNOT_GENERATE, null);
         }
 
         return array(self::NEXT_CHAR_OK, new qtype_poasquestion\utf8_string(qtype_preg_unicode::code2utf8($ranges[0][0])));
@@ -983,7 +1000,18 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
     }
 
     public function is_equal($node, $numberoffset) {
+//        var_dump(parent::is_equal($node, $numberoffset));
+//        var_dump($node);
+//        var_dump($this);
         return parent::is_equal($node, $numberoffset) && ($this->ranges() == $node->ranges());
+    }
+
+    public function get_regex_string() {
+        $regex_string = '';
+        for ($i = 0; $i < count($this->userinscription); $i++) {
+            $regex_string .= $this->userinscription[$i]->data;
+        }
+        return $regex_string;
     }
 }
 
@@ -1281,6 +1309,9 @@ class qtype_preg_leaf_meta extends qtype_preg_leaf {
         return 'ε';
     }
 
+    public function get_regex_string() {
+        return '';
+    }
 }
 
 class qtype_preg_leaf_complex_assert extends qtype_preg_leaf_meta {
@@ -1294,6 +1325,10 @@ class qtype_preg_leaf_complex_assert extends qtype_preg_leaf_meta {
         $this->type = qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT;
         $this->subtype = $subtype;
         $this->innerautomaton = $innerautomaton;
+    }
+
+    public function get_regex_string() {
+        return '';
     }
 }
 
@@ -1345,6 +1380,10 @@ abstract class qtype_preg_leaf_assert extends qtype_preg_leaf {
 
     public function consumes($matcherstateobj = null) {
         return 0;
+    }
+
+    public function get_regex_string() {
+        return $this->tohr();
     }
 }
 
@@ -1761,6 +1800,11 @@ class qtype_preg_leaf_backref extends qtype_preg_leaf {
             /*&& $this->name==$node->name*/
             && (($this->number!==null)?($this->number - $numberoffset):null) === $node->number;
     }
+
+    public function get_regex_string() {
+        $subexpr = $this->name !== null ? $this->name : $this->number;
+        return '\\' . $subexpr;
+    }
 }
 
 class qtype_preg_leaf_subexpr_call extends qtype_preg_leaf {
@@ -1809,6 +1853,10 @@ class qtype_preg_leaf_subexpr_call extends qtype_preg_leaf {
             /*&& $this->name==$node->name*/
             && (($this->number!==null)?($this->number - $numberoffset):null) === $node->number;
     }
+
+    public function get_regex_string() {
+        return '';
+    }
 }
 
 class qtype_preg_leaf_template extends qtype_preg_leaf {
@@ -1827,6 +1875,10 @@ class qtype_preg_leaf_template extends qtype_preg_leaf {
     public function is_equal($node, $numberoffset) {
         return parent::is_equal($node, $numberoffset)
             && $this->name==$node->name;
+    }
+
+    public function get_regex_string() {
+        return '';
     }
 }
 
@@ -1899,6 +1951,10 @@ class qtype_preg_leaf_control extends qtype_preg_leaf {
         return parent::is_equal($node, $numberoffset)
             && $this->name==$node->name;
     }
+
+    public function get_regex_string() {
+        return '';
+    }
 }
 
 class qtype_preg_leaf_options extends qtype_preg_leaf {
@@ -1932,6 +1988,10 @@ class qtype_preg_leaf_options extends qtype_preg_leaf {
         return parent::is_equal($node, $numberoffset)
             && count(array_diff(str_split($this->posopt), str_split($node->posopt)))==0
             && count(array_diff(str_split($this->negopt), str_split($node->negopt)))==0;
+    }
+
+    public function get_regex_string() {
+        return $this->tohr();
     }
 }
 
@@ -2009,6 +2069,18 @@ class qtype_preg_node_finite_quant extends qtype_preg_operator {
             && $this->leftborder==$node->leftborder
             && $this->rightborder==$node->rightborder;
     }
+
+    public function get_regex_string() {
+        $regex_string = '';
+        foreach ($this->operands as $operand) {
+            $regex_string .= $operand->get_regex_string();
+        }
+
+        for ($i = 0; $i < count($this->userinscription); $i++) {
+            $regex_string .= $this->userinscription[$i]->data;
+        }
+        return $regex_string;
+    }
 }
 
 /**
@@ -2084,6 +2156,18 @@ class qtype_preg_node_infinite_quant extends qtype_preg_operator {
         && $this->greedy==$node->greedy
         && $this->possessive==$node->possessive
         && $this->leftborder==$node->leftborder;
+    }
+
+    public function get_regex_string() {
+        $regex_string = '';
+        foreach ($this->operands as $operand) {
+            $regex_string .= $operand->get_regex_string();
+        }
+
+        for ($i = 0; $i < count($this->userinscription); $i++) {
+            $regex_string .= $this->userinscription[$i]->data;
+        }
+        return $regex_string;
     }
 }
 
@@ -2224,6 +2308,18 @@ class qtype_preg_node_alt extends qtype_preg_operator {
             return $result;
         }
     }
+
+    public function get_regex_string() {
+        $regex_string = '';
+        foreach ($this->operands as $operand) {
+            $regex_string .= $operand->get_regex_string();
+            if ($operand->id != $this->operands[count($this->operands)-1]->id) {
+                $regex_string .= '|';
+            }
+        }
+
+        return $regex_string;
+    }
 }
 
 /**
@@ -2261,6 +2357,27 @@ class qtype_preg_node_assert extends qtype_preg_operator {
     }
 
     // TODO - ui_nodename().
+
+    public function get_regex_string() {
+        $regex_string = '(';
+
+        if ($this->subtype == qtype_preg_node_assert::SUBTYPE_PLA) {
+            $regex_string .= '?=';
+        } else if ($this->subtype == qtype_preg_node_assert::SUBTYPE_NLA) {
+            $regex_string .= '?!';
+        } else if ($this->subtype == qtype_preg_node_assert::SUBTYPE_PLB) {
+            $regex_string .= '?<=';
+        } else if ($this->subtype == qtype_preg_node_assert::SUBTYPE_NLB) {
+            $regex_string .= '?<!';
+        }
+
+        foreach ($this->operands as $operand) {
+            $regex_string .= $operand->get_regex_string();
+        }
+        $regex_string .= ')';
+
+        return $regex_string;
+    }
 }
 
 /**
@@ -2308,6 +2425,20 @@ class qtype_preg_node_subexpr extends qtype_preg_operator {
         return parent::is_equal($node, $numberoffset)
             && (($this->number!==null)?($this->number - $numberoffset):null) === $node->number
             /*&& $this->name==$node->name*/;
+    }
+
+    public function get_regex_string() {
+        $regex_string = '(';
+        if ($this->subtype == qtype_preg_node_subexpr::SUBTYPE_GROUPING) {
+            $regex_string .= '?:';
+        }
+
+        foreach ($this->operands as $operand) {
+            $regex_string .= $operand->get_regex_string();
+        }
+        $regex_string .= ')';
+
+        return $regex_string;
     }
 }
 
@@ -2382,6 +2513,21 @@ class qtype_preg_node_cond_subexpr extends qtype_preg_operator {
             && (($this->number!==null)?($this->number - $numberoffset):null) === $node->number
             /*&& $this->name==$node->name*/;
     }
+
+    public function get_regex_string() {
+        $regex_string = '(?(' . $this->number . ')';
+        $operands_count = count($this->operands);
+        foreach ($this->operands as $operand) {
+            $regex_string .= $operand->get_regex_string();
+            if ($operand->id != $this->operands[count($this->operands)-1]->id
+                && $operands_count > 1) {
+                $regex_string .= '|';
+            }
+        }
+        $regex_string .= ')';
+
+        return $regex_string;
+    }
 }
 
 class qtype_preg_node_template extends qtype_preg_operator {
@@ -2401,6 +2547,10 @@ class qtype_preg_node_template extends qtype_preg_operator {
 
     public function is_expandable() {
         return false;
+    }
+
+    public function get_regex_string() {
+        return '';
     }
 }
 
@@ -2482,5 +2632,9 @@ class qtype_preg_node_error extends qtype_preg_operator {
 
     public function is_equal($node, $numberoffset) {
         return $this === $node;
+    }
+
+    public function get_regex_string() {
+        return '';
     }
 }
