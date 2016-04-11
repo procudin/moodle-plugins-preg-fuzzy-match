@@ -83,7 +83,7 @@ class states_group {
      */
     public function equal($other) {
         // Check if all states of this group are inluded in given
-        foreach ($first->states as $state) {
+        foreach ($this->states as $state) {
             if (!in_array($state, $other->states))
                 return false;
         }
