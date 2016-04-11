@@ -61,7 +61,7 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_character_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass;
-        // Substing without last character of matched string in difference is the matched string of both automata.
+        // Substring without last character of matched string in difference is the matched string of both automata.
         $a->matchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
         // Last character of matched string in difference is mismatch character.
         $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
@@ -101,7 +101,7 @@ class compare_automata_analyzer_result extends analyzer_result {
     public function get_final_state_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass;
         $a->matchedstring = $difference->matchedstring;
-        // Substing without last character of matched string in difference is the matched string of both automata.
+        // Substring without last character of matched string in difference is the matched string of both automata.
         $a->bothmatchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
         // Last character of matched string in difference which transport automaton to final state.
         $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
