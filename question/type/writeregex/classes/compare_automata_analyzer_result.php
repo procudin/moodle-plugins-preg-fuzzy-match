@@ -45,6 +45,9 @@ class compare_automata_analyzer_result extends analyzer_result {
                 case \qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE:
                     $feedback .= $this->get_final_state_mismatch_feedback($difference, $renderer);
                     break;
+                case \qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN:
+                    $feedback .= $this->get_subpattern_mismatch_feedback($difference, $renderer);
+                    break;
             }
         }
 
@@ -118,6 +121,88 @@ class compare_automata_analyzer_result extends analyzer_result {
         }
 
         return $feedback;
+    }
+
+    /**
+     * Get feedback for subpattern mismatch.
+     * @param qtype_writeregex_renderer renderer Renderer
+     * @return string Feedback about subpattern mismatch to show to student.
+     */
+    public function get_subpattern_mismatch_feedback($difference, $renderer) {
+        $a = new \stdClass();
+        // Substring without last character of matched string in difference is the matched string.
+        $matchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
+        if (strlen($matchedstring) == 0) {
+            $a->place = get_string('frombeginning', 'qtype_writeregex');
+        }
+        else {
+            $a->place = get_string('aftermatchedstring', 'qtype_writeregex', $matchedstring);
+        }
+        // Last character of matched string in matched character.
+        $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
+        // Set subpattern numbers.
+        if (!empty($difference->opentags)) {
+            $a->subpatterns = $this->enumeration_from_array($difference->opentags);
+        }
+        if (!empty($difference->closetags)) {
+            $a->subpatterns = $this->enumeration_from_array($difference->closetags);
+        }
+        // Set matched answer author.
+        if ($difference->matchedautomaton == 1) {
+            $a->matchedanswer = get_string('youranswer', 'qtype_writeregex');
+            $a->mismatchedanswer = get_string('theporrectanswer', 'qtype_writeregex');
+        }
+        else {
+            $a->matchedanswer = get_string('theporrectanswer', 'qtype_writeregex');
+            $a->mismatchedanswer = get_string('youranswer', 'qtype_writeregex');
+        }
+        // Set behavior.
+        if (count($difference->opentags) == 1) {
+            $a->behavior = get_string('starts', 'qtype_writeregex');
+        }
+        else if (count($difference->opentags) > 1) {
+            $a->behavior = get_string('start', 'qtype_writeregex');
+        }
+        else if (count($difference->closetags) == 1) {
+            $a->behavior = get_string('ends', 'qtype_writeregex');
+        }
+        else if (count($difference->closetags) > 1) {
+            $a->behavior = get_string('end', 'qtype_writeregex');
+        }
+
+        // Get result string.
+        $result = '';
+        if (count($difference->opentags) + count($difference->closetags) == 0) {
+            $result = get_string('nosubpatternmismatch', 'qtype_writeregex', $a);
+        }
+        else if (count($difference->opentags) + count($difference->closetags) == 1) {
+            $result = get_string('singlesubpatternmismatch', 'qtype_writeregex', $a);
+        }
+        else {
+            $result = get_string('multiplesubpatternsmismatch', 'qtype_writeregex', $a);
+        }
+
+        // Set first letter of the result string to uppercase.
+        $letter = \core_text::substr($result, 0, 1);
+        $letter = \core_text::strtoupper($letter);
+        $result[0] = $letter;
+        return $renderer->add_break($result);
+    }
+
+    /**
+     * Generates enumeration of array of integers
+     * @param $arr array of integers
+     * @return string enumeration
+     */
+    private function enumeration_from_array($arr) {
+        $res = "";
+        for ($i = 0; $i < count($arr); $i++) {
+            $res .= $arr[$i];
+            if ($i != count($arr) - 1) {
+                $res .= ',';
+            }
+        }
+        return $res;
     }
 
     /**
