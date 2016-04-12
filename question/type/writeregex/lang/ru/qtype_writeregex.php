@@ -80,6 +80,7 @@ $string['teststringshintpenalty'] = 'Тестовые строки: штраф';
 $string['teststringshintpenalty_help'] = "<p>Величина штрафа за использование подсказки в виде тестовых строк.</p>";
 $string['teststringshinttype'] = 'Тестовые строки';
 $string['teststringshinttype_help'] = "<p>Значение отображения подсказки в виде тестовых строк.</p>";
+$string['unavailableautomataanalyzer'] = 'При использовании данного движка невозможно использовать анализатор на автоматах';
 
 $string['extracharactermismatchfrombeginning'] = 'В Вашем ответе в отличие от правильного возможно совпадение символа \'{$a->character}\' с начала строки';
 $string['missingcharactermismatchfrombeginning'] = 'В Вашем ответе в отличие от правильного невозможно совпадение символа \'{$a->character}\' с начала строки';
