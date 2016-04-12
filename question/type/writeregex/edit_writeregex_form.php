@@ -317,6 +317,11 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
+        // Validate availability of using automata analyzer.
+        if ($data['engine'] == 'php_preg_matcher' && $data['compareautomatapercentage'] > 0) {
+            $errors['engine'] = get_string('unavailableautomataanalyzer', 'qtype_writeregex');
+        }
+
         $errors = $this->validate_compare_values($data, $errors);
 
         $errors = $this->validate_test_strings($data, $errors);
