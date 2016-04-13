@@ -137,6 +137,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_common_subexpressions_trivial() {
         return array (
+            //array('(?:)', '(?:)'),
             array('aaa', 'a{3}'),
             array('aaab', 'a{3}b'),
             array('baaa', 'ba{3}'),
@@ -2758,6 +2759,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a|dc|a', 'dc|[aa]'),
             array('a|[a-c]|\^|^|[01]', '^|[aa-c\^01]'),
             array('[ab](?:a|b)', '[ab](?:[ab])'),
+            array('(a|b)+|c', '([ab])+|c'),
         );
     }
 
@@ -2779,6 +2781,44 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('[^a ]', '[^a\s]'),
             array('[^ a]', '[^\sa]'),
             array('[^a b]', '[^a\sb]'),
+
+            array('[ \s]', '[ \s]'),
+            array('[\s ]', '[\s ]'),
+            array('[\s \s]', '[\s \s]'),
+            array('[\s\s ]', '[\s\s ]'),
+            array('[ \s\s]', '[ \s\s]'),
+
+            array('[ [:space:]]', '[ [:space:]]'),
+            array('[[:space:] ]', '[[:space:] ]'),
+            array('[[:space:] [:space:]]', '[[:space:] [:space:]]'),
+            array('[[:space:][:space:] ]', '[[:space:][:space:] ]'),
+            array('[ [:space:][:space:]]', '[ [:space:][:space:]]'),
+
+            array('[\s [:space:]]', '[\s [:space:]]'),
+            array('[\s[:space:] ]', '[\s[:space:] ]'),
+            array('[ \s[:space:]]', '[ \s[:space:]]'),
+            array('[[:space:] \s]', '[[:space:] \s]'),
+            array('[[:space:]\s ]', '[[:space:]\s ]'),
+            array('[ [:space:]\s]', '[ [:space:]\s]'),
+
+            array('[^ \s]', '[^ \s]'),
+            array('[^\s ]', '[^\s ]'),
+            array('[^\s \s]', '[^\s \s]'),
+            array('[^\s\s ]', '[^\s\s ]'),
+            array('[^ \s\s]', '[^ \s\s]'),
+
+            array('[^ [:space:]]', '[^ [:space:]]'),
+            array('[^[:space:] ]', '[^[:space:] ]'),
+            array('[^[:space:] [:space:]]', '[^[:space:] [:space:]]'),
+            array('[^[:space:][:space:] ]', '[^[:space:][:space:] ]'),
+            array('[^ [:space:][:space:]]', '[^ [:space:][:space:]]'),
+
+            array('[^\s [:space:]]', '[^\s [:space:]]'),
+            array('[^\s[:space:] ]', '[^\s[:space:] ]'),
+            array('[^ \s[:space:]]', '[^ \s[:space:]]'),
+            array('[^[:space:] \s]', '[^[:space:] \s]'),
+            array('[^[:space:]\s ]', '[^[:space:]\s ]'),
+            array('[^ [:space:]\s]', '[^ [:space:]\s]'),
         );
     }
 
@@ -3067,6 +3107,38 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:(?:(?:[ ]))){2,5}', '(?:(?:(?:[ ]))){2,5}'),
             array('(?:(?:(?:[\s]))){2,5}', '(?:(?:(?:[\s]))){2,5}'),
             array('(?:(?:(?:[[:space:]]))){2,5}', '(?:(?:(?:[[:space:]]))){2,5}'),
+
+            array('[  ]', '[  ]+'),
+            array('[\s\s]', '[\s\s]+'),
+            array('[[:space:][:space:]]', '[[:space:][:space:]]+'),
+            array('[ \s]', '[ \s]+'),
+            array('[ [:space:]]', '[ [:space:]]+'),
+            array('[\s ]', '[\s ]+'),
+            array('[[:space:] ]', '[[:space:] ]+'),
+            array('[\s[:space:]]', '[\s[:space:]]+'),
+            array('[[:space:]\s]', '[[:space:]\s]+'),
+
+            array('[   ]', '[   ]+'),
+            array('[\s\s\s]', '[\s\s\s]+'),
+            array('[[:space:][:space:][:space:]]', '[[:space:][:space:][:space:]]+'),
+            array('[\s  ]', '[\s  ]+'),
+            array('[ \s ]', '[ \s ]+'),
+            array('[  \s]', '[  \s]+'),
+            array('[\s\s ]', '[\s\s ]+'),
+            array('[ \s\s]', '[ \s\s]+'),
+            array('[\s \s]', '[\s \s]+'),
+            array('[[:space:]  ]', '[[:space:]  ]+'),
+            array('[ [:space:] ]', '[ [:space:] ]+'),
+            array('[  [:space:]]', '[  [:space:]]+'),
+            array('[[:space:][:space:] ]', '[[:space:][:space:] ]+'),
+            array('[ [:space:][:space:]]', '[ [:space:][:space:]]+'),
+            array('[[:space:] [:space:]]', '[[:space:] [:space:]]+'),
+            array('[\s[:space:][:space:]]', '[\s[:space:][:space:]]+'),
+            array('[[:space:]\s[:space:]]', '[[:space:]\s[:space:]]+'),
+            array('[[:space:][:space:]\s]', '[[:space:][:space:]\s]+'),
+            array('[\s\s[:space:]]', '[\s\s[:space:]]+'),
+            array('[[:space:]\s\s]', '[[:space:]\s\s]+'),
+            array('[\s[:space:]\s]', '[\s[:space:]\s]+'),
         );
     }
 
@@ -3327,6 +3399,38 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:(?:(?:[ ]))){2,5}', '(?:(?:(?:[ ]))){2,5}'),
             array('(?:(?:(?:[\s]))){2,5}', '(?:(?:(?:[\s]))){2,5}'),
             array('(?:(?:(?:[[:space:]]))){2,5}', '(?:(?:(?:[[:space:]]))){2,5}'),
+
+            array('[  ]?', '[  ]*'),
+            array('[\s\s]?', '[\s\s]*'),
+            array('[[:space:][:space:]]?', '[[:space:][:space:]]*'),
+            array('[ \s]?', '[ \s]*'),
+            array('[ [:space:]]?', '[ [:space:]]*'),
+            array('[\s ]?', '[\s ]*'),
+            array('[[:space:] ]?', '[[:space:] ]*'),
+            array('[\s[:space:]]?', '[\s[:space:]]*'),
+            array('[[:space:]\s]?', '[[:space:]\s]*'),
+
+            array('[   ]?', '[   ]*'),
+            array('[\s\s\s]?', '[\s\s\s]*'),
+            array('[[:space:][:space:][:space:]]?', '[[:space:][:space:][:space:]]*'),
+            array('[\s  ]?', '[\s  ]*'),
+            array('[ \s ]?', '[ \s ]*'),
+            array('[  \s]?', '[  \s]*'),
+            array('[\s\s ]?', '[\s\s ]*'),
+            array('[ \s\s]?', '[ \s\s]*'),
+            array('[\s \s]?', '[\s \s]*'),
+            array('[[:space:]  ]?', '[[:space:]  ]*'),
+            array('[ [:space:] ]?', '[ [:space:] ]*'),
+            array('[  [:space:]]?', '[  [:space:]]*'),
+            array('[[:space:][:space:] ]?', '[[:space:][:space:] ]*'),
+            array('[ [:space:][:space:]]?', '[ [:space:][:space:]]*'),
+            array('[[:space:] [:space:]]?', '[[:space:] [:space:]]*'),
+            array('[\s[:space:][:space:]]?', '[\s[:space:][:space:]]*'),
+            array('[[:space:]\s[:space:]]?', '[[:space:]\s[:space:]]*'),
+            array('[[:space:][:space:]\s]?', '[[:space:][:space:]\s]*'),
+            array('[\s\s[:space:]]?', '[\s\s[:space:]]*'),
+            array('[[:space:]\s\s]?', '[[:space:]\s\s]*'),
+            array('[\s[:space:]\s]?', '[\s[:space:]\s]*'),
         );
     }
 
