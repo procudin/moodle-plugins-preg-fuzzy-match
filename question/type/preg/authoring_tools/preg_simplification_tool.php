@@ -3120,6 +3120,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($this->check_space_charsets($node->userinscription[0]->data)
                 || (count($node->userinscription) === 3 && $this->check_space_charsets($node->userinscription[1]->data))
                 || ($this->check_many_charset_node($node) && $this->check_space_charsets($node->userinscription[1]->data))
+                || $this->check_space_charset_node($node)
                 && !$node->negative) {
 
                 if (!$this->check_other_quant_for_space_charset($node)) {
@@ -3147,6 +3148,22 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     private function check_space_charsets($charset_data) {
         return $charset_data === ' ' || $charset_data === '\s' || $charset_data === '[:space:]';
+    }
+
+    private function check_space_charset_node($node) {
+        if (count($node->userinscription) > 3) {
+            foreach($node->userinscription as $ui) {
+                if ($ui->data === '[' || $ui->data === ']') {
+                    continue;
+                }
+                if (!$this->check_space_charsets($ui->data)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        return false;
     }
 
     private function check_other_quant_for_space_charset($node) {
@@ -3232,6 +3249,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($this->check_space_charsets($node->userinscription[0]->data)
                 || (count($node->userinscription) === 3 && $this->check_space_charsets($node->userinscription[1]->data))
                 || ($this->check_many_charset_node($node) && $this->check_space_charsets($node->userinscription[1]->data))
+                || $this->check_space_charset_node($node)
                 && !$node->negative) {
 
                 $qu = $this->get_quant_for_space_charset($node);
