@@ -525,8 +525,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $equivalences = array();
 
         if ($this->search_subpattern_node($this->get_dst_root())) {
-            $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_3', 'qtype_preg'));
-            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_3', 'qtype_preg'));
+            $equivalences['problem'] = $this->problem_message;
+            $equivalences['solve'] = $this->solve_message;
             $equivalences['problem_ids'] = $this->problem_ids;
             $equivalences['problem_type'] = $this->problem_type;
             $equivalences['problem_indfirst'] = $this->indfirst;
