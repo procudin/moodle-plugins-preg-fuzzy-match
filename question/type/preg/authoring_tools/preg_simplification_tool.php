@@ -2372,6 +2372,9 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 //$this->indfirst = $node->position->indfirst;
                 //$this->indlast = $node->position->indlast;
                 return true;
+            } else {
+                $this->indfirst = -2;
+                $this->indlast = -2;
             }
         }
         if ($this->is_operator($node)) {
