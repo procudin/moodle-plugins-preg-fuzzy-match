@@ -3064,14 +3064,22 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 $this->indlast = $node->position->indlast;
                 return true;
             } else {
+                $is_contain_space_char = false;
+                $is_contain_slash_s = false;
                 foreach($node->userinscription as $ui) {
                     if ($ui->data === ' ') {
-                        $this->problem_ids[] = $node->id;
-                        $this->problem_type = 101;
-                        $this->indfirst = $node->position->indfirst;
-                        $this->indlast = $node->position->indlast;
-                        return true;
+                        $is_contain_space_char = true;
+                    } else if ($ui->data === '\\s' || $ui->data === '[:space:]') {
+                        $is_contain_slash_s = true;
                     }
+                }
+
+                if ($is_contain_space_char && !$is_contain_slash_s) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 101;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
                 }
             }
         }
