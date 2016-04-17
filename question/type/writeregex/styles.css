@@ -35,3 +35,14 @@ body#page-question-type-writeregex div[id^=fitem_id_][id*=feedback_] {
     border: 1px solid #BBB;
     border-top: 0;
 }
+
+#mismatch_description_title {
+    width: 135px;
+    text-align: right;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#qtype-preg-colored-string {
+    display: inline-block;
+}

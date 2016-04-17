@@ -809,6 +809,16 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         }
     }
 
+    public static function by_regex($regex) {
+        $options = new qtype_preg_handling_options();
+        $options->preserveallnodes = true;
+        StringStreamController::createRef('regex', $regex);
+        $pseudofile = fopen('string://regex', 'r');
+        $lexer = new qtype_preg_lexer($pseudofile);
+        $lexer->set_options($options);
+        return $lexer->nextToken()->value;
+    }
+
     public function clear_cached_ranges() {
         $this->cachedranges = null;
     }
@@ -881,6 +891,101 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         }
 
         return $this->cachedranges;
+    }
+
+    public function excluding_ranges() {
+        if ($this->cachedranges == null) {
+            $this->ranges();
+            foreach ($this->cachedranges as &$cur) {
+                $cur[1]++;
+            }
+        }
+        return $this->cachedranges;
+    }
+
+    /**
+     * Function divides two arrays of preg_leaf_charsets to noncrossed intervals
+     * param[in] firstgroup - array of qtype_preg_leaf_charset of first automata
+     * param[in] secondgroup - array of qtype_preg_leaf_charset of second automata
+     * param[in] indexes - array, including for each result charsets indexes of initial charsets, which include result ranges
+     * return - two dimensial array of ranges
+     */
+    public static function divide_intervals($firstgroup, $secondgroup, &$indexes) {
+        $ranges = array();
+        $result = array();
+        $indexes = array();
+
+        for ($i = 0; $i < count($firstgroup); $i++) {
+            $ranges[] = array($firstgroup[$i]->excluding_ranges(), 0, $i);
+        }
+        for ($i = 0; $i < count($secondgroup); $i++) {
+            $ranges[] = array($secondgroup[$i]->excluding_ranges(), 1, $i);
+        }
+        while (count($ranges)) {
+            // Searching current minimal character
+            $curchar = 1114113;
+            foreach ($ranges as $curranges) {
+                $curchar = min($curchar, current(current($curranges[0])));
+            }
+
+            // Generating new interval from founded character.
+            if (count($result)) {
+                $result[count($result) - 1][1] = $curchar - 1;
+            }
+            $result[] = array($curchar, $curchar + 1);
+            $indexes[] = array(array(), array());
+
+            // Serching matches in given charsets
+            for ($i = 0; $i < count($ranges); $i++) {
+                if (current($ranges[$i][0])[0] <= $curchar && $curchar < current($ranges[$i][0])[1]) {
+                    $indexes[count($result) - 1][$ranges[$i][1]][] = $ranges[$i][2];
+                }
+                if (current(current($ranges[$i][0])) == $curchar) {
+                    if (next($ranges[$i][0][key($ranges[$i][0])]) === false) {
+                        if (next($ranges[$i][0]) === false) {
+                            array_splice($ranges, $i, 1);
+                            $i--;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Removing intervals with no charset matches.
+        for ($i = 0; $i < count($result); ++$i) {
+            if (count($indexes[$i][0]) + count($indexes[$i][1]) == 0) {
+                array_splice($result, $i, 1);
+                array_splice($indexes, $i, 1);
+                $i--;
+            }
+        }
+
+        // Translating integer intervals to character
+        for ($i = 0; $i < count($result); ++$i) {
+            if ($result[$i][1] == $result[$i][0])
+                $result[$i] = chr($result[$i][0]);
+            else
+                $result[$i] = chr($result[$i][0]) . '-' . chr($result[$i][1]);
+        }
+
+        // Grouping intervals with the same matched indexes
+        for ($i = 0; $i < count($result); ++$i) {
+            for ($j = $i + 1; $j < count($result); ++$j) {
+                if ($indexes[$j] == $indexes[$i]) {
+                    $result[$i] = $result[$i] . $result[$j];
+                    array_splice($result, $j, 1);
+                    array_splice($indexes, $j, 1);
+                    $j--;
+                }
+            }
+        }
+
+        // Adding square brackets around charset
+        for ($i = 0; $i < count($result); ++$i) {
+            $result[$i] = '[' . $result[$i] . ']';
+        }
+
+        return $result;
     }
 
     public function match($str, $pos, &$length, $matcherstateobj = null) {
@@ -977,7 +1082,7 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         if (empty($resrange)) {
             $charset = null;
         } else {
-            $charset = $this->intersect($other); 
+            $charset = $this->intersect($other);
         }
         return $charset;
     }
@@ -1280,7 +1385,6 @@ class qtype_preg_leaf_meta extends qtype_preg_leaf {
     public function tohr() {
         return 'ε';
     }
-
 }
 
 class qtype_preg_leaf_complex_assert extends qtype_preg_leaf_meta {

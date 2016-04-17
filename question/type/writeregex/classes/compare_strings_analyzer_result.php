@@ -1,5 +1,5 @@
 <?php
-// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+// This file is part of WriteRegex question type - https://bitbucket.org/oasychev/moodle-pluginss
 //
 // WriteRegex is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,35 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_writeregex;
+
 /**
- * Class analyser fot compare regex by automata.
+ * Result of comparing regexes by test strings.
  *
  * @package qtype
  * @subpackage writeregex
  * @copyright  2014 onwards Oleg Sychev, Volgograd State Technical University.
- * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
+ * @author Kamo Spertsian <spertsiankamo@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class compare_regex_automata_analyzer {
-
-    /** @var  object Question object. */
-    protected $question;
+class compare_strings_analyzer_result extends analyzer_result {
 
     /**
-     * Init analyzer object.
-     * @param $question object Question object.
+     * Get feedback for analyzing results.
+     * @param qtype_writeregex_renderer renderer Renderer
+     * @return string Feedback about mismatches to show to student.
      */
-    public function __construct($question) {
-
-    }
-
-    /**
-     * Get equality for user response.
-     * @param $answer string Regex answer.
-     * @param $respose string User response.
-     * @return float Value of compare.
-     */
-    public function get_equality ($answer, $respose) {
-        return 0;
+    public function get_feedback($renderer) {
+        return '';
     }
 }

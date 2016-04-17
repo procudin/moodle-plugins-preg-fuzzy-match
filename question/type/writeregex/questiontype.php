@@ -1,5 +1,5 @@
 <?php
-// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+// This file is part of WriteRegex question type - https://bitbucket.org/oasychev/moodle-plugins
 //
 // WriteRegex is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,10 +53,20 @@ class qtype_writeregex extends qtype_shortanswer {
 
         $result = parent::get_question_options($question);
 
+        foreach ($question->options->answers as $key => $answer) {
+            if ($answer->answerformat == self::TEST_STRING_ANSWER_FORMAT_VALUE) {
+                $question->options->teststrings[$key] = $answer;
+                unset($question->options->answers[$key]);
+            }
+        }
+
         $question->syntaxtreehint = array();
         $question->explgraphhint = array();
         $question->descriptionhint = array();
         $question->teststringshint = array();
+
+        if (!isset($question->options->teststrings))
+            $question->options->teststrings = array();
 
         return $result;
     }
@@ -73,7 +83,7 @@ class qtype_writeregex extends qtype_shortanswer {
         // Remove all answers.
         $DB->delete_records('question_answers', array('question' => $question->id));
 
-        if (!isset($question->wre_regexp_ts_answer)) {
+        if (!isset($question->regexp_ts_answer)) {
 
             $answers = array();
             $answersstrings = array();
@@ -92,22 +102,22 @@ class qtype_writeregex extends qtype_shortanswer {
 
             $question->answer = $answers;
             $question->fraction = $fraction;
-            $question->wre_regexp_ts_answer = $answersstrings;
-            $question->wre_regexp_ts_fraction = $fractionstrings;
+            $question->regexp_ts_answer = $answersstrings;
+            $question->regexp_ts_fraction = $fractionstrings;
         }
 
         // Insert regexp answers.
         parent::save_question_options($question);
 
         // Insert test string answers.
-        foreach ($question->wre_regexp_ts_answer as $key => $answer) {
+        foreach ($question->regexp_ts_answer as $key => $answer) {
 
-            if (trim($answer) == '' && $question->wre_regexp_ts_fraction[$key] == 0) {
+            if (trim($answer) == '' && $question->regexp_ts_fraction[$key] == 0) {
                 continue;
             }
 
             $record = $this->get_test_string_answer_object($answer,
-                $question->wre_regexp_ts_fraction[$key], $question->id);
+                $question->regexp_ts_fraction[$key], $question->id);
 
             $DB->insert_record('question_answers', $record);
         }
@@ -196,11 +206,31 @@ class qtype_writeregex extends qtype_shortanswer {
             'descriptionhintpenalty',    // Description hint penalty.
             'teststringshinttype',       // Test strings hint type.
             'teststringshintpenalty',    // Test strings hint penalty.
-            'compareregexpercentage',    // Percentage value of compare regex (0-100).
+            'comparetreepercentage',     // Percentage value of compare regex by tree (0-100).
             'compareautomatapercentage', // Percentage value of compare regex by automata (0-100).
-            'compareregexpteststrings'   // Percentage value of compare regex by testing strings (0-100).
+            'comparestringspercentage'   // Percentage value of compare regex by test strings (0-100).
         );
     }
+
+    /**
+     * @return array of available analyzers where key is the keyword and value is description
+     */
+    public function available_analyzers() {
+        return array('tree' => get_string('comparetreepercentage', 'qtype_writeregex'),
+            'automata' => get_string('compareautomatapercentage', 'qtype_writeregex'),
+            'strings' => get_string('comparestringspercentage', 'qtype_writeregex'));
+    }
+
+    /**
+     * @return array of available hint types, where key is the keyword and value is class name
+     */
+    public function available_hint_types() {
+        return array('syntaxtree' => 'syntax_tree_hint',
+            'explgraph' => 'explanation_graph_hint',
+            'description' => 'description_hint',
+            'teststrings' => 'test_strings_hint');
+    }
+
 
     /**
      * Import from xml
@@ -285,5 +315,44 @@ class qtype_writeregex extends qtype_shortanswer {
         return qtype_poasquestion_moodlehint_adapter::load_from_record($hint);
     }
 
+    protected function initialise_question_instance(question_definition $question, $questiondata) {
+        $this->initialise_question_teststrings($question, $questiondata);
+        parent::initialise_question_instance($question, $questiondata);
+    }
 
+    /**
+     * Initialise question_definition::teststring field (public for testing).
+     * @param question_definition $question the question_definition we are creating.
+     * @param object $questiondata the question data loaded from the database.
+     * @param bool $forceplaintextanswers most qtypes assume that answers are
+     *      FORMAT_PLAIN, and dont use the answerformat DB column (it contains
+     *      the default 0 = FORMAT_MOODLE). Therefore, by default this method
+     *      ingores answerformat. Pass false here to use answerformat. For example
+     *      multichoice does this.
+     */
+    public function initialise_question_teststrings(question_definition $question,
+                                                   $questiondata, $forceplaintextanswers = true) {
+        $question->teststrings = array();
+        if (empty($questiondata->options->teststrings)) {
+            return;
+        }
+        foreach ($questiondata->options->teststrings as $ind => $teststring) {
+            $question->teststrings[$teststring->id] = $this->make_teststring($teststring);
+            if (!$forceplaintextanswers) {
+                $question->teststrings[$teststring->id]->stringformat = $teststring->answerformat;
+            }
+            unset($questiondata->options->teststrings[$ind]);
+        }
+    }
+
+    /**
+     * Create a test_string, or an appropriate subclass for this teststring,
+     * from a row loaded from the database.
+     * @param object $teststring the DB row from the question_answers.
+     * @return test_string
+     */
+    protected function make_teststring($teststring) {
+        return new \qtype_writeregex\test_string($teststring->id, $teststring->answer,
+            $teststring->fraction, $teststring->feedback, $teststring->feedbackformat);
+    }
 }

@@ -1,5 +1,5 @@
 <?php
-// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+// This file is part of WriteRegex question type - https://bitbucket.org/oasychev/moodle-plugins
 //
 // WriteRegex is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_writeregex';
-$plugin->version   = 2014022400;
+$plugin->version   = 2015121700;
 
 $plugin->requires  = 2013050100;
 

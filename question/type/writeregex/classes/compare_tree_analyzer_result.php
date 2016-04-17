@@ -14,20 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_writeregex;
+
 /**
- * Settings for the WriteRegEx question type..
+ * Result of comparing regexes by trees.
  *
  * @package qtype
  * @subpackage writeregex
  * @copyright  2014 onwards Oleg Sychev, Volgograd State Technical University.
- * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
+ * @author Kamo Spertsian <spertsiankamo@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class compare_tree_analyzer_result extends analyzer_result {
 
-defined('MOODLE_INTERNAL') || die;
-
-if ($ADMIN->fulltree) {
-
-    $settings->add(new admin_setting_configtext('qtype_writregex_maxerrorsshown', get_string('maxerrorsshownlabel', 'qtype_preg'),
-        get_string('maxerrorsshowndescription', 'qtype_preg'), 5, PARAM_INT));
+    /**
+     * Get feedback for analyzing results.
+     * @param qtype_writeregex_renderer renderer Renderer
+     * @return string Feedback about mismatches to show to student.
+     */
+    public function get_feedback($renderer) {
+        return '';
+    }
 }

@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_writeregex;
+
 /**
- * Settings for the WriteRegEx question type..
+ * Class analyser fot compare regex.
  *
  * @package qtype
  * @subpackage writeregex
@@ -23,11 +25,24 @@
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class compare_tree_analyzer extends analyzer {
 
-defined('MOODLE_INTERNAL') || die;
+    /**
+     * Get equality for user response.
+     * @param $answer string Regex answer.
+     * @param $respose string User response.
+     * @return compare_tree_analyzer_result Result of compare.
+     */
+    public function analyze ($answer, $respose) {
+        return new compare_tree_analyzer_result();
+    }
 
-if ($ADMIN->fulltree) {
-
-    $settings->add(new admin_setting_configtext('qtype_writregex_maxerrorsshown', get_string('maxerrorsshownlabel', 'qtype_preg'),
-        get_string('maxerrorsshowndescription', 'qtype_preg'), 5, PARAM_INT));
+    /**
+     * Get analyzer name
+     * @return analyzer name, understandable for user
+     */
+    public function name()
+    {
+        return '';
+    }
 }
