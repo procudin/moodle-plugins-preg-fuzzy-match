@@ -54,7 +54,7 @@ class compare_automata_analyzer extends analyzer {
         $differences = array();
         $fitness = 1;
 
-        if (!$answerautomaton->equal($responseautomaton, $differences)) {
+        if (!$answerautomaton->equal($responseautomaton, $differences, true)) {
             $fitness = max(0, 1 - count($differences) * compare_automata_analyzer::MISMATCH_PENALTY);
         }
 
