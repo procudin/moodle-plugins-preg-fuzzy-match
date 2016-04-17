@@ -262,7 +262,7 @@ class qtype_writeregex_question extends question_graded_automatically
     public function get_best_fit_answer (array $response, $gradeborder = null) {
 
         // Check cache for valid results.
-        if ($response['answer'] == $this->responseforbestfit && $this->bestfitanswer !== array()) {
+        if ($response['answer'] == $this->responseforbestfit && $this->bestfitanswer !== array() && $this->bestfitanswer !== null) {
             return $this->bestfitanswer;
         }
 
