@@ -1,5 +1,5 @@
 <?php
-// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+// This file is part of WriteRegex question type - https://bitbucket.org/oasychev/moodle-plugins
 //
 // WriteRegex is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,10 +21,6 @@ global $CFG;
 require_once($CFG->dirroot . '/question/type/questionbase.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_hints.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex_automata_analyzer.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_test_strings_analyser.php');
-require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex_analyzer.php');
 
 /**
  * Represents a write regex question.
@@ -36,11 +32,14 @@ require_once($CFG->dirroot . '/question/type/writeregex/writeregex_compare_regex
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_writeregex_question extends question_graded_automatically
-    implements question_automatically_gradable, question_with_qtype_specific_hints {
+    implements question_automatically_gradable, \qtype_poasquestion\question_with_hints {
 
 
     /** @var array Answers. */
     public $answers = array();
+
+    /** @var array Test strings */
+    public $teststrings = array();
 
     /** @var string Value of using case. */
     public $usecase;
@@ -77,13 +76,13 @@ class qtype_writeregex_question extends question_graded_automatically
 
     // Types of compare.
     /** @var  float Value of compare regexps in %. */
-    public $compareregexpercentage;
+    public $comparetreepercentage;
 
     /** @var  float Value of compare by automates in %. */
     public $compareautomatapercentage;
 
     /** @var  float Value of compare by test strings in %. */
-    public $compareregexpteststrings;
+    public $comparestringspercentage;
 
     /** @var number Only answers with fraction >= hintgradeborder would be used for hinting. */
     public $hintgradeborder = 0.1;
@@ -135,7 +134,7 @@ class qtype_writeregex_question extends question_graded_automatically
         $bestfit = $this->get_best_fit_answer($response);
 
         if ($bestfit['fitness'] >= $this->hintgradeborder) {
-            return $bestfit['answer']->answer;
+            return $bestfit['answer'];
         }
 
         return array();
@@ -197,8 +196,8 @@ class qtype_writeregex_question extends question_graded_automatically
 
         $bestfitanswer = $this->get_best_fit_answer($response);
         $grade = $bestfitanswer['fitness'];
-        question_state::graded_state_for_fraction($bestfitanswer['fitness']);
-        $state = question_state::$gradedwrong;
+        $state = question_state::graded_state_for_fraction($bestfitanswer['fitness']);
+
 
         return array($grade, $state);
     }
@@ -263,37 +262,46 @@ class qtype_writeregex_question extends question_graded_automatically
     public function get_best_fit_answer (array $response, $gradeborder = null) {
 
         // Check cache for valid results.
-        if ($response['answer'] == $this->responseforbestfit && $this->bestfitanswer !== array()) {
+        if ($response['answer'] == $this->responseforbestfit && $this->bestfitanswer !== array() && $this->bestfitanswer !== null) {
             return $this->bestfitanswer;
         }
 
-        $graderanalyzer = new test_strings_analyser($this);
-        $compregex = new compare_regex_analyzer($this);
-        $compregexa = new compare_regex_automata_analyzer($this);
-
-        $bestfitanswer = null;
+        // Finding initial answer with fraction, that is bigger then hint grade border.
         $bestfitness = 0.0;
-
+        reset($this->answers);
+        $bestfitanswer = current($this->answers);
+        $bestfitresults = array();
         foreach ($this->answers as $answer) {
-            if ($answer->feedbackformat == 1) {
-                $fitness1 = $graderanalyzer->get_equality($answer->answer, $response['answer']);
-                $fitness2 = $compregex->get_equality($answer->answer, $response['answer']);
-                $fitness3 = $compregexa->get_equality($answer->answer, $response['answer']);
-
-                $teststringfiness = $fitness1 * $this->compareregexpteststrings / 100;
-                $compregexfitness = $fitness2 * $this->compareregexpercentage / 100;
-                $compregexafitness = $fitness3 * $this->compareautomatapercentage / 100;
-
-                $fraction = $teststringfiness + $compregexfitness + $compregexafitness;
-
-                if ( $fraction > $bestfitness and $fraction > $this->hintgradeborder ) {
-                    $bestfitness = $teststringfiness + $compregexfitness + $compregexafitness;
-                    $bestfitanswer = $answer;
-                }
+            if ($answer->fraction >= $this->hintgradeborder) {
+                $bestfitanswer = $answer;
+                break;// Any one that fits border helps.
             }
         }
 
-        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfitness);
+        $questiontype = new qtype_writeregex();
+        $analyzers = $questiontype->available_analyzers();
+
+        foreach ($this->answers as $answer) {
+            $fraction = 0;
+            // Compare results for each analyzer for current answer
+            $results = array();
+            foreach ($analyzers as $key => $description) {
+                $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
+                $analyzer = new $analyzername($this);
+                $result = $analyzer->analyze($answer->answer, $response['answer']);
+                $percentagefield = 'compare' . $key . 'percentage';
+                $fraction += $result->fitness * $this->$percentagefield / 100.0;
+                $results[$key] = $result;
+            }
+
+            if ($fraction > $bestfitness and $fraction > $this->hintgradeborder) {
+                $bestfitness = $fraction;
+                $bestfitanswer = $answer;
+                $bestfitresults = $results;
+            }
+        }
+
+        $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfitness, 'results' => $bestfitresults);
 
         $this->bestfitanswer = $bestfit;
         $this->responseforbestfit = $response['answer'];
@@ -311,26 +319,19 @@ class qtype_writeregex_question extends question_graded_automatically
 
         // Moodle-specific hints.
         if (substr($hintkey, 0, 11) == 'hintmoodle#') {
-            return new qtype_poasquestion_hintmoodle($this, $hintkey);
+            return new qtype_poasquestion\hintmoodle($this, $hintkey);
         }
 
-        $hintclass = 'qtype_writeregex_'.$hintkey;
+        $hintclass = '\qtype_writeregex\\'.$hintkey;
 
         $analysermode = 0;
-        if ($hintkey == 'syntaxtreehint') {
-            $analysermode = $this->syntaxtreehinttype;
-        }
-
-        if ($hintkey == 'explgraphhint') {
-            $analysermode = $this->explgraphhinttype;
-        }
-
-        if ($hintkey == 'descriptionhint') {
-            $analysermode = $this->descriptionhinttype;
-        }
-
-        if ($hintkey == 'teststringshint') {
-            $analysermode = $this->teststringshinttype;
+        $questiontype = new qtype_writeregex();
+        $availablehinttypes = $questiontype->available_hint_types();
+        foreach ($availablehinttypes as $key => $classname) {
+            if ($classname == $hintkey) {
+                $fieldname = $key . 'hinttype';
+                $analysermode = $this->$fieldname;
+            }
         }
 
         return new $hintclass($this, $hintkey, $analysermode);
@@ -344,24 +345,17 @@ class qtype_writeregex_question extends question_graded_automatically
     public function available_specific_hints ($response = null) {
         $hinttypes = array();
 
-        if (count($this->hints) < 0) {
+        if (count($this->hints) > 0) {
             $hinttypes[] = 'hintmoodle#';
         }
 
-        if ($this->syntaxtreehinttype > 0) {
-            $hinttypes[] = 'syntaxtreehint';
-        }
-
-        if ($this->explgraphhinttype > 0) {
-            $hinttypes[] = 'explgraphhint';
-        }
-
-        if ($this->descriptionhinttype > 0) {
-            $hinttypes[] = 'descriptionhint';
-        }
-
-        if ($this->teststringshinttype > 0) {
-            $hinttypes[] = 'teststringshint';
+        $questiontype = new qtype_writeregex();
+        $availablehinttypes = $questiontype->available_hint_types();
+        foreach ($availablehinttypes as $key => $classname) {
+            $fieldname = $key . 'hinttype';
+            if ($this->$fieldname > 0) {
+                $hinttypes[] = $classname;
+            }
         }
 
         return $hinttypes;

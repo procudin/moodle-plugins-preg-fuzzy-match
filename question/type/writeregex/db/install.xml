@@ -5,7 +5,9 @@
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
                 <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of question"/>
                 <FIELD NAME="notation" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="native" SEQUENCE="false" COMMENT="Notation of regular expressions used to write answer"/>
-                <FIELD NAME="syntaxtreehinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="usecase" SEQUENCE="false" NOTNULL="true" LENGTH="2" TYPE="int"/>
+				<FIELD COMMENT="Class name of the matching engine" NAME="engine" SEQUENCE="false" NOTNULL="true" LENGTH="50" TYPE="char" DEFAULT="preg_php_matcher"/>
+				<FIELD NAME="syntaxtreehinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="syntaxtreehintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="explgraphhinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="explgraphhintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
@@ -13,9 +15,9 @@
                 <FIELD NAME="descriptionhintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="teststringshinttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="teststringshintpenalty" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
-                <FIELD NAME="compareregexpercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
+                <FIELD NAME="comparetreepercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
                 <FIELD NAME="compareautomatapercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
-                <FIELD NAME="compareregexpteststrings" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
+                <FIELD NAME="comparestringspercentage" TYPE="float" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="7"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

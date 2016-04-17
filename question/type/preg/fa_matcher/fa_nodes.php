@@ -28,8 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/preg/preg_regex_handler.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_nodes.php');
-require_once($CFG->dirroot . '/question/type/preg/preg_fa.php');
-require_once($CFG->dirroot . '/question/type/poasquestion/poasquestion_string.php');
+require_once($CFG->dirroot . '/question/type/poasquestion/classes/utf8_string.php');
 
 /**
  * Abstract class for both nodes (operators) and leafs (operands).
@@ -167,22 +166,22 @@ abstract class qtype_preg_fa_node {
         $charsetw = new qtype_preg_leaf_charset();
         $charsetw->flags = array(array($flagw));
         $charsetw->set_user_info($pregleaf->position, array(new qtype_preg_userinscription("\w", qtype_preg_charset_flag::SLASH_W)));
-        $tranw = new qtype_preg_fa_transition(0, $charsetw, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_FIRST, false);
+        $tranw = new \qtype_preg\fa\transition(0, $charsetw, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, false);
         // Create \W.
         $flagbigw = clone $flagw;
         $flagbigw->negative = true;
         $charsetbigw = new qtype_preg_leaf_charset();
         $charsetbigw->flags = array(array($flagbigw));
         $charsetbigw->set_user_info($pregleaf->position, array(new qtype_preg_userinscription("\W", qtype_preg_charset_flag::SLASH_W)));
-        $tranbigw = new qtype_preg_fa_transition(0, $charsetbigw, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_FIRST, false);
+        $tranbigw = new \qtype_preg\fa\transition(0, $charsetbigw, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, false);
         // Create ^.
         $assertcircumflex = new qtype_preg_leaf_assert_circumflex();
         $assertcircumflex->set_user_info($pregleaf->position);
-        $transitioncircumflex = new qtype_preg_fa_transition(0, $assertcircumflex, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_FIRST, false);
+        $transitioncircumflex = new \qtype_preg\fa\transition(0, $assertcircumflex, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, false);
         // Create $.
         $assertdollar = new qtype_preg_leaf_assert_dollar();
         $assertdollar->set_user_info($pregleaf->position);
-        $transitiondollar = new qtype_preg_fa_transition(0, $assertdollar, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_FIRST, false);
+        $transitiondollar = new \qtype_preg\fa\transition(0, $assertdollar, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_FIRST, false);
 
         if ($isinto) {
             // Incoming transitions.
@@ -227,7 +226,7 @@ abstract class qtype_preg_fa_node {
         if (empty($outtransitions)) {
             $state = $automaton->add_state();
             $pregleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $transition = new qtype_preg_fa_transition($tran->to, $pregleaf, $state, $tran->origin, $tran->consumeschars);
+            $transition = new \qtype_preg\fa\transition($tran->to, $pregleaf, $state, $tran->origin, $tran->consumeschars);
             $outtransitions[] = $transition;
             $todel = false;
             if ($changeend) {
@@ -239,7 +238,7 @@ abstract class qtype_preg_fa_node {
             $addedinto = true;
             $state = $automaton->add_state();
             $pregleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $transition = new qtype_preg_fa_transition($state, $pregleaf, $tran->from, $tran->origin, $tran->consumeschars);
+            $transition = new \qtype_preg\fa\transition($state, $pregleaf, $tran->from, $tran->origin, $tran->consumeschars);
             $intotransitions[] = $transition;
             $fromdel = false;
             $changedstate = $tran->from;
@@ -250,14 +249,14 @@ abstract class qtype_preg_fa_node {
         $wordbreakout = self::get_wordbreaks_transitions($tran->pregleaf, false);
         foreach ($wordbreakinto as $wordbreak) {
             $epsleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $epstran = new qtype_preg_fa_transition($wordbreak->from, $epsleaf, $wordbreak->to);
+            $epstran = new \qtype_preg\fa\transition($wordbreak->from, $epsleaf, $wordbreak->to);
             $epstran->opentags = $tran->opentags;
             $wordbreak->mergedafter[] = $epstran;
         }
 
         foreach ($wordbreakout as $wordbreak) {
             $epsleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $epstran = new qtype_preg_fa_transition($wordbreak->from, $epsleaf, $wordbreak->to);
+            $epstran = new \qtype_preg\fa\transition($wordbreak->from, $epsleaf, $wordbreak->to);
             $epstran->closetags = $tran->closetags;
             $wordbreak->mergedbefore[] = $epstran;
         }
@@ -402,7 +401,7 @@ class qtype_preg_fa_leaf extends qtype_preg_fa_node {
         // Create start and end states of the resulting automaton.
         $start = $automaton->add_state();
         $end = $automaton->add_state();
-        $transition = new qtype_preg_fa_transition($start, $this->pregnode, $end);
+        $transition = new \qtype_preg\fa\transition($start, $this->pregnode, $end);
         // Add a corresponding transition between them.
         if ($this->pregnode->type === qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT) {
             if ($this->pregnode->subtype === qtype_preg_leaf_complex_assert::SUBTYPE_LOOKAHEAD) {
@@ -413,7 +412,7 @@ class qtype_preg_fa_leaf extends qtype_preg_fa_node {
                 $state = $end;
             }
             $this->pregnode = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $transition = new qtype_preg_fa_transition($start, $this->pregnode, $end);
+            $transition = new \qtype_preg\fa\transition($start, $this->pregnode, $end);
             $automaton->add_intersected_transitions($state, array($transition));
         }
         $automaton->add_transition($transition);
@@ -440,7 +439,7 @@ abstract class qtype_preg_fa_operator extends qtype_preg_fa_node {
         if (!empty($outgoing)) {
             $end = $automaton->add_state();
             $epsleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $automaton->add_transition(new qtype_preg_fa_transition($stack_item['end'], $epsleaf, $end));
+            $automaton->add_transition(new \qtype_preg\fa\transition($stack_item['end'], $epsleaf, $end));
             $stack_item['end'] = $end;
         }
         if ($transform) {
@@ -777,11 +776,11 @@ class qtype_preg_fa_node_infinite_quant extends qtype_preg_fa_node_quant {
         $prevtrans = $automaton->get_adjacent_transitions($body['end'], false);
         $redirectedtransitions = array();
         // Now, clone all transitions from the start state to the end state.
-        $greediness = $this->pregnode->lazy ? qtype_preg_fa_transition::GREED_LAZY : qtype_preg_fa_transition::GREED_GREEDY;
+        $greediness = $this->pregnode->lazy ? \qtype_preg\fa\transition::GREED_LAZY : \qtype_preg\fa\transition::GREED_GREEDY;
         $outgoing = $automaton->get_adjacent_transitions($body['start'], true);
         $iscycled = false;
         foreach ($outgoing as $transition) {
-            $realgreediness = qtype_preg_fa_transition::min_greediness($transition->greediness, $greediness);
+            $realgreediness = \qtype_preg\fa\transition::min_greediness($transition->greediness, $greediness);
             $transition->greediness = $realgreediness;        // Set this field for transitions, including original body.
             $newtransition = clone $transition;
             $newtransition->from = $body['end'];
@@ -828,7 +827,7 @@ class qtype_preg_fa_node_infinite_quant extends qtype_preg_fa_node_quant {
         // The body automaton can be skipped by an eps-transition.
         self::add_ending_eps_transition_if_needed($automaton, $body, $transform);
         $epsleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-        $transition = new qtype_preg_fa_transition($body['start'], $epsleaf, $body['end']);
+        $transition = new \qtype_preg\fa\transition($body['start'], $epsleaf, $body['end']);
         $automaton->add_transition($transition);
         $body['breakpos'] = null;
         $stack[] = $body;
@@ -845,12 +844,12 @@ class qtype_preg_fa_node_infinite_quant extends qtype_preg_fa_node_quant {
             // The last block is repeated.
             if ($i === $leftborder - 1) {
                 $cur = array_pop($stack);
-                $greediness = $this->pregnode->lazy ? qtype_preg_fa_transition::GREED_LAZY : qtype_preg_fa_transition::GREED_GREEDY;
+                $greediness = $this->pregnode->lazy ? \qtype_preg\fa\transition::GREED_LAZY : \qtype_preg\fa\transition::GREED_GREEDY;
                 $outgoing = $automaton->get_adjacent_transitions($cur['start'], true);
                 $iscycled = false;
                 foreach ($outgoing as $transition) {
                     $newtransition = clone $transition;
-                    $realgreediness = qtype_preg_fa_transition::min_greediness($newtransition->greediness, $greediness);
+                    $realgreediness = \qtype_preg\fa\transition::min_greediness($newtransition->greediness, $greediness);
                     $newtransition->greediness = $realgreediness; // Set this field only for the last repetition.
                     $newtransition->from = $cur['end'];
                     $newtransition->loopsback = true;
@@ -923,16 +922,16 @@ class qtype_preg_fa_node_finite_quant extends qtype_preg_fa_node_quant {
         $body = array_pop($stack);
 
         // Set the greediness.
-        $greediness = $this->pregnode->lazy ? qtype_preg_fa_transition::GREED_LAZY : qtype_preg_fa_transition::GREED_GREEDY;
+        $greediness = $this->pregnode->lazy ? \qtype_preg\fa\transition::GREED_LAZY : \qtype_preg\fa\transition::GREED_GREEDY;
         $outgoing = $automaton->get_adjacent_transitions($body['start'], true);
         foreach ($outgoing as $transition) {
-            $realgreediness = qtype_preg_fa_transition::min_greediness($transition->greediness, $greediness);
+            $realgreediness = \qtype_preg\fa\transition::min_greediness($transition->greediness, $greediness);
             $transition->greediness = $realgreediness;
         }
         // The body automaton can be skipped by an eps-transition.
         self::add_ending_eps_transition_if_needed($automaton, $body, $transform);
         $epsleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-        $transition = new qtype_preg_fa_transition($body['start'], $epsleaf, $body['end']);
+        $transition = new \qtype_preg\fa\transition($body['start'], $epsleaf, $body['end']);
         $automaton->add_transition($transition);
         $body['breakpos'] = null;
         $stack[] = $body;
@@ -959,16 +958,16 @@ class qtype_preg_fa_node_finite_quant extends qtype_preg_fa_node_quant {
 
         // Add eps-transitions to the end state. Set greediness.
         $quantified = array();
-        $greediness = $this->pregnode->lazy ? qtype_preg_fa_transition::GREED_LAZY : qtype_preg_fa_transition::GREED_GREEDY;
+        $greediness = $this->pregnode->lazy ? \qtype_preg\fa\transition::GREED_LAZY : \qtype_preg\fa\transition::GREED_GREEDY;
         for ($i = 0; $i < $rightborder - $leftborder; $i++) {
             $cur = array_pop($stack);
             $outgoing = $automaton->get_adjacent_transitions($cur['start'], true);
             foreach ($outgoing as $transition) {
-                $realgreediness = qtype_preg_fa_transition::min_greediness($transition->greediness, $greediness);
+                $realgreediness = \qtype_preg\fa\transition::min_greediness($transition->greediness, $greediness);
                 $transition->greediness = $realgreediness;
             }
             $epsleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $transition = new qtype_preg_fa_transition($cur['start'], $epsleaf, $endstate);
+            $transition = new \qtype_preg\fa\transition($cur['start'], $epsleaf, $endstate);
             $automaton->add_transition($transition);
             $transition->set_transition_type();
             if ($transform && ($transition->is_eps() || $transition->is_unmerged_assert())) {
@@ -989,7 +988,7 @@ class qtype_preg_fa_node_finite_quant extends qtype_preg_fa_node_quant {
             $start = $automaton->add_state();
             $end = $automaton->add_state();
             $epsleaf = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-            $automaton->add_transition(new qtype_preg_fa_transition($start, $epsleaf, $end));
+            $automaton->add_transition(new \qtype_preg\fa\transition($start, $epsleaf, $end));
             $stack[] = array('start' => $start, 'end' => $end, 'breakpos' => null);
         } else if ($this->pregnode->leftborder === 0 && $this->pregnode->rightborder === 1) {
             $this->create_qu($automaton, $stack, $transform);
