@@ -18,6 +18,7 @@ namespace qtype_writeregex;
 
 global $CFG;
 require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
+require_once($CFG->dirroot . '/question/type/preg/question.php');
 
 /**
  * Class analyser fot compare regex by automata.
@@ -40,9 +41,14 @@ class compare_automata_analyzer extends analyzer {
      */
     public function analyze ($answer, $response)
     {
-        $answermatcher = new \qtype_preg_fa_matcher($answer);
+        $answerquestionstd = new \qtype_preg_question();
+        $answermatcher = $answerquestionstd->get_matcher($this->question->engine, $answer, false,
+            $answerquestionstd->get_modifiers($this->question->usecase), 0, $this->question->notation);
         $answerautomaton = $answermatcher->automaton;
-        $responsematcher = new \qtype_preg_fa_matcher($response);
+
+        $responsequestionstd = new \qtype_preg_question();
+        $responsematcher = $responsequestionstd->get_matcher($this->question->engine, $response, false,
+            $responsequestionstd->get_modifiers($this->question->usecase), 0, $this->question->notation);
         $responseautomaton = $responsematcher->automaton;
 
         $differences = array();
