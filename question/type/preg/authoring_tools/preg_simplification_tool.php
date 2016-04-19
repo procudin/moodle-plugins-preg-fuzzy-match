@@ -3284,8 +3284,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         && $qu->leftborder === 0 && $qu->rightborder === 1) {
                         $this->problem_ids[] = $node->id;
                         $this->problem_type = 104;
-                        $this->indfirst = $node->position->indfirst;
-                        $this->indlast = $node->position->indlast;
+                        $this->indfirst = $qu->position->indfirst;
+                        $this->indlast = $qu->position->indlast;
                         return true;
                     }
                 }
