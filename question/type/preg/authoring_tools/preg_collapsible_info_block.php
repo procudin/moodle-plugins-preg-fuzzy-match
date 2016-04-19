@@ -90,7 +90,7 @@ class qtype_preg_collapsible_info_block extends MoodleQuickForm_textarea {
     public function toHtml() {
         global $PAGE;
 
-        return '<div class="accordion" id="healp_accordion" style="overflow: hidden; position: relative; width: 80%; top: auto; padding-right: 7px;">
+        return '<div class="accordion" id="healp_accordion" style="overflow: hidden; position: relative; top: auto; padding-right: 7px;">
                   <div class="accordion-group">
                     <div class="accordion-heading">
 
