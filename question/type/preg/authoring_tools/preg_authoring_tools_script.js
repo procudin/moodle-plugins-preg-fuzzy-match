@@ -292,7 +292,7 @@ M.preg_authoring_tools_script = (function ($) {
 
         // Clear highlighting
         var hints_table = $('#simplification_tool_hints > tbody');
-        for(var i = 0; i < hints_table.children.length; ++i) {
+        for(var i = 0; i < hints_table.children().length; ++i) {
             if (typeof hints_table[0].children[i] != 'undefined') {
                 hints_table[0].children[i].children[0].style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.0) inset';
             }
