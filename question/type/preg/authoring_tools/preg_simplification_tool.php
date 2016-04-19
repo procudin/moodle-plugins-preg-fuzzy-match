@@ -20,6 +20,11 @@ class qtype_preg_simplification_tool_options extends qtype_preg_handling_options
     public $indlast = -2;
 }
 
+class quantsui {
+    public $first = '';
+    public $second = '';
+}
+
 class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     /** Array with root ids of problem subtree */
@@ -2680,10 +2685,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     public function quant_node() {
         $equivalences = array();
+        $quantsui = new quantsui();
 
-        if ($this->search_quant_node($this->get_dst_root())) {
+        if ($this->search_quant_node($this->get_dst_root(), $quantsui)) {
             $equivalences['problem'] = htmlspecialchars(get_string('simplification_equivalences_short_11', 'qtype_preg'));
-            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_11', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_equivalences_full_11', 'qtype_preg', $quantsui));
             $equivalences['problem_ids'] = $this->problem_ids;
             $equivalences['problem_type'] = $this->problem_type;
             $equivalences['problem_indfirst'] = $this->indfirst;
@@ -2696,9 +2702,11 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Search quantifier node who can convert to short quantifier
      */
-    private function search_quant_node($node) {
+    private function search_quant_node($node, $quantsui) {
         if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT || $node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
             if ($this->is_simple_quant_node($node)) {
+                $quantsui->first = $node->userinscription[0]->data;
+                $quantsui->second = $this->get_eq_quant_ui($node);
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 11;
                 $this->indfirst = $node->position->indfirst;
@@ -2708,7 +2716,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
         if ($this->is_operator($node)) {
             foreach ($node->operands as $operand) {
-                if ($this->search_quant_node($operand)) {
+                if ($this->search_quant_node($operand, $quantsui)) {
                     return true;
                 }
             }
@@ -2735,6 +2743,22 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return false;
     }
 
+    /**
+     *
+     */
+    private function get_eq_quant_ui($node) {
+        if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+            if ($node->leftborder === 0 && $node->userinscription[0]->data !== '*') {
+                return '*';
+            } else if ($node->leftborder === 1 && $node->userinscription[0]->data !== '+') {
+                return '+';
+            }
+        } else if ($node->type == qtype_preg_node::TYPE_NODE_FINITE_QUANT) {
+            if ($node->leftborder === 0 && $node->rightborder === 1 && $node->userinscription[0]->data !== '?') {
+                return '?';
+            }
+        }
+    }
 
 
     /**
