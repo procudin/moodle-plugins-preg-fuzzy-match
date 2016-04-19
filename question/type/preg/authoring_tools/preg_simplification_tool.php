@@ -1212,12 +1212,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         $problem_exist = true;
-        while($problem_exist) {
+        $count = 0;
+        while($problem_exist && $count < 99) {
             if ($this->search_empty_grouping_node($tree_root)) {
                 $this->delete_empty_groping_node($tree_root, $tree_root, $this->problem_ids[0]);
             } else {
                 $problem_exist = false;
             }
+            $count++;
             $this->problem_ids = array();
         }
 
