@@ -938,7 +938,7 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
             $result[] = array($curchar, $curchar + 1);
             $indexes[] = array(array(), array());
 
-            // Serching matches in given charsets
+            // Searching matches in given charsets
             for ($i = 0; $i < count($ranges); $i++) {
                 if (current($ranges[$i][0])[0] <= $curchar && $curchar < current($ranges[$i][0])[1]) {
                     $indexes[count($result) - 1][$ranges[$i][1]][] = $ranges[$i][2];
