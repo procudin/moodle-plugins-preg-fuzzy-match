@@ -918,11 +918,11 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
         $result = array();
         $indexes = array();
 
-        for ($i = 0; $i < count($firstgroup); $i++) {
-            $ranges[] = array($firstgroup[$i]->excluding_ranges(), 0, $i);
+        foreach ($firstgroup as $key => $charset) {
+            $ranges[] = array($charset->excluding_ranges(), 0, $key);
         }
-        for ($i = 0; $i < count($secondgroup); $i++) {
-            $ranges[] = array($secondgroup[$i]->excluding_ranges(), 1, $i);
+        foreach ($secondgroup as $key => $charset) {
+            $ranges[] = array($charset->excluding_ranges(), 1, $key);
         }
         while (count($ranges)) {
             // Searching current minimal character
