@@ -70,7 +70,7 @@ class compare_automata_analyzer_result extends analyzer_result {
         $teachersstitle = get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ';
         // If students answer accepts extra character.
         if ($difference->matchedautomaton == 1) {
-            if (empty($a->matchedstring)) {
+            if (strlen($a->matchedstring) == 0) {
                 $feedback = get_string('extracharactermismatchfrombeginning', 'qtype_writeregex', $a);
             } else {
                 $feedback = get_string('extracharactermismatch', 'qtype_writeregex', $a);
@@ -80,7 +80,7 @@ class compare_automata_analyzer_result extends analyzer_result {
         }
         // If students answer doesn't accept character.
         else {
-            if (empty($a->matchedstring)) {
+            if (strlen($a->matchedstring) == 0) {
                 $feedback = get_string('missingcharactermismatchfrombeginning', 'qtype_writeregex', $a);
             } else {
                 $feedback = get_string('missingcharactermismatch', 'qtype_writeregex', $a);
@@ -214,7 +214,7 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_matching_string_explanation($renderer, $author, $matched, $mismatched = '') {
         $result = $renderer->render_automaton_matched_string($matched, true);
-        if (!empty($mismatched))
+        if (strlen($mismatched) > 0)
             $result .= $renderer->render_automaton_matched_string($mismatched, false);
         $result = $renderer->add_span($result);
         return $renderer->render_automaton_matched_string_with_author($author, $result);
