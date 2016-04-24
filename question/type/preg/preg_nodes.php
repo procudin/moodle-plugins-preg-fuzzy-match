@@ -896,11 +896,14 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
     public function excluding_ranges() {
         if ($this->cachedranges == null) {
             $this->ranges();
-            foreach ($this->cachedranges as &$cur) {
-                $cur[1]++;
-            }
         }
-        return $this->cachedranges;
+
+        $excludingranges = $this->cachedranges;
+        foreach ($excludingranges as &$cur) {
+            $cur[1]++;
+        }
+        reset($excludingranges);
+        return $excludingranges;
     }
 
     /**
