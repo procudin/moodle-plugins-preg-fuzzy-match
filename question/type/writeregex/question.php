@@ -278,6 +278,11 @@ class qtype_writeregex_question extends question_graded_automatically
             }
         }
 
+        // If there is no response, return current bestfit answer.
+        if (strlen($response['answer']) == 0) {
+            return $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfitness, 'results' => 0);
+        }
+
         $questiontype = new qtype_writeregex();
         $analyzers = $questiontype->available_analyzers();
 
