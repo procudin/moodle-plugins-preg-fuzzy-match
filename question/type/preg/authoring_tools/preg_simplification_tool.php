@@ -103,9 +103,26 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     public function data_for_accepted_regex() {
         $data = array();
-        $data['errors'] = $this->get_errors_description();
-        $data['equivalences'] = $this->get_equivalences_description();
-        $data['tips'] = $this->get_tips_description();
+
+        if ($this->options->notation === 'native') {
+            $data['errors'] = $this->get_errors_description();
+            $data['equivalences'] = $this->get_equivalences_description();
+            $data['tips'] = $this->get_tips_description();
+        } else {
+            $data['errors'] = array();
+            $data['equivalences'] = array();
+            $data['tips'] = array();
+        }
+
+        return $data;
+    }
+
+    public function data_for_empty_regex() {
+        $data = array();
+
+        $data['errors'] = array();
+        $data['equivalences'] = array();
+        $data['tips'] = array();
 
         return $data;
     }
@@ -144,8 +161,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
         }
         return $errors;
-
-//        return array(array('problem' => 'Описание ошибки', 'solve' => 'Подробное описание информации'));
     }
 
     /**
