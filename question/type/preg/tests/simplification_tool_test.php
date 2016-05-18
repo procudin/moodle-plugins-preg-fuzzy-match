@@ -75,6 +75,10 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         $this->abstract_testing('common_subexpressions', 'get_test_common_subexpressions_trivial');
     }
 
+    public function test_repeated_assertions_trivial() {
+        $this->abstract_testing('repeated_assertions', 'get_test_repeated_assertions_trivial');
+    }
+
     public function test_grouping_node_trivial() {
         $this->abstract_testing('grouping_node', 'get_test_grouping_node_trivial');
     }
@@ -133,6 +137,14 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     public function test_consecutive_quant_nodes_trivial() {
         $this->abstract_testing('consecutive_quant_nodes', 'get_test_consecutive_quant_nodes_trivial');
+    }
+
+    public function test_useless_circumflex_assertion_trivial() {
+        $this->abstract_testing('useless_circumflex_assertion', 'get_test_useless_circumflex_assertion_trivial');
+    }
+
+    public function test_useless_dollar_assertion_trivial() {
+        $this->abstract_testing('useless_dollar_assertion', 'get_test_useless_dollar_assertion_trivial');
     }
 
     protected function get_test_common_subexpressions_trivial() {
@@ -2025,6 +2037,59 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a{2}bca{2}bc', '(?:a{2}bc){2}'),
             array('cab{2}cab{2}', '(?:cab{2}){2}'),
             array('ab{2}cab{2}c', '(?:ab{2}c){2}'),
+
+            // Repeated simple assertions
+            array('^^a', '^^a'),
+            array('^a^', '^a^'),
+            array('a^^', 'a^^'),
+            array('^^^a', '^^^a'),
+            array('^^a^', '^^a^'),
+            array('^a^^', '^a^^'),
+            array('a^^^', 'a^^^'),
+
+            array('^^aa', '^^a{2}'),
+            array('^aa^', '^a{2}^'),
+            array('aa^^', 'a{2}^^'),
+            array('^^^aa', '^^^a{2}'),
+            array('^^aa^', '^^a{2}^'),
+            array('^aa^^', '^a{2}^^'),
+            array('aa^^^', 'a{2}^^^'),
+
+            array('$$a', '$$a'),
+            array('$a$', '$a$'),
+            array('a$$', 'a$$'),
+            array('$$$a', '$$$a'),
+            array('$$a$', '$$a$'),
+            array('$a$$', '$a$$'),
+            array('a$$$', 'a$$$'),
+
+            array('$$aa', '$$a{2}'),
+            array('$aa$', '$a{2}$'),
+            array('aa$$', 'a{2}$$'),
+            array('$$$aa', '$$$a{2}'),
+            array('$$aa$', '$$a{2}$'),
+            array('$aa$$', '$a{2}$$'),
+            array('aa$$$', 'a{2}$$$'),
+        );
+    }
+
+    protected function get_test_repeated_assertions_trivial() {
+        return array(
+            array('^^a', '^a'),
+            array('^a^', '^a^'),
+            array('a^^', 'a^'),
+            array('^^^a', '^^a'),
+            array('^^a^', '^a^'),
+            array('^a^^', '^a^'),
+            array('a^^^', 'a^^'),
+
+            array('$$a', '$a'),
+            array('$a$', '$a$'),
+            array('a$$', 'a$'),
+            array('$$$a', '$$a'),
+            array('$$a$', '$a$'),
+            array('$a$$', '$a$'),
+            array('a$$$', 'a$$'),
         );
     }
 
