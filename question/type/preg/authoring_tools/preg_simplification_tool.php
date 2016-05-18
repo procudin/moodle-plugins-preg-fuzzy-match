@@ -3763,6 +3763,10 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return $this->add_finit_quant_to_space_charset($node, $this->options->problem_ids[0]);
     }
 
+    protected function optimize_108($node) {
+        return true;
+    }
+
     protected function optimize_201($node) {
         return $this->remove_subtree($this->get_dst_root(), $node, $this->options->problem_ids[0]);
     }
