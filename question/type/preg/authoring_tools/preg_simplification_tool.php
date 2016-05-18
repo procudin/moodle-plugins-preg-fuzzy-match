@@ -1636,8 +1636,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
         }
 
-        //$old_regex = $regex_string;
-
         // Generate new regex
         $this->regex_from_tree = substr_replace($regex_string, $new_regex_string_part, $this->options->indfirst,
                                                 $this->options->indlast - $this->options->indfirst + 1);
@@ -4245,20 +4243,27 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
                 $oq->leftborder = $leftborder;
                 if ($infinite) {
+                    $oq->rightborder = -999;
                     if ($leftborder === 0) {
+                        $oq->type = qtype_preg_node::TYPE_NODE_INFINITE_QUANT;
                         $text = '*';
                     } else if ($leftborder === 1) {
+                        $oq->type = qtype_preg_node::TYPE_NODE_INFINITE_QUANT;
                         $text = '+';
                     } else {
+                        $oq->type = qtype_preg_node::TYPE_NODE_FINITE_QUANT;
                         $text = '{' . $leftborder . ',}';
                     }
                 } else {
                     $oq->rightborder = $rightborder;
                     if ($leftborder === 0 && $rightborder === 1) {
+                        $oq->type = qtype_preg_node::TYPE_NODE_FINITE_QUANT;
                         $text = '?';
                     } else if ($leftborder === $rightborder) {
+                        $oq->type = qtype_preg_node::TYPE_NODE_FINITE_QUANT;
                         $text = '{' . $leftborder . '}';
                     } else {
+                        $oq->type = qtype_preg_node::TYPE_NODE_FINITE_QUANT;
                         $text = '{' . $leftborder . ',' . $rightborder . '}';
                     }
                 }
@@ -4266,6 +4271,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
             $oq->set_user_info(null, array(new qtype_preg_userinscription($text)));
             $oq->position = new qtype_preg_position($tree_root->position->indfirst, $tree_root->position->indlast, null, null, null, null);
+            $tree_root->operands[0]->position = new qtype_preg_position($tree_root->position->indfirst, $tree_root->position->indlast, null, null, null, null);
 
             $parenttr = $this->get_parent_node($this->get_dst_root(), $tree_root->id);
 
