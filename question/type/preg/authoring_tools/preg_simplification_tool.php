@@ -4042,6 +4042,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
 
             $oq->set_user_info(null, array(new qtype_preg_userinscription($text)));
+            $oq->position = new qtype_preg_position($tree_root->position->indfirst, $tree_root->position->indlast, null, null, null, null);
 
             $parenttr = $this->get_parent_node($this->get_dst_root(), $tree_root->id);
 
