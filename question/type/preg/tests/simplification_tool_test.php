@@ -149,7 +149,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_common_subexpressions_trivial() {
         return array (
-            //array('(?:)', '(?:)'),
+            array('(?:)', '(?:)'),
             array('aaa', 'a{3}'),
             array('aaab', 'a{3}b'),
             array('baaa', 'ba{3}'),
@@ -1242,27 +1242,27 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // Integration tests on a combination of quantifiers: single match
             // Character inside a subpattern with the rightmost characters of the
             // A sequence of characters on the left
-            array('ba(?:a?)?', 'ba(?:a?)?'),
-            array('ba(?:a?)+', 'ba(?:a?)+'),
-            array('ba(?:a?)*', 'ba(?:a?)*'),
-            array('ba(?:a+)?', 'ba(?:a+)?'),
-            array('ba(?:a+)+', 'ba(?:a+)+'),
-            array('ba(?:a+)*', 'ba(?:a+)*'),
-            array('ba(?:a*)?', 'ba(?:a*)?'),
-            array('ba(?:a*)+', 'ba(?:a*)+'),
-            array('ba(?:a*)*', 'ba(?:a*)*'),
+            array('ba(?:a?)?', 'ba{1,2}'),
+            array('ba(?:a?)+', 'ba+'),
+            array('ba(?:a?)*', 'ba+'),
+            array('ba(?:a+)?', 'ba+'),
+            array('ba(?:a+)+', 'ba{2,}'),
+            array('ba(?:a+)*', 'ba+'),
+            array('ba(?:a*)?', 'ba+'),
+            array('ba(?:a*)+', 'ba+'),
+            array('ba(?:a*)*', 'ba+'),
             // Integration tests on a combination of quantifiers: single match
             // Character inside a subpattern with the rightmost characters of the
             // A sequence of characters on the left
-            array('ba(a?)?', 'ba(a?)?'),
-            array('ba(a?)+', 'ba(a?)+'),
-            array('ba(a?)*', 'ba(a?)*'),
-            array('ba(a+)?', 'ba(a+)?'),
-            array('ba(a+)+', 'ba(a+)+'),
-            array('ba(a+)*', 'ba(a+)*'),
-            array('ba(a*)?', 'ba(a*)?'),
-            array('ba(a*)+', 'ba(a*)+'),
-            array('ba(a*)*', 'ba(a*)*'),
+            array('ba(a?)?', 'ba{1,2}'),
+            array('ba(a?)+', 'ba+'),
+            array('ba(a?)*', 'ba+'),
+            array('ba(a+)?', 'ba+'),
+            array('ba(a+)+', 'ba{2,}'),
+            array('ba(a+)*', 'ba+'),
+            array('ba(a*)?', 'ba+'),
+            array('ba(a*)+', 'ba+'),
+            array('ba(a*)*', 'ba+'),
             // Integration tests on a combination of quantifiers: single match
             // Character within the group with the rightmost characters of
             // A sequence of characters from the right
@@ -1291,15 +1291,15 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // Integration tests on a combination of quantifiers: single match
             // Character within the group with the leftmost character of the
             // A sequence of characters on the left
-            array('ba(?:a?){1,2}', 'ba(?:a?){1,2}'),
-            array('ba(?:a+){1,2}', 'ba(?:a+){1,2}'),
-            array('ba(?:a*){1,2}', 'ba(?:a*){1,2}'),
+            array('ba(?:a?){1,2}', 'ba{1,3}'),
+            array('ba(?:a+){1,2}', 'ba{2,}'),
+            array('ba(?:a*){1,2}', 'ba+'),
             // Integration tests on a combination of quantifiers: single match
             // Character inside a subpattern with the rightmost characters of the
             // A sequence of characters on the left
-            array('ba(a?){1,2}', 'ba(a?){1,2}'),
-            array('ba(a+){1,2}', 'ba(a+){1,2}'),
-            array('ba(a*){1,2}', 'ba(a*){1,2}'),
+            array('ba(a?){1,2}', 'ba{1,3}'),
+            array('ba(a+){1,2}', 'ba{2,}'),
+            array('ba(a*){1,2}', 'ba+'),
             // Integration tests on a combination of quantifiers: single match
             // Character within the group with the rightmost characters of
             // A sequence of characters from the right
@@ -1649,22 +1649,22 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // Character within the group with a single character to the left
             array('a(?:a){1,2}', 'a{2,3}'),
             array('a(?:a){3,4}', 'a{4,5}'),
-//            array('a(?:a)?{3,4}', 'a(?:a)?{3,4}'),
-//            // Integration tests on a combination of quantifiers: single match
-//            // Character inside a subpattern with a single character to the left
+            array('a(?:a)?{3,4}', 'a{1,5}'),
+            // Integration tests on a combination of quantifiers: single match
+            // Character inside a subpattern with a single character to the left
             array('a(a){1,2}', 'a{2,3}'),
             array('a(a){3,4}', 'a{4,5}'),
-//            array('a(a)?{3,4}', 'a(a)?{3,4}'),
+            array('a(a)?{3,4}', 'a{1,5}'),
             // Integration tests on a combination of quantifiers: single match
             // Character within the group with a single character to the right
             array('(?:a){1,2}a', 'a{2,3}'),
             array('(?:a){3,4}a', 'a{4,5}'),
-//            array('(?:a)?{3,4}a', '(?:a)?{3,4}a'),
+            array('(?:a)?{3,4}a', 'a{1,5}'),
             // Integration tests on a combination of quantifiers: single match
             // Character inside a subpattern with a single character to the right
             array('(a){1,2}a', 'a{2,3}'),
             array('(a){3,4}a', 'a{4,5}'),
-//            array('(a)?{3,4}a', '(a)?{3,4}a'),
+            array('(a)?{3,4}a', 'a{1,5}'),
             // Integration tests on a combination of quantifiers: single match
             // Character within the group with the leftmost character of the
             // A sequence of characters on the left
@@ -1706,13 +1706,13 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // A sequence of characters from the right
             array('(?:a){1,2}ab', 'a{2,3}b'),
             array('(?:a){3,4}ab', 'a{4,5}b'),
-//            array('(?:a)?{3,4}ab', '(?:a)?{3,4}ab'),
+            array('(?:a)?{3,4}ab', 'a{1,5}b'),
             // Integration tests on a combination of quantifiers: single match
             // Character inside a subpattern with the leftmost character in the sequence
             // Characters to the right
             array('(a){1,2}ab', 'a{2,3}b'),
             array('(a){3,4}ab', 'a{4,5}b'),
-//            array('(a)?{3,4}ab', '(a)?{3,4}ab'),
+            array('(a)?{3,4}ab', 'a{1,5}b'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters within the group with
             // Character on the left
@@ -1776,39 +1776,39 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters within the group with
             // Leftmost character of a sequence of characters to the right
-            /*array('(?:ab)?ab', '(?:ab){1,2}'),///
+            array('(?:ab)?ab', '(?:ab){1,2}'),
             array('(?:ab)+ab', '(?:ab){2,}'),
-            array('(?:ab)*ab', '(?:ab)+'),*/
+            array('(?:ab)*ab', '(?:ab)+'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters inside a subpattern with extreme
             // Leftmost character of a sequence of characters from the right
-            /*array('(ab)?ab', '(?:ab){1,2}'),///
+            array('(ab)?ab', '(?:ab){1,2}'),
             array('(ab)+ab', '(?:ab){2,}'),
-            array('(ab)*ab', '(?:ab)+'),*/
+            array('(ab)*ab', '(?:ab)+'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters within the group with
             // Leftmost character of a sequence of characters on the left
             array('ab(?:ab){1,2}', '(?:ab){2,3}'),
             array('ab(?:ab){3,4}', '(?:ab){4,5}'),
-//            array('ab(?:ab)?{3,4}', 'ab(?:ab)?{1,2}'),
+            array('ab(?:ab)?{3,4}', '(?:ab){1,5}'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters inside a subpattern with extreme
             // Leftmost character in the sequence of characters left
             array('ab(ab){1,2}', '(?:ab){2,3}'),
             array('ab(ab){3,4}', '(?:ab){4,5}'),
-//            array('ab(ab)?{3,4}', 'ab(ab)?{3,4}'),
+            array('ab(ab)?{3,4}', '(?:ab){1,5}'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters within the group with
             // Leftmost character of a sequence of characters to the right
             array('(?:ab){1,2}ab', '(?:ab){2,3}'),
-//            array('(?:ab){3,4}ab', '(?:ab){4,5}'),///
-//            array('(?:ab)?{3,4}ab', '(?:ab)?{3,4}ab'),
+            array('(?:ab){3,4}ab', '(?:ab){4,5}'),
+            array('(?:ab)?{3,4}ab', '(?:ab){1,5}'),
             // Integration tests on a combination of quantifiers: совпадение крайнего
             // Leftmost character of a sequence of characters inside a subpattern with extreme
             // Leftmost character of a sequence of characters from the right
             array('(ab){1,2}ab', '(?:ab){2,3}'),
             array('(ab){3,4}ab', '(?:ab){4,5}'),
-            array('(ab)?{3,4}ab', '(?:ab){1,2}'),
+            array('(ab)?{3,4}ab', '(?:ab){1,5}'),
             // Integration tests on a combination of quantifiers: single match
             // Character within the group with the leftmost character of the
             // A sequence of characters on the left
@@ -1850,25 +1850,25 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // A sequence of characters on the left
             array('ba(?:a){1,2}', 'ba{2,3}'),
             array('ba(?:a){3,4}', 'ba{4,5}'),
-//            array('ba(?:a)?{3,4}', 'ba(?:a)?{3,4}'),
+            array('ba(?:a)?{3,4}', 'ba{1,5}'),
             // Integration tests on a combination of quantifiers: single match
             // Character inside a subpattern with the rightmost characters of the
             // A sequence of characters on the left
             array('ba(a){1,2}', 'ba{2,3}'),
             array('ba(a){3,4}', 'ba{4,5}'),
-//            array('ba(a)?{3,4}', 'ba(a)?{3,4}'),
+            array('ba(a)?{3,4}', 'ba{1,5}'),
             // Integration tests on a combination of quantifiers: single match
             // Character within the group with the rightmost characters of
             // A sequence of characters from the right
             array('(?:a){1,2}ba', '(?:a){1,2}ba'),
             array('(?:a){3,4}ba', '(?:a){3,4}ba'),
-//            array('(?:a)?{3,4}ba', 'a?{3,4}ba'),
+            array('(?:a)?{3,4}ba', '(?:a)?{3,4}ba'),
             // Integration tests on a combination of quantifiers: single match
             // Character inside a subpattern with the rightmost characters of the
             // A sequence of characters from the right
             array('(a){1,2}ba', '(a){1,2}ba'),
             array('(a){3,4}ba', '(a){3,4}ba'),
-//            array('(a)?{3,4}ba', '(a)?{3,4}ba'),
+            array('(a)?{3,4}ba', '(a)?{3,4}ba'),
             // Integration tests on a combination of quantifiers: match extreme
             // Right character sequence of characters within the group with
             // Character on the left
@@ -1898,25 +1898,25 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // Character on the left
             array('a(?:ba){1,2}', 'a(?:ba){1,2}'),
             array('a(?:ba){3,4}', 'a(?:ba){3,4}'),
-//            array('a(?:ba)?{3,4}', 'a(?:ba){1,2}'),
+            array('a(?:ba)?{3,4}', 'a(?:ba)?{3,4}'),
             // Integration tests on a combination of quantifiers: match extreme
             // Rightmost character of the character sequences inside a subpattern with
             // Character on the left
             array('a(ba){1,2}', 'a(ba){1,2}'),
             array('a(ba){3,4}', 'a(ba){3,4}'),
-//            array('a(ba)?{3,4}', 'a(ba)?{3,4}'),
+            array('a(ba)?{3,4}', 'a(ba)?{3,4}'),
             // Integration tests on a combination of quantifiers: match extreme
             // Right character sequence of characters within the group with
             // Character to the right
             array('(?:ba){1,2}a', '(?:ba){1,2}a'),
             array('(?:ba){3,4}a', '(?:ba){3,4}a'),
-//            array('(?:ba)?{3,4}a', '(?:ba)?{3,4}a'),
+            array('(?:ba)?{3,4}a', '(?:ba)?{3,4}a'),
             // Integration tests on a combination of quantifiers: match extreme
             // Rightmost character of the character sequences inside a subpattern with
             // Character on the left
             array('(ba){1,2}a', '(ba){1,2}a'),
             array('(ba){3,4}a', '(ba){3,4}a'),
-//            array('(ba)?{3,4}a', '(ba)?{3,4}a'),
+            array('(ba)?{3,4}a', '(ba)?{3,4}a'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters within the group with
             // Rightmost characters of a sequence of characters on the left
@@ -1970,49 +1970,49 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             // Rightmost characters of a sequence of characters on the left
             array('ba(?:ab){1,2}', 'ba(?:ab){1,2}'),
             array('ba(?:ab){3,4}', 'ba(?:ab){3,4}'),
-//            array('ba(?:ab)?{3,4}', 'ba(?:ab)?{3,4}'),
+            array('ba(?:ab)?{3,4}', 'ba(?:ab)?{3,4}'),
             // Integration tests on a combination of quantifiers: match extreme
             // Right character sequence of characters within the group with
             // Leftmost character of a sequence of characters on the left
             array('ab(?:ba){1,2}', 'ab(?:ba){1,2}'),
             array('ab(?:ba){3,4}', 'ab(?:ba){3,4}'),
-//            array('ab(?:ba)?{3,4}', 'ab(?:ba)?{3,4}'),
+            array('ab(?:ba)?{3,4}', 'ab(?:ba)?{3,4}'),
             // Integration tests on a combination of quantifiersв: match extreme
             // Leftmost character of a sequence of characters inside a subpattern with extreme
             // Right character from a sequence of characters on the left
             array('ba(ab){1,2}', 'ba(ab){1,2}'),
             array('ba(ab){3,4}', 'ba(ab){3,4}'),
-//            array('ba(ab)?{3,4}', 'ba(ab)?{3,4}'),
+            array('ba(ab)?{3,4}', 'ba(ab)?{3,4}'),
             // Integration tests on a combination of quantifiers: match extreme
             // Rightmost character of the character sequences inside a subpattern with
             // Leftmost character of a sequence of characters on the left
             array('ab(ba){1,2}', 'ab(ba){1,2}'),
             array('ab(ba){3,4}', 'ab(ba){3,4}'),
-//            array('ab(ba)?{3,4}', 'ab(ba)?{3,4}'),
+            array('ab(ba)?{3,4}', 'ab(ba)?{3,4}'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters within the group with
             // The rightmost characters of a sequence of characters to the right
             array('(?:ab){1,2}ba', '(?:ab){1,2}ba'),
             array('(?:ab){3,4}ba', '(?:ab){3,4}ba'),
-//            array('(?:ab)?{3,4}ba', '(?:ab*)?{3,4}ba'),
+            array('(?:ab)?{3,4}ba', '(?:ab)?{3,4}ba'),
             // Integration tests on a combination of quantifiers: match extreme
             // Right character sequence of characters within the group with
             // Leftmost character of a sequence of characters to the right
             array('(?:ba){1,2}ab', '(?:ba){1,2}ab'),
             array('(?:ba){3,4}ab', '(?:ba){3,4}ab'),
-//            array('(?:ba)?{3,4}ab', '(?:ba){1,2}ab'),
+            array('(?:ba)?{3,4}ab', '(?:ba)?{3,4}ab'),
             // Integration tests on a combination of quantifiers: match extreme
             // Leftmost character of a sequence of characters inside a subpattern with extreme
             // Right character from a sequence of characters from the right
             array('(ab){1,2}ba', '(ab){1,2}ba'),
             array('(ab){3,4}ba', '(ab){3,4}ba'),
-//            array('(ab)?{3,4}ba', '(ab)?{3,4}ba'),
+            array('(ab)?{3,4}ba', '(ab)?{3,4}ba'),
             // Integration tests on a combination of quantifiers: match extreme
             // Rightmost character of the character sequences inside a subpattern with
             // Leftmost character of a sequence of characters to the right
             array('(ba){1,2}ab', '(ba){1,2}ab'),
             array('(ba){3,4}ab', '(ba){3,4}ab'),
-//            array('(ba)?{3,4}ab', '(ba)?{3,4}ab'),
+            array('(ba)?{3,4}ab', '(ba)?{3,4}ab'),
 
             // Alternatives
             array('a|a', 'a'),
