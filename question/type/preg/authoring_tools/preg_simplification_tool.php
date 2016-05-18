@@ -1198,6 +1198,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     protected function normalization($tree_root) {
         $this->deleted_grouping_positions = array();
+
+        $problem_exist = true;
+        $count = 0;
+        while($problem_exist && $count < 999) {
+            if ($this->search_consecutive_quant_nodes($tree_root)) {
+                $this->change_consecutive_quants($tree_root, $this->problem_ids[0]);
+                $count++;
+            } else {
+                $problem_exist = false;
+            }
+            $this->problem_ids = array();
+        }
+
         $this->delete_not_empty_grouping_node($tree_root, $tree_root);
 
         $problem_exist = true;
