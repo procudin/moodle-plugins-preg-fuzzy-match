@@ -813,3 +813,8 @@ $string['simplification_tips_full_7'] = 'Not to copy this part, you can give it 
 $string['simplification_tips_short_8'] = 'Unnecessary asserts left and right';
 $string['simplification_tips_full_8'] = 'Perhaps you should enable the "exact match" instead of "^" and "$" at the beginning and end of the expression';
 $string['simplification_tips_full_8_alt'] = '"^" and "$" in the beginning and at the end of the statement is superfluous, because enabled "exact match"';
+
+$string['simplification_errors_short_1'] = 'Excess simple assertion "^"';
+$string['simplification_errors_full_1'] = 'Simple assertion "^" is superfluous, since it is not at the beginning of the regular expression';
+$string['simplification_errors_short_2'] = 'Excess simple assertion "$"';
+$string['simplification_errors_full_2'] = 'Simple assertion "$" is superfluous, since it is not at the ending of the regular expression';

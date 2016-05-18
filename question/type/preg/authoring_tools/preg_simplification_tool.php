@@ -126,6 +126,22 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                 ++$i;
                 $this->problem_ids = array();
             }
+
+            $result = $this->useless_circumflex_assertion();
+            if ($result != array()) {
+                $errors[$i] = array();
+                $errors[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
+
+            $result = $this->useless_dollar_assertion();
+            if ($result != array()) {
+                $errors[$i] = array();
+                $errors[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
         }
         return $errors;
 
@@ -3456,6 +3472,153 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     }*/
 
 
+
+    //--- errors ---
+    /* The 1th rule */
+    public function useless_circumflex_assertion() {
+        $equivalences = array();
+
+        if ($this->search_useless_circumflex_assertion($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_errors_short_1', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_errors_full_1', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_useless_circumflex_assertion($node, &$is_assert = false) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_ASSERT
+            && $node->subtype == qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX) {
+            if ($node->position->indfirst != 0 && !$this->check_first_operand($node)) {
+                $is_found = false;
+                $next_leaf = $this->get_next_right_leafs($this->get_dst_root(), $node, 2, $is_found);
+
+                if (count($next_leaf) === 1
+                    || (count($next_leaf) > 1
+                        && $next_leaf[1] !== null
+                        && $next_leaf[1]->type != qtype_preg_node::TYPE_LEAF_ASSERT
+                        && $next_leaf[1]->subtype != qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX
+                        && $is_assert == false)
+                    || (count($next_leaf) > 1 && $next_leaf[1] === null)
+                ) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 201;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+                }
+            }
+            $is_assert = true;
+        } else {
+            $is_assert = false;
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_useless_circumflex_assertion($operand, $is_assert)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function check_first_operand($node, &$is_alternative = false) {
+        $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
+        if ($parent != null) {
+            if ($parent->type == qtype_preg_node::TYPE_NODE_ALT) {
+                $is_alternative = true;
+            }
+            $index = array_search($node, $parent->operands);
+            if (($index === false || $index !== 0) && !$is_alternative) {
+                return false;
+            }
+            return $this->check_first_operand($parent, $is_alternative);
+        } else {
+            return true;
+        }
+    }
+
+
+
+    /* The 2th rule */
+    public function useless_dollar_assertion() {
+        $equivalences = array();
+
+        if ($this->search_useless_dollar_assertion($this->get_dst_root())) {
+            $equivalences['problem'] = htmlspecialchars(get_string('simplification_errors_short_2', 'qtype_preg'));
+            $equivalences['solve'] = htmlspecialchars(get_string('simplification_errors_full_2', 'qtype_preg'));
+            $equivalences['problem_ids'] = $this->problem_ids;
+            $equivalences['problem_type'] = $this->problem_type;
+            $equivalences['problem_indfirst'] = $this->indfirst;
+            $equivalences['problem_indlast'] = $this->indlast;
+        }
+
+        return $equivalences;
+    }
+
+    private function search_useless_dollar_assertion($node, &$is_assert = false) {
+        if ($node->type == qtype_preg_node::TYPE_LEAF_ASSERT
+            && $node->subtype == qtype_preg_leaf_assert::SUBTYPE_DOLLAR) {
+            if ($node->position->indfirst != strlen($this->get_dst_root()->get_regex_string()) - 1
+                && !$this->check_last_operand($node)) {
+                $is_found = false;
+                $next_leaf = $this->get_next_right_leafs($this->get_dst_root(), $node, 2, $is_found);
+                if (($next_leaf[1] !== null
+                     && $next_leaf[1]->type != qtype_preg_node::TYPE_LEAF_ASSERT
+                     && $next_leaf[1]->subtype != qtype_preg_leaf_assert::SUBTYPE_DOLLAR
+                     && $is_assert == false)
+                    || $next_leaf[1] === null
+                ) {
+                    $this->problem_ids[] = $node->id;
+                    $this->problem_type = 202;
+                    $this->indfirst = $node->position->indfirst;
+                    $this->indlast = $node->position->indlast;
+                    return true;
+                }
+            }
+            $is_assert = true;
+        } else {
+            $is_assert = false;
+        }
+        if ($this->is_operator($node)) {
+            foreach ($node->operands as $operand) {
+                if ($this->search_useless_dollar_assertion($operand)) {
+                    return true;
+                }
+            }
+        }
+
+        $this->problem_type = -2;
+        $this->indfirst = -2;
+        $this->indlast = -2;
+        return false;
+    }
+
+    private function check_last_operand($node, &$is_alternative = false) {
+        $parent = $this->get_parent_node($this->get_dst_root(), $node->id);
+        if ($parent != null) {
+            if ($parent->type == qtype_preg_node::TYPE_NODE_ALT) {
+                $is_alternative = true;
+            }
+            $index = array_search($node, $parent->operands);
+            if (($index === false || $index !== count($parent->operands) - 1) && !$is_alternative) {
+                return false;
+            }
+            return $this->check_last_operand($parent, $is_alternative);
+        } else {
+            return true;
+        }
+    }
+
+
     //--- OPTIMIZATION ---
     public function optimization() {
         if (count($this->options->problem_ids) > 0 && $this->options->problem_type != -2) {
@@ -3561,6 +3724,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
 
     protected function optimize_104($node) {
         return $this->add_finit_quant_to_space_charset($node, $this->options->problem_ids[0]);
+    }
+
+    protected function optimize_201($node) {
+        return $this->remove_subtree($this->get_dst_root(), $node, $this->options->problem_ids[0]);
+    }
+
+    protected function optimize_202($node) {
+        return $this->remove_subtree($this->get_dst_root(), $node, $this->options->problem_ids[0]);
     }
 
     private function remove_subtree($tree_root, $node, $remove_node_id) {
