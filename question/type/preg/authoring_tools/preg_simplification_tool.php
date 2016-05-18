@@ -1225,11 +1225,19 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $this->deleted_grouping_positions = array();
 
         $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 999) {
+        while($problem_exist) {
+            if ($this->search_repeated_assertions($tree_root)) {
+                $this->remove_subtree($tree_root, $tree_root, $this->problem_ids[0]);
+            } else {
+                $problem_exist = false;
+            }
+            $this->problem_ids = array();
+        }
+
+        $problem_exist = true;
+        while($problem_exist) {
             if ($this->search_consecutive_quant_nodes($tree_root)) {
                 $this->change_consecutive_quants($tree_root, $this->problem_ids[0]);
-                $count++;
             } else {
                 $problem_exist = false;
             }
