@@ -662,11 +662,11 @@ M.preg_authoring_tools_script = (function ($) {
             $('#simplification_tool_cancel_btn').prop('disabled', true);
 
             // Highlight 1st element
-            if (typeof hints_table[0].children[0] !== 'undefined') {
-                setTimeout(function () {
-                    hints_table[0].children[0].children[0].click();
-                }, 500);
-            }
+            //if (typeof hints_table[0].children[0] !== 'undefined') {
+            //    setTimeout(function () {
+            //        hints_table[0].children[0].children[0].click();
+            //    }, 500);
+            //}
         }
 
         if (typeof d != 'undefined') {
