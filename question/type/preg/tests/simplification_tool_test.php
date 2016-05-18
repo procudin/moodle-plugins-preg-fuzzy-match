@@ -3913,5 +3913,33 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:(?:aa?)*)*', 'a*'),*/
         );
     }
+
+    protected function get_test_useless_circumflex_assertion_trivial() {
+        return array(
+            array('^ab', '^ab'),
+            array('^^ab', '^^ab'),
+            array('a^b', 'ab'),
+            array('ab^', 'ab'),
+            array('^a^b', '^ab'),
+            array('^ab^', '^ab'),
+
+            array('^a|^b', '^a|^b'),
+            array('^a|(^b)', '^a|(^b)'),
+        );
+    }
+
+    protected function get_test_useless_dollar_assertion_trivial() {
+        return array(
+            array('ab$', 'ab$'),
+            array('ab$$', 'ab$$'),
+            array('a$b', 'ab'),
+            array('$ab', 'ab'),
+            array('a$b$', 'ab$'),
+            array('$ab$', 'ab$'),
+
+            array('a$|b$', 'a$|b$'),
+            array('a$|(b$)', 'a$|(b$)'),
+        );
+    }
 }
 
