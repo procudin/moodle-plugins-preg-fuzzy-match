@@ -1516,7 +1516,14 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         $regex_string = $this->get_regex_string();
 
         // Calculate quantifier borders
-        $counts = $this->subexpressions_repeats($parent_node, $current_leaf);
+        $tmp_st = new qtype_preg_simplification_tool($regex_string, $this->options);
+        $tmp_st->normalization($tmp_st->get_dst_root());
+        $tmp_del_g_pos = $tmp_st->deleted_grouping_positions;
+        $tmp_del_s_pos = $tmp_st->deleted_subpattern_positions;
+        $tmp_pn = $this->get_node_from_id($tmp_st->get_dst_root(), $parent_node->id);
+        $tmp_cl = $this->get_node_from_id($tmp_st->get_dst_root(), $current_leaf->id);
+
+        $counts = $tmp_st->subexpressions_repeats($tmp_pn, $tmp_cl);
 
         // Create new quantifier with needed borders
         $text = $this->get_quant_text_from_borders($counts[0], $counts[1]);
@@ -1608,7 +1615,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         // Rename all backreference
         $this->rename_all_backreference($tmp_dst_root, $regex_string);
 
-        $this->normalization($tmp_dst_root);
+        $this->deleted_grouping_positions = array_merge($this->deleted_grouping_positions, $tmp_del_g_pos);
+        $this->deleted_subpattern_positions = array_merge($this->deleted_subpattern_positions, $tmp_del_s_pos);
 
         foreach($this->deleted_grouping_positions as $deleted_grouping_position) {
             if ($deleted_grouping_position[1] > $this->options->indlast
