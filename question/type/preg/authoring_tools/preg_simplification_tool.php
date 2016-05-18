@@ -4020,6 +4020,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                     $rightborder = $tree_root->rightborder * $oq->rightborder;
                 }
 
+                $oq->leftborder = $leftborder;
                 if ($infinite) {
                     if ($leftborder === 0) {
                         $text = '*';
@@ -4029,6 +4030,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
                         $text = '{' . $leftborder . ',}';
                     }
                 } else {
+                    $oq->rightborder = $rightborder;
                     if ($leftborder === 0 && $rightborder === 1) {
                         $text = '?';
                     } else if ($leftborder === $rightborder) {
