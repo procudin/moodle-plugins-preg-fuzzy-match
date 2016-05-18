@@ -2085,7 +2085,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Calculate repeats of subexpression
      */
-    private function subexpressions_repeats($current_root, $node) {
+    public function subexpressions_repeats($current_root, $node) {
         $counts = array(0,0);
         for($i = 1; $i < count($this->options->problem_ids); $i++) {
             $tmp_counts = $this->get_repeats($current_root, $node, $this->options->problem_ids[$i]);
@@ -2836,12 +2836,17 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             if ($this->check_other_quant_for_quant($node->operands[0])) {
                 $oq = $this->get_other_quant_for_quant($node->operands[0]);
 
-                if ($oq != null) {
+                if ($oq != null && $this->check_quants_borders($oq, $node)) {
                     $this->problem_ids[] = $node->id;
                     $this->problem_type = 10;
-                    $this->indfirst = $node->position->indfirst;
-                    $this->indlast = $node->position->indlast;
-                    return true;
+                    if ($node->position !== null) {
+                        $this->indfirst = $node->position->indfirst;
+                        $this->indlast = $node->position->indlast;
+                        return true;
+                    } else {
+                        return false;
+                    }
+
 
                     /*$is_found = false;
                     if ($node->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
@@ -2916,6 +2921,15 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         }
 
         return false;
+    }
+
+    private function check_quants_borders($left_quant, $right_quant) {
+        if ($left_quant->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT
+            || $right_quant->type == qtype_preg_node::TYPE_NODE_INFINITE_QUANT) {
+            return true;
+        }
+        return !($left_quant->leftborder === $left_quant->rightborder && $right_quant->leftborder !== $right_quant->rightborder
+                  && $left_quant->leftborder !== 0 && $left_quant->leftborder !== 1);
     }
 
 
