@@ -346,7 +346,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Check repeated assertions.
      */
-    protected function repeated_assertions() {
+    public function repeated_assertions() {
         $equivalences = array();
 
         if ($this->search_repeated_assertions($this->get_dst_root())) {
@@ -364,31 +364,25 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
     /**
      * Search repeated assertions in tree.
      */
-    private function search_repeated_assertions($node) {
+    private function search_repeated_assertions($node, &$is_find_assert = false) {
         if ($node->type == qtype_preg_node::TYPE_LEAF_ASSERT
             && ($node->subtype == qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX || $node->subtype == qtype_preg_leaf_assert::SUBTYPE_DOLLAR)) {
-            if ($this->is_find_assert == true) {
+            if ($is_find_assert == true) {
                 $this->problem_ids[] = $node->id;
                 $this->problem_type = 1;
                 $this->indfirst = $node->position->indfirst;
                 $this->indlast = $node->position->indlast;
                 return true;
             } else {
-                $this->is_find_assert = true;
+                $is_find_assert = true;
             }
-        } else if ($node->type == qtype_preg_node::TYPE_LEAF_CHARSET
-                   || $node->type == qtype_preg_node::TYPE_LEAF_META
-                   || $node->type == qtype_preg_node::TYPE_LEAF_BACKREF
-                   || $node->type == qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL
-                   || $node->type == qtype_preg_node::TYPE_LEAF_TEMPLATE
-                   || $node->type == qtype_preg_node::TYPE_LEAF_CONTROL
-                   || $node->type == qtype_preg_node::TYPE_LEAF_OPTIONS
-                   || $node->type == qtype_preg_node::TYPE_LEAF_COMPLEX_ASSERT) {
-            $this->is_find_assert = false;
+        } else {
+            $is_find_assert = false;
         }
+
         if ($this->is_operator($node)) {
             foreach ($node->operands as $operand) {
-                if ($this->search_repeated_assertions($operand)) {
+                if ($this->search_repeated_assertions($operand, $is_find_assert)) {
                     return true;
                 }
             }
