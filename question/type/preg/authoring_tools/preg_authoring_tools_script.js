@@ -310,6 +310,14 @@ M.preg_authoring_tools_script = (function ($) {
         $('#problem_type')[0].value = e.currentTarget.children[3].value;
         $('#problem_indfirst')[0].value = e.currentTarget.children[4].value;
         $('#problem_indlast')[0].value = e.currentTarget.children[5].value;
+
+        if (e.currentTarget.children[3].value === '105') {
+            $('#simplification_tool_apply_btn').prop('disabled', true);
+        } else {
+            $('#simplification_tool_apply_btn').prop('disabled', false);
+        }
+        $('#simplification_tool_cancel_btn').prop('disabled', false);
+
         //var indfirst = e.currentTarget.children[4].value,
         //    indlast = e.currentTarget.children[5].value;
 
