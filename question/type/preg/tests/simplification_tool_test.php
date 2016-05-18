@@ -57,10 +57,10 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
                 }
 
                 if ($result_regex !== $test_result) {
-                    var_dump($test_regex);
-                    var_dump($result_regex);
-                    var_dump($test_result);
-                    var_dump($result_regex === $test_result);
+                    echo "---Test failure!---\n";
+                    echo "input: {$test_regex}\n";
+                    echo "output: {$result_regex}\n";
+                    echo "correct answer: {$test_result}\n";
                 }
             /*} catch(Exception $e) {
                 var_dump('Exception!');
