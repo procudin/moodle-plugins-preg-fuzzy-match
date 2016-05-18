@@ -284,6 +284,11 @@ M.preg_authoring_tools_script = (function ($) {
 
     regex_text_changed : function (e) {
         e.preventDefault();
+
+        // Remove some hints to form
+        var hints_table = $('#simplification_tool_hints > tbody');
+        hints_table.empty();
+
         self.regex_input.textareaHighlighter('updateMatches', []);
     },
 
