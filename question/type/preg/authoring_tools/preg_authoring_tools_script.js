@@ -658,6 +658,9 @@ M.preg_authoring_tools_script = (function ($) {
 
             self.simplification_hints().click(self.simplification_hints_clicked);
 
+            $('#simplification_tool_apply_btn').prop('disabled', true);
+            $('#simplification_tool_cancel_btn').prop('disabled', true);
+
             // Highlight 1st element
             if (typeof hints_table[0].children[0] !== 'undefined') {
                 setTimeout(function () {
