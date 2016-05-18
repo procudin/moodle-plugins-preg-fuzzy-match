@@ -117,9 +117,16 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
      */
     protected function get_errors_description() {
         $errors = array();
-//        if ($this->options->is_check_errors == true) {
-//            //to do something
-//        }
+        if ($this->options->is_check_errors == true) {
+            $i = 0;
+            $result = $this->nullable_regex();
+            if ($result != array()) {
+                $errors[$i] = array();
+                $errors[$i] += $result;
+                ++$i;
+                $this->problem_ids = array();
+            }
+        }
         return $errors;
 
 //        return array(array('problem' => 'Описание ошибки', 'solve' => 'Подробное описание информации'));
@@ -160,14 +167,6 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             }
 
             $result = $this->space_charset_with_finit_quant();
-            if ($result != array()) {
-                $tips[$i] = array();
-                $tips[$i] += $result;
-                ++$i;
-                $this->problem_ids = array();
-            }
-
-            $result = $this->nullable_regex();
             if ($result != array()) {
                 $tips[$i] = array();
                 $tips[$i] += $result;
