@@ -321,6 +321,14 @@ M.preg_authoring_tools_script = (function ($) {
         //$('#problem_indlast')[0].value = e.currentTarget.children[5].value;
     },
 
+    collapse_block_title_clicked : function (e) {
+        if ($('#simplification_tool_collapse_btn').hasClass("collapsed")) {
+            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/clean/core/1461098461/t/expanded)');
+        } else {
+            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/clean/core/1461098461/t/collapsed)');
+        }
+    },
+
     tree_node_clicked : function (e) {
         e.preventDefault();
 
@@ -609,6 +617,8 @@ M.preg_authoring_tools_script = (function ($) {
             } else {
                 $('#simplification_tool_collapse_btn').css('pointer-events', 'none');
             }
+
+            $('#simplification_tool_collapse_btn').click(self.collapse_block_title_clicked);
 
             // Set some hints to form
             var hints_table = $('#simplification_tool_hints > tbody');
