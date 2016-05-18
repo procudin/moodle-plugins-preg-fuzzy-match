@@ -270,6 +270,9 @@ M.preg_authoring_tools_script = (function ($) {
     btn_apply_hint_click : function (e) {
         e.preventDefault();
         var hint = self.get_hint();
+        if (hint.problem_type == 108) {
+            $("#id_exactmatch_auth").val('1');
+        }
         self.load_apply_hints(hint.problem_indfirst, hint.problem_indlast, hint.problem_ids, hint.problem_type);
     },
 
