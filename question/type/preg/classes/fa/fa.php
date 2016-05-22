@@ -877,14 +877,16 @@ class fa {
     /**
      * Compares two FA and returns whether they are equal.
      *
-     * @param another fa object - FA to compare.
-     * @param withtags - flag to point, if fas should be compared with subpatterns.
-     * @return boolean true if this FA equal to $another.
+     * @param another - FA to compare.
+     * @param withtags - flag to point, if FAs should be compared with subpatterns.
+     * @return boolean true if this FA equal to another.
      */
     public function equal($another, &$differences, $withtags = false) {
         // Initialize memory and stack - arrays of qtype_preg_fa_pair_of_groups
         $stack = array();
         $memory = array();
+
+        $assertdescriptions = array('\\A', '\\z', '\\Z', '\\G', '^', '$');
 
         // Generating initial pair of groups
         $groupspair = equivalence\groups_pair::generate_pair(new equivalence\states_group($this, $this->get_start_states()),
@@ -895,37 +897,116 @@ class fa {
             return false;
         }
 
-        $stack[] = $groupspair;
-        $memory[] = $groupspair;
+        $stack[] = array($groupspair);
+        $memory[] = array($groupspair);
 
         // While stack is not empty
-        while (count($stack)) {
-            // Taking new pair of groups from bottom of stack
-            $groupspair = current($stack);
+        while (!empty($stack)) {
+            // Taking new array of pairs of groups from bottom of stack
+            $arrayofgroupspairs = current($stack);
             array_splice($stack, 0, 1);
 
-            // Genereta array of new qtype_preg_fa_pair_of_groups from current pair
-            $curmismatches = array();
-            $groups = transition::divide_intervals($groupspair, $curmismatches, $withtags);
+            $currentsteppairs = array();
 
-            // Adding mismatches to final array
-            foreach ($curmismatches as $mismatch) {
-                if (count($differences) < 5)
-                    $differences[] = $mismatch;
+            foreach ($arrayofgroupspairs as $groupspair) {
+                // Generate new arrays of equivalence/groups_pair from each pair of current array
+                // Result - array, key - matched symbol (character, assert or epsilon), value - array of groups_pair, matched this character
+                $newarraysofpairs = transition::divide_intervals($groupspair, $withtags);
+
+                // Combine received pairs with other ones for current step
+                foreach ($newarraysofpairs as $matchedsymbol => $arrayofpairs) {
+                    // If there were pairs, matching current symbol, put all pairs of current array there
+                    if (array_key_exists($matchedsymbol, $currentsteppairs)) {
+                        foreach ($arrayofpairs as $newgroupspair) {
+                            $isunique = true;
+                            foreach ($currentsteppairs[$matchedsymbol] as $existinggroupspair) {
+                                if ($newgroupspair->equal($existinggroupspair)) {
+                                    $isunique = false;
+                                    break;
+                                }
+                            }
+                            if ($isunique) {
+                                $currentsteppairs[$matchedsymbol][] = $newgroupspair;
+                            }
+                        }
+                    }
+                    // If current matched symbol is unique for current step, create new array of pairs for that symbol
+                    else {
+                        $currentsteppairs[$matchedsymbol] = $arrayofpairs;
+                    }
+                }
             }
 
-            // Adding pairs to stack and memory
-            foreach ($groups as $curpair) {
-                // If current pair is unique - push it to the stack and memory
+            // Check for mismatches for each matched condition
+            foreach ($currentsteppairs as $condition => $arrayofpairs) {
+                $firstgroup = new equivalence\states_group($this);
+                $secondgroup = new equivalence\states_group($another);
+                // Collect groups of states from each pair in array
+                foreach ($arrayofpairs as $pairofgroups) {
+                    $firstgroup->add_states($pairofgroups->first->states);
+                    $secondgroup->add_states($pairofgroups->second->states);
+                }
+                // Check for character mismatch
+                if ($firstgroup->is_empty() != $secondgroup->is_empty()) {
+                    if (!in_array(strval($condition), $assertdescriptions) && strval($condition) != 'epsilon') {
+                        $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::CHARACTER, $firstgroup->is_empty() ? 1 : 0,
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring));
+                    }
+                    elseif (in_array(strval($condition), $assertdescriptions)) {
+                        $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::ASSERT, $firstgroup->is_empty() ? 1 : 0,
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring, $condition));
+                    }
+                    else {
+                        $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE, $firstgroup->has_end_states() ? 0 : 1,
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring));
+                    }
+                    continue;
+                }
+
+                // Check for final state mismatch
+                if ($firstgroup->has_end_states() != $secondgroup->has_end_states()) {
+                    $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE, $firstgroup->has_end_states() ? 0 : 1,
+                        equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring));
+                    continue;
+                }
+
+                // Adding pairs to stack and memory
+                // If current array of pairs is unique - push it to the stack and memory
                 $exists = false;
-                foreach ($memory as $mempair) {
-                    $exists = $exists || $curpair->first->get_states() == $mempair->first->get_states() && $curpair->second->get_states() == $mempair->second->get_states();
+                foreach ($memory as $memarray) {
+                    if (count($memarray) != count($arrayofpairs)) {
+                        continue;
+                    }
+                    $equalarray = true;
+                    foreach ($arrayofpairs as $pair) {
+                        $equalpair = false;
+                        foreach ($memarray as $mempair) {
+                            if ($pair->equal($mempair)) {
+                                $equalpair = true;
+                                break;
+                            }
+                        }
+                        if (!$equalpair) {
+                            $equalarray = false;
+                            break;
+                        }
+                    }
+                    if ($equalarray) {
+                        $exists = true;
+                        break;
+                    }
                 }
 
                 if (!$exists) {
-                    array_push($stack, $curpair);
-                    array_push($memory, $curpair);
+                    array_push($stack, $arrayofpairs);
+                    array_push($memory, $arrayofpairs);
                 }
+            }
+
+            // Checking mismatches count
+            $differences = array_slice($differences, 0, 5);
+            if (count($differences) == 5) {
+                break;
             }
         }
 
