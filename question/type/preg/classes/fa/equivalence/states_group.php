@@ -54,6 +54,35 @@ class states_group {
     }
 
     /**
+     * Adds new state to group
+     * @param $state int state number
+     */
+    public function add_state($state) {
+        if (!$this->contains($state)) {
+            $this->states[] = $state;
+        }
+    }
+
+    /**
+     * Adds new states to group
+     * @param $states array of states to add
+     */
+    public function add_states($states) {
+        foreach ($states as $state) {
+            $this->add_state($state);
+        }
+    }
+
+    /**
+     * Checks if given state already exists in current group
+     * @param $state int state number
+     * @return boolean whether given state exists in current group or not
+     */
+    public function contains($state) {
+        return in_array($state, $this->states);
+    }
+
+    /**
      * Returns states of this group
      */
     public function get_states() {
