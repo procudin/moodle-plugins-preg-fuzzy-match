@@ -32,7 +32,7 @@ class mismatched_pair extends groups_pair {
     /** Possible types of the mismatch */
     const CHARACTER = 0x0002;
     const FINAL_STATE = 0x0004;
-    const CHARACTER_BUT_NOT_SUBPATTERN = 0x0006;
+    const ASSERT = 0x0006;
     const SUBPATTERN = 0x0008;
     /** @var type of the mismatch - should be equal to a constant defined in this class. */
     public $type;
