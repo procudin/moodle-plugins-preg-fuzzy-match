@@ -42,7 +42,9 @@ class mismatched_pair extends groups_pair {
     public $opentags;
     /** @var array of close tags, if this is subpattern mismatch */
     public $closetags;
-
+    /** @var  string, after which there was subpattern mismatch */
+    public $stringbeforesubpatternmismatch;
+    
     public function __construct($type, $matchedautomaton, $pair = null) {
         if ($pair != null)
             parent::__construct($pair);
