@@ -14,6 +14,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/poasquestion/stringstream/stringstream.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_regex_handler.php');
+require_once($CFG->dirroot . '/question/type/preg/question.php');
 
 class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
@@ -81,38 +82,65 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         return $pair;
     }
     /**
-     * Creates \qtype_preg\fa\equivalence\mismatched_pair with diven parameters
+     * Creates \qtype_preg\fa\equivalence\mismatched_pair with given parameters
      */
-    function create_mismatch($type, $matchedautomaton, $matchedstring, $firstfastates, $secondfastates, $opentags = array(), $closetags = array()) {
+    function create_mismatch($type, $matchedautomaton, $matchedstring, $firstfastates = array(), $secondfastates = array(), $stringbeforesubpatternmismatch = "", $opentags = array(), $closetags = array()) {
         $pair = \qtype_preg\fa\equivalence\groups_pair::generate_pair(new \qtype_preg\fa\equivalence\states_group(null, $firstfastates),
                                                                       new \qtype_preg\fa\equivalence\states_group(null, $secondfastates),
                                                                       $matchedstring);
         $mismatch = new \qtype_preg\fa\equivalence\mismatched_pair($type, $matchedautomaton, $pair);
         $mismatch->opentags = $opentags;
         $mismatch->closetags = $closetags;
+        $mismatch->stringbeforesubpatternmismatch = $stringbeforesubpatternmismatch;
         return $mismatch;
+    }
+    /**
+     * Switches qtype_preg_leaf_meta tags to qtype_preg_leaf_subexpr
+     */
+    function switch_meta_to_subexpr($automaton) {
+        foreach ($automaton->adjacencymatrix as $state) {
+            foreach ($state as $arrayoftransitions) {
+                foreach ($arrayoftransitions as $transition) {
+                    for ($i = 0; $i < count($transition->opentags); $i++) {
+                        if (is_a($transition->opentags[$i], 'qtype_preg_leaf_meta')) {
+                            $subexpr = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_SUBEXPR, $transition->opentags[$i]->subpattern);
+                            $transition->opentags[$i] = $subexpr;
+                        }
+                    }
+                    for ($i = 0; $i < count($transition->closetags); $i++) {
+                        if (is_a($transition->closetags[$i], 'qtype_preg_leaf_meta')) {
+                            $subexpr = new qtype_preg_node_subexpr(qtype_preg_node_subexpr::SUBTYPE_SUBEXPR, $transition->closetags[$i]->subpattern);
+                            $transition->closetags[$i] = $subexpr;
+                        }
+                    }
+                }
+            }
+        }
     }
     /**
      * Compares two arrays of mismatches
      */
-    function compare_mismatches($resmm, $expmm) {
+    function compare_mismatches($resmm, $expmm, $withstates = true, $usecase = false) {
         $res = count($resmm) == count($expmm);
         for ($i = 0; $i < count($resmm) && $res; $i++) {
-            $resfisrtstatenumbers = array();
-            $ressecondstatenumbers = array();
-            foreach ($resmm[$i]->first->get_states() as $stateind) {
-                $resfisrtstatenumbers[] = $resmm[$i]->first->get_fa()->statenumbers[$stateind];
+            if ($withstates) {
+                $resfisrtstatenumbers = array();
+                $ressecondstatenumbers = array();
+                foreach ($resmm[$i]->first->get_states() as $stateind) {
+                    $resfisrtstatenumbers[] = $resmm[$i]->first->get_fa()->statenumbers[$stateind];
+                }
+                foreach ($resmm[$i]->second->get_states() as $stateind) {
+                    $ressecondstatenumbers[] = $resmm[$i]->second->get_fa()->statenumbers[$stateind];
+                }
+                $res = $expmm[$i]->first->get_states() == $resfisrtstatenumbers
+                    && $expmm[$i]->second->get_states() == $ressecondstatenumbers;
             }
-            foreach ($resmm[$i]->second->get_states() as $stateind) {
-                $ressecondstatenumbers[] = $resmm[$i]->second->get_fa()->statenumbers[$stateind];
-            }
-            $res = $resmm[$i]->type == $expmm[$i]->type
-                && $resmm[$i]->matchedautomaton == $expmm[$i]->matchedautomaton
-                && $resmm[$i]->matchedstring == $expmm[$i]->matchedstring
-                && $resmm[$i]->opentags == $expmm[$i]->opentags
-                && $resmm[$i]->closetags == $expmm[$i]->closetags
-                && $expmm[$i]->first->get_states() == $resfisrtstatenumbers
-                && $expmm[$i]->second->get_states() == $ressecondstatenumbers;
+            $res = $res && $resmm[$i]->type == $expmm[$i]->type
+                 && $resmm[$i]->matchedautomaton == $expmm[$i]->matchedautomaton
+                 && ($usecase ? $resmm[$i]->matchedstring : strtolower($resmm[$i]->matchedstring))
+                    == ($usecase ? $expmm[$i]->matchedstring : strtolower($expmm[$i]->matchedstring))
+                 && $resmm[$i]->opentags == $expmm[$i]->opentags
+                 && $resmm[$i]->closetags == $expmm[$i]->closetags;
         }
         return $res;
     }
@@ -125,6 +153,29 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
             $ans = $pairs[$i]->compare($exppairs[$i]);
         }
         return $ans;
+    }
+
+    /**
+     * Compares two regular expressions
+     */
+    function compare_regexes($first, $second, &$differences, $usecase = false) {
+        global $CFG;
+        $CFG->qtype_preg_assertfailmode = true;
+        $pregquestionstd = new \qtype_preg_question();
+        $matchingoptions = $pregquestionstd->get_matching_options($usecase, $pregquestionstd->get_modifiers(false), null, 'native');
+        $matchingoptions->extensionneeded = false;
+        $matchingoptions->capturesubexpressions = true;
+
+        $firstmatcher = $pregquestionstd->get_matcher('fa_matcher', $first, $matchingoptions);
+        $firstautomaton = $firstmatcher->automaton;
+
+        $secondmatcher = $pregquestionstd->get_matcher('fa_matcher', $second, $matchingoptions);
+        $secondautomaton = $secondmatcher->automaton;
+
+        $differences = array();
+        $res = $firstautomaton->equal($secondautomaton, $differences, true);
+
+        return $res;
     }
 
     // Tests for automaton equivalence check function
@@ -1166,12 +1217,12 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
         $firstfa = \qtype_preg\fa\fa::read_fa($firstfadescription);
         $secondfa = \qtype_preg\fa\fa::read_fa($secondfadescription);
 
-        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ae', array("2"), array()));
-        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ie', array("2"), array()));
-        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'aa0', array("3"), array()));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ae'));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ie'));
+        array_push($expmismatches, $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'aa0'));
 
         $this->assertFalse($firstfa->equal($secondfa, $mismatches));
-        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
     }
     public function test_not_equiv_nfas_with_direct_loop_and_difftransition() {
         $firstfadescription = 'digraph {
@@ -1270,6 +1321,272 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
 
         $this->assertFalse($firstfa->equal($secondfa, $mismatches));
         $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+/*
+    // Tests for subpattern dividing
+    public function test_2x2_only_subpatterns_differ() {
+        $firstfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:2,4,</B>>];
+                          0->2[label=<<B>o:1, [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:2,4,</B>>];
+                          0->2[label=<<B>o: [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->3[label=<<B>o: [b] c:</B>>];
+                          }';
+
+        $mismatches = array();
+        $firstfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($firstfadescription));
+        $secondfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($secondfadescription));
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 0, 'ab', array(), array(), 'a', array(1), array()),
+            $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 1, 'ab', array(), array(), 'a', array(), array()));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches, true));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_2x1_subpattern_differ() {
+        $firstfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:2,4,</B>>];
+                          0->2[label=<<B>o:1, [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:2,4,</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          }';
+
+        $mismatches = array();
+        $firstfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($firstfadescription));
+        $secondfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($secondfadescription));
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 0, 'ab', array(), array(), 'a', array(1), array()));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches, true));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_2x2_after_subpatterns_dividing_differ() {
+        $firstfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->4[label=<<B>o:7, [b] c:</B>>];
+                          2->5[label=<<B>o:5, [b] c:</B>>];
+                          4->3[label=<<B>o: [c] c:7,</B>>];
+                          5->3[label=<<B>o: [c] c:5,</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->4[label=<<B>o:5, [b] c:</B>>];
+                          2->5[label=<<B>o:8, [b] c:</B>>];
+                          4->3[label=<<B>o: [c] c:5,</B>>];
+                          5->3[label=<<B>o: [c] c:8,</B>>];
+                          }';
+
+        $mismatches = array();
+        $firstfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($firstfadescription));
+        $secondfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($secondfadescription));
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 0, 'abc', array(), array(), 'ab', array(7), array()),
+            $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 1, 'abc', array(), array(), 'ab', array(8), array()));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches, true));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_2x2_after_subpatterns_dividing_character_mismatch() {
+        $firstfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->3[label=<<B>o: [c] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->3[label=<<B>o: [b] c:</B>>];
+                          }';
+
+        $mismatches = array();
+        $firstfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($firstfadescription));
+        $secondfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($secondfadescription));
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, 'ac'),
+            $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 1, 'ab', array(), array(), 'ab', array(3), array()));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches, true));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_2x2_after_subpatterns_dividing_final_state_mismatch() {
+        $firstfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->4[label=<<B>o: [c] c:</B>>];
+                          4->3[label=<<B>o: [d] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->3[label=<<B>o: [c] c:</B>>];
+                          2->4[label=<<B>o: [c] c:</B>>];
+                          4->3[label=<<B>o: [d] c:</B>>];
+                          }';
+
+        $mismatches = array();
+        $firstfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($firstfadescription));
+        $secondfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($secondfadescription));
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, 'ac'));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches, true));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+    public function test_2x2_subpatterns_dividing_mismatch() {
+        $firstfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->3[label=<<B>o: [c] c:</B>>];
+                          2->3[label=<<B>o: [b] c:</B>>];
+                          }';
+        $secondfadescription = 'digraph {
+                          0;
+                          3;
+                          0->1[label=<<B>o:1, [a] c:</B>>];
+                          0->2[label=<<B>o:3, [a] c:</B>>];
+                          1->3[label=<<B>o: [b] c:</B>>];
+                          2->3[label=<<B>o: [c] c:</B>>];
+                          }';
+
+        $mismatches = array();
+        $firstfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($firstfadescription));
+        $secondfa = $this->switch_meta_to_subexpr(\qtype_preg\fa\fa::read_fa($secondfadescription));
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 0, 'ac', array(), array(), 'a', array(1), array()),
+            $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 1, 'ab', array(), array(), 'a', array(1), array()));
+        $this->assertFalse($firstfa->equal($secondfa, $mismatches, true));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches));
+    }
+*/
+    // Tests for regex equivalence check with automata.
+    function test_equal_simple_regexes() {
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('[0-9]{4}', '[0-9][0-9][0-9][0-9]', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+    }
+    function test_regexes_with_character_mismatch() {
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '000'));
+        $this->assertFalse($this->compare_regexes('[0-9]{4}', '[0-9][0-9][1-9][0-9]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 0, '9'));
+        $this->assertFalse($this->compare_regexes('[0-9]{4}', '[0-8][0-9][0-9][0-9]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, '9'));
+        $this->assertFalse($this->compare_regexes('[0-8]{4}', '[0-9][0-8][0-8][0-8]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::CHARACTER, 1, '000a'));
+        $this->assertFalse($this->compare_regexes('[0-9]{4}', '[0-9][0-9][0-9][0-9a]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+    }
+    function test_regexes_with_final_state_mismatch() {
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, '0000'));
+        $this->assertFalse($this->compare_regexes('[0-9]{4}', '[0-9][0-9][0-9][0-9][0-9]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, '0000'));
+        $this->assertFalse($this->compare_regexes('[0-9]{5}', '[0-9][0-9][0-9][0-9]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+    }
+    function test_regexes_with_subpattern_mismatch() {
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 0, '0', array(), array(), array(1), array(1)),
+            $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 1, '0'));
+        $this->assertFalse($this->compare_regexes('([0-9]){4}', '[0-9]([0-9][0-9])[0-9]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 0, '00'),
+            $this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN, 1, '00', array(), array(), array(1), array()));
+        $this->assertFalse($this->compare_regexes('[0-9]{4}', '[0-9]([0-9][0-9])[0-9]', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+    }
+    function test_plus_quantifier() {
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('a+', 'a+', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, 'a'));
+        $this->assertFalse($this->compare_regexes('a+', 'aa+', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+    }
+    function test_star_quantifier() {
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('qa*', 'qa*', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 1, 'q'));
+        $this->assertFalse($this->compare_regexes('qa+', 'qa*', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+    }
+    function test_numerical_quantifiers() {
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('q{3,5}', 'qqq{1,3}', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('q{3,}', 'qqq+', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, 'qqq'));
+        $this->assertFalse($this->compare_regexes('q{3,5}', 'qqq{2,4}', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+    }
+    function test_epsilon_transition() {
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('q*', 'q*', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+
+        $mismatches = array();
+        $expmismatches = array($this->create_mismatch(\qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE, 0, ''));
+        $this->assertFalse($this->compare_regexes('q*', 'q+', $mismatches));
+        $this->assertTrue($this->compare_mismatches($mismatches, $expmismatches, false));
+    }
+    function test_assertions() {
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('^qwerty', '^qwerty', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
+
+        $mismatches = array();
+        $this->assertTrue($this->compare_regexes('qwerty$', 'qwerty$', $mismatches));
+        $this->assertTrue(count($mismatches) == 0);
     }
 /*
     // Tests for function compare_groups
