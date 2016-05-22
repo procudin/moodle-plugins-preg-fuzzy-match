@@ -111,7 +111,7 @@ class states_group {
      * Compares two groups
      */
     public function equal($other) {
-        // Check if all states of this group are inluded in given
+        // Check if all states of this group are included in the given one
         foreach ($this->states as $state) {
             if (!in_array($state, $other->states))
                 return false;
@@ -138,7 +138,7 @@ class states_group {
     }
 
     /**
-     * Checkes if group is empty
+     * Checks if group is empty
      */
     public function is_empty() {
         return count($this->states) == 0;
