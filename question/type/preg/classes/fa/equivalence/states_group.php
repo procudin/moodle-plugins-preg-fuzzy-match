@@ -33,6 +33,10 @@ defined('MOODLE_INTERNAL') || die();
 class states_group {
     /** @var array of states indexes in the group */
     public $states;
+    /** @var array of open tags */
+    public $opentags;
+    /** @var array of close tags */
+    public $closetags;
     /** @var finite automaton, the states of which are included in the group */
     public $fa;
 
