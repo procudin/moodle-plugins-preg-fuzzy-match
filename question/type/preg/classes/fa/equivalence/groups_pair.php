@@ -35,25 +35,39 @@ class groups_pair {
     public $second;
     /** @var path to current groups */
     public $matchedstring;
-    /** @var bool true, if there was tag mismatch for this path, otherwise false */
-    public $tagmismatch;
+    /** @var string explanation about matched assert */
+    public $assert;
 
     public function __construct($other = null) {
         if ($other != null) {
             $this->first = $other->first;
             $this->second = $other->second;
             $this->matchedstring = $other->matchedstring;
-            $this->tagmismatch = $other->tagmismatch;
         }
     }
 
-    public static function generate_pair($firstgroup, $secondgroup, $matchedstring, $tagmismatch = false) {
+    public static function generate_pair($firstgroup, $secondgroup, $matchedstring, $assert = null) {
         $pair = new groups_pair();
         $pair->first = $firstgroup;
         $pair->second = $secondgroup;
         $pair->matchedstring = $matchedstring;
-        $pair->tagmismatch = $tagmismatch;
+        $pair->assert = $assert;
 
         return $pair;
+    }
+
+    /**
+     * Compare equality of two pairs of groups
+     * @param $other groups_pair with which to compare
+     * @param bool $withmatchedstring the whether to compare with matchedstring or not
+     * @return bool the whether two groups pairs are equal
+     */
+    public function equal($other, $withmatchedstring = false) {
+        $res = $this->first->equal($other->first) && $this->second->equal($other->second);
+        if ($withmatchedstring) {
+            $res &= $this->matchedstring == $other->matchedstring;
+        }
+
+        return $res;
     }
 }
