@@ -51,11 +51,11 @@ class compare_strings_analyzer extends analyzer {
 
         foreach ($this->question->teststrings as $string) {
 
-            if (!$studentmatcher->errors_exist() and !$teachermatcher->errors_exist()) {
+            if (!$studentmatcher->errors_exist() && !$teachermatcher->errors_exist()) {
                 $resulltstd = $studentmatcher->match($string->teststring);
                 $resulltt = $teachermatcher->match($string->teststring);
 
-                if ($resulltstd->indexfirst == $resulltt->indexfirst and
+                if ($resulltstd->indexfirst == $resulltt->indexfirst &&
                     $resulltstd->length == $resulltt->length) {
                     $totalfraction += $string->fraction;
                 }
