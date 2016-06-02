@@ -30,7 +30,7 @@ class compare_tree_analyzer extends analyzer {
     /**
      * Get equality for user response.
      * @param $answer string Regex answer.
-     * @param $respose string User response.
+     * @param $response string User response.
      * @return compare_tree_analyzer_result Result of compare.
      */
     public function analyze ($answer, $respose) {
