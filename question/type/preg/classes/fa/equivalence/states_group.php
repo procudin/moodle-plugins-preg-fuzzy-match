@@ -25,6 +25,8 @@
  */
 namespace qtype_preg\fa\equivalence;
 
+use qtype_preg\fa\transition;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -33,20 +35,19 @@ defined('MOODLE_INTERNAL') || die();
 class states_group {
     /** @var array of states indexes in the group */
     public $states;
-    /** @var array of open tags */
-    public $opentags;
-    /** @var array of close tags */
-    public $closetags;
-    /** @var finite automaton, the states of which are included in the group */
+    /** @var path_to_states_group path to current group */
+    public $path;
+    /** @var fa, the states of which are included in the group */
     public $fa;
+    /** @var transitions which were merged in other transitions, by which current group was reached */
+    public $mergedbeforetransitions = array();
+    public $mergedaftertransitions = array();
 
-    public function __construct($fa, $states = null) {
+    public function __construct($fa, $states = array(), $path = null) {
         $this->fa = $fa;
-        $this->states = array();
-        if ($states != null)
-            $this->states = $states;
+        $this->states = $states;
+        $this->path = $path;
     }
-
 
     /**
      * Sets states to group.
@@ -75,6 +76,14 @@ class states_group {
         foreach ($states as $state) {
             $this->add_state($state);
         }
+    }
+
+    /**
+     * Adds merged transitions to current group
+     */
+    public function add_merged_transitions($mergedbeforetransitions, $mergedaftertransitions) {
+        $this->mergedbeforetransitions = array_merge($this->mergedbeforetransitions, $mergedbeforetransitions);
+        $this->mergedaftertransitions = array_merge($this->mergedaftertransitions, $mergedaftertransitions);
     }
 
     /**
@@ -112,9 +121,19 @@ class states_group {
     }
 
     /**
+     * Returns character path to this group
+     */
+    public function matched_string() {
+        if ($this->path !== null) {
+            return $this->path->matched_string();
+        }
+        return '';
+    }
+
+    /**
      * Compares two groups
      */
-    public function equal($other) {
+    public function equal($other, $withmatchedstring = false) {
         // Check if all states of this group are included in the given one
         foreach ($this->states as $state) {
             if (!in_array($state, $other->states))
@@ -125,6 +144,11 @@ class states_group {
         foreach ($other->states as $state) {
             if (!in_array($state, $this->states))
                 return false;
+        }
+
+        // If need to compare with matched string - compare them
+        if ($withmatchedstring) {
+            return $this->path->matched_string() == $other->path->matched_string();
         }
 
         return true;
