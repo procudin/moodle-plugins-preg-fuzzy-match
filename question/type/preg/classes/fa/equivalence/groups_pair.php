@@ -33,25 +33,22 @@ class groups_pair {
     public $first;
     /** @var states_group for second automaton */
     public $second;
-    /** @var path to current groups */
-    public $matchedstring;
-    /** @var string explanation about matched assert */
-    public $assert;
+    /** @var  groups_pair parent of current group */
+    public $parent;
 
     public function __construct($other = null) {
         if ($other != null) {
             $this->first = $other->first;
             $this->second = $other->second;
-            $this->matchedstring = $other->matchedstring;
+            $this->parent = $other->parent;
         }
     }
 
-    public static function generate_pair($firstgroup, $secondgroup, $matchedstring, $assert = null) {
+    public static function generate_pair($firstgroup, $secondgroup, $parent = null) {
         $pair = new groups_pair();
         $pair->first = $firstgroup;
         $pair->second = $secondgroup;
-        $pair->matchedstring = $matchedstring;
-        $pair->assert = $assert;
+        $pair->parent = $parent;
 
         return $pair;
     }
@@ -63,11 +60,25 @@ class groups_pair {
      * @return bool the whether two groups pairs are equal
      */
     public function equal($other, $withmatchedstring = false) {
-        $res = $this->first->equal($other->first) && $this->second->equal($other->second);
-        if ($withmatchedstring) {
-            $res &= $this->matchedstring == $other->matchedstring;
-        }
+        return $this->first->equal($other->first, $withmatchedstring) && $this->second->equal($other->second, $withmatchedstring);
+    }
 
-        return $res;
+    public function matched_string() {
+        return $this->first->matched_string();
+    }
+
+    /**
+     * Return full path to current pair from the very beginning
+     * @return array of groups pairs, from which current pair was reached
+     */
+    public function path() {
+        $path = array();
+        $pair = $this;
+        do {
+            $path[] = $pair;
+            $pair = $pair->parent;
+        } while ($pair != null);
+
+        return array_reverse($path);
     }
 }

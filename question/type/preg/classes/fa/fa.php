@@ -25,6 +25,8 @@
  */
 namespace qtype_preg\fa;
 
+use qtype_preg\fa\equivalence\path_to_states_group;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/type/poasquestion/stringstream/stringstream.php');
@@ -885,13 +887,19 @@ class fa {
         // Initialize memory and stack - arrays of qtype_preg_fa_pair_of_groups
         $stack = array();
         $memory = array();
+        $finalstatepairs = array();
 
-        $assertdescriptions = array('\\A', '\\z', '\\Z', '\\G', '^', '$');
+        // Supported assertion classes
+        $assertclasses = array('qtype_preg_leaf_assert_esc_a',
+            'qtype_preg_leaf_assert_small_esc_z',
+            'qtype_preg_leaf_assert_capital_esc_z',
+            'qtype_preg_leaf_assert_esc_g',
+            'qtype_preg_leaf_assert_circumflex',
+            'qtype_preg_leaf_assert_dollar');
 
         // Generating initial pair of groups
-        $groupspair = equivalence\groups_pair::generate_pair(new equivalence\states_group($this, $this->get_start_states()),
-                                                            new equivalence\states_group($another, $another->get_start_states()),
-                                                            "");
+        $groupspair = equivalence\groups_pair::generate_pair(new equivalence\states_group($this, $this->get_start_states(), new equivalence\path_to_states_group()),
+                                                            new equivalence\states_group($another, $another->get_start_states(), new equivalence\path_to_states_group()));
         // If first group contains final states and second doesn't or vise versa
         if ($groupspair->first->has_end_states() != $groupspair->second->has_end_states()) {
             return false;
@@ -940,25 +948,35 @@ class fa {
             // Check for mismatches for each matched condition
             foreach ($currentsteppairs as $condition => $arrayofpairs) {
                 $firstgroup = new equivalence\states_group($this);
+                if (!empty($arrayofpairs)) {
+                    $firstgroup->path = $arrayofpairs[0]->first->path;
+                }
                 $secondgroup = new equivalence\states_group($another);
+                if (!empty($arrayofpairs)) {
+                    $secondgroup->path = $arrayofpairs[0]->second->path;
+                }
                 // Collect groups of states from each pair in array
                 foreach ($arrayofpairs as $pairofgroups) {
                     $firstgroup->add_states($pairofgroups->first->states);
+                    $firstgroup->add_merged_transitions($pairofgroups->first->mergedtransitions->mergedbeforetransitions,
+                        $pairofgroups->first->mergedtransitions->mergedaftertransitions);
                     $secondgroup->add_states($pairofgroups->second->states);
+                    $secondgroup->add_merged_transitions($pairofgroups->second->mergedtransitions->mergedbeforetransitions,
+                        $pairofgroups->second->mergedtransitions->mergedaftertransitions);
                 }
                 // Check for character mismatch
                 if ($firstgroup->is_empty() != $secondgroup->is_empty()) {
-                    if (!in_array(strval($condition), $assertdescriptions) && strval($condition) != 'epsilon') {
+                    if (!in_array(strval($condition), $assertclasses) && strval($condition) != 'epsilon') {
                         $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::CHARACTER, $firstgroup->is_empty() ? 1 : 0,
-                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring));
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup));
                     }
-                    elseif (in_array(strval($condition), $assertdescriptions)) {
+                    elseif (in_array(strval($condition), $assertclasses)) {
                         $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::ASSERT, $firstgroup->is_empty() ? 1 : 0,
-                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring, $condition));
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup));
                     }
                     else {
                         $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE, $firstgroup->has_end_states() ? 0 : 1,
-                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring));
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup));
                     }
                     continue;
                 }
@@ -966,9 +984,12 @@ class fa {
                 // Check for final state mismatch
                 if ($firstgroup->has_end_states() != $secondgroup->has_end_states()) {
                     $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE, $firstgroup->has_end_states() ? 0 : 1,
-                        equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->matchedstring));
+                        equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->first->matched_string()));
                     continue;
                 }
+
+                // Check for merged assertions mismatch
+                
 
                 // Adding pairs to stack and memory
                 // If current array of pairs is unique - push it to the stack and memory
@@ -997,9 +1018,15 @@ class fa {
                     }
                 }
 
+                // Push to memory, because there can be different tagsets in the same arrays of groups.
+                // That is necessary for complete check of subpattern equivalence.
+                array_push($memory, $arrayofpairs);
                 if (!$exists) {
                     array_push($stack, $arrayofpairs);
-                    array_push($memory, $arrayofpairs);
+
+                    if ($firstgroup->has_end_states() && $secondgroup->has_end_states()) {
+                        array_push($finalstatepairs, $arrayofpairs);
+                    }
                 }
             }
 
@@ -1010,7 +1037,47 @@ class fa {
             }
         }
 
+        // Check for subpattern mismatches in memory arrays
+        // This is a table of tagsets where:
+        // key - matched string;
+        // value - array of four columns:
+        //      1) opentags
+        //      2) closetags
+        //      3) flag, showing if there is no transition in first automaton, matching current conditions
+        //      4) flag, showing if there is no transition in second automaton, matching current conditions
+        /*$tagsettable = array();
+
+        foreach ($finalstatepairs as $arrayofpairs) {
+            foreach ($arrayofpairs as $finalpairofgroups) {
+                // Get path to current pair of groups from the beginning
+                $path = $finalpairofgroups->path();
+                foreach ($path as $pairofgroups) {
+                    // If there is no key for current matched string - create it
+                    if (!array_key_exists($pairofgroups->matchedstring, array_keys($tagsettable))) {
+                        $tagsettable[$pairofgroups->matchedstring] = array("opentags" => array(), "closetags" => array(), "firstgroupempty" => true, "secondgroupempty" => true);
+                    }
+                }
+            }
+        }*/
+
         return count($differences) == 0;
+    }
+
+    /**
+     * Checks if there already exists subpattern mismatch before current string
+     * @param $mismatches array of mismatches
+     * @param $matchedstring string, before which function checks existence of mismatches
+     * @return boolean true, if there already exists earlier mismatch
+     */
+    private function earlier_mismatch_exists($mismatches, $matchedstring) {
+        $keys = array_keys($mismatches);
+        // For each substring from beginning of current string search it in array of key
+        for ($length = 1; $length < count($matchedstring); $length++) {
+            if (array_search($keys, substr($matchedstring, 0, $length)) !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

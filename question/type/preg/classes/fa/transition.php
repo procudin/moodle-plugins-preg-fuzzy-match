@@ -151,270 +151,159 @@ class transition {
      */
     public static function divide_intervals($oldpair, $withtags = false) {
         $result = array();
+        // Identifiers for reflexion
+        $keys = array('first', 'second');
+        // Supported assertion classes
         $assertclasses = array('qtype_preg_leaf_assert_esc_a',
                                'qtype_preg_leaf_assert_small_esc_z',
                                'qtype_preg_leaf_assert_capital_esc_z',
                                'qtype_preg_leaf_assert_esc_g',
                                'qtype_preg_leaf_assert_circumflex',
                                'qtype_preg_leaf_assert_dollar');
-        $assertdescriptions = array('\\A', '\\z', '\\Z', '\\G', '^', '$');
-
-        // Divide charsets
-        $firstgroupcharsets = array();
-        $secondgroupcharsets = array();
-        $firstgrouptransitions = $oldpair->first->get_outgoing_transitions();
-        $secondgrouptransitions = $oldpair->second->get_outgoing_transitions();
-
+        // Charsets of two given state groups in groups pair
+        $charsets = array(array(), array());
+        // Outgoing transitions of two given state groups in groups pair
+        $transitions = array($oldpair->first->get_outgoing_transitions(), $oldpair->second->get_outgoing_transitions());
+        // Indexes of transitions, where were found assertions. Two array for each supported transition
         $assertions = array(array(array(), array()),
                             array(array(), array()),
                             array(array(), array()),
                             array(array(), array()),
                             array(array(), array()),
                             array(array(), array()));
+        // Indexes of epsilon transitions from all transitions array
         $epsilon = array(array(), array());
-        foreach ($firstgrouptransitions as $index => $curtransition) {
-            if (is_a($curtransition->pregleaf, 'qtype_preg_leaf_charset')) {
-                $firstgroupcharsets[] = $curtransition->pregleaf;
-            }
-            else {
-                for($i = 0; $i < count($assertclasses); $i++) {
-                    if (is_a($curtransition->pregleaf, $assertclasses[$i])) {
-                        $assertions[$i][0][] = $index;
+
+        // Fill described arrays with charsets, assertion and epsilon indexes
+        for ($group = 0; $group <= 1; $group++) {
+            foreach ($transitions[$group] as $index => $curtransition) {
+                // If current transition condition is charset
+                if (is_a($curtransition->pregleaf, 'qtype_preg_leaf_charset')) {
+                    $charsets[$group][] = $curtransition->pregleaf;
+                } else if (is_a($curtransition->pregleaf, 'qtype_preg_leaf') && $curtransition->pregleaf->subtype == 'empty_leaf_meta'){
+                    // If current transition condition is epsilon
+                    $epsilon[$group][] = $index;
+                } else {
+                    // If current transition condition is one of supported assertions
+                    for ($i = 0; $i < count($assertclasses); $i++) {
+                        if (is_a($curtransition->pregleaf, $assertclasses[$i])) {
+                            $assertions[$i][$group][] = $index;
+                        }
                     }
-                }
-                if (is_a($curtransition->pregleaf, 'qtype_preg_leaf') && $curtransition->pregleaf->subtype == 'empty_leaf_meta') {
-                    $epsilon[0][] = $index;
                 }
             }
         }
-        foreach ($secondgrouptransitions as $curtransition) {
-            if (is_a($curtransition->pregleaf, 'qtype_preg_leaf_charset')) {
-                $secondgroupcharsets[] = $curtransition->pregleaf;
-            }
-            else {
-                for($i = 0; $i < count($assertclasses); $i++) {
-                    if (is_a($curtransition->pregleaf, $assertclasses[$i])) {
-                        $assertions[$i][1][] = $index;
-                    }
-                }
-                if (is_a($curtransition->pregleaf, 'qtype_preg_leaf') && $curtransition->pregleaf->subtype == 'empty_leaf_meta') {
-                    $epsilon[1][] = $index;
-                }
-            }
-        }
-        $charsetranges = \qtype_preg_leaf_charset::divide_intervals($firstgroupcharsets, $secondgroupcharsets, $charsetindexes);
+
+        // Divide charsets
+        $charsetranges = \qtype_preg_leaf_charset::divide_intervals($charsets[0], $charsets[1], $charsetindexes);
+
+        // For each charset, assertion and epsilon
         for ($i = 0; $i < count($charsetranges) + count($assertions) + 1; ++$i) {
+            // Get indexes, condition and path for each iteration
             if ($i < count($charsetranges)) {
                 $indexes = $charsetindexes[$i];
+                $path = new equivalence\path_to_states_group(equivalence\path_to_states_group::CHARACTER, $charsetranges[$i][1]);
             }
             elseif ($i < count($charsetranges) + count($assertions)) {
                 $indexes = $assertions[$i - count($charsetranges)];
+                $path = new equivalence\path_to_states_group(equivalence\path_to_states_group::ASSERT, $assertclasses[$i - count($charsetranges)]);
             }
             else {
                 $indexes = $epsilon;
+                $path = new equivalence\path_to_states_group(equivalence\path_to_states_group::EPSILON);
             }
-
+            // If current pair of index arrays is empty, go to the next one
             if (count($indexes[0]) + count($indexes[1]) == 0) {
                 continue;
             }
 
-            // Counting string, matched to this pair of groups
-            $newmatchedstring = $oldpair->matchedstring;
-            if ($i < count($charsetranges)) {
-                $matchedcondition = $charsetranges[$i][1];
-                $newmatchedstring .= $matchedcondition;
-            }
-            else if ($i < count($charsetranges) + count($assertions)) {
-                $matchedcondition = $assertdescriptions[$i - count($charsetranges)];
-            }
-            else {
-                $matchedcondition = 'epsilon';
-            }
-
             // Add new array of pairs to results matching current character
-            $result[$matchedcondition] = array();
+            $result[$path->get_condition_symbol_description()] = array();
 
             // Divide by different tagsets in one automaton
-            if ($withtags && !empty($indexes[0]) && !empty($indexes[1])) {
-                $tags = array(array(), array());  // All tags: [group ind][transition ind][open or close][tag ind]
-                // Combine first group tags
-                for ($j = 0; $j < count($indexes[0]); ++$j) {
-                    $transitionind = $indexes[0][$j];
-                    $tags[0][] = array(array(), array());
-                    foreach ($firstgrouptransitions[$transitionind]->opentags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[0][$j][0][] = $tag->number;
+            if (!$withtags) {
+                // Generate state groups
+                $statesgroups = array();
+                foreach ($keys as $index => $key) {
+                    $statesgroups[$index] = new equivalence\states_group($oldpair->$key->fa);
+                    foreach ($indexes[$index] as $transitionind) {
+                        $statesgroups[$index]->add_state($transitions[$index][$transitionind]->to);
+                        $statesgroups[$index]->add_merged_transitions($transitions[$index][$transitionind]->mergedbefore, $transitions[$index][$transitionind]->mergedafter);
                     }
-                    foreach ($firstgrouptransitions[$transitionind]->closetags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[0][$j][1][] = $tag->number;
-                    }
+                    $statesgroups[$index]->path = $path->clone_path($oldpair->$key->path);
                 }
-                // Combine second group tags
-                for ($j = 0; $j < count($indexes[1]); ++$j) {
-                    $transitionind = $indexes[1][$j];
-                    $tags[1][] = array(array(), array());
-                    foreach ($secondgrouptransitions[$transitionind]->opentags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[1][$j][0][] = $tag->number;
-                    }
-                    foreach ($secondgrouptransitions[$transitionind]->closetags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[1][$j][1][] = $tag->number;
+                $result[$path->get_condition_symbol_description()][] = equivalence\groups_pair::generate_pair($statesgroups[0], $statesgroups[1], $oldpair);
+            } else {
+                $taggedpaths = array(array(), array());  // All paths with tags: [group ind][transition ind]
+                // Combine first group tags
+                foreach ($keys as $groupindex => $key) {
+                    foreach ($indexes[$groupindex] as $transitionindex) {
+                        // Get current transition
+                        $transition = $transitions[$groupindex][$transitionindex];
+                        // Create new path clolne for current tagsets
+                        $curpath = $path->clone_path();
+                        // Combine tags to each set
+                        $curpath->filter_subexpression_tags($transition->opentags, 'beforeopentags');
+                        $curpath->filter_subexpression_tags($transition->closetags, 'afterclosetags');
+
+                        // Combine tags from merged transitions
+                        foreach ($transition->mergedbefore as $mergedtransition) {
+                            $curpath->filter_subexpression_tags($mergedtransition->opentags, 'beforeopentags');
+                            $curpath->filter_subexpression_tags($mergedtransition->closetags, 'beforeclosetags');
+                        }
+                        foreach ($transition->mergedafter as $mergedtransition) {
+                            $curpath->filter_subexpression_tags($mergedtransition->opentags, 'afteropentags');
+                            $curpath->filter_subexpression_tags($mergedtransition->closetags, 'afterclosetags');
+                        }
+
+                        // Add new path to array
+                        $taggedpaths[$groupindex][] = $curpath;
                     }
                 }
 
                 // Divide tagsets to noncrossed
-
-                // key - id from $noncrossedtagsetvalues, value - equivalence\states_group.
-                $noncrossedtagsets = array('first' => array(), 'second' => array());
-                // key - id, value - two arrays of open and close tags.
-                $noncrossedtagsetvalues = array('first' => array(), 'second' => array());
-                foreach (array_keys($noncrossedtagsets) as $ind => $key) {
-                    $transitionsarrayname = $key . 'grouptransitions';
-                    $transitionsarray = $$transitionsarrayname;
-                    foreach ($tags[$ind] as $transitionind => $tagset) {
-                        // If states group for current tagset already exists - add state to that group
-                        $isnewtagset = true;
-                        foreach ($noncrossedtagsetvalues[$key] as $tagsetid => $existingtagset) {
-                            if ($existingtagset[0] == $tagset[0] && $existingtagset[1] == $tagset[1]) {
-                                $noncrossedtagsets[$key][$tagsetid]->add_state($transitionsarray[$indexes[$ind][$transitionind]]->to);
-                                $isnewtagset = false;
-                                break;
+                $newdividedgroups = array(array(), array()); // All new divided groups
+                foreach ($keys as $groupindex => $key) {
+                    foreach ($taggedpaths[$groupindex] as $transitionindex => $curpath) {
+                        $isnewpath = true;
+                        $transition = $transitions[$groupindex][$indexes[$groupindex][$transitionindex]];
+                        foreach ($newdividedgroups[$groupindex] as $group) {
+                            if ($group->path->equal_step($curpath)) {
+                                $group->add_state($transition->to);
+                                $group->add_merged_transitions($transition->mergedbefore, $transition->mergedafter);
+                                $isnewpath = false;
                             }
                         }
-                        // If there is no states group for current tagset - create new one and add current state to it
-                        if ($isnewtagset) {
-                            $id = count($noncrossedtagsetvalues[$key]);
-                            $noncrossedtagsetvalues[$key][$id] = $tagset;
-                            $noncrossedtagsets[$key][$id] = new equivalence\states_group($oldpair->$key->fa, array($transitionsarray[$indexes[$ind][$transitionind]]->to));
-                            $noncrossedtagsets[$key][$id]->opentags = $tagset[0];
-                            $noncrossedtagsets[$key][$id]->closetags = $tagset[1];
+                        // If current path is new - create new group for it
+                        if ($isnewpath) {
+                            $newgroup = new equivalence\states_group($oldpair->$key->fa, array($transition->to), $curpath->clone_path($oldpair->$key->path));
+                            $newgroup->add_merged_transitions($transition->mergedbefore, $transition->mergedafter);
+                            $newdividedgroups[$groupindex][] = $newgroup;
                         }
                     }
                 }
-
                 // Generate new groups for each unique combination of first and second groups tagsets
-                foreach ($noncrossedtagsets['first'] as $firstgroupstatesgroup) {
-                    foreach ($noncrossedtagsets['second'] as $secondgroupstatesgroup) {
-                        $result[$matchedcondition][] = equivalence\groups_pair::generate_pair($firstgroupstatesgroup,
-                            $secondgroupstatesgroup, $newmatchedstring);
+                if (empty($newdividedgroups[1])) {
+                    foreach ($newdividedgroups[0] as $firstgroupstatesgroup) {
+                        $result[$path->get_condition_symbol_description()][] = equivalence\groups_pair::generate_pair($firstgroupstatesgroup,
+                            new equivalence\states_group($oldpair->second->fa, array(), $path->clone_path($oldpair->second->path)), $oldpair);
                     }
                 }
-            }
-            else {
-                // Generating first state group
-                $firststatesgroup = new equivalence\states_group($oldpair->first->fa);
-                foreach ($indexes[0] as $transitionind) {
-                    $firststatesgroup->add_state($firstgrouptransitions[$transitionind]->to);
-                }
-                // Generating second state group
-                $secondstatesgroup = new equivalence\states_group($oldpair->second->fa);
-                foreach ($indexes[1] as $transitionind) {
-                    $secondstatesgroup->add_state($secondgrouptransitions[$transitionind]->to);
-                }
-                $result[$matchedcondition][] = equivalence\groups_pair::generate_pair($firststatesgroup, $secondstatesgroup, $newmatchedstring);
-            }
-            // Check for character mismatch
-            /*if ($newpair->first->is_empty() != $newpair->second->is_empty()) {
-                if ($i < count($charsetranges)) {
-                    $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::CHARACTER,
-                        $newpair->first->is_empty() ? 1 : 0, $newpair);
-                }
-                elseif ($i < count($charsetranges) + count($assertions)) {
-                    $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::ASSERT,
-                        $newpair->first->is_empty() ? 1 : 0, $newpair);
-                    $mismatches[count($mismatches) - 1]->assert = $assertdescriptions[$i - count($charsetranges)];
+                else if (empty($newdividedgroups[0])) {
+                    foreach ($newdividedgroups[1] as $secondgroupstatesgroup) {
+                        $result[$path->get_condition_symbol_description()][] = equivalence\groups_pair::generate_pair(new equivalence\states_group($oldpair->first->fa,
+                            array(), $path->clone_path($oldpair->first->path)), $secondgroupstatesgroup, $oldpair);
+                    }
                 }
                 else {
-                    $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE,
-                        $newpair->first->has_end_states() ? 0 : 1, $newpair);
-                }
-                continue;
-            }
-
-            // Check for final state mismatch
-            if ($newpair->first->has_end_states() != $newpair->second->has_end_states()) {
-                $mismatches[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE,
-                    $newpair->first->has_end_states() ? 0 : 1, $newpair);
-                continue;
-            }
-
-            // Check for merged assertions mismatch
-
-
-            if ($withtags && $newpair->tagmismatch == false)
-            {
-                // Compare tagsets
-                $tags = array(array(), array());  // All tags: [group ind][transition ind][open or close][tag ind]
-                // Combine first group tags
-                for ($j = 0; $j < count($indexes[0]); ++$j) {
-                    $transitionind = $indexes[0][$j];
-                    $tags[0][] = array(array(), array());
-                    foreach ($firstgrouptransitions[$transitionind]->opentags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[0][$j][0][] = $tag->number;
-                    }
-                    foreach ($firstgrouptransitions[$transitionind]->closetags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[0][$j][1][] = $tag->number;
-                    }
-                }
-                // Combine second group tags
-                for ($j = 0; $j < count($indexes[1]); ++$j) {
-                    $transitionind = $indexes[1][$j];
-                    $tags[1][] = array(array(), array());
-                    foreach ($secondgrouptransitions[$transitionind]->opentags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[1][$j][0][] = $tag->number;
-                    }
-                    foreach ($secondgrouptransitions[$transitionind]->closetags as $tag) {
-                        if (is_a($tag, 'qtype_preg_node_subexpr'))
-                            $tags[1][$j][1][] = $tag->number;
-                    }
-                }
-
-                // Check for mismatches
-                // For each group (first and second)
-                for ($groupind = 0; $groupind <= 1; ++$groupind) {
-                    // For each pair of tagsets of different groups
-                    for ($onegrouptransitionind = 0; $onegrouptransitionind < count($tags[$groupind]); ++$onegrouptransitionind) {
-                        $matchfound = false;
-                        for ($othergrouptransitionind = 0; $othergrouptransitionind < count($tags[($groupind + 1) % 2]) && !$matchfound; ++$othergrouptransitionind) {
-                            // Check for situation with empty tagsets
-                            if (count($tags[$groupind][$onegrouptransitionind][0]) + count($tags[$groupind][$onegrouptransitionind][1]) == 0) {
-                                if (count($tags[($groupind + 1) % 2][$othergrouptransitionind][0]) + count($tags[($groupind + 1) % 2][$othergrouptransitionind][1]) == 0) {
-                                    $matchfound = true;
-                                }
-                                continue;
-                            }
-                            $mismatchfound = false;
-                            // For both open and close tags
-                            for ($tagtype = 0; $tagtype <= 1 && !$mismatchfound; ++$tagtype) {
-                                // Check, if tag from one group has no equivalent in other group
-                                foreach ($tags[$groupind][$onegrouptransitionind][$tagtype] as $onegrouptag) {
-                                    if (!in_array($onegrouptag, $tags[($groupind + 1) % 2][$othergrouptransitionind][$tagtype])) {
-                                        $mismatchfound = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // If all tags from transition of one group found in one of transitions of other group, then match found
-                            if (!$mismatchfound) {
-                                $matchfound = true;
-                            }
-                        }
-                        if (!$matchfound) {
-                            $newpair->tagmismatch = true;
-                            $mismatch  = new equivalence\mismatched_pair(equivalence\mismatched_pair::SUBPATTERN, $groupind, $newpair);
-                            $mismatch->opentags = $tags[$groupind][$onegrouptransitionind][0];
-                            $mismatch->closetags = $tags[$groupind][$onegrouptransitionind][1];
-                            $mismatches[] = $mismatch;
+                    foreach ($newdividedgroups[0] as $firstgroupstatesgroup) {
+                        foreach ($newdividedgroups[1] as $secondgroupstatesgroup) {
+                            $result[$path->get_condition_symbol_description()][] = equivalence\groups_pair::generate_pair($firstgroupstatesgroup,
+                                $secondgroupstatesgroup, $oldpair);
                         }
                     }
                 }
-            }*/
+            }
         }
 
         return $result;
