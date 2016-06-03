@@ -86,8 +86,18 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
      */
     function create_mismatch($type, $matchedautomaton, $matchedstring, $firstfastates = array(), $secondfastates = array(), $stringbeforesubpatternmismatch = "", $opentags = array(), $closetags = array()) {
         $pair = \qtype_preg\fa\equivalence\groups_pair::generate_pair(new \qtype_preg\fa\equivalence\states_group(null, $firstfastates),
-                                                                      new \qtype_preg\fa\equivalence\states_group(null, $secondfastates),
-                                                                      $matchedstring);
+                                                                      new \qtype_preg\fa\equivalence\states_group(null, $secondfastates));
+
+        $prevpath = new \qtype_preg\fa\equivalence\path_to_states_group();
+        $path = $prevpath;
+        for ($i = 0; $i < strlen($matchedstring); $i++) {
+            $path = new \qtype_preg\fa\equivalence\path_to_states_group(\qtype_preg\fa\equivalence\path_to_states_group::CHARACTER, $matchedstring[$i]);
+            $path->prev = $prevpath;
+            $prevpath = $path;
+        }
+        $pair->first->path = $path;
+        $pair->second->path = $path;
+
         $mismatch = new \qtype_preg\fa\equivalence\mismatched_pair($type, $matchedautomaton, $pair);
         $mismatch->opentags = $opentags;
         $mismatch->closetags = $closetags;
@@ -137,8 +147,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
             }
             $res = $res && $resmm[$i]->type == $expmm[$i]->type
                  && $resmm[$i]->matchedautomaton == $expmm[$i]->matchedautomaton
-                 && ($usecase ? $resmm[$i]->matchedstring : strtolower($resmm[$i]->matchedstring))
-                    == ($usecase ? $expmm[$i]->matchedstring : strtolower($expmm[$i]->matchedstring))
+                 && ($usecase ? $resmm[$i]->matched_string() : strtolower($resmm[$i]->matched_string()))
+                    == ($usecase ? $expmm[$i]->matched_string() : strtolower($expmm[$i]->matched_string()))
                  && $resmm[$i]->opentags == $expmm[$i]->opentags
                  && $resmm[$i]->closetags == $expmm[$i]->closetags;
         }
