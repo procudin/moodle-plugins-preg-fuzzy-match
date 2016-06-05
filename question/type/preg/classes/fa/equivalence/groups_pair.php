@@ -57,10 +57,12 @@ class groups_pair {
      * Compare equality of two pairs of groups
      * @param $other groups_pair with which to compare
      * @param bool $withmatchedstring the whether to compare with matchedstring or not
+     * @param bool @withpath the whether to compare with paths to groups or not
      * @return bool the whether two groups pairs are equal
      */
-    public function equal($other, $withmatchedstring = false) {
-        return $this->first->equal($other->first, $withmatchedstring) && $this->second->equal($other->second, $withmatchedstring);
+    public function equal($other, $withmatchedstring = false, $withpath = false) {
+        return $this->first->equal($other->first, $withmatchedstring, $withpath)
+            && $this->second->equal($other->second, $withmatchedstring, $withpath);
     }
 
     public function matched_string() {
