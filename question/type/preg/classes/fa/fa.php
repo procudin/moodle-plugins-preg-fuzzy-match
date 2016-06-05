@@ -25,9 +25,13 @@
  */
 namespace qtype_preg\fa;
 
+use qtype_preg\fa\equivalence\assertion_mismatch;
 use qtype_preg\fa\equivalence\path_to_states_group;
+use qtype_preg\fa\equivalence\subpattern_mismatch;
 
 defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
 
 require_once($CFG->dirroot . '/question/type/poasquestion/stringstream/stringstream.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_lexer.lex.php');
@@ -928,7 +932,7 @@ class fa {
                         foreach ($arrayofpairs as $newgroupspair) {
                             $isunique = true;
                             foreach ($currentsteppairs[$matchedsymbol] as $existinggroupspair) {
-                                if ($newgroupspair->equal($existinggroupspair)) {
+                                if ($newgroupspair->equal($existinggroupspair, false, true)) {
                                     $isunique = false;
                                     break;
                                 }
@@ -958,24 +962,24 @@ class fa {
                 // Collect groups of states from each pair in array
                 foreach ($arrayofpairs as $pairofgroups) {
                     $firstgroup->add_states($pairofgroups->first->states);
-                    $firstgroup->add_merged_transitions($pairofgroups->first->mergedtransitions->mergedbeforetransitions,
-                        $pairofgroups->first->mergedtransitions->mergedaftertransitions);
+                    $firstgroup->add_merged_transitions($pairofgroups->first->mergedbeforetransitions,
+                        $pairofgroups->first->mergedaftertransitions);
                     $secondgroup->add_states($pairofgroups->second->states);
-                    $secondgroup->add_merged_transitions($pairofgroups->second->mergedtransitions->mergedbeforetransitions,
-                        $pairofgroups->second->mergedtransitions->mergedaftertransitions);
+                    $secondgroup->add_merged_transitions($pairofgroups->second->mergedbeforetransitions,
+                        $pairofgroups->second->mergedaftertransitions);
                 }
                 // Check for character mismatch
                 if ($firstgroup->is_empty() != $secondgroup->is_empty()) {
                     if (!in_array(strval($condition), $assertclasses) && strval($condition) != 'epsilon') {
-                        $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::CHARACTER, $firstgroup->is_empty() ? 1 : 0,
+                        $differences[] = new equivalence\character_mismatch($firstgroup->is_empty() ? 1 : 0,
                             equivalence\groups_pair::generate_pair($firstgroup, $secondgroup));
                     }
                     elseif (in_array(strval($condition), $assertclasses)) {
-                        $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::ASSERT, $firstgroup->is_empty() ? 1 : 0,
+                        $differences[] = new equivalence\assertion_mismatch($firstgroup->is_empty() ? 1 : 0,
                             equivalence\groups_pair::generate_pair($firstgroup, $secondgroup));
                     }
                     else {
-                        $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE, $firstgroup->has_end_states() ? 0 : 1,
+                        $differences[] = new equivalence\final_state_mismatch($firstgroup->has_end_states() ? 0 : 1,
                             equivalence\groups_pair::generate_pair($firstgroup, $secondgroup));
                     }
                     continue;
@@ -983,13 +987,48 @@ class fa {
 
                 // Check for final state mismatch
                 if ($firstgroup->has_end_states() != $secondgroup->has_end_states()) {
-                    $differences[] = new equivalence\mismatched_pair(equivalence\mismatched_pair::FINAL_STATE, $firstgroup->has_end_states() ? 0 : 1,
-                        equivalence\groups_pair::generate_pair($firstgroup, $secondgroup, $arrayofpairs[0]->first->matched_string()));
+                    $differences[] = new equivalence\final_state_mismatch($firstgroup->has_end_states() ? 0 : 1,
+                        equivalence\groups_pair::generate_pair($firstgroup, $secondgroup));
                     continue;
                 }
 
                 // Check for merged assertions mismatch
-                
+                foreach ($assertclasses as $assert) {
+                    // Merged before
+                    $counter = 0;
+                    foreach ($firstgroup->mergedbeforetransitions as $mergedtransition) {
+                        if (is_a($mergedtransition, $assert)) {
+                            $counter++;
+                        }
+                    }
+                    foreach ($secondgroup->mergedbeforetransitions as $mergedtransition) {
+                        if (is_a($mergedtransition, $assert)) {
+                            $counter--;
+                        }
+                    }
+                    if ($counter !== 0) {
+                        $differences[] = new equivalence\assertion_mismatch($firstgroup->is_empty() ? 1 : 0,
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup), $assert,
+                            assertion_mismatch::POSITION_BEFORE);
+                    }
+                    // Merged after
+                    $counter = 0;
+                    foreach ($firstgroup->mergedaftertransitions as $mergedtransition) {
+                        if (is_a($mergedtransition, $assert)) {
+                            $counter++;
+                        }
+                    }
+                    foreach ($secondgroup->mergedaftertransitions as $mergedtransition) {
+                        if (is_a($mergedtransition, $assert)) {
+                            $counter--;
+                        }
+                    }
+                    if ($counter !== 0) {
+                        $differences[] = new equivalence\assertion_mismatch($firstgroup->is_empty() ? 1 : 0,
+                            equivalence\groups_pair::generate_pair($firstgroup, $secondgroup), $assert,
+                            assertion_mismatch::POSITION_AFTER);
+                    }
+                }
 
                 // Adding pairs to stack and memory
                 // If current array of pairs is unique - push it to the stack and memory
@@ -1021,12 +1060,15 @@ class fa {
                 // Push to memory, because there can be different tagsets in the same arrays of groups.
                 // That is necessary for complete check of subpattern equivalence.
                 array_push($memory, $arrayofpairs);
+                if ($firstgroup->has_end_states() && $secondgroup->has_end_states()) {
+                    foreach($arrayofpairs as $pair) {
+                        if ($pair->first->has_end_states() && $pair->second->has_end_states()) {
+                            $finalstatepairs[] = $pair;
+                        }
+                    }
+                }
                 if (!$exists) {
                     array_push($stack, $arrayofpairs);
-
-                    if ($firstgroup->has_end_states() && $secondgroup->has_end_states()) {
-                        array_push($finalstatepairs, $arrayofpairs);
-                    }
                 }
             }
 
@@ -1038,28 +1080,54 @@ class fa {
         }
 
         // Check for subpattern mismatches in memory arrays
-        // This is a table of tagsets where:
-        // key - matched string;
-        // value - array of four columns:
-        //      1) opentags
-        //      2) closetags
-        //      3) flag, showing if there is no transition in first automaton, matching current conditions
-        //      4) flag, showing if there is no transition in second automaton, matching current conditions
-        /*$tagsettable = array();
-
-        foreach ($finalstatepairs as $arrayofpairs) {
-            foreach ($arrayofpairs as $finalpairofgroups) {
-                // Get path to current pair of groups from the beginning
-                $path = $finalpairofgroups->path();
-                foreach ($path as $pairofgroups) {
-                    // If there is no key for current matched string - create it
-                    if (!array_key_exists($pairofgroups->matchedstring, array_keys($tagsettable))) {
-                        $tagsettable[$pairofgroups->matchedstring] = array("opentags" => array(), "closetags" => array(), "firstgroupempty" => true, "secondgroupempty" => true);
-                    }
+        // Paths to groups, containing final states
+        $equalpaths = array();
+        $nonequalpaths = array();
+        foreach ($finalstatepairs as $pair) {
+            // If both paths are equal, put one of them to equals array
+            if ($pair->first->path->equal_path($pair->second->path)) {
+                $equalpaths[] = $pair->first->path;
+            } else {
+                $nonequalpaths[] = array($pair->first->path, $pair->second->path, $pair);
+            }
+        }
+        // If there were found equal paths for current nonequal - don't consider them
+        for ($i = 0; $i < count($nonequalpaths); $i++) {
+            // Find equal path for first path in pair
+            $equalexists = false;
+            foreach ($equalpaths as $equalpath) {
+                if ($equalpath->equal_path($nonequalpaths[$i][0])) {
+                    $equalexists = true;
+                    break;
                 }
             }
-        }*/
 
+            // If for first path in pair equal was found, find equal path for second path in pair
+            if ($equalexists) {
+                $equalexists = false;
+                foreach ($equalpaths as $equalpath) {
+                    if ($equalpath->equal_path($nonequalpaths[$i][1])) {
+                        $equalexists = true;
+                        break;
+                    }
+                }
+                if ($equalexists) {
+                    array_splice($nonequalpaths, $i, 1);
+                    $i--;
+                }
+            }
+        }
+
+        // Generate mismatches for each left nonequal path
+        foreach ($nonequalpaths as $nonequalpathpair) {
+            $mm = new subpattern_mismatch(-1, $nonequalpathpair[2]);
+            $mm->matchedsubpatterns = $nonequalpathpair[0]->equal_subpatterns($nonequalpathpair[1]);
+            $nonequalpathpair[0]->mismatched_subpatterns($nonequalpathpair[1], $mm->diffpositionsubpatterns, $mm->uniquesubpatterns);
+            $differences[] = $mm;
+        }
+
+        // Checking mismatches count
+        $differences = array_slice($differences, 0, 5);
         return count($differences) == 0;
     }
 
