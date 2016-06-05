@@ -1080,54 +1080,57 @@ class fa {
         }
 
         // Check for subpattern mismatches in memory arrays
-        // Paths to groups, containing final states
-        $equalpaths = array();
-        $nonequalpaths = array();
-        foreach ($finalstatepairs as $pair) {
-            // If both paths are equal, put one of them to equals array
-            if ($pair->first->path->equal_path($pair->second->path)) {
-                $equalpaths[] = $pair->first->path;
-            } else {
-                $nonequalpaths[] = array($pair->first->path, $pair->second->path, $pair);
-            }
-        }
-        // If there were found equal paths for current nonequal - don't consider them
-        for ($i = 0; $i < count($nonequalpaths); $i++) {
-            // Find equal path for first path in pair
-            $equalexists = false;
-            foreach ($equalpaths as $equalpath) {
-                if ($equalpath->equal_path($nonequalpaths[$i][0])) {
-                    $equalexists = true;
-                    break;
+        if ($withtags) {
+            // Paths to groups, containing final states
+            $equalpaths = array();
+            $nonequalpaths = array();
+            foreach ($finalstatepairs as $pair) {
+                // If both paths are equal, put one of them to equals array
+                if ($pair->first->path->equal_path($pair->second->path)) {
+                    $equalpaths[] = $pair->first->path;
+                } else {
+                    $nonequalpaths[] = array($pair->first->path, $pair->second->path, $pair);
                 }
             }
-
-            // If for first path in pair equal was found, find equal path for second path in pair
-            if ($equalexists) {
+            // If there were found equal paths for current nonequal - don't consider them
+            for ($i = 0; $i < count($nonequalpaths); $i++) {
+                // Find equal path for first path in pair
                 $equalexists = false;
                 foreach ($equalpaths as $equalpath) {
-                    if ($equalpath->equal_path($nonequalpaths[$i][1])) {
+                    if ($equalpath->equal_path($nonequalpaths[$i][0])) {
                         $equalexists = true;
                         break;
                     }
                 }
+
+                // If for first path in pair equal was found, find equal path for second path in pair
                 if ($equalexists) {
-                    array_splice($nonequalpaths, $i, 1);
-                    $i--;
+                    $equalexists = false;
+                    foreach ($equalpaths as $equalpath) {
+                        if ($equalpath->equal_path($nonequalpaths[$i][1])) {
+                            $equalexists = true;
+                            break;
+                        }
+                    }
+                    if ($equalexists) {
+                        array_splice($nonequalpaths, $i, 1);
+                        $i--;
+                    }
                 }
             }
+
+            // Generate mismatches for each left nonequal path
+            foreach ($nonequalpaths as $nonequalpathpair) {
+                $mm = new subpattern_mismatch(-1, $nonequalpathpair[2]);
+                $mm->matchedsubpatterns = $nonequalpathpair[0]->equal_subpatterns($nonequalpathpair[1]);
+                $nonequalpathpair[0]->mismatched_subpatterns($nonequalpathpair[1], $mm->diffpositionsubpatterns, $mm->uniquesubpatterns);
+                $differences[] = $mm;
+            }
+
+            // Checking mismatches count
+            $differences = array_slice($differences, 0, 5);
         }
 
-        // Generate mismatches for each left nonequal path
-        foreach ($nonequalpaths as $nonequalpathpair) {
-            $mm = new subpattern_mismatch(-1, $nonequalpathpair[2]);
-            $mm->matchedsubpatterns = $nonequalpathpair[0]->equal_subpatterns($nonequalpathpair[1]);
-            $nonequalpathpair[0]->mismatched_subpatterns($nonequalpathpair[1], $mm->diffpositionsubpatterns, $mm->uniquesubpatterns);
-            $differences[] = $mm;
-        }
-
-        // Checking mismatches count
-        $differences = array_slice($differences, 0, 5);
         return count($differences) == 0;
     }
 
