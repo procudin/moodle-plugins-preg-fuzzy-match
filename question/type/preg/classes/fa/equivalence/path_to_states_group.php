@@ -32,38 +32,24 @@ class path_to_states_group {
     const CHARACTER = 0x0002;
     const ASSERT = 0x0004;
     const EPSILON = 0x0006;
-    /**
-     * @var type of current path step. Set to one of constants of current class
-     */
+    /** @var type of current path step. Set to one of constants of current class */
     public $type;
-    /**
-     * @var char character, matched in automaton to get this group.
-     */
+    /** @var char character, matched in automaton to get this group. */
     public $character;
-    /**
-     * @var string assert, matched in automaton to get this group.
-     */
+    /** @var string assert, matched in automaton to get this group. */
     public $assert;
-    /**
-     * @var array of integer opentags, matched before character.
-     */
+    /** @var array of integer opentags, matched before character. */
     public $beforeopentags = array();
-    /**
-     * @var array of integer closetags, matched before character. Necessary for merged transitions.
-     */
+    /** @var array of integer closetags, matched before character. Necessary for merged transitions. */
     public $beforeclosetags = array();
-    /**
-     * @var array of integer opentags, matched after character. Necessary for merged transitions.
-     */
+    /** @var array of integer opentags, matched after character. Necessary for merged transitions. */
     public $afteropentags = array();
-    /**
-     * @var array of integer closetags, matched after character.
-     */
+    /** @var array of integer closetags, matched after character. */
     public $afterclosetags = array();
-    /**
-     * @var path_to_states_group path to previous group.
-     */
+    /** @var path_to_states_group path to previous group. */
     public $prev;
+    /** @var boolean flag, showing if current path was already normalized */
+    private $normalizedpath = false;
 
     public function __construct($type = path_to_states_group::CHARACTER, $value = '') {
         $this->type = $type;
@@ -92,6 +78,104 @@ class path_to_states_group {
     }
 
     /**
+     * Returns array of numbers of equal in both paths subpatterns
+     */
+    public function equal_subpatterns($other) {
+        $equals = array();
+        $equalclose = array();
+
+        $curfirstpath = $this;
+        $cursecondpath = $other;
+
+        while ($curfirstpath !== null && $cursecondpath != null) {
+            // Get current step equal close tags
+            foreach ($curfirstpath->afterclosetags as $tag) {
+                if (in_array($tag, $cursecondpath->afterclosetags)) {
+                    $equalclose[] = $tag;
+                }
+            }
+            // Check, which close tags has equal open in both paths
+            for ($i = 0; $i < count($equalclose); $i++) {
+                if (in_array($equalclose[$i], $curfirstpath->beforeopentags) && in_array($equalclose[$i], $cursecondpath->beforeopentags)) {
+                    $equals[] = $equalclose[$i];
+                    array_splice($equalclose, $i, 1);
+                    $i--;
+                }
+            }
+            // Go to previous steps
+            $curfirstpath = $curfirstpath->prev;
+            $cursecondpath = $cursecondpath->prev;
+        }
+
+        return $equals;
+    }
+
+    /**
+     * @param $other path to compare with
+     * @param $indiffpositions array of subpatterns, which exist in both pathes, but in different positions
+     * @param $different array of subpatterns, which exist only in one path
+     */
+    public function mismatched_subpatterns($other, &$indiffpositions, &$different) {
+        $nonequaltags = array(array(), array());
+        $indiffpositions = array();
+        $different = array(array(), array());
+
+        $paths = array($this, $other);
+
+        while ($paths[0] !== null && $paths[1] != null) {
+            // For both paths
+            for ($i = 0; $i <= 1; $i++) {
+                // Check open tags
+                foreach ($paths[$i]->beforeopentags as $tag) {
+                    if (!in_array($tag, $paths[($i + 1) % 2]->beforeopentags)) {
+                        $nonequaltags[$i][] = array($tag, true, $paths[$i]->matched_string());
+                    }
+                }
+                // Check close tags
+                foreach ($paths[$i]->afterclosetags as $tag) {
+                    if (!in_array($tag, $paths[($i + 1) % 2]->afterclosetags)) {
+                        $nonequaltags[$i][] = array($tag, false, $paths[$i]->matched_string());
+                    }
+                }
+            }
+            // Go to previous steps
+            $paths[0] = $paths[0]->prev;
+            $paths[1] = $paths[1]->prev;
+        }
+
+        // Sort founded mismatches to returning arrays
+        for ($i = 0; $i <= 1; $i++) {
+            foreach ($nonequaltags[$i] as $nonequaltag) {
+                // If current tag is pair for one already found as different
+                if (in_array($nonequaltag[0], $different[$i])) {
+                    continue;
+                }
+                $found = false;
+                foreach ($nonequaltags[($i + 1) % 2] as $othernonequaltag) {
+                    if ($nonequaltag[0] == $othernonequaltag[0] && $nonequaltag[1] == $othernonequaltag[1]) {
+                        $newdiffposition = array('subexpression' => $nonequaltag[0], 'isopen' => $nonequaltag[1],
+                            'firstmatchedstring' => $i == 0 ? $nonequaltag[2] : $othernonequaltag[2],
+                            'secondmatchedstring' => $i == 1 ? $nonequaltag[2] : $othernonequaltag[2]);
+                        $alreadyexists = false;
+                        foreach ($indiffpositions as $diffposition) {
+                            if ($diffposition == $newdiffposition) {
+                                $alreadyexists = true;
+                            }
+                        }
+                        if (!$alreadyexists) {
+                            $indiffpositions[] = $newdiffposition;
+                        }
+                        $found = true;
+                    }
+                }
+                if (!$found) {
+                    $different[$i][] = $nonequaltag[0];
+                }
+            }
+        }
+    }
+
+    /**
      * Get subexpression tags from given and set to named array
      */
     public function filter_subexpression_tags($arrayoftags, $nameofarraytofill) {
@@ -104,7 +188,7 @@ class path_to_states_group {
 
     /**
      * Compares two paths without history
-     * @param $other path_to_states_group whis which to compare
+     * @param $other path_to_states_group with which to compare
      * @return bool result of comparison
      */
     public function equal_step($other) {
@@ -112,10 +196,10 @@ class path_to_states_group {
         $res = $this->type == $other->type;
         switch ($this->type) {
             case path_to_states_group::CHARACTER:
-                $res &= $this->character == $other->character;
+                $res = $res && $this->character == $other->character;
                 break;
             case path_to_states_group::ASSERT:
-                $res &= $this->assert == $other->assert;
+                $res = $res && $this->assert == $other->assert;
                 break;
         }
 
@@ -123,7 +207,7 @@ class path_to_states_group {
         $this->normalize_tagsets();
         $other->normalize_tagsets();
 
-        $res &= $this->beforeopentags == $other->beforeopentags
+        $res = $res && $this->beforeopentags == $other->beforeopentags
             && $this->afterclosetags == $other->afterclosetags
             && $this->beforeclosetags == $other->beforeclosetags
             && $this->afteropentags == $other->afteropentags;
@@ -132,19 +216,67 @@ class path_to_states_group {
     }
 
     /**
+     * Compares two paths with history
+     * @param $other path_to_states_group with which to compare
+     * @return bool result of comparison
+     */
+    public function equal_path($other) {
+        // Normalize paths
+        if (!$this->normalizedpath) {
+            $this->normalize_path();
+        }
+        if (!$other->normalizedpath) {
+            $other->normalize_path();
+        }
+        // Compare each step
+        $curfirststep = $this;
+        $cursecondstep = $other;
+        while ($curfirststep !== null && $cursecondstep !== null) {
+            if (!$curfirststep->equal_step($cursecondstep)) {
+                return false;
+            }
+            $curfirststep = $curfirststep->prev;
+            $cursecondstep = $cursecondstep->prev;
+        }
+
+        if ($curfirststep == null && $cursecondstep == null) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Normalizes path
+     */
+    public function normalize_path() {
+        if ($this->prev != null) {
+            $this->beforeopentags = array_merge($this->beforeopentags, $this->prev->afteropentags);
+            $this->prev->afteropentags = array();
+            $this->prev->afterclosetags = array_merge($this->beforeclosetags, $this->prev->afterclosetags);
+            $this->beforeclosetags = array();
+            $this->prev->normalize_path();
+        }
+        $this->normalize_tagsets();
+        $this->normalizedpath = true;
+    }
+
+    /**
      * Removes duplicate tags from each array and sorts values
      */
     public function normalize_tagsets() {
+        $this->normalize_tagset($this->beforeopentags);
+        $this->normalize_tagset($this->afterclosetags);
+        $this->normalize_tagset($this->beforeclosetags);
+        $this->normalize_tagset($this->afteropentags);
+    }
+
+    /**
+     * Removes duplicate tags from array and sorts values
+     */
+    public function normalize_tagset(&$tagset) {
         // Remove duplicate values
-        $this->beforeopentags = array_unique($this->beforeopentags, SORT_NUMERIC);
-        $this->afterclosetags = array_unique($this->afterclosetags, SORT_NUMERIC);
-        $this->beforeclosetags = array_unique($this->beforeclosetags, SORT_NUMERIC);
-        $this->afteropentags = array_unique($this->afteropentags, SORT_NUMERIC);
-        // Sort tagsets
-        sort($this->beforeopentags);
-        sort($this->afterclosetags);
-        sort($this->beforeclosetags);
-        sort($this->afteropentags);
+        $tagset = array_unique($tagset, SORT_NUMERIC);
+        sort($tagset);
     }
 
     /**
