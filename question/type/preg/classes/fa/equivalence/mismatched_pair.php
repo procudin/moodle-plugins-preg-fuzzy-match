@@ -38,19 +38,10 @@ class mismatched_pair extends groups_pair {
     public $type;
     /** @var integer index of automaton, which matched to path (and tags) */
     public $matchedautomaton;
-    /** @var array of open tags, if this is subpattern mismatch */
-    public $opentags;
-    /** @var array of close tags, if this is subpattern mismatch */
-    public $closetags;
-    /** @var  string, after which there was subpattern mismatch */
-    public $stringbeforesubpatternmismatch;
     
-    public function __construct($type, $matchedautomaton, $pair = null) {
-        if ($pair != null)
-            parent::__construct($pair);
+    public function __construct($type, $matchedautomaton, $pair) {
+        parent::__construct($pair);
         $this->type = $type;
         $this->matchedautomaton = $matchedautomaton;
-        $this->opentags = array();
-        $this->closetags = array();
     }
 }
