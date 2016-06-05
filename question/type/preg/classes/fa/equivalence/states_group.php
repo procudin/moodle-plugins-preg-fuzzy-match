@@ -133,22 +133,31 @@ class states_group {
     /**
      * Compares two groups
      */
-    public function equal($other, $withmatchedstring = false) {
+    public function equal($other, $withmatchedstring = false, $withpath = false) {
         // Check if all states of this group are included in the given one
         foreach ($this->states as $state) {
-            if (!in_array($state, $other->states))
+            if (!in_array($state, $other->states)) {
                 return false;
+            }
         }
 
         // Check if all states of other group are included in this (for the case of repeated state indexes in one of groups)
         foreach ($other->states as $state) {
-            if (!in_array($state, $this->states))
+            if (!in_array($state, $this->states)) {
                 return false;
+            }
         }
 
         // If need to compare with matched string - compare them
         if ($withmatchedstring) {
-            return $this->path->matched_string() == $other->path->matched_string();
+            if ($this->path->matched_string() != $other->path->matched_string()) {
+                return false;
+            }
+        }
+
+        // If need to compare with paths - compare them
+        if ($withpath) {
+            return $this->path->equal_path($other->path);
         }
 
         return true;
