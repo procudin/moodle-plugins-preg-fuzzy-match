@@ -61,10 +61,11 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_character_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass;
+        $matchedstring = $difference->matched_string();
         // Substring without last character of matched string in difference is the matched string of both automata.
-        $a->matchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
+        $a->matchedstring = substr($matchedstring, 0, strlen($matchedstring) - 1);
         // Last character of matched string in difference is mismatch character.
-        $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
+        $a->character = $matchedstring[strlen($matchedstring) - 1];
         // Get titles for string description of mismatch
         $studentstitle = get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ';
         $teachersstitle = get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ';
@@ -75,7 +76,7 @@ class compare_automata_analyzer_result extends analyzer_result {
             } else {
                 $feedback = get_string('extracharactermismatch', 'qtype_writeregex', $a);
             }
-            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $difference->matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $matchedstring);
             $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $a->matchedstring, $a->character);
         }
         // If students answer doesn't accept character.
@@ -86,7 +87,7 @@ class compare_automata_analyzer_result extends analyzer_result {
                 $feedback = get_string('missingcharactermismatch', 'qtype_writeregex', $a);
             }
             $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $a->matchedstring, $a->character);
-            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $difference->matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $matchedstring);
         }
 
 
@@ -100,19 +101,20 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_final_state_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass;
-        $a->matchedstring = $difference->matchedstring;
+        $matchedstring = $difference->matched_string();
+        $a->matchedstring = $matchedstring;
         // Substring without last character of matched string in difference is the matched string of both automata.
-        $a->bothmatchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
+        $a->bothmatchedstring = substr($matchedstring, 0, strlen($matchedstring) - 1);
         // Last character of matched string in difference which transport automaton to final state.
-        $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
+        $a->character = $matchedstring[strlen($matchedstring) - 1];
         // Get titles for string description of mismatch
         $studentstitle = get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ';
         $teachersstitle = get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ';
         // If students answer accepts extra string.
         if ($difference->matchedautomaton == 1) {
-            $feedback = get_string('extrafinalstatemismatch', 'qtype_writeregex', $difference->matchedstring);
-            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $difference->matchedstring);
-            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $difference->matchedstring, '...');
+            $feedback = get_string('extrafinalstatemismatch', 'qtype_writeregex', $matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $matchedstring, '...');
         } // If students answer doesn't accept string.
         else {
             $feedback = get_string('missingfinalstatemismatch', 'qtype_writeregex', $difference->matchedstring);
