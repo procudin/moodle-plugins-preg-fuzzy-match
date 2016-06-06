@@ -45,4 +45,12 @@ class assertion_mismatch extends mismatched_pair {
         $this->mergedassert = $mergedassert;
         $this->position = $position;
     }
+
+    public function mismatched_assertion() {
+        if ($this->merged) {
+            return $this->mergedassert;
+        }
+
+        return $this->first->path->assert;
+    }
 }
