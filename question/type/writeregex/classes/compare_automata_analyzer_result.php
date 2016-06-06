@@ -174,63 +174,88 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_subpattern_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass();
-        // Substring without last character of matched string in difference is the matched string.
-        $matchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
-        if (strlen($matchedstring) == 0) {
-            $a->place = get_string('frombeginning', 'qtype_writeregex');
+        $singlemismatch = count($difference->diffpositionsubpatterns) + count($difference->uniquesubpatterns[0])
+            + count($difference->uniquesubpatterns[1]) == 1;
+        // Matched string
+        $a->matchedstring = $difference->matched_string();
+        // Subpattern word
+        if (count($difference->matchedsubpatterns) == 1) {
+            $a->subpatternword = get_string('subpattern', 'qtype_writeregex');
         }
         else {
-            $a->place = get_string('aftermatchedstring', 'qtype_writeregex', $matchedstring);
+            $a->subpatternword = get_string('subpatterns', 'qtype_writeregex');
         }
-        // Last character of matched string in matched character.
-        $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
-        // Set subpattern numbers.
-        if (!empty($difference->opentags)) {
-            $a->subpatterns = $this->enumeration_from_array($difference->opentags);
-        }
-        if (!empty($difference->closetags)) {
-            $a->subpatterns = $this->enumeration_from_array($difference->closetags);
-        }
-        // Set matched answer author.
-        if ($difference->matchedautomaton == 1) {
-            $a->matchedanswer = get_string('youranswer', 'qtype_writeregex');
-            $a->mismatchedanswer = get_string('theporrectanswer', 'qtype_writeregex');
+        // Matched subpatterns
+        $a->matchedsubpatterns = $this->enumeration_from_array($difference->matchedsubpatterns);
+
+        // Title for matched part
+        if (count($difference->matchedsubpatterns) == 0) {
+            if ($singlemismatch) {
+                $feedback = get_string('singlesubpatternmismatchcommonpartwithouttags', 'qtype_writeregex', $a);
+            }
+            else {
+                $feedback = get_string('multiplesubpatternmismatchcommonpartwithouttags', 'qtype_writeregex', $a);
+            }
         }
         else {
-            $a->matchedanswer = get_string('theporrectanswer', 'qtype_writeregex');
+            if ($singlemismatch) {
+                $feedback = get_string('singlesubpatternmismatchcommonpart', 'qtype_writeregex', $a);
+            } else {
+                $feedback = get_string('multiplesubpatternmismatchcommonpart', 'qtype_writeregex', $a);
+            }
+        }
+
+        // Information about different place subpattern mismatches
+        foreach ($difference->diffpositionsubpatterns as $mismatch) {
+            if (!$singlemismatch) {
+                $feedback = $renderer->add_break($feedback) . '  - ';
+            }
+            $a = new \stdClass();
+            $a->subpattern = $mismatch['subexpression'];
+            if ($mismatch['isopen']) {
+                $a->behavior = get_string('starts', 'qtype_writeregex');
+            }
+            else {
+                $a->behavior = get_string('ends', 'qtype_writeregex');
+            }
+            $a->studentmatchedstring = $mismatch['secondmatchedstring'];
+            $a->correctmatchedstring = $mismatch['firstmatchedstring'];
+
+            $feedback .= get_string('diffplacesubpatternmismatch', 'qtype_writeregex', $a);
+        }
+
+        // Information about unique subpatterns mimsatches
+        if (count($difference->uniquesubpatterns[0]) > 0) {
+            if (!$singlemismatch) {
+                $feedback = $renderer->add_break($feedback) . '  - ';
+            }
+            $a = new \stdClass();
             $a->mismatchedanswer = get_string('youranswer', 'qtype_writeregex');
+            $a->matchedanswer = get_string('correctanswer', 'qtype_writeregex');
+            $a->subpatterns = $this->enumeration_from_array($difference->uniquesubpatterns[0]);
+            if (count($difference->uniquesubpatterns[0]) == 1) {
+                $feedback .= get_string('singleuniquesubpatternmismatch', 'qtype_writeregex', $a);
+            }
+            else {
+                $feedback .= get_string('multipleuniquesubpatternmismatch', 'qtype_writeregex', $a);
+            }
         }
-        // Set behavior.
-        if (count($difference->opentags) == 1) {
-            $a->behavior = get_string('starts', 'qtype_writeregex');
+        if (count($difference->uniquesubpatterns[1]) > 0) {
+            if (!$singlemismatch) {
+                $feedback = $renderer->add_break($feedback) . '  - ';
+            }
+            $a = new \stdClass();
+            $a->matchedanswer = get_string('youranswer', 'qtype_writeregex');
+            $a->mismatchedanswer = get_string('correctanswer', 'qtype_writeregex');
+            $a->subpatterns = $this->enumeration_from_array($difference->uniquesubpatterns[1]);
+            if (count($difference->uniquesubpatterns[1]) == 1) {
+                $feedback .= get_string('singleuniquesubpatternmismatch', 'qtype_writeregex', $a);
+            }
+            else {
+                $feedback .= get_string('multipleuniquesubpatternmismatch', 'qtype_writeregex', $a);
+            }
         }
-        else if (count($difference->opentags) > 1) {
-            $a->behavior = get_string('start', 'qtype_writeregex');
-        }
-        else if (count($difference->closetags) == 1) {
-            $a->behavior = get_string('ends', 'qtype_writeregex');
-        }
-        else if (count($difference->closetags) > 1) {
-            $a->behavior = get_string('end', 'qtype_writeregex');
-        }
-
-        // Get result string.
-        $result = '';
-        if (count($difference->opentags) + count($difference->closetags) == 0) {
-            $result = get_string('nosubpatternmismatch', 'qtype_writeregex', $a);
-        }
-        else if (count($difference->opentags) + count($difference->closetags) == 1) {
-            $result = get_string('singlesubpatternmismatch', 'qtype_writeregex', $a);
-        }
-        else {
-            $result = get_string('multiplesubpatternsmismatch', 'qtype_writeregex', $a);
-        }
-
-        // Set first letter of the result string to uppercase.
-        $letter = \core_text::substr($result, 0, 1);
-        $letter = \core_text::strtoupper($letter);
-        $result[0] = $letter;
-        return $renderer->add_break($result);
+        return $feedback;
     }
 
     /**
