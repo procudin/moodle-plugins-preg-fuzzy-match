@@ -997,12 +997,12 @@ class fa {
                     // Merged before
                     $counter = 0;
                     foreach ($firstgroup->mergedbeforetransitions as $mergedtransition) {
-                        if (is_a($mergedtransition, $assert)) {
+                        if (is_a($mergedtransition->pregleaf, $assert)) {
                             $counter++;
                         }
                     }
                     foreach ($secondgroup->mergedbeforetransitions as $mergedtransition) {
-                        if (is_a($mergedtransition, $assert)) {
+                        if (is_a($mergedtransition->pregleaf, $assert)) {
                             $counter--;
                         }
                     }
@@ -1014,12 +1014,12 @@ class fa {
                     // Merged after
                     $counter = 0;
                     foreach ($firstgroup->mergedaftertransitions as $mergedtransition) {
-                        if (is_a($mergedtransition, $assert)) {
+                        if (is_a($mergedtransition->pregleaf, $assert)) {
                             $counter++;
                         }
                     }
                     foreach ($secondgroup->mergedaftertransitions as $mergedtransition) {
-                        if (is_a($mergedtransition, $assert)) {
+                        if (is_a($mergedtransition->pregleaf, $assert)) {
                             $counter--;
                         }
                     }
