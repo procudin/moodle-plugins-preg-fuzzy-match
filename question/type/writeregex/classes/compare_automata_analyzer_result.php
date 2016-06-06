@@ -42,6 +42,9 @@ class compare_automata_analyzer_result extends analyzer_result {
                 case \qtype_preg\fa\equivalence\mismatched_pair::CHARACTER:
                     $feedback .= $this->get_character_mismatch_feedback($difference, $renderer);
                     break;
+                case \qtype_preg\fa\equivalence\mismatched_pair::ASSERT:
+                    $feedback .= $this->get_assertion_mismatch_feedback($difference, $renderer);
+                    break;
                 case \qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE:
                     $feedback .= $this->get_final_state_mismatch_feedback($difference, $renderer);
                     break;
@@ -117,9 +120,48 @@ class compare_automata_analyzer_result extends analyzer_result {
             $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $matchedstring, '...');
         } // If students answer doesn't accept string.
         else {
-            $feedback = get_string('missingfinalstatemismatch', 'qtype_writeregex', $difference->matchedstring);
-            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $difference->matchedstring, '...');
-            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $difference->matchedstring);
+            $feedback = get_string('missingfinalstatemismatch', 'qtype_writeregex', $matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $matchedstring, '...');
+            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $matchedstring);
+        }
+
+        return $feedback;
+    }
+
+    /**
+     * Get feedback for assertion mismatch.
+     * @param qtype_writeregex_renderer renderer Renderer
+     * @return string Feedback about assertion mismatch to show to student.
+     */
+    public function get_assertion_mismatch_feedback($difference, $renderer) {
+        $assertions = array('qtype_preg_leaf_assert_esc_a' => '\A',
+            'qtype_preg_leaf_assert_small_esc_z' => '\z',
+            'qtype_preg_leaf_assert_capital_esc_z' => '\Z',
+            'qtype_preg_leaf_assert_esc_g' => '\G',
+            'qtype_preg_leaf_assert_circumflex' => '^',
+            'qtype_preg_leaf_assert_dollar' => '$');
+        $a = new \stdClass;
+        $a->matchedstring = $difference->matched_string();
+        // Mismatched assertion
+        $a->assert = $assertions[$difference->mismatched_assertion()];
+        // Get titles for string description of mismatch
+        $studentstitle = get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ';
+        $teachersstitle = get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ';
+        // If students answer accepts extra assertion.
+        if ($difference->matchedautomaton == 1) {
+            if (strlen($a->matchedstring) == 0) {
+                $feedback = get_string('extraassertionmismatchfrombeginning', 'qtype_writeregex', $a);
+            } else {
+                $feedback = get_string('extraassertionmismatch', 'qtype_writeregex', $a);
+            }
+        }
+        // If students answer doesn't accept assertion.
+        else {
+            if (strlen($a->matchedstring) == 0) {
+                $feedback = get_string('missingassertionmismatchfrombeginning', 'qtype_writeregex', $a);
+            } else {
+                $feedback = get_string('missingassertionmismatch', 'qtype_writeregex', $a);
+            }
         }
 
         return $feedback;
