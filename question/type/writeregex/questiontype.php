@@ -219,7 +219,7 @@ class qtype_writeregex extends qtype_shortanswer {
      * @return array of available analyzers where key is the keyword and value is description
      */
     public function available_analyzers() {
-        return array('tree' => get_string('comparetreepercentage', 'qtype_writeregex'),
+        return array(//'tree' => get_string('comparetreepercentage', 'qtype_writeregex'),
             'strings' => get_string('comparestringspercentage', 'qtype_writeregex'),
             'automata' => get_string('compareautomatapercentage', 'qtype_writeregex'));
     }
