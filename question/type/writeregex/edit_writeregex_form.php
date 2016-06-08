@@ -88,7 +88,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
-        // Add all analizers percentages.
+        // Add all analyzers percentages.
         $questiontype = new qtype_writeregex();
         $analyzers = $questiontype->available_analyzers();
         foreach ($analyzers as $name => $description) {
@@ -101,6 +101,28 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         }
         // Set as default 100% to teststrings analizer.
         $mform->setDefault($constantstringname, '100');
+
+        // Add string penalty field
+        $mform->addElement('text', 'stringmismatchpenalty',
+            get_string('stringmismatchpenalty', 'qtype_writeregex'));
+        $mform->setType('stringmismatchpenalty', PARAM_FLOAT);
+        $mform->setDefault('stringmismatchpenalty', '0.2');
+        $mform->addHelpButton('stringmismatchpenalty', 'stringmismatchpenalty', 'qtype_writeregex');
+        $mform->setAdvanced('stringmismatchpenalty');
+
+        // Add select case of necessity to compare with subpatterns
+        $mform->addElement('select', 'comparewithsubpatterns', get_string('comparewithsubpatterns', 'qtype_writeregex'),
+            array(get_string('comparewithoutsubpatterns', 'qtype_writeregex'), get_string('comparesubpatterns', 'qtype_writeregex')));
+        $mform->addHelpButton('comparewithsubpatterns', 'comparewithsubpatterns', 'qtype_writeregex');
+        $mform->setAdvanced('comparewithsubpatterns');
+
+        // Add subpattern penalty field
+        $mform->addElement('text', 'subpatternmismatchpenalty',
+            get_string('subpatternmismatchpenalty', 'qtype_writeregex'));
+        $mform->setType('subpatternmismatchpenalty', PARAM_FLOAT);
+        $mform->setDefault('subpatternmismatchpenalty', '0.2');
+        $mform->addHelpButton('subpatternmismatchpenalty', 'subpatternmismatchpenalty', 'qtype_writeregex');
+        $mform->setAdvanced('subpatternmismatchpenalty');
 
         // Add hints.
         $mform->addElement('header', 'hintshdr', get_string('hintsheader', 'qtype_writeregex'), '');
