@@ -211,7 +211,8 @@ class qtype_writeregex extends qtype_shortanswer {
             'comparestringspercentage',  // Percentage value of compare regex by test strings (0-100).
             'stringmismatchpenalty',     // Penalty for string mismatch while automata compare algorithm.
             'comparewithsubpatterns',    // Weather to compare regexes with subpatterns or not.
-            'subpatternmismatchpenalty'  // Penalty for string mismatch while automata compare algorithm.
+            'subpatternmismatchpenalty', // Penalty for string mismatch while automata compare algorithm.
+            'mismatchesshowncount'       // Max count of mismatches from automata compare algorithm to show student.
         );
     }
 

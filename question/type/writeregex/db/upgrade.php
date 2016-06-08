@@ -67,7 +67,7 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0) {
         // Writeregex savepoint reached.
         upgrade_plugin_savepoint(true, 2015121700, 'qtype', 'writeregex');
     }    
-    if ($oldversion < 2016060801) {
+    if ($oldversion < 2016060802) {
 
         // Define field stringmismatchpenalty to be added to qtype_writeregex_options.
         $table = new xmldb_table('qtype_writeregex_options');
@@ -92,8 +92,15 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0) {
             $dbman->add_field($table, $field);
         }
 
+        $field = new xmldb_field('mismatchesshowncount', XMLDB_TYPE_INTEGER, '3', null, null, null, '5', 'subpatternmismatchpenalty');
+
+        // Conditionally launch add field mismatchesshouncount.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Writeregex savepoint reached.
-        upgrade_plugin_savepoint(true, 2016060801, 'qtype', 'writeregex');
+        upgrade_plugin_savepoint(true, 2016060802, 'qtype', 'writeregex');
     }
 
 

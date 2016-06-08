@@ -124,6 +124,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('subpatternmismatchpenalty', 'subpatternmismatchpenalty', 'qtype_writeregex');
         $mform->setAdvanced('subpatternmismatchpenalty');
 
+        // Add mismatches shown count field
+        $mform->addElement('text', 'mismatchesshowncount',
+            get_string('mismatchesshowncount', 'qtype_writeregex'));
+        $mform->setType('mismatchesshowncount', PARAM_INT);
+        $mform->setDefault('mismatchesshowncount', '5');
+        $mform->addHelpButton('mismatchesshowncount', 'mismatchesshowncount', 'qtype_writeregex');
+        $mform->setAdvanced('mismatchesshowncount');
+
         // Add hints.
         $mform->addElement('header', 'hintshdr', get_string('hintsheader', 'qtype_writeregex'), '');
         $mform->setExpanded('hintshdr', 1);

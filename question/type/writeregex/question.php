@@ -108,6 +108,8 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var  float penalty for string mismatch while automata compare algorithm. */
     public $subpatternmismatchpenalty;
 
+    /** @var Max count of mismatches from automata compare algorithm to show student. */
+    public $mismatchesshowncount;
     /**
      * Get type of expected data.
      * @return array|string Type of expected data.
