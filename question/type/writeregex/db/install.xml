@@ -28,6 +28,7 @@
         <FIELD NAME="stringmismatchpenalty" TYPE="number" LENGTH="12" NOTNULL="false" SEQUENCE="false" DECIMALS="7"/>
         <FIELD NAME="comparewithsubpatterns" TYPE="binary" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="subpatternmismatchpenalty" TYPE="number" LENGTH="12" NOTNULL="false" SEQUENCE="false" DECIMALS="7"/>
+        <FIELD NAME="mismatchesshowncount" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
