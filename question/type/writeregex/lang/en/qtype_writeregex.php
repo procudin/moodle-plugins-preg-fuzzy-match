@@ -25,6 +25,7 @@
  */
 
 $string['answer'] = 'Show the correct answer';
+$string['automataanalyzersheader'] = 'Finite automata analyzer';
 $string['automataequivalencecheckgroupspairlimit'] = 'Maximum number of groups pair for one wave while automata equivalence check';
 $string['automataequivalencecheckgroupspairlimitdescription'] = 'Automata equivalence check function generates groups pairs for each iteration. When checking equivalence with subpatterns, pairs count may be big and rise exponential, so equivalence check will take a long time. This value limits count of simultaneously processed groups pairs.';
 $string['automataequivalencecheckmismatcheslimit'] = 'Maximum number of mismatches from automata equivalence check';
@@ -63,6 +64,7 @@ $string['hinttitleadditionformode_2'] = 'for correct answer';
 $string['hinttitleadditionformode_3'] = 'for your and correct answers';
 $string['invalidcomparets'] = 'Check value for the test string is set to 0, remove the test strings';
 $string['invalidmatchingtypessumvalue'] = 'Sum of all matching types is not equal 100%';
+$string['invalidmismatchshowncount'] = 'Mismatches shown count can\'t be negative';
 $string['invalidmismatchpenalty'] = 'Mismatch penalty can\'t be negative or higher, than maximal mark for question';
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
 $string['mismatchesshowncount'] = 'Count of mismatches to show';

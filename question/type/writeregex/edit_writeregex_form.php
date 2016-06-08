@@ -99,22 +99,23 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $mform->setDefault($constantstringname, '0');
             $mform->addHelpButton($constantstringname, $constantstringname, 'qtype_writeregex');
         }
-        // Set as default 100% to teststrings analizer.
+        // Set as default 100% to automata analizer.
         $mform->setDefault($constantstringname, '100');
 
+        // Add hints.
+        $mform->addElement('header', 'automataanalyzerhdr', get_string('automataanalyzersheader', 'qtype_writeregex'), '');
+        $mform->setExpanded('automataanalyzerhdr', 0);
         // Add string penalty field
         $mform->addElement('text', 'stringmismatchpenalty',
             get_string('stringmismatchpenalty', 'qtype_writeregex'));
         $mform->setType('stringmismatchpenalty', PARAM_FLOAT);
         $mform->setDefault('stringmismatchpenalty', '0.2');
         $mform->addHelpButton('stringmismatchpenalty', 'stringmismatchpenalty', 'qtype_writeregex');
-        $mform->setAdvanced('stringmismatchpenalty');
 
         // Add select case of necessity to compare with subpatterns
         $mform->addElement('select', 'comparewithsubpatterns', get_string('comparewithsubpatterns', 'qtype_writeregex'),
             array(get_string('comparewithoutsubpatterns', 'qtype_writeregex'), get_string('comparesubpatterns', 'qtype_writeregex')));
         $mform->addHelpButton('comparewithsubpatterns', 'comparewithsubpatterns', 'qtype_writeregex');
-        $mform->setAdvanced('comparewithsubpatterns');
 
         // Add subpattern penalty field
         $mform->addElement('text', 'subpatternmismatchpenalty',
@@ -122,7 +123,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setType('subpatternmismatchpenalty', PARAM_FLOAT);
         $mform->setDefault('subpatternmismatchpenalty', '0.2');
         $mform->addHelpButton('subpatternmismatchpenalty', 'subpatternmismatchpenalty', 'qtype_writeregex');
-        $mform->setAdvanced('subpatternmismatchpenalty');
 
         // Add mismatches shown count field
         $mform->addElement('text', 'mismatchesshowncount',
@@ -130,7 +130,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setType('mismatchesshowncount', PARAM_INT);
         $mform->setDefault('mismatchesshowncount', '5');
         $mform->addHelpButton('mismatchesshowncount', 'mismatchesshowncount', 'qtype_writeregex');
-        $mform->setAdvanced('mismatchesshowncount');
+        //$mform->setAdvanced('mismatchesshowncount');
 
         // Add hints.
         $mform->addElement('header', 'hintshdr', get_string('hintsheader', 'qtype_writeregex'), '');
