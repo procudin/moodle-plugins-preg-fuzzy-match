@@ -452,8 +452,9 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $sum += $data[$constantstringname];
         }
 
-        if ($sum != 100 and !array_key_exists('comparetreepercentage', $errors)) {
-            $errors['comparetreepercentage'] = get_string('invalidmatchingtypessumvalue', 'qtype_writeregex');
+        $fieldname = 'compare' . array_keys($analyzers)[0] . 'percentage';
+        if ($sum != 100 and !array_key_exists($fieldname, $errors)) {
+            $errors[$fieldname] = get_string('invalidmatchingtypessumvalue', 'qtype_writeregex');
         }
 
         return $errors;
