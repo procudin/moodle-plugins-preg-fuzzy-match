@@ -25,6 +25,10 @@
  */
 
 $string['answer'] = 'Show the correct answer';
+$string['automataequivalencecheckgroupspairlimit'] = 'Maximum number of groups pair for one wave while automata equivalence check';
+$string['automataequivalencecheckgroupspairlimitdescription'] = 'Automata equivalence check function generates groups pairs for each iteration. When checking equivalence with subpatterns, pairs count may be big and rise exponential, so equivalence check will take a long time. This value limits count of simultaneously processed groups pairs.';
+$string['automataequivalencecheckmismatcheslimit'] = 'Maximum number of mismatches from automata equivalence check';
+$string['automataequivalencecheckmismatcheslimitdescription'] = 'Count of mismatches, founded by automata equivalence check may be big. This value limit its count, after which equivalence check stops.';
 $string['both'] = 'Show the student\'s answer and the correct answer (both)';
 $string['compareautomataanalyzername'] = 'Automata analyzer';
 $string['compareautomatapercentage'] = 'Rating coincidentally automata regular expressions';
