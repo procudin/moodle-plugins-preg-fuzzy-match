@@ -99,6 +99,15 @@ class qtype_writeregex_question extends question_graded_automatically
     /** @var  string Value of best fit answers response. */
     public $responseforbestfit;
 
+    /** @var float penalty for string mismatch while automata compare algorithm. */
+    public $stringmismatchpenalty;
+
+    /** @var boolean weather to compare regexes with subpatterns or not. */
+    public $comparewithsubpatterns;
+    
+    /** @var  float penalty for string mismatch while automata compare algorithm. */
+    public $subpatternmismatchpenalty;
+
     /**
      * Get type of expected data.
      * @return array|string Type of expected data.

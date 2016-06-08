@@ -208,7 +208,10 @@ class qtype_writeregex extends qtype_shortanswer {
             'teststringshintpenalty',    // Test strings hint penalty.
             'comparetreepercentage',     // Percentage value of compare regex by tree (0-100).
             'compareautomatapercentage', // Percentage value of compare regex by automata (0-100).
-            'comparestringspercentage'   // Percentage value of compare regex by test strings (0-100).
+            'comparestringspercentage',  // Percentage value of compare regex by test strings (0-100).
+            'stringmismatchpenalty',     // Penalty for string mismatch while automata compare algorithm.
+            'comparewithsubpatterns',    // Weather to compare regexes with subpatterns or not.
+            'subpatternmismatchpenalty'  // Penalty for string mismatch while automata compare algorithm.
         );
     }
 
@@ -217,8 +220,8 @@ class qtype_writeregex extends qtype_shortanswer {
      */
     public function available_analyzers() {
         return array('tree' => get_string('comparetreepercentage', 'qtype_writeregex'),
-            'automata' => get_string('compareautomatapercentage', 'qtype_writeregex'),
-            'strings' => get_string('comparestringspercentage', 'qtype_writeregex'));
+            'strings' => get_string('comparestringspercentage', 'qtype_writeregex'),
+            'automata' => get_string('compareautomatapercentage', 'qtype_writeregex'));
     }
 
     /**
