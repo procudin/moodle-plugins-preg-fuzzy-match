@@ -174,8 +174,8 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_subpattern_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass();
-        $singlemismatch = count($difference->diffpositionsubpatterns) + count($difference->uniquesubpatterns[0])
-            + count($difference->uniquesubpatterns[1]) == 1;
+        $singlemismatch = count($difference->diffpositionsubpatterns) + (count($difference->uniquesubpatterns[0]) == 0 ? 0 : 1)
+            + (count($difference->uniquesubpatterns[1]) == 0 ? 0 : 1) == 1;
         // Matched string
         $a->matchedstring = $difference->matched_string();
         // Subpattern word
