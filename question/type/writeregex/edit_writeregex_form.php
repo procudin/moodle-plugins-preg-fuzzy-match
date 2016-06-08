@@ -352,6 +352,16 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $errors = $this->validate_dot_using_hints($data, $errors);
 
+        if ($data['compareautomatapercentage'] > 0) {
+            if ($data['stringmismatchpenalty'] < 0 || $data['stringmismatchpenalty'] > $data['defaultmark']) {
+                $errors['stringmismatchpenalty'] = get_string('invalidmismatchpenalty', 'qtype_writeregex');
+            }
+            if ($data['comparewithsubpatterns'] == 1 &&
+                ($data['subpatternmismatchpenalty'] < 0 || $data['subpatternmismatchpenalty'] > $data['defaultmark'])) {
+                $errors['subpatternmismatchpenalty'] = get_string('invalidmismatchpenalty', 'qtype_writeregex');
+            }
+        }
+
         return $errors;
     }
 
