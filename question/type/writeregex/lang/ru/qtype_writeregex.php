@@ -59,6 +59,7 @@ $string['hinttitleadditionformode_2'] = 'правильного ответа';
 $string['hinttitleadditionformode_3'] = 'Вашего и правильного ответов';
 $string['invalidcomparets'] = 'Значение проверки по тестовым строкам выставлена в 0, удалите тестовые строки';
 $string['invalidmatchingtypessumvalue'] = 'Сумма всех типов проверок не равна 100%';
+$string['invalidmismatchpenalty'] = 'Штраф по расхождению не может быть отрицателен или больше максимальной оценки за вопрос';
 $string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
 $string['none'] = 'Не показывать';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';

@@ -59,6 +59,7 @@ $string['hinttitleadditionformode_2'] = 'for correct answer';
 $string['hinttitleadditionformode_3'] = 'for your and correct answers';
 $string['invalidcomparets'] = 'Check value for the test string is set to 0, remove the test strings';
 $string['invalidmatchingtypessumvalue'] = 'Sum of all matching types is not equal 100%';
+$string['invalidmismatchpenalty'] = 'Mismatch penalty can\'t be negative or higher, than maximal mark for question';
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
 $string['none'] = 'None';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';
