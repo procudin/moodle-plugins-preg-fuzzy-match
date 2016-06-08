@@ -31,8 +31,6 @@ require_once($CFG->dirroot . '/question/type/preg/question.php');
  */
 class compare_automata_analyzer extends analyzer {
 
-    const MISMATCH_PENALTY = 0.2;
-
     /**
      * Get equality for user response.
      * @param $answer string Regex answer.
@@ -66,8 +64,15 @@ class compare_automata_analyzer extends analyzer {
             return $result;
         }
 
-        if (!$answerautomaton->equal($responseautomaton, $differences, true)) {
-            $fitness = max(0, 1 - count($differences) * compare_automata_analyzer::MISMATCH_PENALTY);
+        if (!$answerautomaton->equal($responseautomaton, $differences, ($this->question->comparewithsubpatterns == 1))) {
+            foreach ($differences as $difference) {
+                if ($difference->type == \qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN) {
+                    $fitness = max(0, $fitness - $this->question->subpatternmismatchpenalty);
+                }
+                else {
+                    $fitness = max(0, $fitness - $this->question->stringmismatchpenalty);
+                }
+            }
         }
 
         // Generate result
