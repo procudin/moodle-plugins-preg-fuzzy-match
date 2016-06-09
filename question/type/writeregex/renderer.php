@@ -95,7 +95,12 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
         }
         else {
             if (!empty($question->bestfitanswer['results'])) {
-                $feedback = $question->bestfitanswer['results']['tree']->get_feedback($this) . $question->bestfitanswer['results']['automata']->get_feedback($this) . $question->bestfitanswer['results']['strings']->get_feedback($this);
+                $questiontype = new qtype_writeregex();
+                $analyzerkeys = array_keys($questiontype->available_analyzers());
+                $feedback = '';
+                foreach($analyzerkeys as $analyzerkey) {
+                    $feedback .= $question->bestfitanswer['results'][$analyzerkey]->get_feedback($this);
+                }
             }
         }
 
