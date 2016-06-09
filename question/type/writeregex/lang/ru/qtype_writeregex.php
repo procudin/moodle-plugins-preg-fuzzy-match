@@ -69,6 +69,7 @@ $string['invalidmismatchpenalty'] = 'Штраф по расхождению не
 $string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
 $string['mismatchesshowncount'] = 'Количество демонстрируемых расхождений';
 $string['mismatchesshowncount_help'] = 'Максимальное количество расхождений по алгоритму сравнения конечных автоматов, демонстрируемых студенту';
+$string['moremismatches'] = 'И ещё расхождений: {$a}';
 $string['none'] = 'Не показывать';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';
 $string['noteststringsforhint'] = 'Отсутствуют тестовые строки для подсказки';

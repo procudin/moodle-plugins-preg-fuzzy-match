@@ -69,6 +69,7 @@ $string['invalidmismatchpenalty'] = 'Mismatch penalty can\'t be negative or high
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
 $string['mismatchesshowncount'] = 'Count of mismatches to show';
 $string['mismatchesshowncount_help'] = 'Max count of mismatches from automata compare algorithm to show for student';
+$string['moremismatches'] = 'And also mismatches: {$a}';
 $string['none'] = 'None';
 $string['notenoughanswers'] = 'This type of question requires at least {$a} answers';
 $string['noteststringsforhint'] = 'There are no test strings for hint';
