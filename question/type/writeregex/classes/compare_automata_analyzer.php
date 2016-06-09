@@ -79,6 +79,7 @@ class compare_automata_analyzer extends analyzer {
         $result = new compare_automata_analyzer_result();
         $result->fitness = $fitness;
         $result->differences = $differences;
+        $result->maxshowncount = $this->question->mismatchesshowncount;
         return $result;
     }
 

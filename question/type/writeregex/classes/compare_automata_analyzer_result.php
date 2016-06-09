@@ -30,6 +30,9 @@ class compare_automata_analyzer_result extends analyzer_result {
     /** @var array of qtype_preg\fa\equivalence\mismatched_pair Differences of compared automata */
     public $differences;
 
+    /** @var int count of differences to describe */
+    public $maxshowncount;
+
     /**
      * Get feedback for analyzing results.
      * @param qtype_writeregex_renderer renderer Renderer
@@ -37,7 +40,13 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_feedback($renderer) {
         $feedback = "";
+        $countshown = 0;
         foreach ($this->differences as $difference) {
+            if ($countshown == intval($this->maxshowncount)) {
+                $feedback .= get_string('moremismatches', 'qtype_writeregex', count($this->differences) - $this->maxshowncount);
+                break;
+            }
+            $countshown++;
             switch ($difference->type) {
                 case \qtype_preg\fa\equivalence\mismatched_pair::CHARACTER:
                     $feedback .= $this->get_character_mismatch_feedback($difference, $renderer);
