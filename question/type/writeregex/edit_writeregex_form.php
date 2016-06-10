@@ -383,30 +383,23 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @return array Errors array.
      */
     public function validate_regexp ($data, $errors) {
-
         global $CFG;
-        $test = $data['comparestringspercentage'];
 
-        if ($test > 0 && $test <= 100) {
+        $answers = $data['answer'];
+        foreach ($answers as $key => $answer) {
+            $trimmedanswer = trim($answer);
+            if ($trimmedanswer !== '') {
+                $pregquestionobj = new qtype_preg_question();
+                $matchingoptions = $pregquestionobj->get_matching_options(false, $pregquestionobj->get_modifiers($data['usecase']), null, $data['notation']);
+                $matchingoptions->extensionneeded = false;
+                $matchingoptions->capturesubexpressions = true;
+                $matcher = $pregquestionobj->get_matcher($data['engine'], $trimmedanswer, $matchingoptions);
 
-            $answers = $data['answer'];
-            $i = 0;
-
-            foreach ($answers as $key => $answer) {
-                $trimmedanswer = trim($answer);
-                if ($trimmedanswer !== '') {
-					$pregquestionobj = new qtype_preg_question();
-                    $matchingoptions = $pregquestionobj->get_matching_options(false, $pregquestionobj->get_modifiers($data['usecase']), null, $data['notation']);
-                    $matchingoptions->extensionneeded = false;
-                    $matchingoptions->capturesubexpressions = true;
-                    $matcher = $pregquestionobj->get_matcher($data['engine'], $trimmedanswer, $matchingoptions);
-
-                    if ($matcher->errors_exist()) {
-                        $regexerrors = $matcher->get_error_messages($CFG->qtype_writregex_maxerrorsshown);
-                        $errors['answer['.$key.']'] = '';
-                        foreach ($regexerrors as $item) {
-                            $errors['answer['.$key.']'] .= $item . '<br />';
-                        }
+                if ($matcher->errors_exist()) {
+                    $regexerrors = $matcher->get_error_messages($CFG->qtype_writregex_maxerrorsshown);
+                    $errors['answer['.$key.']'] = '';
+                    foreach ($regexerrors as $item) {
+                        $errors['answer['.$key.']'] .= $item . '<br />';
                     }
                 }
             }
