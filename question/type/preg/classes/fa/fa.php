@@ -888,6 +888,8 @@ class fa {
      * @return boolean true if this FA equal to another.
      */
     public function equal($another, &$differences, $withtags = false) {
+        global $CFG;
+
         // Initialize memory and stack - arrays of qtype_preg_fa_pair_of_groups
         $stack = array();
         $memory = array();
@@ -1073,8 +1075,8 @@ class fa {
             }
 
             // Checking mismatches count
-            $differences = array_slice($differences, 0, 5);
-            if (count($differences) == 5) {
+            $differences = array_slice($differences, 0, $CFG->qtype_writregex_mismatches_limit);
+            if (count($differences) == $CFG->qtype_writregex_mismatches_limit) {
                 break;
             }
         }
@@ -1128,10 +1130,10 @@ class fa {
             }
 
             // Checking mismatches count
-            $differences = array_slice($differences, 0, 5);
+            $differences = array_slice($differences, 0, $CFG->qtype_writregex_mismatches_limit);
         }
 
-        return count($differences) == 0;
+        return count($differences) == $CFG->qtype_writregex_mismatches_limit;
     }
 
     /**
