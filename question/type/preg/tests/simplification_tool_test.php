@@ -16,7 +16,102 @@ require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_simplific
 
 class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
+    /*public function test_1() {
+        $stooloptions = new qtype_preg_simplification_tool_options();
+        $stooloptions->engine = 'fa_matcher';
+        $stooloptions->notation = 'native';
+        $stooloptions->exactmatch = false;
+        $stooloptions->problem_ids = array();
+        $stooloptions->problem_ids[0] = '';
+        $stooloptions->problem_type = -2;
+        $stooloptions->indfirst = -2;
+        $stooloptions->indlast = -2;
+
+        $stooloptions->selection = new qtype_preg_position(-2, -2);
+        $stooloptions->preserveallnodes = true;
+
+        $st = new qtype_preg_simplification_tool('aa{1,1}', $stooloptions);
+        $rule = new qtype_preg_regex_hint_common_subexpressions($st->get_dst_root());
+        $rhr = $rule->check_hint();
+
+        var_dump($rhr);
+//        $this->assertTrue(true);
+
+        $st = new qtype_preg_simplification_tool('aa{1,1}', $stooloptions);
+        $rule = new qtype_preg_regex_hint_common_subexpressions($st->get_dst_root());
+        $restree = $rule->use_hint($rhr);
+
+        var_dump($restree);
+        $this->assertTrue(true);
+
+//        if ($restree === null) {
+//            $this->assertTrue(false);
+//        } else {
+//            var_dump($restree->get_regex_string());
+//            $this->assertTrue(true);
+//        }
+    }*/
+
+
     protected function abstract_testing($function_name_for_test, $function_name_with_tests) {
+        $tests = $this->$function_name_with_tests();
+        for($i = 0; $i < count($tests); $i++) {
+            $test_result = $tests[$i][1];
+            $test_regex = $tests[$i][0];
+
+            //var_dump($test_regex);
+
+            $stooloptions = new qtype_preg_simplification_tool_options();
+            $stooloptions->engine = 'fa_matcher';
+            $stooloptions->notation = 'native';
+            $stooloptions->exactmatch = false;
+            $stooloptions->problem_ids = array();
+            $stooloptions->problem_ids[0] = '';
+            $stooloptions->problem_type = -2;
+            $stooloptions->indfirst = -2;
+            $stooloptions->indlast = -2;
+
+            $stooloptions->selection = new qtype_preg_position(-2, -2);
+            $stooloptions->preserveallnodes = true;
+
+            $result_regex = '';
+            $st = new qtype_preg_simplification_tool($test_regex, $stooloptions);
+
+            $rule_name = 'qtype_preg_regex_hint_' . $function_name_for_test;
+
+            $rule = new $rule_name($st->get_dst_root());
+            $rhr = $rule->check_hint();
+
+            if (count($rhr->problem_ids) > 0) {
+                $st = new qtype_preg_simplification_tool($test_regex, $stooloptions);
+                $rule = new $rule_name($st->get_dst_root());
+                $restree = $rule->use_hint($rhr);
+
+                if ($restree === null) {
+                    $result_regex = '';
+                } else {
+                    if ($rhr->problem_type === 'qtype_preg_regex_hint_common_subexpressions') {
+                        $result_regex = $restree;
+                    } else {
+                        $result_regex = $restree->get_regex_string();
+                    }
+                }
+            } else {
+                $result_regex = $test_regex;
+            }
+
+            if ($result_regex !== $test_result) {
+                echo "---Test failure!---\n";
+                echo "input: {$test_regex}\n";
+                echo "output: {$result_regex}\n";
+                echo "correct answer: {$test_result}\n";
+            }
+
+            $this->assertTrue($result_regex === $test_result);
+        }
+    }
+
+    /*protected function abstract_testing($function_name_for_test, $function_name_with_tests) {
         $tests = $this->$function_name_with_tests();
         for($i = 0; $i < count($tests); $i++) {
             $test_result = $tests[$i][1];
@@ -65,11 +160,11 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             /*} catch(Exception $e) {
                 var_dump('Exception!');
                 var_dump($test_regex);
-            }*/
+            }*
 
             $this->assertTrue($result_regex === $test_result);
         }
-    }
+    }*/
 
     public function test_common_subexpressions_trivial() {
         $this->abstract_testing('common_subexpressions', 'get_test_common_subexpressions_trivial');
@@ -107,9 +202,9 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         $this->abstract_testing('question_quant_for_alternative_node', 'get_test_question_quant_for_alternative_node_trivial');
     }
 
-    /*public function test_nullable_alternative_node_trivial() {
-        $this->abstract_testing('nullable_alternative_node', 'get_test_nullable_alternative_node_trivial');
-    }*/
+    public function test_nullable_alt_without_question_quant_trivial() {
+        $this->abstract_testing('nullable_alt_without_question_quant', 'get_test_nullable_alt_without_question_quant_trivial');
+    }
 
     public function test_quant_node_1_to_1_trivial() {
         $this->abstract_testing('quant_node_1_to_1', 'get_test_quant_node_1_to_1_trivial');
@@ -147,8 +242,22 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         $this->abstract_testing('useless_dollar_assertion', 'get_test_useless_dollar_assertion_trivial');
     }
 
+    public function test_exact_match_trivial() {
+        $this->abstract_testing('exact_match', 'get_test_exact_match_trivial');
+    }
+
+    public function test_nullable_regex_trivial() {
+        $this->abstract_testing('nullable_regex', 'get_test_nullable_regex_trivial');
+    }
+
     protected function get_test_common_subexpressions_trivial() {
         return array (
+            array('a?a+', 'a+'), // a*
+            array('(?:a|b)(?:a|b)', '(?:a|b){2}'),
+            array('(?:a|b)?(?:a|b)+', '(?:a|b)+'), //(?:a|b)*
+
+            array('a?a{0,0}', 'a?'), // a*
+
             array('(?:)', '(?:)'),
             array('aaa', 'a{3}'),
             array('aaab', 'a{3}b'),
@@ -274,6 +383,75 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:cab)(?:ab)', 'c(?:ab){2}'),
             array('(?:ab)(?:cab)ab', '(?:ab)c(?:ab){2}'),
             array('ab(?:cab)(?:ab)', 'abc(?:ab){2}'),
+
+            /*array('a(?>a)', 'a{2}'),
+            array('(?>a)a', 'a{2}'),
+            array('a(?>a)a', 'a{3}'),
+            array('aa(?>aa)aa', 'a{6}'),
+            array('a(?>ab)', 'a{2}b'),
+            array('(?>ab)a', '(?>ab)a'),
+            array('a(?>ab)a', 'a{2}ba'),
+            array('a(?>ba)', 'a(?>ba)'),
+            array('(?>ba)a', 'ba{2}'),
+            array('a(?>ba)a', 'aba{2}'),
+
+            array('ab(?>ab)', '(?>ab){2}'),
+            array('(?>ab)ab', '(?>ab){2}'),
+            array('ab(?>ab)ab', '(?>ab){3}'),
+            array('abab(?>abab)abab', '(?>ab){6}'),
+            array('ab(?>abc)', '(?>ab){2}c'),
+            array('(?>abc)ab', '(?>abc)ab'),
+            array('ab(?>abc)ab', '(?>ab){2}cab'),
+            array('ab(?>cab)', 'ab(?>cab)'),
+            array('(?>cab)ab', 'c(?>ab){2}'),
+            array('ab(?>cab)ab', 'abc(?>ab){2}'),
+
+            array('(?>a)(?>a)', 'a{2}'),
+            array('a(?>a)(?>a)', 'a{3}'),
+            array('(?>a)(?>a)(?>a)', 'a{3}'),
+            array('(?>a)(?>a)a', 'a{3}'),
+            array('(?>a)a(?>a)', 'a{3}'),
+            array('(?>a)a(?>aa)aa', 'a{6}'),
+            array('(?>a)a(?>aa)a(?>a)', 'a{6}'),
+            array('aa(?>aa)a(?>a)', 'a{6}'),
+            array('a(?>a)(?>aa)(?>a)a', 'a{6}'),
+            array('a(?>a)(?>aa)aa', 'a{6}'),
+            array('aa(?>aa)(?>a)a', 'a{6}'),
+            array('(?>a)(?>ab)', 'a{2}b'),
+            array('(?>ab)(?>a)', '(?>ab)(?>a)'),
+            array('(?>a)(?>ab)a', 'a{2}ba'),
+            array('(?>a)(?>ab)(?>a)', 'a{2}b(?>a)'),
+            array('a(?>ab)(?>a)', 'a{2}b(?>a)'),
+            array('(?>a)(?>ba)', '(?>a)(?>ba)'),
+            array('(?>ba)(?>a)', 'ba{2}'),
+            array('(?>a)(?>ba)(?>a)', '(?>a)ba{2}'),
+            array('(?>a)(?>ba)a', '(?>a)ba{2}'),
+            array('a(?>ba)(?>a)', 'aba{2}'),
+
+            array('(?>ab)(?>ab)', '(?>ab){2}'),
+            array('(?>ab)(?>a)b', '(?>ab){2}'),
+            array('(?>ab)a(?>b)', '(?>ab){2}'),
+            array('(?>a)b(?>ab)', '(?>ab){2}'),
+            array('a(?>b)(?>ab)', '(?>ab){2}'),
+            array('(?>ab)(?>ab)ab', '(?>ab){3}'),
+            array('ab(?>ab)(?>ab)', '(?>ab){3}'),
+            array('(?>ab)(?>ab)(?>ab)', '(?>ab){3}'),
+            array('(?>a)bab(?>abab)abab', '(?>ab){6}'),
+            array('a(?>b)ab(?>abab)abab', '(?>ab){6}'),
+            array('ab(?>a)b(?>abab)abab', '(?>ab){6}'),
+            array('aba(?>b)(?>abab)abab', '(?>ab){6}'),
+            array('abab(?>abab)(?>a)bab', '(?>ab){6}'),
+            array('abab(?>abab)a(?>b)ab', '(?>ab){6}'),
+            array('abab(?>abab)ab(?>a)b', '(?>ab){6}'),
+            array('abab(?>abab)aba(?>b)', '(?>ab){6}'),
+            array('(?>ab)(?>abc)', '(?>ab){2}c'),
+            array('(?>abc)(?>ab)', '(?>abc)(?>ab)'),
+            array('(?>ab)(?>abc)ab', '(?>ab){2}cab'),
+            array('ab(?>abc)(?>ab)', '(?>ab){2}c(?>ab)'),
+            array('(?>ab)(?>cab)', '(?>ab)(?>cab)'),
+            array('(?>cab)(?>ab)', 'c(?>ab){2}'),
+            array('(?>ab)(?>cab)ab', '(?>ab)c(?>ab){2}'),
+            array('ab(?>cab)(?>ab)', 'abc(?>ab){2}'),*/
 
             array('[a]aa', 'a{3}'),
             array('a[a]a', 'a{3}'),
@@ -2347,6 +2525,106 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('$$aa$', '$$a{2}$'),
             array('$aa$$', '$a{2}$$'),
             array('aa$$$', 'a{2}$$$'),
+
+
+            // Repeated alternatives
+            //array('(?:a|b)?(?:a|b|)', '(?:(?:a|b)?){2}'),
+
+            // Quant from 1 to 1
+            array('a{1,1}a', 'a{2}'),
+            array('aa{1,1}', 'a{2}'),
+            array('a{1,1}a{1,1}', 'a{2}'),
+
+            array('aaa{1,1}', 'a{3}'),
+            array('aa{1,1}a', 'a{3}'),
+            array('a{1,1}aa', 'a{3}'),
+            array('a{1,1}a{1,1}a', 'a{3}'),
+            array('aa{1,1}a{1,1}', 'a{3}'),
+            array('a{1,1}aa{1,1}', 'a{3}'),
+            array('a{1,1}a{1,1}a{1,1}', 'a{3}'),
+            array('aa(?:a){1,1}', 'a{3}'),
+            array('aa{1,1}(?:a){1,1}', 'a{3}'),
+            array('a{1,1}a(?:a){1,1}', 'a{3}'),
+            array('a{1,1}a{1,1}(?:a){1,1}', 'a{3}'),
+            array('aa(?:a{1,1})', 'a{3}'),
+            array('aa{1,1}(?:a{1,1})', 'a{3}'),
+            array('a{1,1}a(?:a{1,1})', 'a{3}'),
+            array('a{1,1}a{1,1}(?:a{1,1})', 'a{3}'),
+            array('aa(?:a){1,1}(?:a){1,1}', 'a{4}'),
+            array('aa{1,1}(?:a){1,1}(?:a){1,1}', 'a{4}'),
+            array('a{1,1}a(?:a){1,1}(?:a){1,1}', 'a{4}'),
+            array('a{1,1}a{1,1}(?:a){1,1}(?:a){1,1}', 'a{4}'),
+            array('aa(?:a{1,1})(?:a{1,1})', 'a{4}'),
+            array('aa{1,1}(?:a{1,1})(?:a{1,1})', 'a{4}'),
+            array('a{1,1}a(?:a{1,1})(?:a{1,1})', 'a{4}'),
+            array('a{1,1}a{1,1}(?:a{1,1})(?:a{1,1})', 'a{4}'),
+            array('aa(?:a{1,1})(?:a){1,1}', 'a{4}'),
+            array('aa{1,1}(?:a{1,1})(?:a){1,1}', 'a{4}'),
+            array('a{1,1}a(?:a{1,1})(?:a){1,1}', 'a{4}'),
+            array('a{1,1}a{1,1}(?:a{1,1})(?:a){1,1}', 'a{4}'),
+            array('aa(?:a){1,1}(?:a{1,1})', 'a{4}'),
+            array('aa{1,1}(?:a){1,1}(?:a{1,1})', 'a{4}'),
+            array('a{1,1}a(?:a){1,1}(?:a{1,1})', 'a{4}'),
+            array('a{1,1}a{1,1}(?:a){1,1}(?:a{1,1})', 'a{4}'),
+            array('aa(a){1,1}', 'a{3}'),
+            array('aa{1,1}(a){1,1}', 'a{3}'),
+            array('a{1,1}a(a){1,1}', 'a{3}'),
+            array('a{1,1}a{1,1}(a){1,1}', 'a{3}'),
+            array('aa(a{1,1})', 'a{3}'),
+            array('aa{1,1}(a{1,1})', 'a{3}'),
+            array('a{1,1}a(a{1,1})', 'a{3}'),
+            array('a{1,1}a{1,1}(a{1,1})', 'a{3}'),
+            array('aa(a){1,1}(a){1,1}', 'a{4}'),
+            array('aa{1,1}(a){1,1}(a){1,1}', 'a{4}'),
+            array('a{1,1}a(a){1,1}(a){1,1}', 'a{4}'),
+            array('a{1,1}a{1,1}(a){1,1}(a){1,1}', 'a{4}'),
+            array('aa(a{1,1})(a{1,1})', 'a{4}'),
+            array('aa{1,1}(a{1,1})(a{1,1})', 'a{4}'),
+            array('a{1,1}a(a{1,1})(a{1,1})', 'a{4}'),
+            array('a{1,1}a{1,1}(a{1,1})(a{1,1})', 'a{4}'),
+            array('aa(a{1,1})(a){1,1}', 'a{4}'),
+            array('aa{1,1}(a{1,1})(a){1,1}', 'a{4}'),
+            array('a{1,1}a(a{1,1})(a){1,1}', 'a{4}'),
+            array('a{1,1}a{1,1}(a{1,1})(a){1,1}', 'a{4}'),
+            array('aa(a){1,1}(a{1,1})', 'a{4}'),
+            array('aa{1,1}(a){1,1}(a{1,1})', 'a{4}'),
+            array('a{1,1}a(a){1,1}(a{1,1})', 'a{4}'),
+            array('a{1,1}a{1,1}(a){1,1}(a{1,1})', 'a{4}'),
+            array('(aa)(a){1,1}', 'a{3}'),
+            /*array('(aa){1,1}(a){1,1}', 'a{4}'),
+            array('(aa{1,1})(a){1,1}', 'a{3}'),
+            array('(a{1,1}a)(a){1,1}', 'a{3}'),
+            array('(a{1,1}a{1,1})(a){1,1}', 'a{3}'),
+            array('(a{1,1}a){1,1}(a){1,1}', 'a{4}'),
+            array('(aa{1,1}){1,1}(a){1,1}', 'a{3}'),
+            array('(a{1,1}a{1,1}){1,1}(a){1,1}', 'a{3}'),
+            array('(aa)(a{1,1})', 'a{3}'),
+            array('(aa){1,1}(a{1,1})', 'a{3}'),
+            array('(aa{1,1})(a{1,1})', 'a{3}'),
+            array('(a{1,1}a)(a{1,1})', 'a{3}'),
+            array('(a{1,1}a{1,1})(a{1,1})', 'a{3}'),
+            array('(a{1,1}a){1,1}(a{1,1})', 'a{3}'),
+            array('(aa{1,1}){1,1}(a{1,1})', 'a{3}'),
+            array('(a{1,1}a{1,1}){1,1}(a{1,1})', 'a{3}'),
+            array('(aa)(?:a){1,1}', 'a{3}'),
+            array('(aa){1,1}(?:a){1,1}', 'a{3}'),
+            array('(aa{1,1})(?:a){1,1}', 'a{3}'),
+            array('(a{1,1}a)(?:a){1,1}', 'a{3}'),
+            array('(a{1,1}a{1,1})(?:a){1,1}', 'a{3}'),
+            array('(a{1,1}a){1,1}(?:a){1,1}', 'a{3}'),
+            array('(aa{1,1}){1,1}(?:a){1,1}', 'a{3}'),
+            array('(a{1,1}a{1,1}){1,1}(?:a){1,1}', 'a{3}'),
+            array('(aa)(?:a{1,1})', 'a{3}'),
+            array('(aa){1,1}(?:a{1,1})', 'a{3}'),
+            array('(aa{1,1})(?:a{1,1})', 'a{3}'),
+            array('(a{1,1}a)(?:a{1,1})', 'a{3}'),
+            array('(a{1,1}a{1,1})(?:a{1,1})', 'a{3}'),
+            array('(a{1,1}a){1,1}(?:a{1,1})', 'a{3}'),
+            array('(aa{1,1}){1,1}(?:a{1,1})', 'a{3}'),
+            array('(a{1,1}a{1,1}){1,1}(?:a{1,1})', 'a{3}'),*/
+
+            // \Q+-*/\E
+            //array('\Q+-*/\Eaa', '\Q+-*/\Ea{2}}'),
         );
     }
 
@@ -2367,6 +2645,212 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('$$a$', '$a$'),
             array('$a$$', '$a$'),
             array('a$$$', 'a$$'),
+
+            array('\A\Aa', '\Aa'),
+            array('\Aa\A', '\Aa\A'),
+            array('a\A\A', 'a\A'),
+            array('\A\A\Aa', '\A\Aa'),
+            array('\A\Aa\A', '\Aa\A'),
+            array('\Aa\A\A', '\Aa\A'),
+            array('a\A\A\A', 'a\A\A'),
+
+            array('\Z\Za', '\Za'),
+            array('\Za\Z', '\Za\Z'),
+            array('a\Z\Z', 'a\Z'),
+            array('\Z\Z\Za', '\Z\Za'),
+            array('\Z\Za\Z', '\Za\Z'),
+            array('\Za\Z\Z', '\Za\Z'),
+            array('a\Z\Z\Z', 'a\Z\Z'),
+
+            array('\z\za', '\za'),
+            array('\za\z', '\za\z'),
+            array('a\z\z', 'a\z'),
+            array('\z\z\za', '\z\za'),
+            array('\z\za\z', '\za\z'),
+            array('\za\z\z', '\za\z'),
+            array('a\z\z\z', 'a\z\z'),
+
+
+            array('abc^^a', 'abc^a'),
+            array('abc^a^', 'abc^a^'),
+            array('abca^^', 'abca^'),
+            array('abc^^^a', 'abc^^a'),
+            array('abc^^a^', 'abc^a^'),
+            array('abc^a^^', 'abc^a^'),
+            array('abca^^^', 'abca^^'),
+
+            array('abc$$a', 'abc$a'),
+            array('abc$a$', 'abc$a$'),
+            array('abca$$', 'abca$'),
+            array('abc$$$a', 'abc$$a'),
+            array('abc$$a$', 'abc$a$'),
+            array('abc$a$$', 'abc$a$'),
+            array('abca$$$', 'abca$$'),
+
+            array('abc\A\Aa', 'abc\Aa'),
+            array('abc\Aa\A', 'abc\Aa\A'),
+            array('abca\A\A', 'abca\A'),
+            array('abc\A\A\Aa', 'abc\A\Aa'),
+            array('abc\A\Aa\A', 'abc\Aa\A'),
+            array('abc\Aa\A\A', 'abc\Aa\A'),
+            array('abca\A\A\A', 'abca\A\A'),
+
+            array('abc\Z\Za', 'abc\Za'),
+            array('abc\Za\Z', 'abc\Za\Z'),
+            array('abca\Z\Z', 'abca\Z'),
+            array('abc\Z\Z\Za', 'abc\Z\Za'),
+            array('abc\Z\Za\Z', 'abc\Za\Z'),
+            array('abc\Za\Z\Z', 'abc\Za\Z'),
+            array('abca\Z\Z\Z', 'abca\Z\Z'),
+
+            array('abc\z\za', 'abc\za'),
+            array('abc\za\z', 'abc\za\z'),
+            array('abca\z\z', 'abca\z'),
+            array('abc\z\z\za', 'abc\z\za'),
+            array('abc\z\za\z', 'abc\za\z'),
+            array('abc\za\z\z', 'abc\za\z'),
+            array('abca\z\z\z', 'abca\z\z'),
+
+            array('^^aabc', '^aabc'),
+            array('^a^abc', '^a^abc'),
+            array('a^^abc', 'a^abc'),
+            array('^^^aabc', '^^aabc'),
+            array('^^a^abc', '^a^abc'),
+            array('^a^^abc', '^a^abc'),
+            array('a^^^abc', 'a^^abc'),
+
+            array('$$aabc', '$aabc'),
+            array('$a$abc', '$a$abc'),
+            array('a$$abc', 'a$abc'),
+            array('$$$aabc', '$$aabc'),
+            array('$$a$abc', '$a$abc'),
+            array('$a$$abc', '$a$abc'),
+            array('a$$$abc', 'a$$abc'),
+
+            array('\A\Aaabc', '\Aaabc'),
+            array('\Aa\Aabc', '\Aa\Aabc'),
+            array('a\A\Aabc', 'a\Aabc'),
+            array('\A\A\Aaabc', '\A\Aaabc'),
+            array('\A\Aa\Aabc', '\Aa\Aabc'),
+            array('\Aa\A\Aabc', '\Aa\Aabc'),
+            array('a\A\A\Aabc', 'a\A\Aabc'),
+
+            array('\Z\Zaabc', '\Zaabc'),
+            array('\Za\Zabc', '\Za\Zabc'),
+            array('a\Z\Zabc', 'a\Zabc'),
+            array('\Z\Z\Zaabc', '\Z\Zaabc'),
+            array('\Z\Za\Zabc', '\Za\Zabc'),
+            array('\Za\Z\Zabc', '\Za\Zabc'),
+            array('a\Z\Z\Zabc', 'a\Z\Zabc'),
+
+            array('\z\zaabc', '\zaabc'),
+            array('\za\zabc', '\za\zabc'),
+            array('a\z\zabc', 'a\zabc'),
+            array('\z\z\zaabc', '\z\zaabc'),
+            array('\z\za\zabc', '\za\zabc'),
+            array('\za\z\zabc', '\za\zabc'),
+            array('a\z\z\zabc', 'a\z\zabc'),
+
+            array('abc^^aabc', 'abc^aabc'),
+            array('abc^a^abc', 'abc^a^abc'),
+            array('abca^^abc', 'abca^abc'),
+            array('abc^^^aabc', 'abc^^aabc'),
+            array('abc^^a^abc', 'abc^a^abc'),
+            array('abc^a^^abc', 'abc^a^abc'),
+            array('abca^^^abc', 'abca^^abc'),
+
+            array('abc$$aabc', 'abc$aabc'),
+            array('abc$a$abc', 'abc$a$abc'),
+            array('abca$$abc', 'abca$abc'),
+            array('abc$$$aabc', 'abc$$aabc'),
+            array('abc$$a$abc', 'abc$a$abc'),
+            array('abc$a$$abc', 'abc$a$abc'),
+            array('abca$$$abc', 'abca$$abc'),
+
+            array('abc\A\Aaabc', 'abc\Aaabc'),
+            array('abc\Aa\Aabc', 'abc\Aa\Aabc'),
+            array('abca\A\Aabc', 'abca\Aabc'),
+            array('abc\A\A\Aaabc', 'abc\A\Aaabc'),
+            array('abc\A\Aa\Aabc', 'abc\Aa\Aabc'),
+            array('abc\Aa\A\Aabc', 'abc\Aa\Aabc'),
+            array('abca\A\A\Aabc', 'abca\A\Aabc'),
+
+            array('abc\Z\Zaabc', 'abc\Zaabc'),
+            array('abc\Za\Zabc', 'abc\Za\Zabc'),
+            array('abca\Z\Zabc', 'abca\Zabc'),
+            array('abc\Z\Z\Zaabc', 'abc\Z\Zaabc'),
+            array('abc\Z\Za\Zabc', 'abc\Za\Zabc'),
+            array('abc\Za\Z\Zabc', 'abc\Za\Zabc'),
+            array('abca\Z\Z\Zabc', 'abca\Z\Zabc'),
+
+            array('abc\z\zaabc', 'abc\zaabc'),
+            array('abc\za\zabc', 'abc\za\zabc'),
+            array('abca\z\zabc', 'abca\zabc'),
+            array('abc\z\z\zaabc', 'abc\z\zaabc'),
+            array('abc\z\za\zabc', 'abc\za\zabc'),
+            array('abc\za\z\zabc', 'abc\za\zabc'),
+            array('abca\z\z\zabc', 'abca\z\zabc'),
+
+
+            array('^|^a', '^|^a'),
+            array('^^|a', '^|a'),
+            array('^|a^', '^|a^'),
+            array('^a|^', '^a|^'),
+            array('a|^^', 'a|^'),
+//            array('a^|^', 'a^|^'),
+            array('^|^^a', '^|^a'),
+            array('^^|^a', '^|^a'),
+            array('^^|^|a', '^|^|a'),
+//            array('^|^|^a', '^|^|^a'),
+//            array('^|^|^|a', '^|^|^|a'),
+            array('^|^a^', '^|^a^'),
+            array('^^|a^', '^|a^'),
+            array('^^|a^', '^|a^'),
+            array('^^a|^', '^a|^'),
+            array('^|^a|^', '^|^a|^'),
+            array('^|a^^', '^|a^'),
+            array('^a|^^', '^a|^'),
+//            array('^a^|^', '^a^|^'),
+//            array('^|a|^|^', '^|a|^|^'),
+            array('a|^^^', 'a|^^'),
+            array('a^|^^', 'a^|^'),
+            array('a^^|^', 'a^|^'),
+//            array('a^|^|^', 'a^|^|^'),
+
+
+            /*array('(?:^)^a', '(?:^)a'),
+            array('^(?:^)a', '(?:^)a'),
+            array('(?:^)(?:^)a', '(?:^)a'),
+            array('(?:^)a^', '(?:^)a^'),
+            array('^a(?:^)', '^a(?:^)'),
+            array('(?:^)a(?:^)', '(?:^)a(?:^)'),
+            array('a(?:^)^', 'a(?:^)'),
+            array('a^(?:^)', 'a^'),
+            array('a(?:^)(?:^)', 'a(?:^)'),
+            array('(?:^)^^a', '(?:^)^a'),
+            array('^(?:^)^a', '^^a'),
+            array('^^(?:^)a', '^(?:^)a'),
+            array('(?:^)(?:^)^a', '(?:^)^a'),
+            array('^(?:^)(?:^)a', '^(?:^)a'),
+            array('(?:^)(?:^)(?:^)a', '(?:^)(?:^)a'),
+            array('(?:^)^a^', '(?:^)a^'),
+            array('^(?:^)a^', '^a^'),
+            array('^^a(?:^)', '^a(?:^)'),
+            array('(?:^)(?:^)a^', '(?:^)a^'),
+            array('^(?:^)a(?:^)', '^a(?:^)'),
+            array('(?:^)(?:^)a(?:^)', '(?:^)a(?:^)'),
+            array('(?:^)a^^', '(?:^)a^'),
+            array('^a(?:^)^', '^a(?:^)'),
+            array('^a^(?:^)', '^a^'),
+            array('(?:^)a(?:^)^', '(?:^)a(?:^)'),
+            array('^a(?:^)(?:^)', '^a(?:^)'),
+            array('(?:^)a(?:^)(?:^)', '(?:^)a(?:^)'),
+            array('a(?:^)^^', 'a(?:^)^'),
+            array('a^(?:^)^', 'a^^'),
+            array('a^^(?:^)', 'a^(?:^)'),
+            array('a(?:^)(?:^)^', 'a(?:^)^'),
+            array('a^(?:^)(?:^)', 'a^(?:^)'),
+            array('a(?:^)(?:^)(?:^)', 'a(?:^)(?:^)'),*/
         );
     }
 
@@ -2440,11 +2924,303 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('[[:upper:]]', '[[:upper:]]'),
             array('[[:word:]]', '[[:word:]]'),
             array('[[:xdigit:]]', '[[:xdigit:]]'),
+
+            array('[a]|', 'a|'),
+            array('a|[a]', 'a|a'),
+            array('a[a]|', 'aa|'),
+            array('a|[a]|', 'a|a|'),
+            array('[a]|a', 'a|a'),
+            array('[a]a|', 'aa|'),
+            array('[a]|a|', 'a|a|'),
+            array('a|[a]a', 'a|aa'),
+            array('a[a]|a', 'aa|a'),
+            array('a[a]a|', 'aaa|'),
+            array('a|[a]|a|', 'a|a|a|'),
+            array('b|[a]c', 'b|ac'),
+            array('b[a]|c', 'ba|c'),
+            array('b[a]c|', 'bac|'),
+            array('b|[a]|c|', 'b|a|c|'),
+            array('[aa]|', 'a|'),
+            array('a|[aa]', 'a|a'),
+            array('a[aa]|', 'aa|'),
+            array('a|[aa]|', 'a|a|'),
+            array('[aa]|a', 'a|a'),
+            array('[aa]a|', 'aa|'),
+            array('[aa]|a|', 'a|a|'),
+            array('a|[aa]a', 'a|aa'),
+            array('a[aa]|a', 'aa|a'),
+            array('a[aa]a|', 'aaa|'),
+            array('a|[aa]|a', 'a|a|a'),
+            array('[^a]|', '[^a]|'),
+            array('a|[^a]', 'a|[^a]'),
+            array('a[^a]|', 'a[^a]|'),
+            array('a|[^a]|', 'a|[^a]|'),
+            array('[^a]|a', '[^a]|a'),
+            array('[^a]a|', '[^a]a|'),
+            array('[^a]|a|', '[^a]|a|'),
+            array('a|[^a]a', 'a|[^a]a'),
+            array('a[^a]|a', 'a[^a]|a'),
+            array('a[^a]a|', 'a[^a]a|'),
+            array('a|[^a]|a|', 'a|[^a]|a|'),
+            array('b|[^a]c', 'b|[^a]c'),
+            array('b[^a]|c', 'b[^a]|c'),
+            array('b[^a]c|', 'b[^a]c|'),
+            array('b|[^a]|c|', 'b|[^a]|c|'),
+            array('[^aa]|', '[^aa]|'),
+            array('a|[^aa]', 'a|[^aa]'),
+            array('a[^aa]|', 'a[^aa]|'),
+            array('a|[^aa]|', 'a|[^aa]|'),
+            array('[^aa]|a', '[^aa]|a'),
+            array('[^aa]a|', '[^aa]a|'),
+            array('[^aa]|a|', '[^aa]|a|'),
+            array('a|[^aa]a', 'a|[^aa]a'),
+            array('a[^aa]|a', 'a[^aa]|a'),
+            array('a[^aa]a|', 'a[^aa]a|'),
+            array('a|[^aa]|a', 'a|[^aa]|a'),
+
+
+            array('(?:[a])', '(?:a)'),
+            array('(?:a[a])', '(?:aa)'),
+            array('(?:[a]a)', '(?:aa)'),
+            array('(?:a[a]a)', '(?:aaa)'),
+            array('(?:b[a]c)', '(?:bac)'),
+            array('(?:[aa])', '(?:a)'),
+            array('(?:a[aa])', '(?:aa)'),
+            array('(?:[aa]a)', '(?:aa)'),
+            array('(?:a[aa]a)', '(?:aaa)'),
+            array('(?:[^a])', '(?:[^a])'),
+            array('(?:a[^a])', '(?:a[^a])'),
+            array('(?:[^a]a)', '(?:[^a]a)'),
+            array('(?:a[^a]a)', '(?:a[^a]a)'),
+            array('(?:b[^a]c)', '(?:b[^a]c)'),
+            array('(?:[^aa])', '(?:[^aa])'),
+            array('(?:a[^aa])', '(?:a[^aa])'),
+            array('(?:[^aa]a)', '(?:[^aa]a)'),
+            array('(?:a[^aa]a)', '(?:a[^aa]a)'),
+
+            array('(?:[a]|)', '(?:a|)'),
+            array('(?:a|[a])', '(?:a|a)'),
+            array('(?:a[a]|)', '(?:aa|)'),
+            array('(?:a|[a]|)', '(?:a|a|)'),
+            array('(?:[a]|a)', '(?:a|a)'),
+            array('(?:[a]a|)', '(?:aa|)'),
+            array('(?:[a]|a|)', '(?:a|a|)'),
+            array('(?:a|[a]a)', '(?:a|aa)'),
+            array('(?:a[a]|a)', '(?:aa|a)'),
+            array('(?:a[a]a|)', '(?:aaa|)'),
+            array('(?:a|[a]|a|)', '(?:a|a|a|)'),
+            array('(?:b|[a]c)', '(?:b|ac)'),
+            array('(?:b[a]|c)', '(?:ba|c)'),
+            array('(?:b[a]c|)', '(?:bac|)'),
+            array('(?:b|[a]|c|)', '(?:b|a|c|)'),
+            array('(?:[aa]|)', '(?:a|)'),
+            array('(?:a|[aa])', '(?:a|a)'),
+            array('(?:a[aa]|)', '(?:aa|)'),
+            array('(?:a|[aa]|)', '(?:a|a|)'),
+            array('(?:[aa]|a)', '(?:a|a)'),
+            array('(?:[aa]a|)', '(?:aa|)'),
+            array('(?:[aa]|a|)', '(?:a|a|)'),
+            array('(?:a|[aa]a)', '(?:a|aa)'),
+            array('(?:a[aa]|a)', '(?:aa|a)'),
+            array('(?:a[aa]a|)', '(?:aaa|)'),
+            array('(?:a|[aa]|a)', '(?:a|a|a)'),
+            array('(?:[^a]|)', '(?:[^a]|)'),
+            array('(?:a|[^a])', '(?:a|[^a])'),
+            array('(?:a[^a]|)', '(?:a[^a]|)'),
+            array('(?:a|[^a]|)', '(?:a|[^a]|)'),
+            array('(?:[^a]|a)', '(?:[^a]|a)'),
+            array('(?:[^a]a|)', '(?:[^a]a|)'),
+            array('(?:[^a]|a|)', '(?:[^a]|a|)'),
+            array('(?:a|[^a]a)', '(?:a|[^a]a)'),
+            array('(?:a[^a]|a)', '(?:a[^a]|a)'),
+            array('(?:a[^a]a|)', '(?:a[^a]a|)'),
+            array('(?:a|[^a]|a|)', '(?:a|[^a]|a|)'),
+            array('(?:b|[^a]c)', '(?:b|[^a]c)'),
+            array('(?:b[^a]|c)', '(?:b[^a]|c)'),
+            array('(?:b[^a]c|)', '(?:b[^a]c|)'),
+            array('(?:b|[^a]|c|)', '(?:b|[^a]|c|)'),
+            array('(?:[^aa]|)', '(?:[^aa]|)'),
+            array('(?:a|[^aa])', '(?:a|[^aa])'),
+            array('(?:a[^aa]|)', '(?:a[^aa]|)'),
+            array('(?:a|[^aa]|)', '(?:a|[^aa]|)'),
+            array('(?:[^aa]|a)', '(?:[^aa]|a)'),
+            array('(?:[^aa]a|)', '(?:[^aa]a|)'),
+            array('(?:[^aa]|a|)', '(?:[^aa]|a|)'),
+            array('(?:a|[^aa]a)', '(?:a|[^aa]a)'),
+            array('(?:a[^aa]|a)', '(?:a[^aa]|a)'),
+            array('(?:a[^aa]a|)', '(?:a[^aa]a|)'),
+            array('(?:a|[^aa]|a)', '(?:a|[^aa]|a)'),
+
+
+            array('(?:(?:[a]))', '(?:(?:a))'),
+            array('(?:(?:a)[a])', '(?:(?:a)a)'),
+            array('(?:a(?:[a]))', '(?:a(?:a))'),
+            array('(?:(?:a)(?:[a]))', '(?:(?:a)(?:a))'),
+            array('(?:(?:[a])a)', '(?:(?:a)a)'),
+            array('(?:[a](?:a))', '(?:a(?:a))'),
+            array('(?:(?:[a])(?:a))', '(?:(?:a)(?:a))'),
+            array('(?:(?:a)[a]a)', '(?:(?:a)aa)'),
+            array('(?:a(?:[a])a)', '(?:a(?:a)a)'),
+            array('(?:a[a](?:a))', '(?:aa(?:a))'),
+            array('(?:(?:a)(?:[a])(?:a))', '(?:(?:a)(?:a)(?:a))'),
+            array('(?:(?:b)[a]c)', '(?:(?:b)ac)'),
+            array('(?:b(?:[a])c)', '(?:b(?:a)c)'),
+            array('(?:b[a](?:c))', '(?:ba(?:c))'),
+            array('(?:(?:b)(?:[a])(?:c))', '(?:(?:b)(?:a)(?:c))'),
+            array('(?:(?:[aa]))', '(?:(?:a))'),
+            array('(?:(?:a)[aa])', '(?:(?:a)a)'),
+            array('(?:a(?:[aa]))', '(?:a(?:a))'),
+            array('(?:(?:a)(?:[aa]))', '(?:(?:a)(?:a))'),
+            array('(?:(?:[aa])a)', '(?:(?:a)a)'),
+            array('(?:[aa](?:a))', '(?:a(?:a))'),
+            array('(?:(?:[aa])(?:a))', '(?:(?:a)(?:a))'),
+            array('(?:(?:a)[aa]a)', '(?:(?:a)aa)'),
+            array('(?:a(?:[aa])a)', '(?:a(?:a)a)'),
+            array('(?:a[aa](?:a))', '(?:aa(?:a))'),
+            array('(?:(?:a)(?:[aa])(?:a))', '(?:(?:a)(?:a)(?:a))'),
+            array('(?:(?:[^a]))', '(?:(?:[^a]))'),
+            array('(?:(?:a)[^a])', '(?:(?:a)[^a])'),
+            array('(?:a(?:[^a]))', '(?:a(?:[^a]))'),
+            array('(?:(?:a)(?:[^a]))', '(?:(?:a)(?:[^a]))'),
+            array('(?:(?:[^a])a)', '(?:(?:[^a])a)'),
+            array('(?:[^a](?:a))', '(?:[^a](?:a))'),
+            array('(?:(?:[^a])(?:a))', '(?:(?:[^a])(?:a))'),
+            array('(?:(?:a)[^a]a)', '(?:(?:a)[^a]a)'),
+            array('(?:a(?:[^a])a)', '(?:a(?:[^a])a)'),
+            array('(?:a[^a](?:a))', '(?:a[^a](?:a))'),
+            array('(?:(?:a)(?:[^a])(?:a))', '(?:(?:a)(?:[^a])(?:a))'),
+            array('(?:(?:b)[^a]c)', '(?:(?:b)[^a]c)'),
+            array('(?:b(?:[^a])c)', '(?:b(?:[^a])c)'),
+            array('(?:b[^a](?:c))', '(?:b[^a](?:c))'),
+            array('(?:(?:[^aa]))', '(?:(?:[^aa]))'),
+            array('(?:(?:a)[^aa])', '(?:(?:a)[^aa])'),
+            array('(?:a(?:[^aa]))', '(?:a(?:[^aa]))'),
+            array('(?:(?:a)(?:[^aa]))', '(?:(?:a)(?:[^aa]))'),
+            array('(?:(?:[^aa])a)', '(?:(?:[^aa])a)'),
+            array('(?:[^aa](?:a))', '(?:[^aa](?:a))'),
+            array('(?:(?:[^aa])(?:a))', '(?:(?:[^aa])(?:a))'),
+            array('(?:(?:a)[^aa]a)', '(?:(?:a)[^aa]a)'),
+            array('(?:a(?:[^aa])a)', '(?:a(?:[^aa])a)'),
+            array('(?:a[^aa](?:a))', '(?:a[^aa](?:a))'),
+            array('(?:(?:a)(?:[^aa])(?:a))', '(?:(?:a)(?:[^aa])(?:a))'),
+
+            array('(?:(?:[a])|)', '(?:(?:a)|)'),
+            array('(?:(?:a)|[a])', '(?:(?:a)|a)'),
+            array('(?:a|(?:[a]))', '(?:a|(?:a))'),
+            array('(?:(?:a)|(?:[a]))', '(?:(?:a)|(?:a))'),
+            array('(?:(?:a[a])|)', '(?:(?:aa)|)'),
+            array('(?:(?:a)|[a]|)', '(?:(?:a)|a|)'),
+            array('(?:a|(?:[a])|)', '(?:a|(?:a)|)'),
+            array('(?:(?:a)|(?:[a])|)', '(?:(?:a)|(?:a)|)'),
+            array('(?:(?:[a])|a)', '(?:(?:a)|a)'),
+            array('(?:[a]|(?:a))', '(?:a|(?:a))'),
+            array('(?:(?:[a])|(?:a))', '(?:(?:a)|(?:a))'),
+            array('(?:(?:[a])a|)', '(?:(?:a)a|)'),
+            array('(?:[a](?:a)|)', '(?:a(?:a)|)'),
+            array('(?:(?:[a])(?:a)|)', '(?:(?:a)(?:a)|)'),
+            array('(?:(?:[a])|a|)', '(?:(?:a)|a|)'),
+            array('(?:[a]|(?:a)|)', '(?:a|(?:a)|)'),
+            array('(?:(?:[a])|(?:a)|)', '(?:(?:a)|(?:a)|)'),
+            array('(?:(?:a)|[a]a)', '(?:(?:a)|aa)'),
+            array('(?:a|(?:[a])a)', '(?:a|(?:a)a)'),
+            array('(?:a|[a](?:a))', '(?:a|a(?:a))'),
+            array('(?:(?:a)|(?:[a])(?:a))', '(?:(?:a)|(?:a)(?:a))'),
+            array('(?:(?:a)[a]|a)', '(?:(?:a)a|a)'),
+            array('(?:a(?:[a])|a)', '(?:a(?:a)|a)'),
+            array('(?:a[a]|(?:a))', '(?:aa|(?:a))'),
+            array('(?:(?:a)(?:[a])|(?:a))', '(?:(?:a)(?:a)|(?:a))'),
+            array('(?:(?:a)[a]a|)', '(?:(?:a)aa|)'),
+            array('(?:a(?:[a])a|)', '(?:a(?:a)a|)'),
+            array('(?:a[a](?:a)|)', '(?:aa(?:a)|)'),
+            array('(?:(?:a)(?:[a])(?:a)|)', '(?:(?:a)(?:a)(?:a)|)'),
+            array('(?:(?:a)|[a]|a|)', '(?:(?:a)|a|a|)'),
+            array('(?:a|(?:[a])|a|)', '(?:a|(?:a)|a|)'),
+            array('(?:a|[a]|(?:a)|)', '(?:a|a|(?:a)|)'),
+            array('(?:(?:a)|(?:[a])|(?:a)|)', '(?:(?:a)|(?:a)|(?:a)|)'),
+            array('(?:(?:b)|[a]c)', '(?:(?:b)|ac)'),
+            array('(?:b|(?:[a])c)', '(?:b|(?:a)c)'),
+            array('(?:b|[a](?:c))', '(?:b|a(?:c))'),
+            array('(?:(?:b)|(?:[a])(?:c))', '(?:(?:b)|(?:a)(?:c))'),
+            array('(?:(?:b)[a]|c)', '(?:(?:b)a|c)'),
+            array('(?:b(?:[a])|c)', '(?:b(?:a)|c)'),
+            array('(?:b[a]|(?:c))', '(?:ba|(?:c))'),
+            array('(?:(?:b)(?:[a])|(?:c))', '(?:(?:b)(?:a)|(?:c))'),
+            array('(?:(?:b)[a]c|)', '(?:(?:b)ac|)'),
+            array('(?:b(?:[a])c|)', '(?:b(?:a)c|)'),
+            array('(?:b[a](?:c)|)', '(?:ba(?:c)|)'),
+            array('(?:(?:b)(?:[a])(?:c)|)', '(?:(?:b)(?:a)(?:c)|)'),
+            array('(?:(?:b)|[a]|c|)', '(?:(?:b)|a|c|)'),
+            array('(?:b|(?:[a])|c|)', '(?:b|(?:a)|c|)'),
+            array('(?:b|[a]|(?:c)|)', '(?:b|a|(?:c)|)'),
+            array('(?:(?:b)|(?:[a])|(?:c)|)', '(?:(?:b)|(?:a)|(?:c)|)'),
+            array('(?:(?:[aa])|)', '(?:(?:a)|)'),
+            array('(?:(?:a)|[aa])', '(?:(?:a)|a)'),
+            array('(?:a|(?:[aa]))', '(?:a|(?:a))'),
+            array('(?:(?:a)|(?:[aa]))', '(?:(?:a)|(?:a))'),
+            array('(?:(?:a)[aa]|)', '(?:(?:a)a|)'),
+            array('(?:a(?:[aa])|)', '(?:a(?:a)|)'),
+            array('(?:(?:a)(?:[aa])|)', '(?:(?:a)(?:a)|)'),
+            array('(?:(?:a)|[aa]|)', '(?:(?:a)|a|)'),
+            array('(?:a|(?:[aa])|)', '(?:a|(?:a)|)'),
+            array('(?:(?:a)|(?:[aa])|)', '(?:(?:a)|(?:a)|)'),
+            array('(?:(?:[aa])|a)', '(?:(?:a)|a)'),
+            array('(?:[aa]|(?:a))', '(?:a|(?:a))'),
+            array('(?:(?:[aa])|(?:a))', '(?:(?:a)|(?:a))'),
+            array('(?:(?:[aa])a|)', '(?:(?:a)a|)'),
+            array('(?:[aa](?:a)|)', '(?:a(?:a)|)'),
+            array('(?:(?:[aa])(?:a)|)', '(?:(?:a)(?:a)|)'),
+            array('(?:(?:[aa])|a|)', '(?:(?:a)|a|)'),
+            array('(?:[aa]|(?:a)|)', '(?:a|(?:a)|)'),
+            array('(?:(?:[aa])|(?:a)|)', '(?:(?:a)|(?:a)|)'),
+            array('(?:(?:a)|[aa]a)', '(?:(?:a)|aa)'),
+            array('(?:a|(?:[aa])a)', '(?:a|(?:a)a)'),
+            array('(?:a|[aa](?:a))', '(?:a|a(?:a))'),
+            array('(?:(?:a)|(?:[aa])(?:a))', '(?:(?:a)|(?:a)(?:a))'),
+            array('(?:(?:a)[aa]|a)', '(?:(?:a)a|a)'),
+            array('(?:a(?:[aa])|a)', '(?:a(?:a)|a)'),
+            array('(?:a[aa]|(?:a))', '(?:aa|(?:a))'),
+            array('(?:(?:a)(?:[aa])|(?:a))', '(?:(?:a)(?:a)|(?:a))'),
+            array('(?:(?:a)[aa]a|)', '(?:(?:a)aa|)'),
+            array('(?:a(?:[aa])a|)', '(?:a(?:a)a|)'),
+            array('(?:a[aa](?:a)|)', '(?:aa(?:a)|)'),
+            array('(?:(?:a)(?:[aa])(?:a)|)', '(?:(?:a)(?:a)(?:a)|)'),
+            array('(?:(?:a)|[aa]|a)', '(?:(?:a)|a|a)'),
+            array('(?:a|(?:[aa])|a)', '(?:a|(?:a)|a)'),
+            array('(?:a|[aa]|(?:a))', '(?:a|a|(?:a))'),
+            array('(?:(?:a)|(?:[aa])|(?:a))', '(?:(?:a)|(?:a)|(?:a))'),
+            /*array('(?:[^a]|)', '(?:[^a]|)'),
+            array('(?:a|[^a])', '(?:a|[^a])'),
+            array('(?:a[^a]|)', '(?:a[^a]|)'),
+            array('(?:a|[^a]|)', '(?:a|[^a]|)'),
+            array('(?:[^a]|a)', '(?:[^a]|a)'),
+            array('(?:[^a]a|)', '(?:[^a]a|)'),
+            array('(?:[^a]|a|)', '(?:[^a]|a|)'),
+            array('(?:a|[^a]a)', '(?:a|[^a]a)'),
+            array('(?:a[^a]|a)', '(?:a[^a]|a)'),
+            array('(?:a[^a]a|)', '(?:a[^a]a|)'),
+            array('(?:a|[^a]|a|)', '(?:a|[^a]|a|)'),
+            array('(?:b|[^a]c)', '(?:b|[^a]c)'),
+            array('(?:b[^a]|c)', '(?:b[^a]|c)'),
+            array('(?:b[^a]c|)', '(?:b[^a]c|)'),
+            array('(?:b|[^a]|c|)', '(?:b|[^a]|c|)'),
+            array('(?:[^aa]|)', '(?:[^aa]|)'),
+            array('(?:a|[^aa])', '(?:a|[^aa])'),
+            array('(?:a[^aa]|)', '(?:a[^aa]|)'),
+            array('(?:a|[^aa]|)', '(?:a|[^aa]|)'),
+            array('(?:[^aa]|a)', '(?:[^aa]|a)'),
+            array('(?:[^aa]a|)', '(?:[^aa]a|)'),
+            array('(?:[^aa]|a|)', '(?:[^aa]|a|)'),
+            array('(?:a|[^aa]a)', '(?:a|[^aa]a)'),
+            array('(?:a[^aa]|a)', '(?:a[^aa]|a)'),
+            array('(?:a[^aa]a|)', '(?:a[^aa]a|)'),
+            array('(?:a|[^aa]|a)', '(?:a|[^aa]|a)'),*/
         );
     }
 
     protected function get_test_grouping_node_trivial() {
         return array(
+            array('', ''),
+            array('a', 'a'),
             array('(?:)', ''),
             array('a(?:)', 'a'),
             array('(?:)a', 'a'),
@@ -2482,7 +3258,11 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_subpattern_node_trivial() {
         return array(
+            array('', ''),
+            array('a', 'a'),
             array('()', ''),
+            array('(())', ''),
+            array('((()))', ''),
             array('a()', 'a'),
             array('()a', 'a'),
             array('a()a', 'aa'),
@@ -2811,10 +3591,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a|', '(?:a)?'),
             array('a|b|', '(?:a|b)?'),
 
-            array('a*|b|', 'a*|b'),
-            array('a*|b*|', 'a*|b*'),
-            array('a|b*|', 'a|b*'),
-            array('a*|', 'a*'),
+            array('(?:a|)', '(?:a)?'),
 
             array('(?:a|b|)?', '(?:a|b|)?'),
             array('(?:a|b|)+', '(?:(?:a|b)?)+'),
@@ -2826,25 +3603,16 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:(?:a|b|)|c)+', '(?:(?:a|b)?|c)+'),
             array('(?:(?:a|b|)|c)*', '(?:(?:a|b|)|c)*'),
 
-            //array('a|', 'a|'),
-            array('a*|', 'a*'),
-            array('(?:a*|)', '(?:a*)'),
-            array('(?:a*|)c', '(?:a*)c'),
-            array('(?:a*|)|c', '(?:a*)|c'),
-            //array('a*|b+|', 'a*|b+|'),
-            array('a*|b*|', 'a*|b*'),
-            array('a*||b*|', 'a*|b*'),
-            array('a*|||b*', 'a*|b*'),
-            array('a*|||b*|', 'a*|b*'),
-            //array('(?:a*|b+|)', '(?:a*|b+|)'),
-            array('(?:a*|b+|)|', '(?:a*|b+|)'),
-            array('(?:a*|b*|)|c', '(?:a*|b*)|c'),
-            //array('(?:a*|b+|)|c', '(?:a*|b+|)|c'),
+            /*array('(?=a|)', '(?=(?:a)?)'),
+            array('(?!a|)', '(?!(?:a)?)'),
+            array('(?<=a|)', '(?<=(?:a)?)'),
+            array('(?<!a|)', '(?<!(?:a)?)'),*/
         );
     }
 
     protected function get_test_alt_with_question_quant_trivial() {
         return array(
+            array('a|b', 'a|b'),
             array('(?:a|b)?', '(?:a|b|)'),
             array('(?:a|b){0,1}', '(?:a|b|)'),
 
@@ -2920,6 +3688,7 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_question_quant_for_alternative_node_trivial() {
         return array(
+            array('a?', 'a?'),
             array('(?:a|)?', '(?:a|)'),
             array('(?:a|)+', '(?:a|)+'),
             array('(?:a|)*', '(?:a|)*'),
@@ -2929,27 +3698,33 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         );
     }
 
-    protected function get_test_nullable_alternative_node_trivial() {
+    protected function get_test_nullable_alt_without_question_quant_trivial() {
         return array(
-            array('a|', 'a|'),
+            array('a|', 'a'),
             array('a*|', 'a*'),
             array('(?:a*|)', '(?:a*)'),
             array('(?:a*|)c', '(?:a*)c'),
             array('(?:a*|)|c', '(?:a*)|c'),
-            array('a*|b+|', 'a*|b+|'),
+            array('a*|b+|', 'a*|b+'),
             array('a*|b*|', 'a*|b*'),
             array('a*||b*|', 'a*|b*'),
             array('a*|||b*', 'a*|b*'),
             array('a*|||b*|', 'a*|b*'),
-            array('(?:a*|b+|)', '(?:a*|b+|)'),
+            array('(?:a*|b+|)', '(?:a*|b+)'),
             array('(?:a*|b+|)|', '(?:a*|b+|)'),
             array('(?:a*|b*|)|c', '(?:a*|b*)|c'),
-            array('(?:a*|b+|)|c', '(?:a*|b+|)|c'),
+            array('(?:a*|b+|)|c', '(?:a*|b+)|c'),
+
+            array('a*|b|', 'a*|b'),
+            array('a*|b*|', 'a*|b*'),
+            array('a|b*|', 'a|b*'),
+            array('a*|', 'a*'),
         );
     }
 
     protected function get_test_quant_node_1_to_1_trivial() {
         return array(
+            array('a', 'a'),
             array('a{1,1}', 'a'),
             array('a{1,1}|b', 'a|b'),
             array('(?:a{1,1})', '(?:a)'),
@@ -3048,7 +3823,6 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
         return array(
             // Cast to character classes
             array('a|b', '[ab]'),
-            //array('a|b|', '[ab]?'),
             array('a|c|b|d', '[acbd]'),
             array('a|b|c|e|f|g', '[abcefg]'),
             array('a|b|[c-d]', '[abc-d]'),
@@ -3079,29 +3853,33 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('(?:a|b)?', '(?:[ab])?'),
 
             array('a|-|b', '[a\-b]'),
-            array('a|.|b', '.|[ab]'),
+            array('a|.|b', '[ab]|.'),
             array('a|-|]|{|}|b', '[a\-\]\{\}b]'),
             array('a|\|b', 'a|\|b'),
-            array('a|^|b', '^|[ab]'),
-            array('a|$|b', '$|[ab]'),
+            array('a|^|b', '[ab]|^'),
+            array('a|$|b', '[ab]|$'),
             array('a|[|b', 'a|[|b'),
-            array('a|||b', '||[ab]'),
+            array('a|||b', '[ab]||'),
             array('a|(|b', 'a|(|b'),
             array('a|)|b', 'a|)|b'),
             //array('a|?|b', 'a|?|b'),
             //array('a|+|b', 'a|+|b'),
             //array('a|*|b', 'a|*|b'),
 
-            array('[ab]|c|ab', 'ab|[abc]'),
-            array('ab|c|[ab]', 'ab|[cab]'),
+            array('[ab]|c|ab', '[abc]|ab'),
+            array('ab|c|[ab]', '[cab]|ab'),
             array('[ab]|c|a', '[abca]'),
 
-            array('[ab]|dc|e', 'dc|[abe]'),
-            array('a|dc|e', 'dc|[ae]'),
-            array('a|dc|a', 'dc|[aa]'),
-            array('a|[a-c]|\^|^|[01]', '^|[aa-c\^01]'),
+            array('[ab]|dc|e', '[abe]|dc'),
+            array('a|dc|e', '[ae]|dc'),
+            array('a|dc|a', '[aa]|dc'),
+            array('a|[a-c]|\^|^|[01]', '[aa-c\^01]|^'),
             array('[ab](?:a|b)', '[ab](?:[ab])'),
             array('(a|b)+|c', '([ab])+|c'),
+
+            array('a|b|', '[ab]|'),
+
+            array('(?:a|b|)', '(?:[ab]|)'),
         );
     }
 
@@ -3188,16 +3966,19 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
             array('a\s', 'a\s+'),
             array('a[ ]', 'a[ ]+'),
             array('a[\s]', 'a[\s]+'),
+            array('a[\sa]', 'a[\sa]'),
             array('a[[:space:]]', 'a[[:space:]]+'),
             array('a a', 'a +a'),
             array('a\sa', 'a\s+a'),
             array('a[ ]a', 'a[ ]+a'),
             array('a[\s]a', 'a[\s]+a'),
+            array('a[\sa]a', 'a[\sa]a'),
             array('a[[:space:]]a', 'a[[:space:]]+a'),
             array(' a', ' +a'),
             array('\sa', '\s+a'),
             array('[ ]a', '[ ]+a'),
             array('[\s]a', '[\s]+a'),
+            array('[\sa]a', '[\sa]a'),
             array('[[:space:]]a', '[[:space:]]+a'),
 
             array(' ', ' +'),
@@ -3486,6 +4267,8 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_space_charset_with_finit_quant_trivial() {
         return array(
+            array('a ', 'a '),
+
             array('a ?', 'a *'),
             array('a\s?', 'a\s*'),
             array('a[ ]?', 'a[ ]*'),
@@ -3778,6 +4561,8 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
     protected function get_test_consecutive_quant_nodes_trivial() {
         return array(
+            array('a?', 'a?'),
+
             array('(?:a{0,0}){0,0}', '(?:a{0})'),
             array('(?:a{0,0}){0}', '(?:a{0})'),
             array('(?:a{0,0}){0,1}', '(?:a{0})'),
@@ -4281,6 +5066,26 @@ class qtype_preg_simplification_tool_test extends PHPUnit_Framework_TestCase {
 
             array('a$|b$', 'a$|b$'),
             array('a$|(b$)', 'a$|(b$)'),
+        );
+    }
+
+    protected function get_test_exact_match_trivial() {
+        return array(
+            array('a', 'a'),
+            array('^a$', 'a'),
+
+            array('a^a$', 'a^a$'),
+            array('^a$a', '^a$a'),
+
+            array('^a$|^b$', 'a|b'),
+        );
+    }
+
+    protected function get_test_nullable_regex_trivial() {
+        return array(
+            array('a', 'a'),
+            array('a*', ''),
+            array('a|', ''),
         );
     }
 }
