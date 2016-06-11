@@ -798,7 +798,7 @@ $string['simplification_equivalences_full_13'] = 'Пустота в альтер
 $string['simplification_equivalences_short_14'] = 'Бесполезный квантификатор';
 $string['simplification_equivalences_full_14'] = 'Квантификатор не влияет на работу регулярного выражения, его можно убрать';
 
-$string['simplification_tips_short_1'] = 'Расширить список проблельных символов';
+$string['simplification_tips_short_1'] = 'Расширить список пробельных символов';
 $string['simplification_tips_full_1'] = 'Возможно вы хотите разрешить любые пробельные символы (например табуляцию), для этого следует использовать "\s" вместо пробела';
 $string['simplification_tips_short_2'] = 'Можно увеличить количество пробельных символов';
 $string['simplification_tips_full_2'] = 'Возможно вы хотите разрешить более одного пробельного символа в этом месте, для этого следует использовать квантификатор "+"';
