@@ -38,6 +38,8 @@ M.preg_authoring_tools_script = (function ($) {
 
     DESCRIPTION_KEY : 'description',
 
+    SIMPLIFICATION_KEY : 'simplification',
+
     STRINGS_KEY : 'regex_test',
 
     TREE_MAP_ID : '#qtype_preg_tree',
@@ -80,6 +82,7 @@ M.preg_authoring_tools_script = (function ($) {
         this.setup_parent_object();
     },
 
+    simplification_hints: function() { return $('#simplification_tool_hints > tbody > tr > td'); },
     tree_err : function () { return $('#tree_err'); },
     tree_img: function () { return $('#tree_img'); },
     graph_err: function () { return $('#graph_err'); },
@@ -126,6 +129,8 @@ M.preg_authoring_tools_script = (function ($) {
                     $('#id_regex_check_strings').click(self.btn_check_strings_clicked);
 
                     $("#id_graph_selection_mode").change(self.btn_graph_selection_mode_rectangle_selection_click);
+
+                    $("#simplification_tool_apply_btn").click(self.btn_apply_hint_click);
 
                     // Add handlers for the radiobuttons.
                     $('#fgroup_id_tree_orientation_radioset input').change(self.rbtn_changed);
@@ -227,7 +232,7 @@ M.preg_authoring_tools_script = (function ($) {
             indfirst = indlast = -2;
         }
         $('input[name=\'tree_selected_node_points\']').val(indfirst + ',' + indlast);
-        self.load_content(indfirst, indlast);
+        self.load_content(indfirst, indlast, null, null);
         self.load_strings(indfirst, indlast);
 
         /*$('input[name=\'tree_selected_node_points\']').val('');
@@ -262,18 +267,82 @@ M.preg_authoring_tools_script = (function ($) {
         self.load_strings(sel.indfirst, sel.indlast);
     },
 
+    btn_apply_hint_click : function (e) {
+        e.preventDefault();
+        var hint = self.get_hint();
+        if (hint.problem_type == 108) {
+            $("#id_exactmatch_auth").val('1');
+        }
+        self.load_apply_hints(hint.problem_indfirst, hint.problem_indlast, hint.problem_ids, hint.problem_type);
+    },
+
     rbtn_changed : function (e) {
         e.preventDefault();
         if (e.currentTarget.id != "id_tree_folding_mode") {
             var sel = self.get_selection();
-            self.load_content(sel.indfirst, sel.indlast);
+            self.load_content(sel.indfirst, sel.indlast, null, null);
             self.panzooms.reset_tree();
         }
     },
 
     regex_text_changed : function (e) {
         e.preventDefault();
+
+        // Remove some hints to form
+        var hints_table = $('#simplification_tool_hints > tbody');
+        hints_table.empty();
+
         self.regex_input.textareaHighlighter('updateMatches', []);
+    },
+
+    simplification_hints_clicked : function (e) {
+        e.preventDefault();
+
+        // Clear highlighting
+        var hints_table = $('#simplification_tool_hints > tbody');
+        for(var i = 0; i < hints_table.children().length; ++i) {
+            if (typeof hints_table[0].children[i] != 'undefined') {
+                hints_table[0].children[i].children[0].style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.0) inset';
+            }
+        }
+
+        e.currentTarget.style.boxShadow = '0 0 0 128px rgba(0, 0, 0, 0.1) inset';
+
+        $('#simplification_tool_hint_text').text(e.currentTarget.children[1].value);
+        $('#problem_ids')[0].value = e.currentTarget.children[2].value;
+        $('#problem_type')[0].value = e.currentTarget.children[3].value;
+        $('#problem_indfirst')[0].value = e.currentTarget.children[4].value;
+        $('#problem_indlast')[0].value = e.currentTarget.children[5].value;
+
+        if (e.currentTarget.children[3].value === 'qtype_preg_regex_hint_nullable_regex') {
+            $('#simplification_tool_apply_btn').prop('disabled', true);
+        } else {
+            $('#simplification_tool_apply_btn').prop('disabled', false);
+        }
+        $('#simplification_tool_cancel_btn').prop('disabled', false);
+
+        //var indfirst = e.currentTarget.children[4].value,
+        //    indlast = e.currentTarget.children[5].value;
+
+        //self.load_content(indfirst, indlast, null, null);
+        //self.load_strings(indfirst, indlast);
+
+        self.regex_input.textrange('set', 0, 0);
+        self.regex_input.textareaHighlighter('updateMatches',
+            [
+                {'type': 'qtype-preg-orange', start: e.currentTarget.children[4].value, end: e.currentTarget.children[5].value}
+            ]
+        );
+        //$('#problem_indfirst')[0].value = e.currentTarget.children[4].value;
+        //$('#problem_indlast')[0].value = e.currentTarget.children[5].value;
+    },
+
+    collapse_block_title_clicked : function (e) {
+        if ($('#simplification_tool_collapse_btn').hasClass("collapsed")) {
+            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/clean/core/1461098461/t/expanded)');
+        } else {
+            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/clean/core/1461098461/t/collapsed)');
+        }
     },
 
     tree_node_clicked : function (e) {
@@ -309,7 +378,7 @@ M.preg_authoring_tools_script = (function ($) {
                 indfirst = tmpcoords[0];
                 indlast = tmpcoords[1];
 
-                self.load_content(indfirst, indlast);
+                self.load_content(indfirst, indlast, null, null);
                 self.load_strings(indfirst, indlast);
             } else {
                 self.load_content();
@@ -317,7 +386,7 @@ M.preg_authoring_tools_script = (function ($) {
             }
         } else {
             $('input[name=\'tree_selected_node_points\']').val(indfirst + ',' + indlast);
-            self.load_content(indfirst, indlast);
+            self.load_content(indfirst, indlast, null, null);
             self.load_strings(indfirst, indlast);
         }
     },
@@ -340,7 +409,7 @@ M.preg_authoring_tools_script = (function ($) {
 
             $('input[name=\'tree_selected_node_points\']').val(indfirst + ',' + indlast);
 
-            self.load_content(indfirst, indlast);
+            self.load_content(indfirst, indlast, null, null);
             self.load_strings(indfirst, indlast);
         }
     },
@@ -402,15 +471,18 @@ M.preg_authoring_tools_script = (function ($) {
             t = json[self.TREE_KEY],
             g = json[self.GRAPH_KEY],
             d = json[self.DESCRIPTION_KEY],
+            si = json[self.SIMPLIFICATION_KEY],
             k = '' + regex + notation + exactmatch + usecase + treeorientation + displayas + indfirst + ',' + indlast;
 
         // Cache the content.
         self.cache[self.TREE_KEY][k] = t;
         self.cache[self.GRAPH_KEY][k] = g;
         self.cache[self.DESCRIPTION_KEY][k] = d;
+        //self.cache[self.SIMPLIFICATION_KEY][k] = si;
 
+        self.regex_input.val(regex);
         // Display the content.
-        self.display_content(t, g, d, indfirst, indlast, indfirstorig, indlastorig);
+        self.display_content(t, g, d, si, indfirst, indlast, indfirstorig, indlastorig);
     },
 
     upd_strings_success : function (data, textStatus, jqXHR) {
@@ -447,7 +519,7 @@ M.preg_authoring_tools_script = (function ($) {
     },
 
     // Displays given images and description
-    display_content : function (t, g, d, indfirst, indlast, indfirstorig, indlastorig) {
+    display_content : function (t, g, d, si, indfirst, indlast, indfirstorig, indlastorig) {
         var scroll = $(window).scrollTop();
 
         self.invalidate_content();
@@ -522,7 +594,7 @@ M.preg_authoring_tools_script = (function ($) {
 
                     $('input[name=\'tree_selected_node_points\']').val(sel.indfirst + ',' + sel.indlast);
 
-                    self.load_content(sel.indfirst, sel.indlast);
+                    self.load_content(sel.indfirst, sel.indlast, null, null);
                     self.load_strings(sel.indfirst, sel.indlast);
 
                     $('#resizeGraph').css({
@@ -535,6 +607,69 @@ M.preg_authoring_tools_script = (function ($) {
             });
         } else if (typeof g != 'undefined') {
             self.graph_err().html(g);
+        }
+
+        if (typeof si != 'undefined') {
+
+            var get_error_row = function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast) {
+                return self.get_hint_row(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, "error", "color: #222222;");
+            };
+
+            var get_tip_row = function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast) {
+                return self.get_hint_row(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, "warning", "font-weight: normal;");
+            };
+
+            var get_equivalence_row = function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast) {
+                return self.get_hint_row(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, "info", "");
+            };
+
+            // Set count of any hints
+            $('#simplification_tool_errors_count').text(si.errors.length);
+            $('#simplification_tool_tips_count').text(si.tips.length);
+            $('#simplification_tool_equivalences_count').text(si.equivalences.length);
+
+            if (si.errors.length > 0 || si.tips.length > 0 || si.equivalences.length > 0) {
+                $('#simplification_tool_collapse_btn').css('pointer-events', 'auto');
+            } else {
+                $('#simplification_tool_collapse_btn').css('pointer-events', 'none');
+            }
+
+            $('#simplification_tool_collapse_btn').click(self.collapse_block_title_clicked);
+
+            // Set some hints to form
+            var hints_table = $('#simplification_tool_hints > tbody');
+            hints_table.empty();
+            $('#simplification_tool_hint_text').empty();
+            // Set errors
+            for (var i = 0; i < si.errors.length; ++i) {
+                hints_table.append(get_error_row(si.errors[i].problem, si.errors[i].solve,
+                                                 si.errors[i].problem_ids, si.errors[i].problem_type,
+                                                 si.errors[i].problem_indfirst, si.errors[i].problem_indlast));
+            }
+            // Set tips
+            for (var i = 0; i < si.tips.length; ++i) {
+                hints_table.append(get_tip_row(si.tips[i].problem, si.tips[i].solve,
+                                               si.tips[i].problem_ids, si.tips[i].problem_type,
+                                               si.tips[i].problem_indfirst, si.tips[i].problem_indlast));
+            }
+            // Set equivalences
+            for (var i = 0; i < si.equivalences.length; ++i) {
+                hints_table.append(get_equivalence_row(si.equivalences[i].problem, si.equivalences[i].solve,
+                                                       si.equivalences[i].problem_ids, si.equivalences[i].problem_type,
+                                                       si.equivalences[i].problem_indfirst, si.equivalences[i].problem_indlast));
+            }
+
+            self.simplification_hints().click(self.simplification_hints_clicked);
+
+            $('#simplification_tool_apply_btn').prop('disabled', true);
+            $('#simplification_tool_cancel_btn').prop('disabled', true);
+
+            // Highlight 1st element
+            //if (typeof hints_table[0].children[0] !== 'undefined') {
+            //    setTimeout(function () {
+            //        hints_table[0].children[0].children[0].click();
+            //    }, 500);
+            //}
         }
 
         if (typeof d != 'undefined') {
@@ -565,6 +700,20 @@ M.preg_authoring_tools_script = (function ($) {
         //}
     },
 
+    get_hint_row : function(problem, solve, problem_ids, problem_type, problem_indfirst, problem_indlast, hint_class, hint_style) {
+        return '<tr class=\"' + hint_class + '\"  style=\"' + hint_style + '\">' +
+                   '<td>' +
+                       '<span>' + problem + '</span>' +
+                       '<input type=\"hidden\" value=\"' + solve + '\">' +
+                       '<input type=\"hidden\" value=\"' + problem_ids + '\">' +
+                       '<input type=\"hidden\" value=\"' + problem_type + '\">' +
+                       '<input type=\"hidden\" value=\"' + problem_indfirst + '\">' +
+                       '<input type=\"hidden\" value=\"' + problem_indlast + '\">' +
+                       '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-remove\"></i></button>' +
+                       /*'<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-ok\"></i></button>' +*/
+                   '</td>' +
+               '</tr>';
+    },
 
     resize_rectangle_selection : function(e, img, rectangle, hnd) {
         if (self.CALC_COORD) {
@@ -926,9 +1075,15 @@ M.preg_authoring_tools_script = (function ($) {
     },
 
     /** Checks for cached data and if it doesn't exist, sends a request to the server */
-    load_content : function (indfirst, indlast) {
+    load_content : function (indfirst, indlast, problem_ids, problem_type) {
         if (typeof indfirst == "undefined" || typeof indlast == "undefined") {
             indfirst = indlast = -2;
+        }
+
+        if (typeof problem_ids == "undefined" || typeof problem_type == "undefined"
+            || problem_ids == null || typeof problem_type == null) {
+            problem_ids = '';
+            problem_type = -2;
         }
 
         // Unbind tree handlers so nothing is clickable till the response is received.
@@ -960,6 +1115,8 @@ M.preg_authoring_tools_script = (function ($) {
                 displayas: self.get_displayas(),
                 foldcoords: $('input[name=\'tree_fold_node_points\']').val(),
                 treeisfold: $("#id_tree_folding_mode").is(':checked') ? 1 : 0,
+                problem_ids: problem_ids,
+                problem_type: problem_type,
                 ajax: true
             },
             success: self.upd_content_success
@@ -1024,6 +1181,20 @@ M.preg_authoring_tools_script = (function ($) {
 
     get_displayas : function () {
         return $('#fgroup_id_charset_process_radioset input:checked').val();
+    },
+
+    get_hint : function () {
+        return {
+            problem_ids : $('#problem_ids').val(),
+            problem_type : $('#problem_type').val(),
+            problem_indfirst : parseInt($('#problem_indfirst').val()),
+            problem_indlast : parseInt($('#problem_indlast').val())
+        };
+    },
+
+    load_apply_hints : function (indfirst, indlast, problem_ids, problem_type) {
+        self.load_content(indfirst, indlast, problem_ids, problem_type);
+        self.load_strings();
     },
 
     resize_handler : function() {
