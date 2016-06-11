@@ -51,6 +51,7 @@ $string['exactmatch_help'] = '<p>By default regular expression matching returns 
 $string['explaining_graph_tool'] = 'Explaining graph';
 $string['explaining_graph_tool_help'] = 'Here you can see explaining graph. Pressing the node of the tree marks corresponding subgraph with dark green rectangle. You can also select multiple nodes at once rectangle, enabling mode selection rectangle.';
 $string['fa_matcher'] = 'Finite state automata';
+$string['groupspaircountoverlimit'] = 'Possible count of groups pairs at single step of automata equivalence check algorithm overflowed. This limit is necessary to protect from long duration of comparison. Ask your site administrator to change settings if it is necessary.';
 $string['hintcolouredstring'] = 'matched part of the response';
 $string['hintgradeborder'] = 'Hint grade border';
 $string['hintgradeborder_help'] = 'Answers with the grade less than the hint grade border won\'t be used in hinting.';
