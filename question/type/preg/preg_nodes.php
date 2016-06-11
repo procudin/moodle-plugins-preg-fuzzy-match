@@ -1000,9 +1000,6 @@ class qtype_preg_leaf_charset extends qtype_preg_leaf {
     }
 
     public function is_equal($node, $numberoffset) {
-//        var_dump(parent::is_equal($node, $numberoffset));
-//        var_dump($node);
-//        var_dump($this);
         return parent::is_equal($node, $numberoffset) && ($this->ranges() == $node->ranges());
     }
 

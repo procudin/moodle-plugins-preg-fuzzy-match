@@ -314,7 +314,7 @@ M.preg_authoring_tools_script = (function ($) {
         $('#problem_indfirst')[0].value = e.currentTarget.children[4].value;
         $('#problem_indlast')[0].value = e.currentTarget.children[5].value;
 
-        if (e.currentTarget.children[3].value === '105') {
+        if (e.currentTarget.children[3].value === 'qtype_preg_regex_hint_nullable_regex') {
             $('#simplification_tool_apply_btn').prop('disabled', true);
         } else {
             $('#simplification_tool_apply_btn').prop('disabled', false);
@@ -710,7 +710,7 @@ M.preg_authoring_tools_script = (function ($) {
                        '<input type=\"hidden\" value=\"' + problem_indfirst + '\">' +
                        '<input type=\"hidden\" value=\"' + problem_indlast + '\">' +
                        '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-remove\"></i></button>' +
-                       '<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-ok\"></i></button>' +
+                       /*'<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"icon-ok\"></i></button>' +*/
                    '</td>' +
                '</tr>';
     },
@@ -1186,7 +1186,7 @@ M.preg_authoring_tools_script = (function ($) {
     get_hint : function () {
         return {
             problem_ids : $('#problem_ids').val(),
-            problem_type : parseInt($('#problem_type').val()),
+            problem_type : $('#problem_type').val(),
             problem_indfirst : parseInt($('#problem_indfirst').val()),
             problem_indlast : parseInt($('#problem_indlast').val())
         };
