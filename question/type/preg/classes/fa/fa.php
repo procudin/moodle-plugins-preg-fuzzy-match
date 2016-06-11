@@ -951,6 +951,15 @@ class fa {
                 }
             }
 
+            // Count pair of groups to compare with limit
+            $pairscount = 0;
+            foreach ($currentsteppairs as $arrayofpairs) {
+                $pairscount += count($arrayofpairs);
+            }
+            if ($pairscount >= $CFG->qtype_writregex_groups_pairs_limit) {
+                throw new \moodle_exception('groupspaircountoverlimit', 'qtype_preg');
+            }
+
             // Check for mismatches for each matched condition
             foreach ($currentsteppairs as $condition => $arrayofpairs) {
                 $firstgroup = new equivalence\states_group($this);

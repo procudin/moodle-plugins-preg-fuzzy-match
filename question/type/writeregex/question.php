@@ -205,10 +205,14 @@ class qtype_writeregex_question extends question_graded_automatically
      */
     public function grade_response (array $response) {
 
-        $bestfitanswer = $this->get_best_fit_answer($response);
+        try {
+            $bestfitanswer = $this->get_best_fit_answer($response);
+        }
+        catch (moodle_exception $e) {
+            return array(0, question_state::$invalid);
+        }
         $grade = $bestfitanswer['fitness'];
         $state = question_state::graded_state_for_fraction($bestfitanswer['fitness']);
-
 
         return array($grade, $state);
     }
@@ -250,7 +254,12 @@ class qtype_writeregex_question extends question_graded_automatically
      * @return string Feedback value.
      */
     public function get_feedback_for_response ($response, $qa) {
-        $besftfit = $this->get_best_fit_answer($response);
+        try {
+            $besftfit = $this->get_best_fit_answer($response);
+        }
+        catch (moodle_exception $e) {
+            return $e->getMessage();
+        }
         $feedback = '';
         $boardermatch = 0.7;
         $state = $qa->get_state();
@@ -270,7 +279,8 @@ class qtype_writeregex_question extends question_graded_automatically
      * @param null $gradeborder Gradeborder value.
      * @return array Answer array.
      */
-    public function get_best_fit_answer (array $response, $gradeborder = null) {
+    public function get_best_fit_answer (array $response, $gradeborder = null)
+    {
 
         // Check cache for valid results.
         if ($response['answer'] == $this->responseforbestfit && $this->bestfitanswer !== array() && $this->bestfitanswer !== null) {
@@ -296,25 +306,28 @@ class qtype_writeregex_question extends question_graded_automatically
 
         $questiontype = new qtype_writeregex();
         $analyzers = $questiontype->available_analyzers();
+        try {
+            foreach ($this->answers as $answer) {
+                $fraction = 0;
+                // Compare results for each analyzer for current answer
+                $results = array();
+                foreach ($analyzers as $key => $description) {
+                    $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
+                    $analyzer = new $analyzername($this);
+                    $result = $analyzer->analyze($answer->answer, $response['answer']);
+                    $percentagefield = 'compare' . $key . 'percentage';
+                    $fraction += $result->fitness * $this->$percentagefield / 100.0;
+                    $results[$key] = $result;
+                }
 
-        foreach ($this->answers as $answer) {
-            $fraction = 0;
-            // Compare results for each analyzer for current answer
-            $results = array();
-            foreach ($analyzers as $key => $description) {
-                $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
-                $analyzer = new $analyzername($this);
-                $result = $analyzer->analyze($answer->answer, $response['answer']);
-                $percentagefield = 'compare' . $key . 'percentage';
-                $fraction += $result->fitness * $this->$percentagefield / 100.0;
-                $results[$key] = $result;
+                if ($fraction > $bestfitness and $fraction > $this->hintgradeborder) {
+                    $bestfitness = $fraction;
+                    $bestfitanswer = $answer;
+                    $bestfitresults = $results;
+                }
             }
-
-            if ($fraction > $bestfitness and $fraction > $this->hintgradeborder) {
-                $bestfitness = $fraction;
-                $bestfitanswer = $answer;
-                $bestfitresults = $results;
-            }
+        } catch (moodle_exception $e) {
+            throw $e;
         }
 
         $bestfit = array('answer' => $bestfitanswer, 'fitness' => $bestfitness, 'results' => $bestfitresults);

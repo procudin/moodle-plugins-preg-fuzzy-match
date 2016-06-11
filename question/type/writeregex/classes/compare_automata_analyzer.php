@@ -63,16 +63,18 @@ class compare_automata_analyzer extends analyzer {
             $result->differences = $differences;
             return $result;
         }
-
-        if (!$answerautomaton->equal($responseautomaton, $differences, ($this->question->comparewithsubpatterns == 1))) {
-            foreach ($differences as $difference) {
-                if ($difference->type == \qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN) {
-                    $fitness = max(0, $fitness - $this->question->subpatternmismatchpenalty);
-                }
-                else {
-                    $fitness = max(0, $fitness - $this->question->stringmismatchpenalty);
+        try {
+            if (!$answerautomaton->equal($responseautomaton, $differences, ($this->question->comparewithsubpatterns == 1))) {
+                foreach ($differences as $difference) {
+                    if ($difference->type == \qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN) {
+                        $fitness = max(0, $fitness - $this->question->subpatternmismatchpenalty);
+                    } else {
+                        $fitness = max(0, $fitness - $this->question->stringmismatchpenalty);
+                    }
                 }
             }
+        } catch (\moodle_exception $e) {
+            throw $e;
         }
 
         // Generate result
