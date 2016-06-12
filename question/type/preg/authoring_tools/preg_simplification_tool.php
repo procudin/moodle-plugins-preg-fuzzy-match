@@ -258,15 +258,15 @@ abstract class qtype_preg_regex_hint {
      * @param $node Node
      * @param int $subpattern_last_number Last number of searched subpattern
      */
-    protected function rename_backreferences_for_subpattern($tree_root, $node, &$subpattern_last_number = 0) {
+    protected function rename_backreferences($tree_root, $node, &$subpattern_last_number = 0) {
         if ($node !== null) {
             if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
                 ++$subpattern_last_number;
-                $this->rename_backref($tree_root, $node->number, $subpattern_last_number);
+                $this->rename_backreferences_for_subpattern($tree_root, $node->number, $subpattern_last_number);
             }
             if ($this->is_operator($node)) {
                 foreach ($node->operands as $operand) {
-                    $this->rename_backreferences_for_subpattern($tree_root, $operand, $subpattern_last_number);
+                    $this->rename_backreferences($tree_root, $operand, $subpattern_last_number);
                 }
             }
         }
@@ -278,7 +278,7 @@ abstract class qtype_preg_regex_hint {
      * @param $old_number Old backreference number
      * @param $new_number New backreference number
      */
-    protected function rename_backref($node, $old_number, $new_number) {
+    protected function rename_backreferences_for_subpattern($node, $old_number, $new_number) {
         if ($node !== null) {
             if (($node->type == qtype_preg_node::TYPE_LEAF_BACKREF
                     && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $old_number)
@@ -291,7 +291,7 @@ abstract class qtype_preg_regex_hint {
             }
             if ($this->is_operator($node)) {
                 foreach ($node->operands as $operand) {
-                    $this->rename_backref($operand, $old_number, $new_number);
+                    $this->rename_backreferences_for_subpattern($operand, $old_number, $new_number);
                 }
             }
         }
@@ -929,7 +929,7 @@ class qtype_preg_regex_hint_subpattern_node extends qtype_preg_regex_hint {
 
     public function use_hint($regex_hint_result) {
         $this->remove_subpattern_node($this->tree, $this->tree, $regex_hint_result->problem_ids[0]);
-        $this->rename_backreferences_for_subpattern($this->tree, $this->tree);
+        $this->rename_backreferences($this->tree, $this->tree);
         return $this->tree;
     }
 
@@ -1107,6 +1107,7 @@ class qtype_preg_regex_hint_single_charset_node extends qtype_preg_regex_hint {
                 $tmp = $tree_root->userinscription[1];
                 $tmp->data = $this->escape_character_for_single_charset($tmp->data);
                 $tmp->data = $this->non_escaped_characters($tmp->data);
+                $tmp->data = $this->characters_interval_for_single_charset($tmp->data);
                 $tree_root->userinscription = array($tmp);
                 $tree_root->flags[0][0]->data = new qtype_poasquestion\string($tmp->data);
                 $tree_root->subtype = "enumerable_characters";
@@ -1134,6 +1135,16 @@ class qtype_preg_regex_hint_single_charset_node extends qtype_preg_regex_hint {
             || $character === '?' || $character === '*' || $character === '+'
             || $character === '{' || $character === '}') {
             return '\\' . $character;
+        }
+        return $character;
+    }
+
+    /**
+     * Check characters interval for single charset
+     */
+    private function characters_interval_for_single_charset($character) {
+        if (strrpos($character, '-') > -1) {
+            return preg_split('/-/', $character)[0];
         }
         return $character;
     }
@@ -2382,7 +2393,7 @@ class qtype_preg_regex_hint_subpattern_without_backref extends qtype_preg_regex_
         if ($node->id == $remove_node_id) {
             $node->subtype = qtype_preg_node_subexpr::SUBTYPE_GROUPING;
             //$subpattern_last_number = 0;
-            $this->rename_backreferences_for_subpattern($this->tree, $this->tree/*, $subpattern_last_number*/);
+            $this->rename_backreferences($this->tree, $this->tree/*, $subpattern_last_number*/);
             return true;
         }
 
@@ -2974,7 +2985,7 @@ class qtype_preg_regex_hint_common_subexpressions extends qtype_preg_regex_hint 
             array_push($leafs[0], $tree_root);
 
             $norm = new qtype_preg_tree_normalization();
-            $norm->normalization1($tree_root);
+            $norm->normalization($tree_root);
 //            $this->normalization($tree_root);
         }
 
@@ -4311,7 +4322,7 @@ class qtype_preg_tree_normalization {
     public function __construct() {}
     protected function __clone() {}
 
-    public function normalization1($tree_root) {
+    public function normalization($tree_root) {
         $rules_names = array(
             'qtype_preg_regex_hint_quant_node_1_to_1',
             'qtype_preg_regex_hint_repeated_assertions',
@@ -4357,123 +4368,6 @@ class qtype_preg_tree_normalization {
                 $count++;
             }
         }
-
-        /*$problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_quant_node_1_to_1($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_repeated_assertions($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_single_alternative_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_alt_with_question_quant($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_consecutive_quant_nodes($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-//        $this->delete_not_empty_grouping_node($tree_root, $tree_root);
-
-        $problem_exist = true;
-        while($problem_exist) {
-            $rule = new qtype_preg_regex_hint_single_charset_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_grouping_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_subpattern_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-                $this->deleted_subpattern_positions = array_merge($this->deleted_subpattern_positions, $rule->deleted_subpattern_positions);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        /*$problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            if ($this->search_single_not_repeat_alternative_node($tree_root)) {
-                $this->change_alternative_to_charset($tree_root, $tree_root, $this->problem_ids[0]);
-                $count++;
-            } else {
-                $problem_exist = false;
-            }
-            $this->problem_ids = array();
-        }*/
 
         $this->delete_not_empty_grouping_node($tree_root, $tree_root);
 
@@ -4746,9 +4640,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return array(
             'qtype_preg_regex_hint_space_charset',
             'qtype_preg_regex_hint_space_charset_without_quant',
-            'qtype_preg_regex_hint_subpattern_without_backref',
-            'qtype_preg_regex_hint_space_charset_with_finit_quant',
-            'qtype_preg_regex_hint_exact_match'
+            'qtype_preg_regex_hint_space_charset_with_finit_quant'
         );
     }
 
@@ -4766,6 +4658,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             'qtype_preg_regex_hint_question_quant_for_alternative_node',
             'qtype_preg_regex_hint_consecutive_quant_nodes',
             'qtype_preg_regex_hint_common_subexpressions',
+            'qtype_preg_regex_hint_subpattern_without_backref',
+            'qtype_preg_regex_hint_exact_match'
         );
     }
 
