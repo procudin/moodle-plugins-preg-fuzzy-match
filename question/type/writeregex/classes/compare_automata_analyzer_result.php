@@ -30,9 +30,6 @@ class compare_automata_analyzer_result extends analyzer_result {
     /** @var array of qtype_preg\fa\equivalence\mismatched_pair Differences of compared automata */
     public $differences;
 
-    /** @var int count of differences to describe */
-    public $maxshowncount;
-
     /**
      * Get feedback for analyzing results.
      * @param qtype_writeregex_renderer renderer Renderer
@@ -40,19 +37,10 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_feedback($renderer) {
         $feedback = "";
-        $countshown = 0;
         foreach ($this->differences as $difference) {
-            if ($countshown == intval($this->maxshowncount)) {
-                $feedback .= get_string('moremismatches', 'qtype_writeregex', count($this->differences) - $this->maxshowncount);
-                break;
-            }
-            $countshown++;
             switch ($difference->type) {
                 case \qtype_preg\fa\equivalence\mismatched_pair::CHARACTER:
                     $feedback .= $this->get_character_mismatch_feedback($difference, $renderer);
-                    break;
-                case \qtype_preg\fa\equivalence\mismatched_pair::ASSERT:
-                    $feedback .= $this->get_assertion_mismatch_feedback($difference, $renderer);
                     break;
                 case \qtype_preg\fa\equivalence\mismatched_pair::FINAL_STATE:
                     $feedback .= $this->get_final_state_mismatch_feedback($difference, $renderer);
@@ -73,33 +61,32 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_character_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass;
-        $matchedstring = $difference->matched_string();
         // Substring without last character of matched string in difference is the matched string of both automata.
-        $a->matchedstring = substr($matchedstring, 0, strlen($matchedstring) - 1);
+        $a->matchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
         // Last character of matched string in difference is mismatch character.
-        $a->character = $matchedstring[strlen($matchedstring) - 1];
+        $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
         // Get titles for string description of mismatch
         $studentstitle = get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ';
         $teachersstitle = get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ';
         // If students answer accepts extra character.
         if ($difference->matchedautomaton == 1) {
-            if (strlen($a->matchedstring) == 0) {
+            if (empty($a->matchedstring)) {
                 $feedback = get_string('extracharactermismatchfrombeginning', 'qtype_writeregex', $a);
             } else {
                 $feedback = get_string('extracharactermismatch', 'qtype_writeregex', $a);
             }
-            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $difference->matchedstring);
             $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $a->matchedstring, $a->character);
         }
         // If students answer doesn't accept character.
         else {
-            if (strlen($a->matchedstring) == 0) {
+            if (empty($a->matchedstring)) {
                 $feedback = get_string('missingcharactermismatchfrombeginning', 'qtype_writeregex', $a);
             } else {
                 $feedback = get_string('missingcharactermismatch', 'qtype_writeregex', $a);
             }
             $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $a->matchedstring, $a->character);
-            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $difference->matchedstring);
         }
 
 
@@ -113,64 +100,24 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_final_state_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass;
-        $matchedstring = $difference->matched_string();
-        $a->matchedstring = $matchedstring;
+        $a->matchedstring = $difference->matchedstring;
         // Substring without last character of matched string in difference is the matched string of both automata.
-        $a->bothmatchedstring = substr($matchedstring, 0, strlen($matchedstring) - 1);
+        $a->bothmatchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
         // Last character of matched string in difference which transport automaton to final state.
-        $a->character = $matchedstring[strlen($matchedstring) - 1];
+        $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
         // Get titles for string description of mismatch
         $studentstitle = get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ';
         $teachersstitle = get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ';
         // If students answer accepts extra string.
         if ($difference->matchedautomaton == 1) {
-            $feedback = get_string('extrafinalstatemismatch', 'qtype_writeregex', $matchedstring);
-            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $matchedstring);
-            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $matchedstring, '...');
+            $feedback = get_string('extrafinalstatemismatch', 'qtype_writeregex', $difference->matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $difference->matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $difference->matchedstring, '...');
         } // If students answer doesn't accept string.
         else {
-            $feedback = get_string('missingfinalstatemismatch', 'qtype_writeregex', $matchedstring);
-            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $matchedstring, '...');
-            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $matchedstring);
-        }
-
-        return $feedback;
-    }
-
-    /**
-     * Get feedback for assertion mismatch.
-     * @param qtype_writeregex_renderer renderer Renderer
-     * @return string Feedback about assertion mismatch to show to student.
-     */
-    public function get_assertion_mismatch_feedback($difference, $renderer) {
-        $assertions = array('qtype_preg_leaf_assert_esc_a' => '\A',
-            'qtype_preg_leaf_assert_small_esc_z' => '\z',
-            'qtype_preg_leaf_assert_capital_esc_z' => '\Z',
-            'qtype_preg_leaf_assert_esc_g' => '\G',
-            'qtype_preg_leaf_assert_circumflex' => '^',
-            'qtype_preg_leaf_assert_dollar' => '$');
-        $a = new \stdClass;
-        $a->matchedstring = $difference->matched_string();
-        // Mismatched assertion
-        $a->assert = $assertions[$difference->mismatched_assertion()];
-        // Get titles for string description of mismatch
-        $studentstitle = get_string('hintdescriptionstudentsanswer', 'qtype_writeregex') . ': ';
-        $teachersstitle = get_string('hintdescriptionteachersanswer', 'qtype_writeregex') . ': ';
-        // If students answer accepts extra assertion.
-        if ($difference->matchedautomaton == 1) {
-            if (strlen($a->matchedstring) == 0) {
-                $feedback = get_string('extraassertionmismatchfrombeginning', 'qtype_writeregex', $a);
-            } else {
-                $feedback = get_string('extraassertionmismatch', 'qtype_writeregex', $a);
-            }
-        }
-        // If students answer doesn't accept assertion.
-        else {
-            if (strlen($a->matchedstring) == 0) {
-                $feedback = get_string('missingassertionmismatchfrombeginning', 'qtype_writeregex', $a);
-            } else {
-                $feedback = get_string('missingassertionmismatch', 'qtype_writeregex', $a);
-            }
+            $feedback = get_string('missingfinalstatemismatch', 'qtype_writeregex', $difference->matchedstring);
+            $feedback .= $this->get_matching_string_explanation($renderer, $studentstitle, $difference->matchedstring, '...');
+            $feedback .= $this->get_matching_string_explanation($renderer, $teachersstitle, $difference->matchedstring);
         }
 
         return $feedback;
@@ -183,88 +130,63 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_subpattern_mismatch_feedback($difference, $renderer) {
         $a = new \stdClass();
-        $singlemismatch = count($difference->diffpositionsubpatterns) + (count($difference->uniquesubpatterns[0]) == 0 ? 0 : 1)
-            + (count($difference->uniquesubpatterns[1]) == 0 ? 0 : 1) == 1;
-        // Matched string
-        $a->matchedstring = $difference->matched_string();
-        // Subpattern word
-        if (count($difference->matchedsubpatterns) == 1) {
-            $a->subpatternword = get_string('subpattern', 'qtype_writeregex');
+        // Substring without last character of matched string in difference is the matched string.
+        $matchedstring = substr($difference->matchedstring, 0, strlen($difference->matchedstring) - 1);
+        if (strlen($matchedstring) == 0) {
+            $a->place = get_string('frombeginning', 'qtype_writeregex');
         }
         else {
-            $a->subpatternword = get_string('subpatterns', 'qtype_writeregex');
+            $a->place = get_string('aftermatchedstring', 'qtype_writeregex', $matchedstring);
         }
-        // Matched subpatterns
-        $a->matchedsubpatterns = $this->enumeration_from_array($difference->matchedsubpatterns);
-
-        // Title for matched part
-        if (count($difference->matchedsubpatterns) == 0) {
-            if ($singlemismatch) {
-                $feedback = get_string('singlesubpatternmismatchcommonpartwithouttags', 'qtype_writeregex', $a);
-            }
-            else {
-                $feedback = get_string('multiplesubpatternmismatchcommonpartwithouttags', 'qtype_writeregex', $a);
-            }
+        // Last character of matched string in matched character.
+        $a->character = $difference->matchedstring[strlen($difference->matchedstring) - 1];
+        // Set subpattern numbers.
+        if (!empty($difference->opentags)) {
+            $a->subpatterns = $this->enumeration_from_array($difference->opentags);
         }
-        else {
-            if ($singlemismatch) {
-                $feedback = get_string('singlesubpatternmismatchcommonpart', 'qtype_writeregex', $a);
-            } else {
-                $feedback = get_string('multiplesubpatternmismatchcommonpart', 'qtype_writeregex', $a);
-            }
+        if (!empty($difference->closetags)) {
+            $a->subpatterns = $this->enumeration_from_array($difference->closetags);
         }
-
-        // Information about different place subpattern mismatches
-        foreach ($difference->diffpositionsubpatterns as $mismatch) {
-            if (!$singlemismatch) {
-                $feedback = $renderer->add_break($feedback) . '  - ';
-            }
-            $a = new \stdClass();
-            $a->subpattern = $mismatch['subexpression'];
-            if ($mismatch['isopen']) {
-                $a->behavior = get_string('starts', 'qtype_writeregex');
-            }
-            else {
-                $a->behavior = get_string('ends', 'qtype_writeregex');
-            }
-            $a->studentmatchedstring = $mismatch['secondmatchedstring'];
-            $a->correctmatchedstring = $mismatch['firstmatchedstring'];
-
-            $feedback .= get_string('diffplacesubpatternmismatch', 'qtype_writeregex', $a);
-        }
-
-        // Information about unique subpatterns mimsatches
-        if (count($difference->uniquesubpatterns[0]) > 0) {
-            if (!$singlemismatch) {
-                $feedback = $renderer->add_break($feedback) . '  - ';
-            }
-            $a = new \stdClass();
-            $a->mismatchedanswer = get_string('youranswer', 'qtype_writeregex');
-            $a->matchedanswer = get_string('correctanswer', 'qtype_writeregex');
-            $a->subpatterns = $this->enumeration_from_array($difference->uniquesubpatterns[0]);
-            if (count($difference->uniquesubpatterns[0]) == 1) {
-                $feedback .= get_string('singleuniquesubpatternmismatch', 'qtype_writeregex', $a);
-            }
-            else {
-                $feedback .= get_string('multipleuniquesubpatternmismatch', 'qtype_writeregex', $a);
-            }
-        }
-        if (count($difference->uniquesubpatterns[1]) > 0) {
-            if (!$singlemismatch) {
-                $feedback = $renderer->add_break($feedback) . '  - ';
-            }
-            $a = new \stdClass();
+        // Set matched answer author.
+        if ($difference->matchedautomaton == 1) {
             $a->matchedanswer = get_string('youranswer', 'qtype_writeregex');
-            $a->mismatchedanswer = get_string('correctanswer', 'qtype_writeregex');
-            $a->subpatterns = $this->enumeration_from_array($difference->uniquesubpatterns[1]);
-            if (count($difference->uniquesubpatterns[1]) == 1) {
-                $feedback .= get_string('singleuniquesubpatternmismatch', 'qtype_writeregex', $a);
-            }
-            else {
-                $feedback .= get_string('multipleuniquesubpatternmismatch', 'qtype_writeregex', $a);
-            }
+            $a->mismatchedanswer = get_string('theporrectanswer', 'qtype_writeregex');
         }
-        return $feedback;
+        else {
+            $a->matchedanswer = get_string('theporrectanswer', 'qtype_writeregex');
+            $a->mismatchedanswer = get_string('youranswer', 'qtype_writeregex');
+        }
+        // Set behavior.
+        if (count($difference->opentags) == 1) {
+            $a->behavior = get_string('starts', 'qtype_writeregex');
+        }
+        else if (count($difference->opentags) > 1) {
+            $a->behavior = get_string('start', 'qtype_writeregex');
+        }
+        else if (count($difference->closetags) == 1) {
+            $a->behavior = get_string('ends', 'qtype_writeregex');
+        }
+        else if (count($difference->closetags) > 1) {
+            $a->behavior = get_string('end', 'qtype_writeregex');
+        }
+
+        // Get result string.
+        $result = '';
+        if (count($difference->opentags) + count($difference->closetags) == 0) {
+            $result = get_string('nosubpatternmismatch', 'qtype_writeregex', $a);
+        }
+        else if (count($difference->opentags) + count($difference->closetags) == 1) {
+            $result = get_string('singlesubpatternmismatch', 'qtype_writeregex', $a);
+        }
+        else {
+            $result = get_string('multiplesubpatternsmismatch', 'qtype_writeregex', $a);
+        }
+
+        // Set first letter of the result string to uppercase.
+        $letter = \core_text::substr($result, 0, 1);
+        $letter = \core_text::strtoupper($letter);
+        $result[0] = $letter;
+        return $renderer->add_break($result);
     }
 
     /**
@@ -292,7 +214,7 @@ class compare_automata_analyzer_result extends analyzer_result {
      */
     public function get_matching_string_explanation($renderer, $author, $matched, $mismatched = '') {
         $result = $renderer->render_automaton_matched_string($matched, true);
-        if (strlen($mismatched) > 0)
+        if (!empty($mismatched))
             $result .= $renderer->render_automaton_matched_string($mismatched, false);
         $result = $renderer->add_span($result);
         return $renderer->render_automaton_matched_string_with_author($author, $result);

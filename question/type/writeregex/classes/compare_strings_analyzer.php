@@ -39,8 +39,6 @@ class compare_strings_analyzer extends analyzer {
     public function analyze($answer, $response) {
 
         $totalfraction = 0;
-        $matchedcount = 0;
-        $mismatchedstrings = array();
 
         $pregquestionstd = new \qtype_preg_question();
         $matchingoptions = $pregquestionstd->get_matching_options(false, $pregquestionstd->get_modifiers($this->question->usecase), null, $this->question->notation);
@@ -53,17 +51,13 @@ class compare_strings_analyzer extends analyzer {
 
         foreach ($this->question->teststrings as $string) {
 
-            if (!$studentmatcher->errors_exist() && !$teachermatcher->errors_exist()) {
+            if (!$studentmatcher->errors_exist() and !$teachermatcher->errors_exist()) {
                 $resulltstd = $studentmatcher->match($string->teststring);
                 $resulltt = $teachermatcher->match($string->teststring);
 
-                if ($resulltstd->indexfirst == $resulltt->indexfirst &&
+                if ($resulltstd->indexfirst == $resulltt->indexfirst and
                     $resulltstd->length == $resulltt->length) {
                     $totalfraction += $string->fraction;
-                    $matchedcount++;
-                }
-                else {
-                    $mismatchedstrings[] = $string;
                 }
             }
         }
@@ -71,10 +65,6 @@ class compare_strings_analyzer extends analyzer {
         // Generate result
         $result = new compare_strings_analyzer_result();
         $result->fitness = $totalfraction;
-        $result->stringscount = count($this->question->teststrings);
-        $result->matchedstringscount = $matchedcount;
-        $result->mismatchedstrings = $mismatchedstrings;
-        $result->showmismatchedstrings = $this->question->showmismatchedteststrings;
         return $result;
     }
 

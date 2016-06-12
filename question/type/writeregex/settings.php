@@ -30,8 +30,4 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configtext('qtype_writregex_maxerrorsshown', get_string('maxerrorsshownlabel', 'qtype_preg'),
         get_string('maxerrorsshowndescription', 'qtype_preg'), 5, PARAM_INT));
-    $settings->add(new admin_setting_configtext('qtype_writregex_groups_pairs_limit', get_string('automataequivalencecheckgroupspairlimit', 'qtype_writeregex'),
-        get_string('automataequivalencecheckgroupspairlimitdescription', 'qtype_writeregex'), 2000, PARAM_INT));
-    $settings->add(new admin_setting_configtext('qtype_writregex_mismatches_limit', get_string('automataequivalencecheckmismatcheslimit', 'qtype_writeregex'),
-        get_string('automataequivalencecheckmismatcheslimitdescription', 'qtype_writeregex'), 15, PARAM_INT));
 }

@@ -31,17 +31,16 @@ require_once($CFG->dirroot . '/question/type/preg/question.php');
  */
 class compare_automata_analyzer extends analyzer {
 
+    const MISMATCH_PENALTY = 0.2;
+
     /**
      * Get equality for user response.
      * @param $answer string Regex answer.
-     * @param $response string User response.
+     * @param $respose string User response.
      * @return compare_automata_analyzer_result Result of compare.
      */
     public function analyze ($answer, $response)
     {
-        global $CFG;
-        $CFG->qtype_preg_assertfailmode = true;
-
         $pregquestionstd = new \qtype_preg_question();
         $matchingoptions = $pregquestionstd->get_matching_options(false, $pregquestionstd->get_modifiers($this->question->usecase), null, $this->question->notation);
         $matchingoptions->extensionneeded = false;
@@ -56,32 +55,14 @@ class compare_automata_analyzer extends analyzer {
         $differences = array();
         $fitness = 1;
 
-        // If the was syntax error in response automaton.
-        if ($responseautomaton == null) {
-            $result = new compare_automata_analyzer_result();
-            $result->fitness = 0;
-            $result->differences = $differences;
-            return $result;
-        }
-        try {
-            if (!$answerautomaton->equal($responseautomaton, $differences, ($this->question->comparewithsubpatterns == 1))) {
-                foreach ($differences as $difference) {
-                    if ($difference->type == \qtype_preg\fa\equivalence\mismatched_pair::SUBPATTERN) {
-                        $fitness = max(0, $fitness - $this->question->subpatternmismatchpenalty);
-                    } else {
-                        $fitness = max(0, $fitness - $this->question->stringmismatchpenalty);
-                    }
-                }
-            }
-        } catch (\moodle_exception $e) {
-            throw $e;
+        if (!$answerautomaton->equal($responseautomaton, $differences, true)) {
+            $fitness = max(0, 1 - count($differences) * compare_automata_analyzer::MISMATCH_PENALTY);
         }
 
         // Generate result
         $result = new compare_automata_analyzer_result();
         $result->fitness = $fitness;
         $result->differences = $differences;
-        $result->maxshowncount = $this->question->mismatchesshowncount;
         return $result;
     }
 

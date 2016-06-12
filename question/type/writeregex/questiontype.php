@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
-require_once($CFG->dirroot . '/question/type/writeregex/question.php');
 
 /**
  * Question type class for the write regex question type.
@@ -209,12 +208,7 @@ class qtype_writeregex extends qtype_shortanswer {
             'teststringshintpenalty',    // Test strings hint penalty.
             'comparetreepercentage',     // Percentage value of compare regex by tree (0-100).
             'compareautomatapercentage', // Percentage value of compare regex by automata (0-100).
-            'comparestringspercentage',  // Percentage value of compare regex by test strings (0-100).
-            'stringmismatchpenalty',     // Penalty for string mismatch while automata compare algorithm.
-            'comparewithsubpatterns',    // Weather to compare regexes with subpatterns or not.
-            'subpatternmismatchpenalty', // Penalty for string mismatch while automata compare algorithm.
-            'mismatchesshowncount',      // Max count of mismatches from automata compare algorithm to show student.
-            'showmismatchedteststrings'  // Flag of necessity to show mismatched string as a result of test strings analyzer.
+            'comparestringspercentage'   // Percentage value of compare regex by test strings (0-100).
         );
     }
 
@@ -222,9 +216,9 @@ class qtype_writeregex extends qtype_shortanswer {
      * @return array of available analyzers where key is the keyword and value is description
      */
     public function available_analyzers() {
-        return array(//'tree' => get_string('comparetreepercentage', 'qtype_writeregex'),
-            'strings' => get_string('comparestringspercentage', 'qtype_writeregex'),
-            'automata' => get_string('compareautomatapercentage', 'qtype_writeregex'));
+        return array('tree' => get_string('comparetreepercentage', 'qtype_writeregex'),
+            'automata' => get_string('compareautomatapercentage', 'qtype_writeregex'),
+            'strings' => get_string('comparestringspercentage', 'qtype_writeregex'));
     }
 
     /**
@@ -318,20 +312,7 @@ class qtype_writeregex extends qtype_shortanswer {
 
     /** Overload hints functions to be able to work with interactivehints*/
     protected function make_hint($hint) {
-        return \qtype_poasquestion\moodle_hint_adapter::load_from_record($hint);
-    }
-
-    public function make_question_for_automata_analyzer($data) {
-        $question = new qtype_writeregex_question();//$this->make_question($data);
-        $question->engine = $data['engine'];
-        $question->usecase = $data['usecase'];
-        $question->notation = $data['notation'];
-        $question->comparewithsubpatterns = $data['comparewithsubpatterns'];
-        $question->subpatternmismatchpenalty = $data['subpatternmismatchpenalty'];
-        $question->stringmismatchpenalty = $data['stringmismatchpenalty'];
-        $question->mismatchesshowncount = $data['mismatchesshowncount'];
-
-        return $question;
+        return qtype_poasquestion_moodlehint_adapter::load_from_record($hint);
     }
 
     protected function initialise_question_instance(question_definition $question, $questiondata) {
