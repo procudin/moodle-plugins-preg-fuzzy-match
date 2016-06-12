@@ -1800,7 +1800,7 @@ class qtype_preg_leaf_backref extends qtype_preg_leaf {
 
     public function get_regex_string() {
         $subexpr = $this->name !== null ? $this->name : $this->number;
-        return '\\' . $subexpr;
+        return preg_replace('/\d+/', $subexpr, $this->userinscription[0]->data);
     }
 }
 
