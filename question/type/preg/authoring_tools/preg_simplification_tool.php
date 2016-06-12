@@ -1107,6 +1107,7 @@ class qtype_preg_regex_hint_single_charset_node extends qtype_preg_regex_hint {
                 $tmp = $tree_root->userinscription[1];
                 $tmp->data = $this->escape_character_for_single_charset($tmp->data);
                 $tmp->data = $this->non_escaped_characters($tmp->data);
+                $tmp->data = $this->characters_interval_for_single_charset($tmp->data);
                 $tree_root->userinscription = array($tmp);
                 $tree_root->flags[0][0]->data = new qtype_poasquestion\string($tmp->data);
                 $tree_root->subtype = "enumerable_characters";
@@ -1134,6 +1135,16 @@ class qtype_preg_regex_hint_single_charset_node extends qtype_preg_regex_hint {
             || $character === '?' || $character === '*' || $character === '+'
             || $character === '{' || $character === '}') {
             return '\\' . $character;
+        }
+        return $character;
+    }
+
+    /**
+     * Check characters interval for single charset
+     */
+    private function characters_interval_for_single_charset($character) {
+        if (strrpos($character, '-') > -1) {
+            return preg_split('/-/', $character)[0];
         }
         return $character;
     }
