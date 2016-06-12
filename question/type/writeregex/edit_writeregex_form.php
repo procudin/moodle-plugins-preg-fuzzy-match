@@ -88,7 +88,7 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
-        // Add all analyzers percentages.
+        // Add all analizers percentages.
         $questiontype = new qtype_writeregex();
         $analyzers = $questiontype->available_analyzers();
         foreach ($analyzers as $name => $description) {
@@ -99,44 +99,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $mform->setDefault($constantstringname, '0');
             $mform->addHelpButton($constantstringname, $constantstringname, 'qtype_writeregex');
         }
-        // Set as default 100% to automata analizer.
+        // Set as default 100% to teststrings analizer.
         $mform->setDefault($constantstringname, '100');
-
-        // Add field of necessity to show mismatched string as a result of test strings analyzer.
-        $mform->addElement('select', 'showmismatchedteststrings', get_string('showmismatchedteststrings', 'qtype_writeregex'),
-            array(get_string('showmismatchedteststringsfalse', 'qtype_writeregex'), get_string('showmismatchedteststringstrue', 'qtype_writeregex')));
-        $mform->addHelpButton('showmismatchedteststrings', 'showmismatchedteststrings', 'qtype_writeregex');
-        $mform->setAdvanced('showmismatchedteststrings');
-
-        // Add automata analyzer settings.
-        $mform->addElement('header', 'automataanalyzerhdr', get_string('automataanalyzersheader', 'qtype_writeregex'), '');
-        $mform->setExpanded('automataanalyzerhdr', 0);
-        // Add string penalty field
-        $mform->addElement('text', 'stringmismatchpenalty',
-            get_string('stringmismatchpenalty', 'qtype_writeregex'));
-        $mform->setType('stringmismatchpenalty', PARAM_FLOAT);
-        $mform->setDefault('stringmismatchpenalty', '0.2');
-        $mform->addHelpButton('stringmismatchpenalty', 'stringmismatchpenalty', 'qtype_writeregex');
-
-        // Add select case of necessity to compare with subpatterns
-        $mform->addElement('select', 'comparewithsubpatterns', get_string('comparewithsubpatterns', 'qtype_writeregex'),
-            array(get_string('comparewithoutsubpatterns', 'qtype_writeregex'), get_string('comparesubpatterns', 'qtype_writeregex')));
-        $mform->addHelpButton('comparewithsubpatterns', 'comparewithsubpatterns', 'qtype_writeregex');
-
-        // Add subpattern penalty field
-        $mform->addElement('text', 'subpatternmismatchpenalty',
-            get_string('subpatternmismatchpenalty', 'qtype_writeregex'));
-        $mform->setType('subpatternmismatchpenalty', PARAM_FLOAT);
-        $mform->setDefault('subpatternmismatchpenalty', '0.2');
-        $mform->addHelpButton('subpatternmismatchpenalty', 'subpatternmismatchpenalty', 'qtype_writeregex');
-
-        // Add mismatches shown count field
-        $mform->addElement('text', 'mismatchesshowncount',
-            get_string('mismatchesshowncount', 'qtype_writeregex'));
-        $mform->setType('mismatchesshowncount', PARAM_INT);
-        $mform->setDefault('mismatchesshowncount', '5');
-        $mform->addHelpButton('mismatchesshowncount', 'mismatchesshowncount', 'qtype_writeregex');
-        //$mform->setAdvanced('mismatchesshowncount');
 
         // Add hints.
         $mform->addElement('header', 'hintshdr', get_string('hintsheader', 'qtype_writeregex'), '');
@@ -366,19 +330,6 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
 
         $errors = $this->validate_dot_using_hints($data, $errors);
 
-        if ($data['compareautomatapercentage'] > 0) {
-            if ($data['stringmismatchpenalty'] < 0 || $data['stringmismatchpenalty'] > $data['defaultmark']) {
-                $errors['stringmismatchpenalty'] = get_string('invalidmismatchpenalty', 'qtype_writeregex');
-            }
-            if ($data['comparewithsubpatterns'] == 1 &&
-                ($data['subpatternmismatchpenalty'] < 0 || $data['subpatternmismatchpenalty'] > $data['defaultmark'])) {
-                $errors['subpatternmismatchpenalty'] = get_string('invalidmismatchpenalty', 'qtype_writeregex');
-            }
-            if ($data['mismatchesshowncount'] < 0) {
-                $errors['mismatchesshowncount'] = get_string('invalidmismatchshowncount', 'qtype_writeregex');
-            }
-        }
-
         return $errors;
     }
 
@@ -389,37 +340,31 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
      * @return array Errors array.
      */
     public function validate_regexp ($data, $errors) {
+
         global $CFG;
+        $test = $data['comparestringspercentage'];
 
-        $answers = $data['answer'];
-        if ($data['compareautomatapercentage'] > 0) {
-            $questiontype = new qtype_writeregex();
-            $question = $questiontype->make_question_for_automata_analyzer($data);
-            $analyzer = new \qtype_writeregex\compare_automata_analyzer($question);
-        }
-        foreach ($answers as $key => $answer) {
-            $trimmedanswer = trim($answer);
-            if ($trimmedanswer !== '') {
-                $pregquestionobj = new qtype_preg_question();
-                $matchingoptions = $pregquestionobj->get_matching_options(false, $pregquestionobj->get_modifiers($data['usecase']), null, $data['notation']);
-                $matchingoptions->extensionneeded = false;
-                $matchingoptions->capturesubexpressions = true;
-                $matcher = $pregquestionobj->get_matcher($data['engine'], $trimmedanswer, $matchingoptions);
+        if ($test > 0 && $test <= 100) {
 
-                if ($matcher->errors_exist()) {
-                    $regexerrors = $matcher->get_error_messages($CFG->qtype_writregex_maxerrorsshown);
-                    $errors['answer['.$key.']'] = '';
-                    foreach ($regexerrors as $item) {
-                        $errors['answer['.$key.']'] .= $item . '<br />';
+            $answers = $data['answer'];
+            $i = 0;
+
+            foreach ($answers as $key => $answer) {
+                $trimmedanswer = trim($answer);
+                if ($trimmedanswer !== '') {
+					$pregquestionobj = new qtype_preg_question();
+                    $matchingoptions = $pregquestionobj->get_matching_options(false, $pregquestionobj->get_modifiers($data['usecase']), null, $data['notation']);
+                    $matchingoptions->extensionneeded = false;
+                    $matchingoptions->capturesubexpressions = true;
+                    $matcher = $pregquestionobj->get_matcher($data['engine'], $trimmedanswer, $matchingoptions);
+
+                    if ($matcher->errors_exist()) {
+                        $regexerrors = $matcher->get_error_messages($CFG->qtype_writregex_maxerrorsshown);
+                        $errors['answer['.$key.']'] = '';
+                        foreach ($regexerrors as $item) {
+                            $errors['answer['.$key.']'] .= $item . '<br />';
+                        }
                     }
-                }
-            }
-            if ($data['compareautomatapercentage'] > 0 && !array_key_exists('answer['.$key.']', $errors)) {
-                try {
-                    $analyzer->analyze($answer, $answer);
-                }
-                catch (moodle_exception $e) {
-                    $errors['answer['.$key.']'] = get_string('automataanalyzersoverflowforteacher', 'qtype_writeregex');
                 }
             }
         }
@@ -485,9 +430,8 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
             $sum += $data[$constantstringname];
         }
 
-        $fieldname = 'compare' . array_keys($analyzers)[0] . 'percentage';
-        if ($sum != 100 and !array_key_exists($fieldname, $errors)) {
-            $errors[$fieldname] = get_string('invalidmatchingtypessumvalue', 'qtype_writeregex');
+        if ($sum != 100 and !array_key_exists('comparetreepercentage', $errors)) {
+            $errors['comparetreepercentage'] = get_string('invalidmatchingtypessumvalue', 'qtype_writeregex');
         }
 
         return $errors;
