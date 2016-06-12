@@ -4322,7 +4322,7 @@ class qtype_preg_tree_normalization {
     public function __construct() {}
     protected function __clone() {}
 
-    public function normalization1($tree_root) {
+    public function normalization($tree_root) {
         $rules_names = array(
             'qtype_preg_regex_hint_quant_node_1_to_1',
             'qtype_preg_regex_hint_repeated_assertions',
@@ -4368,123 +4368,6 @@ class qtype_preg_tree_normalization {
                 $count++;
             }
         }
-
-        /*$problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_quant_node_1_to_1($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_repeated_assertions($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_single_alternative_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_alt_with_question_quant($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_consecutive_quant_nodes($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-//        $this->delete_not_empty_grouping_node($tree_root, $tree_root);
-
-        $problem_exist = true;
-        while($problem_exist) {
-            $rule = new qtype_preg_regex_hint_single_charset_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_grouping_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        $problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            $rule = new qtype_preg_regex_hint_subpattern_node($tree_root);
-            $rhr = $rule->check_hint();
-            if (count($rhr->problem_ids) > 0) {
-                $rule->use_hint($rhr);
-                $this->deleted_subpattern_positions = array_merge($this->deleted_subpattern_positions, $rule->deleted_subpattern_positions);
-            } else {
-                $problem_exist = false;
-            }
-            $count++;
-        }
-
-        /*$problem_exist = true;
-        $count = 0;
-        while($problem_exist && $count < 99) {
-            if ($this->search_single_not_repeat_alternative_node($tree_root)) {
-                $this->change_alternative_to_charset($tree_root, $tree_root, $this->problem_ids[0]);
-                $count++;
-            } else {
-                $problem_exist = false;
-            }
-            $this->problem_ids = array();
-        }*/
 
         $this->delete_not_empty_grouping_node($tree_root, $tree_root);
 
@@ -4757,9 +4640,7 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
         return array(
             'qtype_preg_regex_hint_space_charset',
             'qtype_preg_regex_hint_space_charset_without_quant',
-            'qtype_preg_regex_hint_subpattern_without_backref',
-            'qtype_preg_regex_hint_space_charset_with_finit_quant',
-            'qtype_preg_regex_hint_exact_match'
+            'qtype_preg_regex_hint_space_charset_with_finit_quant'
         );
     }
 
@@ -4777,6 +4658,8 @@ class qtype_preg_simplification_tool extends qtype_preg_authoring_tool {
             'qtype_preg_regex_hint_question_quant_for_alternative_node',
             'qtype_preg_regex_hint_consecutive_quant_nodes',
             'qtype_preg_regex_hint_common_subexpressions',
+            'qtype_preg_regex_hint_subpattern_without_backref',
+            'qtype_preg_regex_hint_exact_match'
         );
     }
 
