@@ -258,15 +258,15 @@ abstract class qtype_preg_regex_hint {
      * @param $node Node
      * @param int $subpattern_last_number Last number of searched subpattern
      */
-    protected function rename_backreferences_for_subpattern($tree_root, $node, &$subpattern_last_number = 0) {
+    protected function rename_backreferences($tree_root, $node, &$subpattern_last_number = 0) {
         if ($node !== null) {
             if ($node->type == qtype_preg_node::TYPE_NODE_SUBEXPR && $node->subtype == qtype_preg_node_subexpr::SUBTYPE_SUBEXPR) {
                 ++$subpattern_last_number;
-                $this->rename_backref($tree_root, $node->number, $subpattern_last_number);
+                $this->rename_backreferences_for_subpattern($tree_root, $node->number, $subpattern_last_number);
             }
             if ($this->is_operator($node)) {
                 foreach ($node->operands as $operand) {
-                    $this->rename_backreferences_for_subpattern($tree_root, $operand, $subpattern_last_number);
+                    $this->rename_backreferences($tree_root, $operand, $subpattern_last_number);
                 }
             }
         }
@@ -278,7 +278,7 @@ abstract class qtype_preg_regex_hint {
      * @param $old_number Old backreference number
      * @param $new_number New backreference number
      */
-    protected function rename_backref($node, $old_number, $new_number) {
+    protected function rename_backreferences_for_subpattern($node, $old_number, $new_number) {
         if ($node !== null) {
             if (($node->type == qtype_preg_node::TYPE_LEAF_BACKREF
                     && $node->subtype == qtype_preg_node::TYPE_LEAF_BACKREF && $node->number == $old_number)
@@ -291,7 +291,7 @@ abstract class qtype_preg_regex_hint {
             }
             if ($this->is_operator($node)) {
                 foreach ($node->operands as $operand) {
-                    $this->rename_backref($operand, $old_number, $new_number);
+                    $this->rename_backreferences_for_subpattern($operand, $old_number, $new_number);
                 }
             }
         }
@@ -929,7 +929,7 @@ class qtype_preg_regex_hint_subpattern_node extends qtype_preg_regex_hint {
 
     public function use_hint($regex_hint_result) {
         $this->remove_subpattern_node($this->tree, $this->tree, $regex_hint_result->problem_ids[0]);
-        $this->rename_backreferences_for_subpattern($this->tree, $this->tree);
+        $this->rename_backreferences($this->tree, $this->tree);
         return $this->tree;
     }
 
@@ -2382,7 +2382,7 @@ class qtype_preg_regex_hint_subpattern_without_backref extends qtype_preg_regex_
         if ($node->id == $remove_node_id) {
             $node->subtype = qtype_preg_node_subexpr::SUBTYPE_GROUPING;
             //$subpattern_last_number = 0;
-            $this->rename_backreferences_for_subpattern($this->tree, $this->tree/*, $subpattern_last_number*/);
+            $this->rename_backreferences($this->tree, $this->tree/*, $subpattern_last_number*/);
             return true;
         }
 
@@ -2974,7 +2974,7 @@ class qtype_preg_regex_hint_common_subexpressions extends qtype_preg_regex_hint 
             array_push($leafs[0], $tree_root);
 
             $norm = new qtype_preg_tree_normalization();
-            $norm->normalization1($tree_root);
+            $norm->normalization($tree_root);
 //            $this->normalization($tree_root);
         }
 
