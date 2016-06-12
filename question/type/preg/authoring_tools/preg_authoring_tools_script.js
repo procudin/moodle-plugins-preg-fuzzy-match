@@ -291,6 +291,12 @@ M.preg_authoring_tools_script = (function ($) {
         // Remove some hints to form
         var hints_table = $('#simplification_tool_hints > tbody');
         hints_table.empty();
+        $('#simplification_tool_hint_text').text('');
+        $('#simplification_tool_equivalences_count').text('0');
+        $('#simplification_tool_tips_count').text('0');
+        $('#simplification_tool_errors_count').text('0');
+        $('#simplification_tool_apply_btn').prop('disabled', true);
+        $('#simplification_tool_cancel_btn').prop('disabled', true);
 
         self.regex_input.textareaHighlighter('updateMatches', []);
     },
