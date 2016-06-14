@@ -312,12 +312,14 @@ class qtype_writeregex_question extends question_graded_automatically
                 // Compare results for each analyzer for current answer
                 $results = array();
                 foreach ($analyzers as $key => $description) {
-                    $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
-                    $analyzer = new $analyzername($this);
-                    $result = $analyzer->analyze($answer->answer, $response['answer']);
                     $percentagefield = 'compare' . $key . 'percentage';
-                    $fraction += $result->fitness * $this->$percentagefield / 100.0;
-                    $results[$key] = $result;
+                    if ($this->$percentagefield > 0) {
+                        $analyzername = '\qtype_writeregex\compare_' . $key . '_analyzer';
+                        $analyzer = new $analyzername($this);
+                        $result = $analyzer->analyze($answer->answer, $response['answer']);
+                        $fraction += $result->fitness * $this->$percentagefield / 100.0;
+                        $results[$key] = $result;
+                    }
                 }
 
                 if ($fraction > $bestfitness and $fraction > $this->hintgradeborder) {

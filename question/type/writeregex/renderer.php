@@ -99,7 +99,9 @@ class qtype_writeregex_renderer extends qtype_shortanswer_renderer {
                 $analyzerkeys = array_keys($questiontype->available_analyzers());
                 $feedback = '';
                 foreach($analyzerkeys as $analyzerkey) {
-                    $feedback .= $question->bestfitanswer['results'][$analyzerkey]->get_feedback($this);
+                    if (array_key_exists($analyzerkey, $question->bestfitanswer['results'])) {
+                        $feedback .= $question->bestfitanswer['results'][$analyzerkey]->get_feedback($this);
+                    }
                 }
             }
         }
