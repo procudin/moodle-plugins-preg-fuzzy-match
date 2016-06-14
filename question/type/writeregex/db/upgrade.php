@@ -102,7 +102,18 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0) {
         // Writeregex savepoint reached.
         upgrade_plugin_savepoint(true, 2016060802, 'qtype', 'writeregex');
     }
+    if ($oldversion < 2016061401) {
 
+        // Changing the default of field comparetreepercentage on table qtype_writeregex_options to 0.
+        $table = new xmldb_table('qtype_writeregex_options');
+        $field = new xmldb_field('comparetreepercentage', XMLDB_TYPE_FLOAT, '12, 7', null, XMLDB_NOTNULL, null, '0', 'teststringshintpenalty');
+
+        // Launch change of default for field comparetreepercentage.
+        $dbman->change_field_default($table, $field);
+
+        // Writeregex savepoint reached.
+        upgrade_plugin_savepoint(true, 2016061401, 'qtype', 'writeregex');
+    }
 
     return true;
 
