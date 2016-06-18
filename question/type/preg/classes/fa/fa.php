@@ -956,7 +956,7 @@ class fa {
             foreach ($currentsteppairs as $arrayofpairs) {
                 $pairscount += count($arrayofpairs);
             }
-            if ($pairscount >= $CFG->qtype_writregex_groups_pairs_limit) {
+            if ($pairscount > $CFG->qtype_writregex_groups_pairs_limit) {
                 throw new \moodle_exception('groupspaircountoverlimit', 'qtype_preg');
             }
 
