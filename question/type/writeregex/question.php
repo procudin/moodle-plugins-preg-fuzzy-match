@@ -142,7 +142,11 @@ class qtype_writeregex_question extends question_graded_automatically
      * @return array answer value.
      */
     public function get_matching_answer(array $response) {
-        $bestfit = $this->get_best_fit_answer($response);
+        try {
+            $bestfit = $this->get_best_fit_answer($response);
+        } catch (moodle_exception $e) {
+            return array();
+        }
 
         if ($bestfit['fitness'] >= $this->hintgradeborder) {
             return $bestfit['answer'];
@@ -258,7 +262,7 @@ class qtype_writeregex_question extends question_graded_automatically
             $besftfit = $this->get_best_fit_answer($response);
         }
         catch (moodle_exception $e) {
-            return $e->getMessage();
+            return get_string('automataanalyzersoverflowforstudent', 'qtype_writeregex');
         }
         $feedback = '';
         $boardermatch = 0.7;
