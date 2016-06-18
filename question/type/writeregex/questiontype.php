@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/question/type/shortanswer/questiontype.php');
+require_once($CFG->dirroot . '/question/type/writeregex/question.php');
 
 /**
  * Question type class for the write regex question type.
@@ -317,6 +318,19 @@ class qtype_writeregex extends qtype_shortanswer {
     /** Overload hints functions to be able to work with interactivehints*/
     protected function make_hint($hint) {
         return \qtype_poasquestion\moodle_hint_adapter::load_from_record($hint);
+    }
+
+    public function make_question_for_automata_analyzer($data) {
+        $question = new qtype_writeregex_question();//$this->make_question($data);
+        $question->engine = $data['engine'];
+        $question->usecase = $data['usecase'];
+        $question->notation = $data['notation'];
+        $question->comparewithsubpatterns = $data['comparewithsubpatterns'];
+        $question->subpatternmismatchpenalty = $data['subpatternmismatchpenalty'];
+        $question->stringmismatchpenalty = $data['stringmismatchpenalty'];
+        $question->mismatchesshowncount = $data['mismatchesshowncount'];
+
+        return $question;
     }
 
     protected function initialise_question_instance(question_definition $question, $questiondata) {
