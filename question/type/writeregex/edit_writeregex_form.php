@@ -386,6 +386,11 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         global $CFG;
 
         $answers = $data['answer'];
+        if ($data['compareautomatapercentage'] > 0) {
+            $questiontype = new qtype_writeregex();
+            $question = $questiontype->make_question_for_automata_analyzer($data);
+            $analyzer = new \qtype_writeregex\compare_automata_analyzer($question);
+        }
         foreach ($answers as $key => $answer) {
             $trimmedanswer = trim($answer);
             if ($trimmedanswer !== '') {
@@ -401,6 +406,14 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
                     foreach ($regexerrors as $item) {
                         $errors['answer['.$key.']'] .= $item . '<br />';
                     }
+                }
+            }
+            if ($data['compareautomatapercentage'] > 0 && !array_key_exists('answer['.$key.']', $errors)) {
+                try {
+                    $analyzer->analyze($answer, $answer);
+                }
+                catch (moodle_exception $e) {
+                    $errors['answer['.$key.']'] = get_string('automataanalyzersoverflowforteacher', 'qtype_writeregex');
                 }
             }
         }

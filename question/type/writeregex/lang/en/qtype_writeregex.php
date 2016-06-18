@@ -26,6 +26,8 @@
 
 $string['answer'] = 'Show the correct answer';
 $string['automataanalyzersheader'] = 'Finite automata analyzer';
+$string['automataanalyzersoverflowforstudent'] = 'Can\'t check correctness of your answer. Call for teacher to solve this problem.';
+$string['automataanalyzersoverflowforteacher'] = 'Checking equivalence of current answer with student\'s one by automata analyzer may cause long duration - limit of maximal count of groups pairs at single step of finite automata equivalence check algorithm overflowed. Ask your site administrator to change this limit.';
 $string['automataequivalencecheckgroupspairlimit'] = 'Maximum number of groups pair for one wave while automata equivalence check';
 $string['automataequivalencecheckgroupspairlimitdescription'] = 'Automata equivalence check function generates groups pairs for each iteration. When checking equivalence with subpatterns, pairs count may be big and rise exponential, so equivalence check will take a long time. This value limits count of simultaneously processed groups pairs.';
 $string['automataequivalencecheckmismatcheslimit'] = 'Maximum number of mismatches from automata equivalence check';
