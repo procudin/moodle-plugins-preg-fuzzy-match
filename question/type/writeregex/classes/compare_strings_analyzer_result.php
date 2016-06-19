@@ -26,6 +26,10 @@ namespace qtype_writeregex;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class compare_strings_analyzer_result extends analyzer_result {
+    /** @var int Count of test strings */
+    public $stringscount;
+    /** @var int Count of matched test strings */
+    public $matchedstringscount;
 
     /**
      * Get feedback for analyzing results.
@@ -33,6 +37,9 @@ class compare_strings_analyzer_result extends analyzer_result {
      * @return string Feedback about mismatches to show to student.
      */
     public function get_feedback($renderer) {
-        return '';
+        $a = new \stdClass;
+        $a->count = $this->stringscount;
+        $a->matchedcount = $this->matchedstringscount;
+        return $renderer->add_break(get_string('teststringsmatchedcount', 'qtype_writeregex', $a));
     }
 }
