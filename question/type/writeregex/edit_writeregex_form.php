@@ -102,7 +102,13 @@ class qtype_writeregex_edit_form extends qtype_shortanswer_edit_form {
         // Set as default 100% to automata analizer.
         $mform->setDefault($constantstringname, '100');
 
-        // Add hints.
+        // Add field of necessity to show mismatched string as a result of test strings analyzer.
+        $mform->addElement('select', 'showmismatchedteststrings', get_string('showmismatchedteststrings', 'qtype_writeregex'),
+            array(get_string('showmismatchedteststringsfalse', 'qtype_writeregex'), get_string('showmismatchedteststringstrue', 'qtype_writeregex')));
+        $mform->addHelpButton('showmismatchedteststrings', 'showmismatchedteststrings', 'qtype_writeregex');
+        $mform->setAdvanced('showmismatchedteststrings');
+
+        // Add automata analyzer settings.
         $mform->addElement('header', 'automataanalyzerhdr', get_string('automataanalyzersheader', 'qtype_writeregex'), '');
         $mform->setExpanded('automataanalyzerhdr', 0);
         // Add string penalty field
