@@ -213,7 +213,8 @@ class qtype_writeregex extends qtype_shortanswer {
             'stringmismatchpenalty',     // Penalty for string mismatch while automata compare algorithm.
             'comparewithsubpatterns',    // Weather to compare regexes with subpatterns or not.
             'subpatternmismatchpenalty', // Penalty for string mismatch while automata compare algorithm.
-            'mismatchesshowncount'       // Max count of mismatches from automata compare algorithm to show student.
+            'mismatchesshowncount',      // Max count of mismatches from automata compare algorithm to show student.
+            'showmismatchedteststrings'  // Flag of necessity to show mismatched string as a result of test strings analyzer.
         );
     }
 
