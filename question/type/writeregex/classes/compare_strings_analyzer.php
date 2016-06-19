@@ -39,6 +39,7 @@ class compare_strings_analyzer extends analyzer {
     public function analyze($answer, $response) {
 
         $totalfraction = 0;
+        $matchedcount = 0;
 
         $pregquestionstd = new \qtype_preg_question();
         $matchingoptions = $pregquestionstd->get_matching_options(false, $pregquestionstd->get_modifiers($this->question->usecase), null, $this->question->notation);
@@ -58,6 +59,7 @@ class compare_strings_analyzer extends analyzer {
                 if ($resulltstd->indexfirst == $resulltt->indexfirst &&
                     $resulltstd->length == $resulltt->length) {
                     $totalfraction += $string->fraction;
+                    $matchedcount++;
                 }
             }
         }
@@ -65,6 +67,8 @@ class compare_strings_analyzer extends analyzer {
         // Generate result
         $result = new compare_strings_analyzer_result();
         $result->fitness = $totalfraction;
+        $result->stringscount = count($this->question->teststrings);
+        $result->matchedstringscount = $matchedcount;
         return $result;
     }
 

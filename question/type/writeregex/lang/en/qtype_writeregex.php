@@ -100,6 +100,7 @@ $string['teststringshintpenalty'] = 'Test string: penalty';
 $string['teststringshintpenalty_help'] = "<p>The amount of penalty for the use of clues in the form of test strings.</p>";
 $string['teststringshinttype'] = 'Test string';
 $string['teststringshinttype_help'] = "<p>Value display clues in the form of test strings.</p>";
+$string['teststringsmatchedcount'] = 'Matched test strings count: {$a->matchedcount}/{$a->count}.';
 $string['unavailableautomataanalyzer'] = 'You can\'t use automata analyzer with this engine';
 
 $string['extracharactermismatchfrombeginning'] = 'Your answer accepts character \'{$a->character}\' at the beginning while the correct one doesn\'t';
