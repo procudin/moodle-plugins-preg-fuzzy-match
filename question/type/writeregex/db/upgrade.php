@@ -114,6 +114,20 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0) {
         // Writeregex savepoint reached.
         upgrade_plugin_savepoint(true, 2016061401, 'qtype', 'writeregex');
     }
+    if ($oldversion < 2016061900) {
+
+        // Define field showmismatchedteststrings to be added to qtype_writeregex_options.
+        $table = new xmldb_table('qtype_writeregex_options');
+        $field = new xmldb_field('showmismatchedteststrings', XMLDB_TYPE_BINARY, null, null, null, null, null, 'mismatchesshowncount');
+
+        // Conditionally launch add field showmismatchedteststrings.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Writeregex savepoint reached.
+        upgrade_plugin_savepoint(true, 2016061900, 'qtype', 'writeregex');
+    }
 
     return true;
 

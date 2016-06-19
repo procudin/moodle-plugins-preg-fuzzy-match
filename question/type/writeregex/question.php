@@ -110,6 +110,10 @@ class qtype_writeregex_question extends question_graded_automatically
 
     /** @var Max count of mismatches from automata compare algorithm to show student. */
     public $mismatchesshowncount;
+
+    /** @var  boolean flag of necessity to show mismatched string as a result of test strings analyzer. */
+    public $showmismatchedteststrings;
+
     /**
      * Get type of expected data.
      * @return array|string Type of expected data.
