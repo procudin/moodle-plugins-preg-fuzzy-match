@@ -69,6 +69,7 @@ $string['invalidmatchingtypessumvalue'] = 'Sum of all matching types is not equa
 $string['invalidmismatchshowncount'] = 'Mismatches shown count can\'t be negative';
 $string['invalidmismatchpenalty'] = 'Mismatch penalty can\'t be negative or higher, than maximal mark for question';
 $string['invalidtssumvalue'] = 'Sum fractions of lines must be set to 100';
+$string['mismatchedteststrings'] = 'Mismatched test strings:';
 $string['mismatchesshowncount'] = 'Count of mismatches to show';
 $string['mismatchesshowncount_help'] = 'Max count of mismatches from automata compare algorithm to show for student';
 $string['moremismatches'] = 'And also mismatches: {$a}';

@@ -69,6 +69,7 @@ $string['invalidmatchingtypessumvalue'] = 'Сумма всех типов про
 $string['invalidmismatchshowncount'] = 'Количество демонстрируемых студенту расхождений не может быть отрицательным';
 $string['invalidmismatchpenalty'] = 'Штраф по расхождению не может быть отрицателен или больше максимальной оценки за вопрос';
 $string['invalidtssumvalue'] = 'Сумма оценок строк должна иметь значение 100, т. к. высталена проверка по ним';
+$string['mismatchedteststrings'] = 'Несовпавшие тестовые строки:';
 $string['mismatchesshowncount'] = 'Количество демонстрируемых расхождений';
 $string['mismatchesshowncount_help'] = 'Максимальное количество расхождений по алгоритму сравнения конечных автоматов, демонстрируемых студенту';
 $string['moremismatches'] = 'И ещё расхождений: {$a}';
