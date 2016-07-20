@@ -36,6 +36,7 @@ require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_explainin
 require_once($CFG->dirroot . '/question/type/preg/question.php');
 require_once($CFG->dirroot . '/question/type/preg/questiontype.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_collapsible_info_block.php');
 
 $PAGE->requires->jquery_plugin('poasquestion-jquerymodule', 'qtype_poasquestion');
 
@@ -69,6 +70,8 @@ class qtype_preg_authoring_form extends moodleform {
         $mform->addHelpButton('regex_input_header', 'authoring_form_edit_header', 'qtype_preg');
         $mform->addElement('textarea', 'regex_text', get_string('authoring_form_text', 'qtype_preg'), array('rows' => 1, 'cols' => 80, 'style' => 'width: 100%', 'class'=>'qtype-preg-highlighted-regex-text'));
         $mform->setType('regex_text', PARAM_RAW);
+
+        $mform->addElement('preg_collapsible_info_block');
 
         $topline = array();
         $topline[] =& $mform->createElement('submit', 'regex_show', get_string('show', 'moodle'));
