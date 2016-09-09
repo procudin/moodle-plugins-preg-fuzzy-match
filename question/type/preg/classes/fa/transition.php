@@ -404,7 +404,7 @@ class transition {
             }
         }
 
-        return array(\qtype_preg_leaf::NEXT_CHAR_OK, new \qtype_poasquestion\utf8_string(core_text::code2utf8($result_ranges[0][0])));
+        return array(\qtype_preg_leaf::NEXT_CHAR_OK, new \qtype_poasquestion\utf8_string(\core_text::code2utf8($result_ranges[0][0])));
     }
 
     public function is_start_anchor() {
