@@ -192,8 +192,8 @@ class qtype_preg_equivalence_test extends PHPUnit_Framework_TestCase {
      * Compares two regular expressions
      */
     function compare_regexes($first, $second, &$differences, $usecase = false) {
-        global $CFG;
-        $CFG->qtype_preg_assertfailmode = true;
+        set_config('assertfailmode', true, 'qtype_preg');
+
         $pregquestionstd = new \qtype_preg_question();
         $matchingoptions = $pregquestionstd->get_matching_options($usecase, $pregquestionstd->get_modifiers(false), null, 'native');
         $matchingoptions->extensionneeded = false;
