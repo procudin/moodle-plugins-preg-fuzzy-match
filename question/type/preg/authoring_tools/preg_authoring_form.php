@@ -94,12 +94,12 @@ class qtype_preg_authoring_form extends moodleform {
 
         $engines = $qtype->available_engines();
         $mform->addElement('select', 'engine_auth', get_string('engine', 'qtype_preg'), $engines);
-        $mform->setDefault('engine_auth', $CFG->qtype_preg_defaultengine);
+        $mform->setDefault('engine_auth', get_config('qtype_preg', 'defaultengine'));
         $mform->addHelpButton('engine_auth', 'engine', 'qtype_preg');
 
         $notations = $qtype->available_notations();
         $mform->addElement('select', 'notation_auth', get_string('notation', 'qtype_preg'), $notations);
-        $mform->setDefault('notation_auth', $CFG->qtype_preg_defaultnotation);
+        $mform->setDefault('notation_auth', get_config('qtype_preg', 'defaultnotation'));
         $mform->addHelpButton('notation_auth', 'notation', 'qtype_preg');
 
         $mform->addElement('selectyesno', 'exactmatch_auth', get_string('exactmatch', 'qtype_preg'));
