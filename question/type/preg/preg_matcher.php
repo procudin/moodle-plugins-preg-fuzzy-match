@@ -396,6 +396,9 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
     /** @var boolean Should matcher look for subexpression captures or the whole match only? */
     // TODO - does we need to specify subexpressions we are looking for or there is no sense in it?
     public $capturesubexpressions = true;
+
+    /** @var bool True if matcher will be used in equivalence checking. It affects accepting, as equivalence may not support some nodes.*/
+    public $equivalencecheck = false;
 }
 
 /**

@@ -493,11 +493,4 @@ class block_formal_langs_userdefined_language extends block_formal_langs_abstrac
         $names  = (array)json_decode($this->lexemenames);
         return  $names[$lang];
     }
-
-    public function lexem_name() {
-        $lang  = current_language();
-        $names  = (array)json_decode($this->lexemenames);
-        return  $names[$lang];
-    }
-
 }

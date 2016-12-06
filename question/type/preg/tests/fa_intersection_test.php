@@ -3,7 +3,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/question/type/preg/preg_fa.php');
 require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_nodes.php');
 require_once($CFG->dirroot . '/question/type/poasquestion/stringstream/stringstream.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_lexer.lex.php');
@@ -1419,8 +1418,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "3,"->"4,"[label = <<B>o: a c:</B>>, color = violet, penwidth = 2];
                     }';
 
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = new qtype_preg_fa();
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = new \qtype_preg\fa\fa();
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('1', $numbers));
         $oldfront = array(array_search('0', $numbers));
@@ -1454,8 +1453,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "3,"->"0,"[label = <<B>o: a c:</B>>, color = violet, penwidth = 2];
                     }';
 
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = new qtype_preg_fa();
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = new \qtype_preg\fa\fa();
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('1', $numbers));
         $oldfront = array(array_search('0', $numbers));
@@ -1483,8 +1482,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,"->"1,"[label = <<B>o: [ab] c:</B>>, color = violet, penwidth = 2];
                     }';
 
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = new qtype_preg_fa();
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = new \qtype_preg\fa\fa();
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('1', $numbers));
         $oldfront = array(array_search('0', $numbers));
@@ -1524,8 +1523,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                             }';
 
 
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = qtype_preg_fa::read_fa($directdescription);
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = \qtype_preg\fa\fa::read_fa($directdescription);
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('4', $numbers));
         $oldfront = array(array_search('2', $numbers));
@@ -1560,8 +1559,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                                 "0,"->"1,"[label=<<B>o: [ab] c:</B>>];
                             }';
 
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = qtype_preg_fa::read_fa($directdescription);
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = \qtype_preg\fa\fa::read_fa($directdescription);
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('1', $numbers));
         $oldfront = array(array_search('2', $numbers));
@@ -1598,8 +1597,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                                 "2,"->"0,"[label=<<B>o: [ab] c:</B>>];
                             }';
 
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = qtype_preg_fa::read_fa($directdescription);
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = \qtype_preg\fa\fa::read_fa($directdescription);
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('0', $numbers));
         $oldfront = array(array_search('2', $numbers));
@@ -1633,8 +1632,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,"->"1,"[label = <<B>o: [df] c:</B>>, color = violet, penwidth = 2];
                     }';
 
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = new qtype_preg_fa();
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = new \qtype_preg\fa\fa();
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('0', $numbers));
         $oldfront = array(array_search('4', $numbers));
@@ -1668,9 +1667,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         ",3"->",4"[label = <<B>o: [a] c:</B>>, color = blue, penwidth = 2, style = dotted];
                     }';
 
-        $origin = qtype_preg_fa_transition::ORIGIN_TRANSITION_SECOND;
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = $direct = new qtype_preg_fa();;
+        $origin = \qtype_preg\fa\transition::ORIGIN_TRANSITION_SECOND;
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = $direct = new \qtype_preg\fa\fa();;
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('1', $numbers));
         $oldfront = array(array_search('0', $numbers));
@@ -1704,9 +1703,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         ",3"->",0"[label = <<B>o: [a] c:</B>>, color = blue, penwidth = 2, style = dotted];
                     }';
 
-        $origin = qtype_preg_fa_transition::ORIGIN_TRANSITION_SECOND;
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = $direct = new qtype_preg_fa();
+        $origin = \qtype_preg\fa\transition::ORIGIN_TRANSITION_SECOND;
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = $direct = new \qtype_preg\fa\fa();
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('1', $numbers));
         $oldfront = array(array_search('0', $numbers));
@@ -1745,9 +1744,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                                 ",0"->",1"[label=<<B>o: [df] c:</B>>, color = blue, style = dotted];
                             }';
 
-        $origin = qtype_preg_fa_transition::ORIGIN_TRANSITION_SECOND;
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = qtype_preg_fa::read_fa($directdescription);
+        $origin = \qtype_preg\fa\transition::ORIGIN_TRANSITION_SECOND;
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = \qtype_preg\fa\fa::read_fa($directdescription);
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('4', $numbers));
         $oldfront = array(array_search('2', $numbers));
@@ -1784,9 +1783,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                                 ",2"->",0"[label=<<B>o: [ab] c:</B>>, color = blue, style = dotted];
                             }';
 
-        $origin = qtype_preg_fa_transition::ORIGIN_TRANSITION_SECOND;
-        $source = qtype_preg_fa::read_fa($sourcedescription);
-        $direct = qtype_preg_fa::read_fa($directdescription);
+        $origin = \qtype_preg\fa\transition::ORIGIN_TRANSITION_SECOND;
+        $source = \qtype_preg\fa\fa::read_fa($sourcedescription);
+        $direct = \qtype_preg\fa\fa::read_fa($directdescription);
         $numbers = $source->get_state_numbers();
         $stopcoping = array(array_search('0', $numbers));
         $oldfront = array(array_search('2', $numbers));
@@ -1819,7 +1818,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     2->3[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     1->2[label = <<B>o: [abc] c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -1840,7 +1839,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     0->1[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     1->3[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -1862,7 +1861,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     0->1[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     1->2[label = <<B>o: a c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -1885,7 +1884,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     0->1[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     1->2[label = <<B>o: a c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -1911,7 +1910,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     1->2[label = <<B>o: a c:</B>>, color = violet, penwidth = 2];
     3->4[label = <<B>o: [cd] c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -1937,7 +1936,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     1->4[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     4->5[label = <<B>o: [kmn] c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -1963,7 +1962,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     "1,2"->",3"[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     ",3"->",5"[label = <<B>o: [kmn] c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -1987,7 +1986,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     0->1[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     1->2[label = <<B>o: a c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -2012,7 +2011,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     0->1[label = <<B>o: [01] c:</B>>, color = violet, penwidth = 2];
     1->2[label = <<B>o: a c:</B>>, color = violet, penwidth = 2];
 }';
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -2045,7 +2044,7 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     3->1[label = <<B>o: [ab] c:</B>>, color = violet, penwidth = 2];
 }';
 
-        $input = qtype_preg_fa::read_fa($dotdescription);
+        $input = \qtype_preg\fa\fa::read_fa($dotdescription);
         $input->remove_unreachable_states();
         $inputdesc = $input->fa_to_dot(null, null, true);
         $this->assertEquals($inputdesc, $dotresult, 'Result automata is not equal to expected');
@@ -2069,10 +2068,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $lexer = $this->create_lexer('[a-z][cd]');
         $leaf1 = $lexer->nextToken()->value;
         $leaf2 = $lexer->nextToken()->value;
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1);  //0->1[label="[a-z]"];
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1);  //0->1[label="[cd]"];
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1);  //0->1[label="[a-z]"];
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1);  //0->1[label="[cd]"];
         $rescharset = $leaf1->intersect_leafs($leaf2, false, false);
-        $restran = new qtype_preg_fa_transition(0, $rescharset, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_INTER);
+        $restran = new \qtype_preg\fa\transition(0, $rescharset, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER);
         $resulttran = $transition1->intersect($transition2);
 
         $this->assertEquals($restran, $resulttran, 'Result transition is not equal to expected');
@@ -2081,10 +2080,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     public function test_intersecion_eps() {
         $leaf1 = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
         $leaf2 = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1);  //0->1[label="[]"];
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1);  //0->1[label="[]"];
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1);  //0->1[label="[]"];
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1);  //0->1[label="[]"];
         $resulttran = $transition1->intersect($transition2);
-        $restran = new qtype_preg_fa_transition(0, $leaf1, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_INTER);
+        $restran = new \qtype_preg\fa\transition(0, $leaf1, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER);
         $this->assertEquals($restran, $resulttran, 'Result transition is not equal to expected');
     }
 
@@ -2094,13 +2093,13 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $assert1 = new qtype_preg_leaf_assert_circumflex;
         $leaf2 = $lexer->nextToken()->value;
         $assert2 = new qtype_preg_leaf_assert_esc_a;
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1);  //0->1[label="[^a]"];
-        $transition1->mergedafter[] = new qtype_preg_fa_transition(0, $assert1, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1);  //0->1[label="[\\Aa-c]"];
-        $transition1->mergedafter[] = new qtype_preg_fa_transition(0, $assert2, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1);  //0->1[label="[^a]"];
+        $transition1->mergedafter[] = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1);  //0->1[label="[\\Aa-c]"];
+        $transition1->mergedafter[] = new \qtype_preg\fa\transition(0, $assert2, 1);
         $rescharset = $leaf1->intersect_leafs($leaf2, false, false);
-        $restran = new qtype_preg_fa_transition(0, $rescharset, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_INTER); //0->1[label="[\\Aa]"];
-        $restran->mergedafter[] = new qtype_preg_fa_transition(0, $assert2, 1);
+        $restran = new \qtype_preg\fa\transition(0, $rescharset, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER); //0->1[label="[\\Aa]"];
+        $restran->mergedafter[] = new \qtype_preg\fa\transition(0, $assert2, 1);
         $resulttran = $transition1->intersect($transition2);
         $this->assertEquals($restran, $resulttran, 'Result transition is not equal to expected');
     }
@@ -2112,13 +2111,13 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $assert1 = new qtype_preg_leaf_assert_circumflex;
         $assert2 = new qtype_preg_leaf_assert_dollar;
         $rescharset = $leaf1->intersect_leafs($leaf2, false, false);
-        $restran = new qtype_preg_fa_transition(0, $rescharset, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_INTER);  //0->1[label="[^$a]"];
-        $restran->mergedafter[] = new qtype_preg_fa_transition(0, $assert1, 1);
-        $restran->mergedbefore[] = new qtype_preg_fa_transition(0, $assert2, 1);
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1);   //0->1[label="[^a]"];
-        $transition1->mergedafter[] = new qtype_preg_fa_transition(0, $assert1, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1);   //0->1[label="[$a]"];
-        $transition2->mergedbefore[] = new qtype_preg_fa_transition(0, $assert2, 1);
+        $restran = new \qtype_preg\fa\transition(0, $rescharset, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER);  //0->1[label="[^$a]"];
+        $restran->mergedafter[] = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $restran->mergedbefore[] = new \qtype_preg\fa\transition(0, $assert2, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1);   //0->1[label="[^a]"];
+        $transition1->mergedafter[] = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1);   //0->1[label="[$a]"];
+        $transition2->mergedbefore[] = new \qtype_preg\fa\transition(0, $assert2, 1);
         $resulttran = $transition1->intersect($transition2);
         $this->assertEquals($restran, $resulttran, 'Result transition is not equal to expected');
     }
@@ -2127,13 +2126,13 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $lexer = $this->create_lexer('[a]');
         $leaf = $lexer->nextToken()->value;
         $assert = new qtype_preg_leaf_assert_circumflex;
-        $transition1 = new qtype_preg_fa_transition(0, $leaf, 1);   //0->1[label="[^a]"];
-        $transition1->mergedafter[] = new qtype_preg_fa_transition(0, $assert, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $leaf, 1);   //0->1[label="[a]"];
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf, 1);   //0->1[label="[^a]"];
+        $transition1->mergedafter[] = new \qtype_preg\fa\transition(0, $assert, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf, 1);   //0->1[label="[a]"];
         $rescharset = $leaf->intersect_leafs($leaf, false, false);
 
-        $restran = new qtype_preg_fa_transition(0, $rescharset, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_INTER);
-        $restran->mergedafter[] = new qtype_preg_fa_transition(0, $assert, 1);
+        $restran = new \qtype_preg\fa\transition(0, $rescharset, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER);
+        $restran->mergedafter[] = new \qtype_preg\fa\transition(0, $assert, 1);
         $resulttran = $transition1->intersect($transition2);        //0->1[label="[^a]"];
         $this->assertEquals($restran, $resulttran, 'Result transition is not equal to expected');
     }
@@ -2141,9 +2140,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     public function test_intersecion_unmerged_asserts() {
         $leaf1 = new qtype_preg_leaf_assert_circumflex;
         $leaf2 = new qtype_preg_leaf_assert_esc_a;
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1);  //0->1[label="[^]"];
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1);  //0->1[label="[\\A]"];
-        $restran = new qtype_preg_fa_transition(0, $leaf1, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_INTER);
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1);  //0->1[label="[^]"];
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1);  //0->1[label="[\\A]"];
+        $restran = new \qtype_preg\fa\transition(0, $leaf1, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER);
         $resulttran = $transition1->intersect($transition2);
         $this->assertEquals($restran, $resulttran, 'Result transition is not equal to expected');
     }
@@ -2151,9 +2150,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     public function test_intersecion_eps_and_assert() {
         $leaf1 = new qtype_preg_leaf_assert_circumflex;
         $leaf2 = $assert = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1);  //0->1[label="[^]"];
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1);  //0->1[label="[]"];
-        $restran = new qtype_preg_fa_transition(0, $leaf1, 1, qtype_preg_fa_transition::ORIGIN_TRANSITION_INTER);
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1);  //0->1[label="[^]"];
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1);  //0->1[label="[]"];
+        $restran = new \qtype_preg\fa\transition(0, $leaf1, 1, \qtype_preg\fa\transition::ORIGIN_TRANSITION_INTER);
         $resulttran = $transition1->intersect($transition2);
         $this->assertEquals($restran, $resulttran, 'Result transition is not equal to expected');
     }
@@ -2164,10 +2163,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $leaf2 = $lexer->nextToken()->value;
         $subpatt1 = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
         $subpatt2 = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1); //0->1[label="[(a-c)]"];
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1); //0->1[label="[(a-c)]"];
         $transition1->subpatt_start[] = $subpatt1;
         $transition1->subpatt_end[] = $subpatt2;
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1); //0->1[label="[(g-k)]"];
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1); //0->1[label="[(g-k)]"];
         $transition2->subpatt_start[] = $subpatt1;
         $transition2->subpatt_end[] = $subpatt2;
         $restran = null;
@@ -2183,8 +2182,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $assert = new qtype_preg_leaf_assert_circumflex;
         $leaf1->mergedassertions[] = $assert;
         $leaf2->mergedassertions[] = $assert;
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1); //0->1[label="[^a]"];
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1); //0->1[label="[^01]"];
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1); //0->1[label="[^a]"];
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1); //0->1[label="[^01]"];
         $restran = null;
 
         $resulttran = $transition1->intersect($transition2);
@@ -2197,8 +2196,8 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $leaf2 = $lexer->nextToken()->value;
         $assert = new qtype_preg_leaf_assert_circumflex;
         $leaf1->mergedassertions[] = $assert;
-        $transition1 = new qtype_preg_fa_transition(0, $leaf1, 1); //0->1[label="[^a]"];
-        $transition2 = new qtype_preg_fa_transition(0, $leaf2, 1); //0->1[label="[01]"];
+        $transition1 = new \qtype_preg\fa\transition(0, $leaf1, 1); //0->1[label="[^a]"];
+        $transition2 = new \qtype_preg\fa\transition(0, $leaf2, 1); //0->1[label="[01]"];
         $restran = null;
 
         $resulttran = $transition1->intersect($transition2);
@@ -2210,11 +2209,11 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     public function test_with_and_without_assert() {
         $assert1 = new qtype_preg_leaf_assert_circumflex;
         $assert2 = new qtype_preg_leaf_meta(qtype_preg_leaf_meta::SUBTYPE_EMPTY);
-        $transition1 = new qtype_preg_fa_transition(0, $assert1, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $assert2, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $assert2, 1);
         $result = $transition1->intersect_asserts($transition2);
         $resassert = new qtype_preg_leaf_assert_circumflex;
-        $resulttran = new qtype_preg_fa_transition(0, $resassert, 1);
+        $resulttran = new \qtype_preg\fa\transition(0, $resassert, 1);
         $this->assertEquals($resulttran, $result, 'Result assert is not equal to expected');
     }
 
@@ -2226,10 +2225,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $assert2 = new qtype_preg_leaf_assert_esc_a;
         $mergedassert2 = new qtype_preg_leaf_assert_esc_a;
         //$assert2->mergedassertions = array($assert2);
-        $transition1 = new qtype_preg_fa_transition(0, $assert1, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $assert2, 1);
-        $mergedtransition1 = new qtype_preg_fa_transition(0, $mergedassert1, 1);
-        $mergedtransition2 = new qtype_preg_fa_transition(0, $mergedassert2, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $assert2, 1);
+        $mergedtransition1 = new \qtype_preg\fa\transition(0, $mergedassert1, 1);
+        $mergedtransition2 = new \qtype_preg\fa\transition(0, $mergedassert2, 1);
         $transition1->mergedafter[] = $mergedtransition1;
         $transition2->mergedafter[] = $mergedtransition2;
         $result = $transition1->intersect_asserts($transition2);
@@ -2243,10 +2242,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
 
         $assert2 = new qtype_preg_leaf_assert_small_esc_z;
         $mergedassert2 = new qtype_preg_leaf_assert_small_esc_z;
-        $transition1 = new qtype_preg_fa_transition(0, $assert1, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $assert2, 1);
-        $mergedtransition1 = new qtype_preg_fa_transition(0, $mergedassert1, 1);
-        $mergedtransition2 = new qtype_preg_fa_transition(0, $mergedassert2, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $assert2, 1);
+        $mergedtransition1 = new \qtype_preg\fa\transition(0, $mergedassert1, 1);
+        $mergedtransition2 = new \qtype_preg\fa\transition(0, $mergedassert2, 1);
         $transition1->mergedbefore[] = $mergedtransition1;
         $transition2->mergedbefore[] = $mergedtransition2;
         $result = $transition1->intersect_asserts($transition2);
@@ -2264,17 +2263,17 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $mergedassert2 = new qtype_preg_leaf_assert_dollar;
         //$assert1->mergedassertions = array($mergedassert2);
 
-        $transition1 = new qtype_preg_fa_transition(0, $assert1, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $assert2, 1);
-        $mergedtransition1 = new qtype_preg_fa_transition(0, $mergedassert1, 1);
-        $mergedtransition2 = new qtype_preg_fa_transition(0, $mergedassert2, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $assert2, 1);
+        $mergedtransition1 = new \qtype_preg\fa\transition(0, $mergedassert1, 1);
+        $mergedtransition2 = new \qtype_preg\fa\transition(0, $mergedassert2, 1);
         $transition1->mergedafter[] = $mergedtransition1;
         $transition2->mergedbefore[] = $mergedtransition2;
         $result = $transition1->intersect_asserts($transition2);
 
         $assertresult = new qtype_preg_leaf_assert_dollar;
-        $resulttran = new qtype_preg_fa_transition(0, $assertresult, 1);
-        $resmergedtransition = new qtype_preg_fa_transition(0, $assert1, 1);
+        $resulttran = new \qtype_preg\fa\transition(0, $assertresult, 1);
+        $resmergedtransition = new \qtype_preg\fa\transition(0, $assert1, 1);
         $resulttran->mergedafter[] = $transition1;
         $resulttran->mergedafter[] = $mergedtransition1;
         $resulttran->mergedbefore[] = $mergedtransition2;
@@ -2286,10 +2285,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     public function test_esc_b_and_esc_a() {
         $assert1 = new qtype_preg_leaf_assert_esc_b;
         $assert2 = new qtype_preg_leaf_assert_esc_a;
-        $transition1 = new qtype_preg_fa_transition(0, $assert1, 1);
-        $transition2 = new qtype_preg_fa_transition(0, $assert2, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $assert1, 1);
+        $transition2 = new \qtype_preg\fa\transition(0, $assert2, 1);
         $assertresult = new qtype_preg_leaf_assert_esc_a;
-        $resulttran = new qtype_preg_fa_transition(0, $assertresult, 1);
+        $resulttran = new \qtype_preg\fa\transition(0, $assertresult, 1);
 
 
         $result = $transition1->intersect_asserts($transition2);
@@ -2299,9 +2298,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
     public function test_assert_with_backref() {
         $assert1 = new qtype_preg_leaf_assert_esc_a;
         $backref = new qtype_preg_leaf_backref();
-        $expected = new qtype_preg_fa_transition(0, $backref, 1);
-        $backreftran = new qtype_preg_fa_transition(0, clone $backref, 1);
-        $transition1 = new qtype_preg_fa_transition(0, $assert1, 1);
+        $expected = new \qtype_preg\fa\transition(0, $backref, 1);
+        $backreftran = new \qtype_preg\fa\transition(0, clone $backref, 1);
+        $transition1 = new \qtype_preg\fa\transition(0, $assert1, 1);
         $expected->mergedafter[] = $transition1;
 
         $result = $transition1->intersect_asserts($backreftran);
@@ -2339,14 +2338,14 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,0";
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotresult);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotresult);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array_search('0,0', $realnumbers);
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 0, false);
-        $result = qtype_preg_fa::read_fa($dotresult);
+        $result = \qtype_preg\fa\fa::read_fa($dotresult);
         $this->assertEquals($resultautomata, $result, 'Result automata is not equal to expected');
     }
 
@@ -2391,10 +2390,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,0"->"1,1"[label = <<B>o: [0-9] ∩ [01] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('2,3', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 1, false);
@@ -2441,10 +2440,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "2,2"->"2,2"[label = <<B>o: [a-c] ∩ [ab] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('1,0', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 0, false);
@@ -2493,10 +2492,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "1,1"->"2,2"[label = <<B>o: [ab] ∩ [ab] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('1,0', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 0, false);
@@ -2533,10 +2532,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,0"->"1,1"[label = <<B>o: a ∩ a c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('2,2', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 1, false);
@@ -2573,10 +2572,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,0"->"1,1"[label = <<B>o: a ∩ a c:</B><BR/>o: ^ c:(0,1)>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('2,2', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 1, false);
@@ -2611,10 +2610,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,2"[shape=rarrow];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('0,2', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 1, false);
@@ -2662,10 +2661,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "4,1"->"5,1"[label = <<B>o: [xy] ∩ [a-z] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('1,0', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 0, false);
@@ -2711,10 +2710,10 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "3,2"->"4,3"[label = <<B>o: [ab] ∩ [ab] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $direct = qtype_preg_fa::read_fa($dotdirect);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $direct = \qtype_preg\fa\fa::read_fa($dotdirect);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $direct->get_state_numbers();
         $startstate = array(array_search('1,0', $realnumbers));
         $resultautomata = $firstautomata->get_intersection_part($secondautomata, $direct, $startstate, 0, false);
@@ -2750,13 +2749,13 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                                 0->2[label=<<B>o: [-?] c:</B>>, color = blue];
                             }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('0', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 0);
-        $result = new qtype_preg_fa();
+        $result = new \qtype_preg\fa\fa();
         $this->assertEquals($resultautomata, $result, 'Result automata is not equal to expected');
     }
 
@@ -2793,9 +2792,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,0"->"1,1"[label = <<B>o: [0-9] ∩ [01] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('2', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 1);
@@ -2837,9 +2836,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "2,2"->"2,2"[label = <<B>o: [a-c] ∩ [ab] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('1', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 0);
@@ -2882,9 +2881,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "1,1"->"2,2"[label = <<B>o: [ab] ∩ [ab] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('1', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 0);
@@ -2915,13 +2914,13 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $dotresult = 'digraph res {
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('1', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 0);
-        $result = new qtype_preg_fa();
+        $result = new \qtype_preg\fa\fa();
         $this->assertEquals($resultautomata, $result, 'Result automata is not equal to expected');
     }
 
@@ -2944,13 +2943,13 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $dotresult = 'digraph res {
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('3', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 1);
-        $result = new qtype_preg_fa();
+        $result = new \qtype_preg\fa\fa();
         $this->assertEquals($resultautomata, $result, 'Result automata is not equal to expected');
     }
 
@@ -2976,9 +2975,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "2,1"->",2"[label = <<B>o: [a-z] c:</B>>, color = blue, penwidth = 2, style = dotted];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('1', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 0);
@@ -3025,9 +3024,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,0"->"1,1"[label = <<B>o: [0-9] ∩ [01] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('2', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 1);
@@ -3075,9 +3074,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "4,4   1"->"0,2"[label = <<B>o: [bc] ∩ [ab] c:</B>>, color = red, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('2', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 0);
@@ -3131,9 +3130,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                         "0,"->"1,0"[label = <<B>o: [ab] c:</B>>, color = violet, penwidth = 2];
                     }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
         $realnumbers = $firstautomata->get_state_numbers();
         $stateforinter = array_search('1', $realnumbers);
         $resultautomata = $firstautomata->intersect_fa($secondautomata, array($stateforinter), 1);
@@ -3190,9 +3189,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('2'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3235,9 +3234,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('2'), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3311,9 +3310,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('3'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3350,9 +3349,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('1'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3388,9 +3387,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('0'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3423,9 +3422,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('0'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3458,9 +3457,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('0'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3502,9 +3501,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('0'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3565,9 +3564,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('4'), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3620,9 +3619,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('5'), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3648,12 +3647,12 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
                                 1->2[label=<<B>o: [01] c:</B>>, color = blue];
                             }';
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('2'), 0);
-        $result = new qtype_preg_fa();
+        $result = new \qtype_preg\fa\fa();
         $this->assertEquals($result, $resultautomata, 'Result automata is not equal to expected');
     }
 
@@ -3694,9 +3693,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('2'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3746,9 +3745,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('0'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3795,9 +3794,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('4'), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3850,9 +3849,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('2'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3907,9 +3906,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('6'), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -3961,9 +3960,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('6'), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4016,9 +4015,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('0'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4076,9 +4075,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(4), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4126,9 +4125,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(1), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4176,9 +4175,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(5), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4259,9 +4258,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(2), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4305,9 +4304,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(7), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4359,9 +4358,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(6), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4435,9 +4434,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(7), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4551,9 +4550,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(5), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4595,9 +4594,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('2'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4668,11 +4667,11 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $origin = qtype_preg_fa_transition::ORIGIN_TRANSITION_SECOND;
+        $origin = \qtype_preg\fa\transition::ORIGIN_TRANSITION_SECOND;
 
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(1), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4717,9 +4716,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(1), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4775,9 +4774,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(2), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4836,9 +4835,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(4), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4933,9 +4932,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(2), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -4987,9 +4986,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(4), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -5048,9 +5047,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array(4), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -5275,9 +5274,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('5'), 0);
         $result = $resultautomata->fa_to_dot(null, null, true);
@@ -5560,9 +5559,9 @@ require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_matcher.php');
         $search = '
                     ';
         $replace = "\n";
-        $firstautomata = qtype_preg_fa::read_fa($dotdescription1);
-        $secondautomata = qtype_preg_fa::read_fa($dotdescription2);
-        $resultautomata = new qtype_preg_fa();
+        $firstautomata = \qtype_preg\fa\fa::read_fa($dotdescription1);
+        $secondautomata = \qtype_preg\fa\fa::read_fa($dotdescription2);
+        $resultautomata = new \qtype_preg\fa\fa();
 
         $resultautomata = $firstautomata->intersect($secondautomata, array('5'), 1);
         $result = $resultautomata->fa_to_dot(null, null, true);

@@ -102,11 +102,23 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             case qtype_preg_node::TYPE_LEAF_META:
             case qtype_preg_node::TYPE_LEAF_ASSERT:
             case qtype_preg_node::TYPE_LEAF_BACKREF:
-            case qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL:
             case qtype_preg_node::TYPE_LEAF_TEMPLATE:
             case qtype_preg_node::TYPE_NODE_TEMPLATE:
             case qtype_preg_node::TYPE_NODE_ERROR:
                 return true;
+            case qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL:
+                // Equivalence checking doesn't support subexpression recursion for now.
+                if ($this->get_options()->equivalencecheck && $pregnode->isrecursive) {
+                    $str = '';
+                    if ($pregnode->number == 0) { // Whole regex recursive call.
+                        $str = get_string('description_leaf_subexpr_call_all_recursive', 'qtype_preg');
+                    } else { // Particular subexpression recursive call.
+                        $str = get_string('description_leaf_subexpr_call_recursive', 'qtype_preg', $pregnode->number);
+                    }
+                    return $str;
+                } else {
+                    return true;
+                }
             default:
                 return get_string($pregnode->type, 'qtype_preg');
         }
@@ -308,8 +320,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
      */
     protected function epsilon_closure($startstates, $str, $addbacktracks) {
         $curstates = $startstates;
-        $result = array(qtype_preg_fa_transition::GREED_LAZY => array(),
-                        qtype_preg_fa_transition::GREED_GREEDY => $startstates
+        $result = array(\qtype_preg\fa\transition::GREED_LAZY => array(),
+                        \qtype_preg\fa\transition::GREED_GREEDY => $startstates
                         );
         while (!empty($curstates)) {
             // Get the current state and iterate over all transitions.
@@ -342,12 +354,12 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                 // Resolve ambiguities if any.
                 $number = $newstate->state();
-                $key = $transition->greediness == qtype_preg_fa_transition::GREED_LAZY
-                     ? qtype_preg_fa_transition::GREED_LAZY
-                     : qtype_preg_fa_transition::GREED_GREEDY;
+                $key = $transition->greediness == \qtype_preg\fa\transition::GREED_LAZY
+                     ? \qtype_preg\fa\transition::GREED_LAZY
+                     : \qtype_preg\fa\transition::GREED_GREEDY;
                 if (!isset($result[$key][$number]) || $newstate->leftmost_longest($result[$key][$number])) {
                     $result[$key][$number] = $newstate;
-                    if ($key != qtype_preg_fa_transition::GREED_LAZY) {
+                    if ($key != \qtype_preg\fa\transition::GREED_LAZY) {
                         $curstates[] = $newstate;
                     }
                 }
@@ -377,7 +389,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 continue;
             }
             $closure = $this->epsilon_closure(array($laststate->state() => $laststate), $str, false);
-            $closure = array_merge($closure[qtype_preg_fa_transition::GREED_LAZY], $closure[qtype_preg_fa_transition::GREED_GREEDY]);
+            $closure = array_merge($closure[\qtype_preg\fa\transition::GREED_LAZY], $closure[\qtype_preg\fa\transition::GREED_GREEDY]);
             foreach ($closure as $curclosure) {
                 if (in_array($curclosure->state(), $endstates)) {
                     // The end state is reachable; return it immediately.
@@ -486,7 +498,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
         // Get an epsilon-closure of the resume state.
         $closure = $this->epsilon_closure(array($resumestate->state() => $resumestate), $str, false);
-        $closure = array_merge($closure[qtype_preg_fa_transition::GREED_LAZY], $closure[qtype_preg_fa_transition::GREED_GREEDY]);
+        $closure = array_merge($closure[\qtype_preg\fa\transition::GREED_LAZY], $closure[\qtype_preg\fa\transition::GREED_GREEDY]);
         foreach ($closure as $curclosure) {
             $states[$curclosure->state()] = $curclosure;
             $curstates[] = $curclosure->state();
@@ -553,7 +565,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             }
 
             $reached = $this->epsilon_closure($reached, $str, false);
-            $reached = array_merge($reached[qtype_preg_fa_transition::GREED_LAZY], $reached[qtype_preg_fa_transition::GREED_GREEDY]);
+            $reached = array_merge($reached[\qtype_preg\fa\transition::GREED_LAZY], $reached[\qtype_preg\fa\transition::GREED_GREEDY]);
 
             // Replace curstates with reached.
             foreach ($reached as $curstate) {
@@ -649,7 +661,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                             // Save the current match.
                             if (!$skip) {
-                                if ($transition->greediness == qtype_preg_fa_transition::GREED_LAZY) {
+                                if ($transition->greediness == \qtype_preg\fa\transition::GREED_LAZY) {
                                     $lazystates[] = $newstate;
                                 } else {
                                     //echo "add state {$newstate->state()}\n";
@@ -746,8 +758,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         }
 
         $closure = $this->epsilon_closure($reached, $str, true);
-        $lazystates = $closure[qtype_preg_fa_transition::GREED_LAZY];
-        $closure = $closure[qtype_preg_fa_transition::GREED_GREEDY];
+        $lazystates = $closure[\qtype_preg\fa\transition::GREED_LAZY];
+        $closure = $closure[\qtype_preg\fa\transition::GREED_GREEDY];
 
         foreach ($closure as $state) {
             $states['0'][$state->state()] = $state;
@@ -827,7 +839,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                             // Save the current result.
                             if (!$skip) {
-                                if ($transition->greediness == qtype_preg_fa_transition::GREED_LAZY) {
+                                if ($transition->greediness == \qtype_preg\fa\transition::GREED_LAZY) {
                                     $lazystates[] = $newstate;
                                 } else {
                                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
@@ -859,8 +871,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
             foreach ($reached as $recursionlevel => $reachedforlevel) {
                 $reached[$recursionlevel] = $this->epsilon_closure($reachedforlevel, $str, true);
-                $lazystates = array_merge($lazystates, $reached[$recursionlevel][qtype_preg_fa_transition::GREED_LAZY]);
-                $reached[$recursionlevel] = $reached[$recursionlevel][qtype_preg_fa_transition::GREED_GREEDY];
+                $lazystates = array_merge($lazystates, $reached[$recursionlevel][\qtype_preg\fa\transition::GREED_LAZY]);
+                $reached[$recursionlevel] = $reached[$recursionlevel][\qtype_preg\fa\transition::GREED_GREEDY];
             }
 
 
@@ -1086,10 +1098,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
     /**
      * Constructs an FA corresponding to the given node.
-     * @return - object of qtype_preg_fa in case of success, null otherwise.
+     * @return - object of \qtype_preg\fa\fa in case of success, null otherwise.
      */
     public function build_fa($dstnode, $mergeassertions = false) {
-        $result = new qtype_preg_fa($this, $this->get_nodes_with_subexpr_refs());
+        $result = new \qtype_preg\fa\fa($this, $this->get_nodes_with_subexpr_refs());
 
         $stack = array();
         $dstnode->create_automaton($result, $stack, $mergeassertions);
@@ -1137,7 +1149,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
             }
         }
-        
+
         //$result->fa_to_dot('svg', "/home/elena/fa_1.svg");
         return $result;
     }

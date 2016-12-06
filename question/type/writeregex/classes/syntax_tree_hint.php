@@ -1,5 +1,5 @@
 <?php
-// This file is part of WriteRegex question type - https://code.google.com/p/oasychev-moodle-plugins/
+// This file is part of WriteRegex question type - https://bitbucket.org/oasychev/moodle-plugins
 //
 // WriteRegex is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,8 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_writeregex;
+
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_syntax_tree_tool.php');
+
 /**
- * Class analyser fot compare regex.
+ * Class for writeregex syntax tree hint.
  *
  * @package qtype
  * @subpackage writeregex
@@ -23,26 +30,27 @@
  * @author Mikhail Navrotskiy <m.navrotskiy@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class compare_regex_analyzer {
-
-    /** @var  object Question object. */
-    protected $question;
+class syntax_tree_hint extends hint {
 
     /**
-     * Init analyzer object.
-     * @param $question object Question object.
+     * Get hint title.
+     * @return string hint title.
      */
-    public function __construct($question) {
-
+    public function hint_title() {
+        return get_string('syntaxtreehinttype', 'qtype_writeregex');
     }
 
     /**
-     * Get equality for user response.
-     * @param $answer string Regex answer.
-     * @param $respose string User response.
-     * @return float Value of compare.
+     * @return string key for lang strings and field names
      */
-    public function get_equality ($answer, $respose) {
-        return 0;
+    public function short_key() {
+        return 'syntaxtree';
+    }
+
+    /**
+     * @return qtype_preg_authoring_tool tool used for hint
+     */
+    public function tool($regex) {
+        return new \qtype_preg_syntax_tree_tool($regex, $this->get_regex_options());
     }
 }

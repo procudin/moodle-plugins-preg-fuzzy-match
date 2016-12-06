@@ -46,6 +46,28 @@ function xmldb_qtype_writeregex_upgrade($oldversion = 0) {
         upgrade_plugin_savepoint(true, 2014022400, 'qtype', 'writeregex');
     }
 
+    if ($oldversion < 2015121700) {
+
+        // Rename field compareregexpercentage on table qtype_writeregex_options to comparetreepercentage.
+        $table = new xmldb_table('qtype_writeregex_options');
+        $field = new xmldb_field('compareregexpercentage', XMLDB_TYPE_FLOAT, '12, 7', null,
+            XMLDB_NOTNULL, null, null, 'teststringshintpenalty');
+
+        // Launch rename field compareregexpercentage.
+        $dbman->rename_field($table, $field, 'comparetreepercentage');
+
+        // Rename field compareregexpteststrings on table qtype_writeregex_options to comparestringspercentage.
+        $table = new xmldb_table('qtype_writeregex_options');
+        $field = new xmldb_field('compareregexpteststrings', XMLDB_TYPE_FLOAT, '12, 7', null,
+            XMLDB_NOTNULL, null, null, 'compareautomatapercentage');
+
+        // Launch rename field compareregexpteststrings.
+        $dbman->rename_field($table, $field, 'comparestringspercentage');
+
+        // Writeregex savepoint reached.
+        upgrade_plugin_savepoint(true, 2015121700, 'qtype', 'writeregex');
+    }
+
     return true;
 
 }

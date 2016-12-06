@@ -592,6 +592,13 @@ class qtype_preg_regex_handler {
         return $output;
     }
 
+    public function get_regex_string() {
+        if ($this->is_node_generated($this->get_dst_root())) {
+            return $this->get_dst_root()->operands[1]->operands[0]->get_regex_string();
+        }
+        return $this->get_dst_root()->get_regex_string();
+    }
+
     /**
      * Returns the infix for DST node names which are named like 'qtype_preg_' . $infix . '_' . $pregnodename.
      * Should be overloaded in child classes.
