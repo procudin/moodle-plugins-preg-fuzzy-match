@@ -24,13 +24,13 @@
  */
  
 $plugin->component = 'qbehaviour_adaptivehints';
-$plugin->version  = 2015033000;
-$plugin->requires = 2014111000;
-$plugin->release = 'Adaptive with hints behaviour 2.8';
+$plugin->version  = 2016120500;
+$plugin->requires = 2015111600;
+$plugin->release = 'Adaptive with hints behaviour 3.0';
 $plugin->maturity = MATURITY_STABLE;
 
 $plugin->dependencies = array(
-    'qbehaviour_adaptive' => 2014111000,
-    'qtype_poasquestion' => 2015033000
+    'qbehaviour_adaptive' => 2015111600,
+    'qtype_poasquestion' => 2016120500
 );
 ?>

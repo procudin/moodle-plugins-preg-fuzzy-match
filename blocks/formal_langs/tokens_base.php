@@ -22,7 +22,7 @@
  * @author     Oleg Sychev, Mamontov Dmitriy, Maria Birukova
  * @license    http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
-require_once($CFG->dirroot.'/question/type/poasquestion/classes/string.php');
+require_once($CFG->dirroot.'/question/type/poasquestion/classes/utf8_string.php');
 require_once($CFG->dirroot.'/question/type/poasquestion/stringstream/stringstream.php');
 require_once($CFG->dirroot.'/blocks/formal_langs/descriptions/descriptionrule.php');
 
@@ -354,16 +354,6 @@ class block_formal_langs_ast_node_base {
         }
         return $result;
     }
-}
-
-/**
- * Class for options, controlling strings comparison process.
- */
-class block_formal_langs_comparing_options {
-    /**
-     * @var bool true if comparing is case sensitive, false if insensitive
-     */
-    public $usecase;
 }
 
 /**

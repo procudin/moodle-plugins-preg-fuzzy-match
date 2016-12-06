@@ -103,13 +103,18 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
      * @param MoodleQuickForm $mform the form being built.
      */
     protected function definition_inner($mform) {
-        global $CFG, $COURSE;
+        global $CFG, $COURSE, $PAGE;
 
         question_bank::load_question_definition_classes($this->qtype());
         $qtypeclass = 'qtype_'.$this->qtype();
         $qtype = new $qtypeclass;
 
         $engines = $qtype->available_engines();
+
+        $PAGE->requires->js('/question/type/poasquestion/ui-bootstrap/ui-bootstrap-tpls.min.js');
+        $PAGE->requires->js('/question/type/poasquestion/bootstrap/js/bootstrap.min.js');
+        $PAGE->requires->js('/question/type/poasquestion/bootstrap/js/bootstrap-tooltip.js');
+
         $mform->addElement('select', 'engine', get_string('engine', 'qtype_preg'), $engines);
         $mform->setDefault('engine', $CFG->qtype_preg_defaultengine);
         $mform->addHelpButton('engine', 'engine', 'qtype_preg');
@@ -233,8 +238,8 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
             if ($trimmedanswer !== '') {
                 $hintused = ($data['usecharhint'] || $data['uselexemhint']) && $fractions[$key] >= $data['hintgradeborder'];
                 // Create matcher to check regex for errors and try to match correct answer.
-                $matcher = $questionobj->get_matcher($data['engine'], $trimmedanswer, $data['exactmatch'],
-                        $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation'], $hintused);
+                $options = $questionobj->get_matching_options($data['exactmatch'], $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation']);
+                $matcher = $questionobj->get_matcher($data['engine'], $trimmedanswer, $options, (-1)*$i, $hintused);
                 if ($matcher->errors_exist()) {// There were errors in the matching process.
                     $regexerrors = $matcher->get_error_messages();// Show no more than max errors.
                     $errors['answer['.$key.']'] = '';

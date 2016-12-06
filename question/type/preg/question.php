@@ -153,8 +153,8 @@ class qtype_preg_question extends question_graded_automatically
                 if ($answer->fraction >= $hintgradeborder) {
                     $bestfitanswer = $answer;
                     $hintneeded = ($this->usecharhint || $this->uselexemhint);// We already know that $answer->fraction >= $hintgradeborder.
-                    $matcher = $this->get_matcher($this->engine, $answer->answer, $this->exactmatch, $this->get_modifiers($this->usecase),
-                                                    $answer->id, $this->notation, $hintneeded);
+                    $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation);
+                    $matcher = $this->get_matcher($this->engine, $answer->answer, $options, $answer->id, $hintneeded);
                     $bestmatchresult = $matcher->match($response['answer']);
                     if ($knowleftcharacters) {
                         $maxfitness = (-1)*$bestmatchresult->left;
@@ -165,14 +165,16 @@ class qtype_preg_question extends question_graded_automatically
                 }
             }
         } else {// Just use first answer and not bother with maxfitness. But we still should fill $bestmatchresults from matcher to correctly fill matching results arrays.
-            $matcher = $this->get_matcher($this->engine, $bestfitanswer->answer, $this->exactmatch, $this->get_modifiers($this->usecase), $bestfitanswer->id, $this->notation);
+            $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $bestfitanswer->id, $this->notation);
+            $matcher = $this->get_matcher($this->engine, $bestfitanswer->answer, $options, $bestfitanswer->id);
             $bestmatchresult = $matcher->match($response['answer']);
         }
 
         // fitness = (the number of correct letters in response) or  (-1)*(the number of letters left to complete response) so we always look for maximum fitness.
         foreach ($this->answers as $answer) {
             $hintneeded = ($this->usecharhint || $this->uselexemhint) && $answer->fraction >= $hintgradeborder;
-            $matcher = $this->get_matcher($this->engine, $answer->answer, $this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation, $hintneeded);
+            $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation);
+            $matcher = $this->get_matcher($this->engine, $answer->answer, $options, $answer->id, $hintneeded);
             $matchresults = $matcher->match($response['answer']);
 
             // Check full match.
@@ -252,42 +254,53 @@ class qtype_preg_question extends question_graded_automatically
     }
 
     /**
-     * Create or get suitable matcher object for given engine, regex and options.
-     * @param engine string engine name
-     * @param regex string regular expression to match
+     * Create matcher options object for given arguments. Options can be changed later.
      * @param $exact bool exact matching mode
      * @param $modifiers string modifiers for regular expression, use @link get_modifiers to get it
      * @param $answerid integer answer id for this regex, null for cases where id is unknown - no cache
      * @param $notation string notation, in which regex is written
+     * @return matching options object
+     */
+    public function get_matching_options($exact = false, $modifiers = 0, $answerid = null, $notation = 'native') {
+        global $CFG;
+        // Create and fill options object.
+        $matchingoptions = new qtype_preg_matching_options();
+        $matchingoptions->modifiers = $modifiers;
+
+        // We need extension to hint next character or to generate correct answer if none is supplied.
+        $matchingoptions->extensionneeded = $this->usecharhint || $this->uselexemhint || trim($this->correctanswer) == '';
+        if ($answerid !== null && $answerid > 0) {
+            $feedback = $this->answers[$answerid]->feedback;
+            if (strpos($feedback, '{$') === false || strpos($feedback, '}') === false) {// No placeholders for subexpressions in feedback.
+                $matchingoptions->capturesubexpressions = false;
+            }
+        }
+
+        $matchingoptions->notation = $notation;
+        $matchingoptions->exactmatch = $exact;
+        if(! is_null($CFG->qtype_preg_assertfailmode)) {
+            $matchingoptions->mergeassertions = $CFG->qtype_preg_assertfailmode;
+        }
+
+        return $matchingoptions;
+    }
+
+    /**
+     * Create or get suitable matcher object for given engine, regex and options.
+     * @param engine string engine name
+     * @param regex string regular expression to match
+     * @param $matchingoptions object matching options
+     * @param $answerid integer answer id for this regex, null for cases where id is unknown - no cache
      * @param $hintpossible boolean whether hint possible for specified answer
      * @return matcher object
      */
-    public function &get_matcher($engine, $regex, $exact = false, $modifiers = 0, $answerid = null, $notation = 'native', $hintpossible = true) {
+    public function &get_matcher($engine, $regex, $matchingoptions, $answerid = null, $hintpossible = true) {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/preg/'.$engine.'/'.$engine.'.php');
 
         if ($answerid !== null && array_key_exists($answerid, $this->matchers_cache)) {// Could use cache.
             $matcher = $this->matchers_cache[$answerid];
         } else {// Create and store matcher object.
-
-            // Create and fill options object.
-            $matchingoptions = new qtype_preg_matching_options();
-            $matchingoptions->modifiers = $modifiers;
-
-            // We need extension to hint next character or to generate correct answer if none is supplied.
-            $matchingoptions->extensionneeded = $this->usecharhint || $this->uselexemhint || trim($this->correctanswer) == '';
-            if ($answerid !== null && $answerid > 0) {
-                $feedback = $this->answers[$answerid]->feedback;
-                if (strpos($feedback, '{$') === false || strpos($feedback, '}') === false) {// No placeholders for subexpressions in feedback.
-                    $matchingoptions->capturesubexpressions = false;
-                }
-            }
-
-            $matchingoptions->notation = $notation;
-            $matchingoptions->exactmatch = $exact;
-            if(! is_null($CFG->qtype_preg_assertfailmode)) {
-                $matchingoptions->mergeassertions = $CFG->qtype_preg_assertfailmode;
-            }
 
             $engineclass = 'qtype_preg_'.$engine;
             $matcher = new $engineclass($regex, $matchingoptions);

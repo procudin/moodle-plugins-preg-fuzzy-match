@@ -2610,7 +2610,7 @@ class poasassignment_model {
     public static function add_admin_plugin_settings($subtype, $admin, $settings, $module) {
         global $CFG;
 
-        $plugins = get_plugin_list_with_file($subtype, 'settings.php', false);
+        $plugins = core_component::get_plugin_list_with_file($subtype, 'settings.php', false);
         $pluginsbyname = array();
         foreach ($plugins as $plugin => $plugindir) {
             $pluginname = get_string('pluginname', $subtype . '_'.$plugin);
