@@ -38,7 +38,7 @@ class qtype_preg_collapsible_info_block extends MoodleQuickForm_textarea {
     public function qtype_preg_collapsible_info_block() {
         global $PAGE;
 
-        parent::MoodleQuickForm_textarea();
+        parent::__construct();
 
 //        $this->buttonName = $buttonName;
 //        $this->linkToPage = $elementLinks['link_to_page'];
