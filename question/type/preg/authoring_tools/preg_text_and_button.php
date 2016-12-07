@@ -48,7 +48,7 @@ class qtype_preg_text_and_button extends qtype_poasquestion_text_and_button {
         );
         $dialogWidth = '90%';
 
-        parent::qtype_poasquestion_text_and_button($textareaName, $textareaLabel, $attributes, $buttonName, $elementLinks, $dialogWidth);
+        parent::__construct($textareaName, $textareaLabel, $attributes, $buttonName, $elementLinks, $dialogWidth);
 
         if (!self::$_preg_authoring_tools_script_included) {
             $jsmodule = array(
