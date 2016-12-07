@@ -47,7 +47,7 @@ class qtype_preg_authoring_form extends moodleform {
     function __construct($isblock = false) {
         $this->isblock = $isblock;
         $attributes = array('id' => 'mformauthoring');
-        parent::moodleform(null, null, 'post', '', $attributes);
+        parent::__construct(null, null, 'post', '', $attributes);
     }
 
     //Add elements to form
