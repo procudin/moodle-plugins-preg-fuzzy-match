@@ -51,11 +51,11 @@ class qtype_poasquestion_text_and_button extends MoodleQuickForm_textarea {
      * @param string $buttonName (optional) name of the button
      * @param array $elementLinks (optional) link on button image and link on new page
      */
-    public function qtype_poasquestion_text_and_button($textareaName = null, $textareaLabel = null, $attributes = null,
+    public function __construct($textareaName = null, $textareaLabel = null, $attributes = null,
                                                        $buttonName = null, $elementLinks = null, $dialogWidth = null) {
         global $PAGE;
 
-        parent::MoodleQuickForm_textarea($textareaName, $textareaLabel, $attributes);
+        parent::__construct($textareaName, $textareaLabel, $attributes);
 
         $this->buttonName = $buttonName;
         $this->linkToPage = $elementLinks['link_to_page'];
