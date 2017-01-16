@@ -69,7 +69,7 @@ function qtype_preg_get_json_array() {
 
     $options->foldcoords = $foldcoords;
     $options->treeisfold = $treeisfold;
-
+    /*
     $stooloptions = new qtype_preg_simplification_tool_options();
     $stooloptions->engine = $engine;
     $stooloptions->notation = $notation;
@@ -86,9 +86,9 @@ function qtype_preg_get_json_array() {
         $options->selection = new qtype_preg_position(-2, -2);
         $stooloptions->exactmatch = $exactmatch;
     }
-
+    */
     $tools = array(
-        'simplification' => new qtype_preg_simplification_tool($regex, $stooloptions),
+        //'simplification' => new qtype_preg_simplification_tool($regex, $stooloptions),
         'tree' => new qtype_preg_syntax_tree_tool($regex, $options),
         'graph' => new qtype_preg_explaining_graph_tool($regex, $options),
         'description' => new qtype_preg_description_tool($regex, $options)
