@@ -8,7 +8,8 @@ $plugins = array(
             'jquerymodule/jquery.panzoom.js',
             'jquerymodule/jquery-textrange.js',
             'jquerymodule/jquery.mousewheel.js',
-            'jquerymodule/jquery.textarea-highlighter.js'
+            'jquerymodule/jquery.textarea-highlighter.js',
+			'jquerymodule/jquery.scrollstop.js',
         ),
      ),
 );
