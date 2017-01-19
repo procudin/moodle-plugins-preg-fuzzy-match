@@ -115,6 +115,8 @@ M.preg_authoring_tools_script = (function ($) {
                         M.form.shortforms({"formid":"mformauthoring"}); // TODO - find native way to init headers collapce functionatily
                     }
 
+
+
                     // Remove the "skip to main content" link.
                     $(self.textbutton_widget.dialog).find('.skiplinks').remove();
 
@@ -156,6 +158,9 @@ M.preg_authoring_tools_script = (function ($) {
                     $( window ).resize(self.resize_handler);
                     self.resize_handler();
 
+                    $( window ).scroll(self.disable_panzooms);
+                    $( window ).on("scrollstop", self.enable_panzooms);
+
                     self.panzooms.init();
                     options.oneachpresscallback();
                 });
@@ -195,6 +200,16 @@ M.preg_authoring_tools_script = (function ($) {
         };
 
         self.textbutton_widget.setup(options);
+    },
+
+    disable_panzooms : function() {
+        self.panzooms.disable_graph();
+        self.panzooms.disable_tree();
+    },
+
+    enable_panzooms : function() {
+        self.panzooms.enable_graph();
+        self.panzooms.enable_tree();
     },
 
     is_changed : function() {
