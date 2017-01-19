@@ -9,7 +9,7 @@ $plugins = array(
             'jquerymodule/jquery-textrange.js',
             'jquerymodule/jquery.mousewheel.js',
             'jquerymodule/jquery.textarea-highlighter.js',
-			'jquerymodule/jquery.scrollstop.js',
+            'jquerymodule/jquery.scrollstop.js',
         ),
      ),
 );
