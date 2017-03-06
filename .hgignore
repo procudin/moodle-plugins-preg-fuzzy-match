@@ -1,0 +1,3 @@
+syntax: regexp
+
+(^(?!(question\/type\/preg|question\/type\/writeregex)/)[^/]+/)|(^(?!/).*)
