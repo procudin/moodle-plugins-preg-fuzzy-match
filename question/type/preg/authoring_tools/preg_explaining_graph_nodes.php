@@ -229,10 +229,13 @@ class qtype_preg_explaining_graph_leaf_charset extends qtype_preg_explaining_gra
     }
 
     public function get_shape() {
+        if ($this->pregnode->negative) {
+            return 'record';
+        }
         if (count($this->pregnode->errors) > 0 || $this->pregnode->is_single_flag()) {
             return 'ellipse';
         }
-        if ($this->pregnode->negative || $this->is_complex_charset()) {
+        if ($this->is_complex_charset()) {
             return 'record';
         }
         return 'ellipse';
