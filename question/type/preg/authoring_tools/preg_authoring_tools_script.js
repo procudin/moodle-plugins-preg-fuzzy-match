@@ -412,6 +412,80 @@ M.preg_authoring_tools_script = (function ($) {
             self.load_strings(indfirst, indlast);
         }
     },
+    //get the index(position) of node from attribute
+    get_id_node: function(current_node){
+        var temp=current_node.id.split(/_/);
+        if (temp[0]=="description"){
+            return temp;
+
+        }
+        else{
+            temp=current_node.parentNode.id.split(/_/);
+
+            return temp;
+        }
+    },
+        //get the high from root to node
+    get_high_node: function (current_node) {
+        var tmp=self.get_id_node(current_node);
+        var high_node=1;
+        while (tmp[2]!=1){
+            current_node=current_node.parentNode;
+            tmp=self.get_id_node(current_node);
+            high_node++;
+        }
+        return high_node;
+
+    },
+        //get the lowest common ancestor of 2 nodes u and v
+    get_LCA: function(u,v){
+
+        if (self.get_high_node(u)>self.get_high_node(v)){
+            while (self.get_high_node(u)>self.get_high_node(v)){
+                u=u.parentNode;
+            }
+        }
+        else{
+            while (self.get_high_node(u)<self.get_high_node(v)){
+                v=v.parentNode;
+            }
+        }
+
+        while (u.parentNode!=v.parentNode){
+            u=u.parentNode;
+            v=v.parentNode;
+
+        }
+
+        return {first: u,last: v};
+
+
+    },
+
+        //take the part of regular expression from the selection description text
+    description_node_clicked: function(e){
+
+        e.preventDefault(); // TODO - joining many times when panning
+
+        if (window.getSelection) {
+
+            var part_select_mouse = window.getSelection();
+            var anchorNode = part_select_mouse.anchorNode.parentNode,
+                focusNode = part_select_mouse.focusNode.parentNode;
+            var tmp_first, tmp_last;
+
+            var couple_node = self.get_LCA(anchorNode, focusNode);
+
+
+            tmp_first = self.get_id_node(couple_node.first);
+            tmp_last = self.get_id_node(couple_node.last);
+            var indfirst = tmp_first[3],
+                indlast = tmp_last[4];
+            self.load_content(indfirst, indlast, null, null);
+            self.load_strings(indfirst, indlast);
+
+        }
+    },
 
     tree_node_misclicked : function (e) {
         e.preventDefault(); // TODO - joining many times when panning
@@ -696,6 +770,7 @@ M.preg_authoring_tools_script = (function ($) {
 
         if (typeof d != 'undefined') {
             self.desc_hnd().html(d);
+            self.desc_hnd().mouseup(self.description_node_clicked);
         }
 
         var length =  indlast - indfirst + 1;
@@ -1113,6 +1188,7 @@ M.preg_authoring_tools_script = (function ($) {
         $("svg .node", self.tree_img()).unbind('click', self.tree_node_clicked);
         self.graph_img().unbind('click', self.graph_node_misclicked);
         $("svg .node", self.graph_img()).unbind('click', self.graph_node_clicked); // TODO - idea says that this is bad :c
+        self.desc_hnd().unbind('mouseup',self.description_node_clicked); 
 
         // Check the cache.
         var k = self.cache_key_for_explaining_tools(indfirst, indlast);

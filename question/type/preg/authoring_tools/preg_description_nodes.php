@@ -142,7 +142,7 @@ abstract class qtype_preg_description_node {
         $stylestr = $bgclor!==null ? 'background: ' . $bgclor : '';
 
         $result = qtype_poasquestion\utf8_string::replace('%content', $s, $numbering_pattern);
-        $result = qtype_poasquestion\utf8_string::replace('%idclass', 'description_node_'.$this->pregnode->id, $result);
+        $result = qtype_poasquestion\utf8_string::replace('%idclass', 'description_node_'.$this->pregnode->id.'_'.$this->pregnode->position->indfirst.'_'.$this->pregnode->position->indlast, $result);
         $result = qtype_poasquestion\utf8_string::replace('%optionalclassesdevider', $classesstrdivider, $result);
         $result = qtype_poasquestion\utf8_string::replace('%optionalclasses', $classesstr, $result);
         $result = qtype_poasquestion\utf8_string::replace('%style', $stylestr, $result);
