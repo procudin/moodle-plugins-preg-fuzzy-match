@@ -223,7 +223,7 @@ class qtype_preg_description_tool extends qtype_preg_authoring_tool {
      * Calling default description() with default params
      */
     public function default_description() {
-        return $this->description('<span class="%idclass%optionalclassesdevider%optionalclasses" style="%style" >%content</span>', '<span style="background: white">%content</span>');
+        return $this->description('<span id="%idclass%optionalclassesdevider%optionalclasses" class="description" style="%style" >%content</span>', '<span style="background: white">%content</span>');
     }
 
     /**
