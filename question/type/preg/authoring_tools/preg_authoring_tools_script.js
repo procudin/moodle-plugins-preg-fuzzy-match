@@ -412,8 +412,18 @@ M.preg_authoring_tools_script = (function ($) {
             self.load_strings(indfirst, indlast);
         }
     },
+
+    check_keyword: function (current_node) {
+        var temp=current_node.id.split(/_/);
+        if (temp[0]=="description") {
+            return true;
+        }
+        else{
+            return false;
+        }
+    },
     //get the index(position) of node from attribute
-    get_id_node: function(current_node){
+    get_id_node: function(current_node) {
         var temp=current_node.id.split(/_/);
         if (temp[0]=="description"){
             return temp;
@@ -472,6 +482,30 @@ M.preg_authoring_tools_script = (function ($) {
             var part_select_mouse = window.getSelection();
             var anchorNode = part_select_mouse.anchorNode.parentNode,
                 focusNode = part_select_mouse.focusNode.parentNode;
+
+            //delete unwanted space at the start and end of the text
+            var length_text_anchorNode =part_select_mouse.anchorNode.nodeValue.toString().length;
+            var text_selected_mouse=part_select_mouse.toString();
+            var textRange=part_select_mouse.getRangeAt(0);
+
+            if (self.check_keyword(anchorNode) && text_selected_mouse[0]==" "&&part_select_mouse.anchorOffset==length_text_anchorNode-1) {
+                textRange.setStartAfter(textRange.startContainer);
+                part_select_mouse.removeAllRanges();
+                part_select_mouse.addRange(textRange);
+            }
+
+
+            var length_text=text_selected_mouse.length;
+            if (self.check_keyword(focusNode) && text_selected_mouse[length_text-1]==" "&&part_select_mouse.focusOffset==1) {
+                textRange.setEndBefore(textRange.endContainer);
+                part_select_mouse.removeAllRanges();
+                part_select_mouse.addRange(textRange);
+            }
+
+            //get the coordinate 
+            anchorNode = part_select_mouse.anchorNode.parentNode;
+            focusNode = part_select_mouse.focusNode.parentNode;
+
             var tmp_first, tmp_last;
 
             var couple_node = self.get_LCA(anchorNode, focusNode);
