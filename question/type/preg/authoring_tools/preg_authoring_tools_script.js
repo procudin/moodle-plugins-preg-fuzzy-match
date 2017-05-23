@@ -485,24 +485,51 @@ M.preg_authoring_tools_script = (function ($) {
 
             //delete unwanted space at the start and end of the text
             var length_text_anchorNode =part_select_mouse.anchorNode.nodeValue.toString().length;
+            var length_text_focusNode =part_select_mouse.focusNode.nodeValue.toString().length;
             var text_selected_mouse=part_select_mouse.toString();
             var textRange=part_select_mouse.getRangeAt(0);
 
+            var length_text=text_selected_mouse.length;
+            
+            //mouse from right to left
+            //check anchor node
+            if (self.check_keyword(anchorNode) && text_selected_mouse[length_text-1]==" "&&part_select_mouse.anchorOffset==1) {
+                textRange.setEndBefore(textRange.endContainer);
+                part_select_mouse.removeAllRanges();
+                part_select_mouse.addRange(textRange);
+                text_selected_mouse = part_select_mouse.toString();
+                length_text = text_selected_mouse.length;
+                length_text_anchorNode = part_select_mouse.anchorNode.nodeValue.toString().length;
+                length_text_focusNode = part_select_mouse.focusNode.nodeValue.toString().length;
+            }
+            //check focus node
+            if (self.check_keyword(focusNode) && text_selected_mouse[0]==" "&&part_select_mouse.focusOffset==length_text_focusNode-1){
+                textRange.setStartAfter(textRange.startContainer);
+                part_select_mouse.removeAllRanges();
+                part_select_mouse.addRange(textRange);
+                text_selected_mouse=part_select_mouse.toString();
+                length_text=text_selected_mouse.length;
+                length_text_anchorNode = part_select_mouse.anchorNode.nodeValue.toString().length;
+            }
+
+            //mouse from left to right
+            //check anchor node
             if (self.check_keyword(anchorNode) && text_selected_mouse[0]==" "&&part_select_mouse.anchorOffset==length_text_anchorNode-1) {
                 textRange.setStartAfter(textRange.startContainer);
                 part_select_mouse.removeAllRanges();
                 part_select_mouse.addRange(textRange);
+                text_selected_mouse=part_select_mouse.toString();
+                length_text=text_selected_mouse.length;
             }
-
-
-            var length_text=text_selected_mouse.length;
+            //check focus node
             if (self.check_keyword(focusNode) && text_selected_mouse[length_text-1]==" "&&part_select_mouse.focusOffset==1) {
                 textRange.setEndBefore(textRange.endContainer);
                 part_select_mouse.removeAllRanges();
                 part_select_mouse.addRange(textRange);
             }
 
-            //get the coordinate 
+
+            //get the coordinate
             anchorNode = part_select_mouse.anchorNode.parentNode;
             focusNode = part_select_mouse.focusNode.parentNode;
 
