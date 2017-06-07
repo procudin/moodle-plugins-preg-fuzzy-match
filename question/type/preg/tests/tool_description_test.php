@@ -23,7 +23,6 @@ class qtype_preg_tool_description_test extends PHPUnit_Framework_TestCase {
     {
         $handler = new qtype_preg_description_tool($regex);
         $result = $handler->description('%content','%content');
-        echo($result);
         $this->assertEquals($expected_en, $result);
     }
     public function charset_provider()
