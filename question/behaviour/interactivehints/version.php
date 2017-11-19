@@ -26,12 +26,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbehaviour_interactivehints';
-$plugin->version   = 2016120500;
-$plugin->requires  = 2015111600;
-$plugin->release = 'Interactive with hints behaviour 3.0';
+$plugin->version   = 2017111900;
+$plugin->requires  = 2016052305;
+$plugin->release = 'Interactive with hints behaviour 3.1';
 $plugin->maturity  = MATURITY_STABLE;
 
 $plugin->dependencies = array(
-    'qbehaviour_interactive' => 2015111600,
-    'qtype_poasquestion' => 2016120500
+    'qbehaviour_interactive' => 2016052300,
+    'qtype_poasquestion' => 2017111900
 );
