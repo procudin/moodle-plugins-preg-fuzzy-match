@@ -37,7 +37,7 @@ class qtype_preg_text_and_button extends qtype_poasquestion_text_and_button {
 
     private static $_preg_authoring_tools_script_included = false;
 
-    public function qtype_preg_text_and_button($textareaName = null, $textareaLabel = null, $buttonName = null) {
+    public function __construct($textareaName = null, $textareaLabel = null, $buttonName = null) {
         global $CFG;
         global $PAGE;
 
@@ -71,4 +71,8 @@ class qtype_preg_text_and_button extends qtype_poasquestion_text_and_button {
     public function getTooltip() {
         return get_string('authoring_form_tooltip', 'qtype_preg');
     }
+
+    // public function getType() {
+    //     return 'qtype_preg_text_and_button';
+    // }
 }
