@@ -66,6 +66,8 @@ class qtype_preg_matching_results {
      */
     public $extensionstart;
 
+    /** @var object of qtype_preg_typo_container, containing all errors encountered by fuzzy matching */
+    public $errors;
     //      Source data.
     /** @var qtype_poasquestion\utf8_string A string being matched. */
     protected $str;
@@ -74,13 +76,14 @@ class qtype_preg_matching_results {
     /** @var array A map where keys are subexpression names and values are their numbers. */
     protected $subexprmap;
 
-    public function __construct($full = false, $indexfirst = array(), $length = array(), $left = self::UNKNOWN_CHARACTERS_LEFT, $extendedmatch = null) {
+    public function __construct($full = false, $indexfirst = array(), $length = array(), $left = self::UNKNOWN_CHARACTERS_LEFT, $extendedmatch = null, $errors = null) {
         $this->full = $full;
         $this->indexfirst = $indexfirst;
         $this->length = $length;
         $this->left = $left;
         $this->extendedmatch = $extendedmatch;
         $this->extensionstart = self::NO_MATCH_FOUND;
+        $this->errors = $errors;
     }
 
     /**
@@ -151,7 +154,7 @@ class qtype_preg_matching_results {
      * For now the first (leftmost) full match is enought.
      */
     public function best() {
-        return $this->full;
+        return $this->full && $this->errors->count() === 0;
     }
 
     /**
@@ -169,10 +172,19 @@ class qtype_preg_matching_results {
             $areequal = false;
         }
 
-        // 1. The match is definitely best (full match).
-        if (!$this->best() && $other->best()) {
+        // 1. The match is full .
+        if (!$this->full && $other->full) {
             return true;
-        } else if ($this->best() && !$other->best()) {
+        } else if ($this->full && !$other->full) {
+            return false;
+        }
+
+        // More errors count.
+        $thiserrcount = $this->errors->count();
+        $othererrcount = $other->errors->count();
+        if ($thiserrcount > $othererrcount) {
+            return true;
+        } else if ($thiserrcount < $othererrcount) {
             return false;
         }
 
@@ -181,6 +193,15 @@ class qtype_preg_matching_results {
             return true;
         } else if ($this->is_match() && !$other->is_match()) {
             return false;
+        }
+
+        // Rightmost if contains errors.
+        if ($thiserrcount > 0) {
+            if ($this->indexfirst > $other->indexfirst) {
+                return true;
+            } else if ($this->indexfirst < $other->indexfirst) {
+                return false;
+            }
         }
 
         if (!$longestmatch) {
@@ -228,6 +249,7 @@ class qtype_preg_matching_results {
         // $this->left = self::UNKNOWN_CHARACTERS_LEFT;
         $this->indexfirst = array();
         $this->length = array();
+        $this->errors = new qtype_preg_typo_container();
         for ($i = 0; $i <= $this->maxsubexpr; $i++) {
             $this->indexfirst[$i] = self::NO_MATCH_FOUND;
             $this->length[$i] = self::NO_MATCH_FOUND;
