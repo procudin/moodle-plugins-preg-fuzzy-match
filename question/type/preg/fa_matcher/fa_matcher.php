@@ -152,6 +152,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $result->str = clone $str;
         $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos));
         $result->backtrack_states = array();
+        $result->errors = new qtype_preg_typo_container();
         if (in_array($state, $this->backtrackstates)) {
             $result->backtrack_states[] = $result;
         }
