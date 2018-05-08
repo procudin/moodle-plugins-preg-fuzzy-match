@@ -783,6 +783,12 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             }
         }
 
+        if ($thiserrcount < $othererrcount) {
+            return true;
+        } else if ($thiserrcount > $othererrcount) {
+            return false;
+        }
+
         return false;
     }
 
