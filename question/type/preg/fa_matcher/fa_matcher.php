@@ -995,6 +995,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 // Try to deletion pseudo transition.
                 if ($this->options->fuzzymathing && $this->maxerrors > $curstate->errors->count()) {
                     $newstate = $this->match_deletion_pseudotransitions($curstate, $curpos);
+                    self::ensure_index_exists($reached,$index->recursionlevel,$from,null);
                     if ($reached[$index->recursionlevel][$from] === null ||
                             $newstate->leftmost_longest($reached[$index->recursionlevel][$from])) {
                         $reached[$index->recursionlevel][$from] = $newstate;
