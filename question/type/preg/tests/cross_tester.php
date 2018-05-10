@@ -82,6 +82,11 @@ abstract class qtype_preg_cross_tester extends PHPUnit_Framework_TestCase {
     const TAG_DONT_CHECK_PARTIAL = 0x1000; //         // Indicates that if there's no full match, the cross-tester skips partial match and next character/left checking.
     const TAG_DEBUG_MODE         = 0x2000; //         // Informs matchers that it's debug mode.
 
+    const TAG_SKIP_TEST          = 0x4000;            // Skip test with this tag.
+
+    const TAG_ALLOW_FUZZY        = 0x8000;            // Allow fuzzy matching.
+
+
     const MAX_BUILDING_TIME      = 2000;   // Max time for matchers to be compiled from regex, milliseconds.
     const MAX_MATCHING_TIME      = 2000;   // Max time for matchers to match a string, milliseconds.
 
@@ -515,6 +520,7 @@ abstract class qtype_preg_cross_tester extends PHPUnit_Framework_TestCase {
                         $options->modifiers = qtype_preg_handling_options::string_to_modifiers($modifiersstr);
                         $options->debugmode = in_array(self::TAG_DEBUG_MODE, $regextags);
                         $options->mergeassertions = $merge;
+                        $options->fuzzymathing = in_array(self::TAG_ALLOW_FUZZY, $regextags);
                         $options->extensionneeded = !in_array(self::TAG_DONT_CHECK_PARTIAL, $regextags);
                         $tmpmatcher = $this->get_matcher($this->engine_name(), $regex, $options);
                         $timeend = round(microtime(true) * 1000);
