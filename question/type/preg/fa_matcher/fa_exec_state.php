@@ -633,31 +633,7 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             return false;
         }
 
-        // Choose by typo priority.
-        if ($comparebyerrors && $thiserrcount > 0) {
-            if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) > $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
-                return true;
-            } else if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) < $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
-                return false;
-            }
-            if ($this->errors->count(qtype_preg_typo::SUBSTITUTION) > $other->errors->count(qtype_preg_typo::SUBSTITUTION)) {
-                return true;
-            } else if ($this->errors->count(qtype_preg_typo::SUBSTITUTION) < $other->errors->count(qtype_preg_typo::SUBSTITUTION)) {
-                return false;
-            }
-            if ($this->errors->count(qtype_preg_typo::DELETION) > $other->errors->count(qtype_preg_typo::DELETION)) {
-                return true;
-            } else if ($this->errors->count(qtype_preg_typo::DELETION) < $other->errors->count(qtype_preg_typo::DELETION)) {
-                return false;
-            }
-            if ($this->errors->count(qtype_preg_typo::INSERTION) > $other->errors->count(qtype_preg_typo::INSERTION)) {
-                return true;
-            } else if ($this->errors->count(qtype_preg_typo::INSERTION) < $other->errors->count(qtype_preg_typo::INSERTION)) {
-                return false;
-            }
-            // If all encountered errors are equal.
-            return false;
-        }
+
 
 
         // If both states have partial match, choose one with minimal left
@@ -781,6 +757,32 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
                     return false;
                 }
             }
+        }
+
+        // Choose by typo priority.
+        if ($comparebyerrors && $thiserrcount > 0) {
+            if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) > $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+                return true;
+            } else if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) < $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+                return false;
+            }
+            if ($this->errors->count(qtype_preg_typo::SUBSTITUTION) > $other->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+                return true;
+            } else if ($this->errors->count(qtype_preg_typo::SUBSTITUTION) < $other->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+                return false;
+            }
+            if ($this->errors->count(qtype_preg_typo::DELETION) > $other->errors->count(qtype_preg_typo::DELETION)) {
+                return true;
+            } else if ($this->errors->count(qtype_preg_typo::DELETION) < $other->errors->count(qtype_preg_typo::DELETION)) {
+                return false;
+            }
+            if ($this->errors->count(qtype_preg_typo::INSERTION) > $other->errors->count(qtype_preg_typo::INSERTION)) {
+                return true;
+            } else if ($this->errors->count(qtype_preg_typo::INSERTION) < $other->errors->count(qtype_preg_typo::INSERTION)) {
+                return false;
+            }
+            // If all encountered errors are equal.
+            return false;
         }
 
         if ($thiserrcount < $othererrcount) {
