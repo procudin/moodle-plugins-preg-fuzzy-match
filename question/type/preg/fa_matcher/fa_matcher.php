@@ -1033,6 +1033,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             // Iterate over reached states. Get epsilon-closure for each recursion level.
             foreach ($reached as $newstates) {
                 foreach ($newstates as $newstate) {
+                    if ($newstate->errors->count() > $this->maxerrors) {
+                        continue;
+                    }
+
                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
                     self::ensure_index_exists($states, $index->recursionlevel, $index->state, null);
                     if ($states[$index->recursionlevel][$index->state] === null ||
