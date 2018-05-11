@@ -246,6 +246,16 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $tmplength = 0;
             $result = $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
             if ($result) {
+                // Check for transpositions
+                if ($curpos < $str->length() && $trysubstitution && $tmplength > 0 && $newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $curpos - 1)) {
+                    $lasttr = $newstate->last_transition();
+                    if ($lasttr !== null && $lasttr->pregleaf->consumes() !== 0
+                            && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)
+                            && $lasttr->pregleaf->match($str, $curpos, $tmplength1, $newstate)) {
+                        $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
+                        $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
+                    }
+                }
                 $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 //echo "passed $tr\n";
             } else if ($curpos < $str->length() && $trysubstitution && ($tmplength = $tr->pregleaf->consumes()) !== 0) { // If substitution pseudo transitions are allowed.
