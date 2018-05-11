@@ -378,13 +378,13 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
 
     protected function match_deletion_pseudotransitions($curstate, $curpos) {
-        $newstate = clone $curstate;
+        $newstate = /*clone*/ $curstate;
 
         // Don't try deletion for initial or end state
         $subpatt = $newstate->matcher->get_ast_root()->subpattern;
         if (!isset($newstate->stack[0]->matches[$subpatt]) || $newstate->is_full()) {
-            $newstate->set_full(false);
-            return $newstate;
+            //$newstate->set_full(false);
+            return null;
         }
 
         $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
@@ -1005,10 +1005,12 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 // Try to deletion pseudo transition.
                 if ($this->options->fuzzymathing && $this->maxerrors > $curstate->errors->count()) {
                     $newstate = $this->match_deletion_pseudotransitions($curstate, $curpos);
-                    self::ensure_index_exists($reached,$index->recursionlevel,$from,null);
-                    if ($reached[$index->recursionlevel][$from] === null ||
-                            $newstate->leftmost_longest($reached[$index->recursionlevel][$from])) {
-                        $reached[$index->recursionlevel][$from] = $newstate;
+                    if ($newstate !== null) {
+                        self::ensure_index_exists($reached,$index->recursionlevel,$from,null);
+                        if ($reached[$index->recursionlevel][$from] === null ||
+                                $newstate->leftmost_longest($reached[$index->recursionlevel][$from])) {
+                            $reached[$index->recursionlevel][$from] = $newstate;
+                        }
                     }
                 }
             }
@@ -1034,7 +1036,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
                     self::ensure_index_exists($states, $index->recursionlevel, $index->state, null);
                     if ($states[$index->recursionlevel][$index->state] === null ||
-                            $newstate->leftmost_longest($states[$index->recursionlevel][$index->state],true,$this->options->fuzzymathing && $newstate->is_full())) {
+                            $newstate->leftmost_longest($states[$index->recursionlevel][$index->state])) {
                         if ($statescount >= $this->maxstatescount) {
                             break;
                         }
