@@ -16,7 +16,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
     protected $passednormaltests = [];
 
     public function accept_regex($regex) {
-        return !preg_match('/\\\\\d+|\*\?|\+\?|\?\?|\*|\+|\?|\{|\^|\$|\\\\b|\\\\B|\\\\A|\\\\z|\\\\Z/', $regex);
+        return !preg_match('/\\\\\d+|\*\?|\+\?|\?\?|\^|\$|\\\\b|\\\\B|\\\\A|\\\\z|\\\\Z|\\\\g|\(\?\=|\(\?\!|\(\?\<\=|\(\?\<\!|\(\?/', $regex);
     }
 
     protected function serialize_test_data($filename = 'C:/Users/Admin/YandexDisk/Diplom/moodle/server/moodle/question/type/preg/tests/fuzzytests.txt') {
@@ -87,29 +87,24 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
 
                     // Create matcher
-                    $merge = in_array(self::TAG_FAIL_MODE_MERGE, $tags);
-                    if (($merge && $matcher_merged === null) || (!$merge && $matcher_unmerged === null)) {
-                        $timestart = round(microtime(true) * 1000);
-                        $options->mode = in_array(self::TAG_MODE_POSIX, $regextags) ? qtype_preg_handling_options::MODE_POSIX : qtype_preg_handling_options::MODE_PCRE;
-                        $options->modifiers = qtype_preg_handling_options::string_to_modifiers($modifiersstr);
-                        $options->debugmode = in_array(self::TAG_DEBUG_MODE, $regextags);
-                        $options->fuzzymathing = true;
-                        $options->mergeassertions = true;
-                        $options->extensionneeded = !in_array(self::TAG_DONT_CHECK_PARTIAL, $regextags);
-                        $tmpmatcher = $this->get_matcher($this->engine_name(), $regex, $options);
-                        $timeend = round(microtime(true) * 1000);
-                        if ($timeend - $timestart > self::MAX_BUILDING_TIME) {
-                            //$slowbuildtests[] = $classname . ' : ' . $methodname;
-                        }
-
-                        if ($merge) {
-                            $matcher_merged = $tmpmatcher;
-                        } else {
-                            $matcher_unmerged = $tmpmatcher;
-                        }
+                    $timestart = round(microtime(true) * 1000);
+                    $options->mode = in_array(self::TAG_MODE_POSIX, $regextags) ? qtype_preg_handling_options::MODE_POSIX : qtype_preg_handling_options::MODE_PCRE;
+                    $options->modifiers = qtype_preg_handling_options::string_to_modifiers($modifiersstr);
+                    $options->debugmode = in_array(self::TAG_DEBUG_MODE, $regextags);
+                    $options->fuzzymathing = true;
+                    $options->mergeassertions = true;
+                    $options->extensionneeded = !in_array(self::TAG_DONT_CHECK_PARTIAL, $regextags);
+                    $matcher = $this->get_matcher($this->engine_name(), $regex, $options);
+                    $timeend = round(microtime(true) * 1000);
+                    if ($timeend - $timestart > self::MAX_BUILDING_TIME) {
+                        //$slowbuildtests[] = $classname . ' : ' . $methodname;
                     }
-                    $matcher = $merge ? $matcher_merged : $matcher_unmerged;
+
                     $matcher->maxerrors = !isset($fuzzyexpected['errorslimit'])? 0 : $fuzzyexpected['errorslimit'];
+
+                    //if ($regex =='a\Sb' && ($str == 'ab') /*&& $expectederrorslimit === 1*/) {
+                    //    $qweqwe = 0;
+                    //}
 
                     $timestart = round(microtime(true) * 1000);
                     try {
@@ -123,12 +118,18 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                         //$slowmatchtests[] = $classname . ' : ' . $methodname;
                     }
 
+
+
                     // Results obtained, check them.
                     $skippartialcheck = in_array(self::TAG_DONT_CHECK_PARTIAL, $tags);
-                    if ($this->compare_better_or_equal($regex,$str,$modifiersstr,$tags,$matcher,$fuzzyexpected,$obtained,true)) {
-                        $passcount++;
-                    } else {
-                        $failcount++;
+                    try {
+                        if ($this->compare_better_or_equal($regex,$str,$modifiersstr,$tags,$matcher,$fuzzyexpected,$obtained,true)) {
+                            $passcount++;
+                        } else {
+                            $failcount++;
+                        }
+                    } catch (Exception $e) {
+                        $werew = 0;
                     }
                     //if ($this->compare_results($regex, $notation, $str, $modifiersstr, $tags, $matcher, $fuzzyexpected, $obtained, $classname, $methodname, $skippartialcheck, true)) {
                     //    $passcount++;
@@ -152,7 +153,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         $expectederrorslimit = isset($expected['errorslimit']) ? $expected['errorslimit'] : 0;
         $expectederrors = isset($expected['errors']) ? $expected['errors'] : [];
 
-        if ($regex =='(..)' && $expectederrorslimit === 0) {
+        if ($regex =='\d\D\h\H\s\S\v\V\w\W' /*&& ($str == 'ab'*/ /*&& $expectederrorslimit === 1*/) {
             $qweqwe = 0;
         }
 
@@ -230,8 +231,8 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             }
 
             if (!$fuzzypassed) {
-                $obtainedstr .= $this->dump_errors('ERRORS:        ', $obtained->errors->get_errors());
-                $expectedstr .= $this->dump_errors('ERRORS:        ', $expectederrors);
+                $obtainedstr .= "ERRORS:        \n" . $obtained->errors;
+                $expectedstr .= "ERRORS:        \n" . $this->dump_errors($expectederrors);
             }
 
             // is_match
@@ -279,14 +280,14 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         return $passed;
     }
 
-    function dump_errors($label, $values) {
-        $result = $label;
+    function dump_errors($values) {
+        $result = "";
         foreach ($values as $type => $errors) {
             if (count($errors)) {
-                $result.= "\t" + qtype_preg_typo::typo_description($type) . "s:\n";
+                $result.= "\t" . qtype_preg_typo::typo_description($type) . "s:\n";
             }
             foreach($errors as $err) {
-                $result .= "\t\t" . $err . "\n";
+                $result.= "\t\tpos = {$err['pos']}, char = {$err['char']}" . "\n";
             }
         }
         return $result;
@@ -469,11 +470,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         return $result;
     }
-
-
-
-
-
 
     public function run_normal_tests() {
         $passcount = 0;
