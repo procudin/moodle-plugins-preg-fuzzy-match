@@ -1024,7 +1024,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             }
 
             // If fuzzy enabled check if lazy returns better by errors result
-            if ($this->opetions->fuzzymathing && $this->maxerrors > 0) {
+            if ($this->options->fuzzymathing && $this->maxerrors > 0) {
                 foreach ($lazystates as $lazy) {
                     $index = self::create_index($lazy->recursive_calls_sequence(), $lazy->state());
                     self::ensure_index_exists($reached, $index->recursionlevel, $index->state, null);
