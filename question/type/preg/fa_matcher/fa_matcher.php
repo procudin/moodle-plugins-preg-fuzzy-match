@@ -1023,6 +1023,17 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 $reached[$index->recursionlevel][$index->state] = $lazy;
             }
 
+            // If fuzzy enabled check if lazy returns better by errors result
+            if ($this->opetions->fuzzymathing && $this->maxerrors > 0) {
+                foreach ($lazystates as $lazy) {
+                    $index = self::create_index($lazy->recursive_calls_sequence(), $lazy->state());
+                    self::ensure_index_exists($reached, $index->recursionlevel, $index->state, null);
+                    if ($reached[$index->recursionlevel][$index->state] === null || $lazy->errors->count() < $reached[$index->recursionlevel][$index->state]->errors->count()) {
+                        $reached[$index->recursionlevel][$index->state] = $lazy;
+                    }
+                }
+            }
+
             foreach ($reached as $recursionlevel => $reachedforlevel) {
                 $reached[$recursionlevel] = $this->epsilon_closure($reachedforlevel, $str, true);
                 $lazystates = array_merge($lazystates, $reached[$recursionlevel][\qtype_preg\fa\transition::GREED_LAZY]);
