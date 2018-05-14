@@ -15,8 +15,16 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
     }
     protected $passednormaltests = [];
 
+    protected $logfilename = 'C:/Users/Admin/YandexDisk/Diplom/moodle/server/moodle/question/type/preg/tests/errorslog.txt';
+    protected $logcontent = '';
+
+    public function log($message) {
+        $this->logcontent .= $message;
+        file_put_contents($this->logfilename, $this->logcontent);
+    }
+
     public function accept_regex($regex) {
-        return !preg_match('/\\\\\d+|\*\?|\+\?|\?\?|\^|\$|\\\\b|\\\\B|\\\\A|\\\\z|\\\\Z|\\\\g|\(\?\=|\(\?\!|\(\?\<\=|\(\?\<\!|\(\?/', $regex);
+        return !preg_match('/\\\\\d+|\*\?|\+\?|\?\?|\}\?|\^|\$|\\\\b|\\\\B|\\\\A|\\\\z|\\\\Z|\\\\g|\(\?\=|\(\?\!|\(\?\<\=|\(\?\<\!|\(\?/', $regex);
     }
 
     protected function serialize_test_data($filename = 'C:/Users/Admin/YandexDisk/Diplom/moodle/server/moodle/question/type/preg/tests/fuzzytests.txt') {
@@ -24,14 +32,9 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         echo $serialized;
         $content = file_get_contents($filename);
         mb_internal_encoding('UTF-8');
-        //if (mb_strpos($content, $serialized) !== false) {
-            file_put_contents($filename, /*$content .*/ $serialized);
-            $result = 'Data Added ok!!';
-            return $result;
-        //} else {
-         //   $result = 'Data Already Saved';
-        //    return $result;
-        //}
+        file_put_contents($filename, /*$content .*/ $serialized);
+        $result = 'Data Added ok!!';
+        return $result;
     }
     protected function unserialize_test_data($filename = 'C:/Users/Admin/YandexDisk/Diplom/moodle/server/moodle/question/type/preg/tests/fuzzytests.txt') {
         $content = file_get_contents($filename);
@@ -68,6 +71,10 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             $regextags [] = self::TAG_FAIL_MODE_MERGE;
             $regextags [] = self::TAG_ALLOW_FUZZY;
 
+            if ($regex !== 'XXXXXX' /*&& ($str == 'ab'*/ /*&& $expectederrorslimit === 0*/) {
+                //continue;
+            }
+
             $matcher_merged = null;
             $matcher_unmerged = null;
 
@@ -83,8 +90,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                     }
 
                     $tags = array_merge($regextags, $strtags);
-
-
 
                     // Create matcher
                     $timestart = round(microtime(true) * 1000);
@@ -118,10 +123,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                         //$slowmatchtests[] = $classname . ' : ' . $methodname;
                     }
 
-
-
                     // Results obtained, check them.
-                    $skippartialcheck = in_array(self::TAG_DONT_CHECK_PARTIAL, $tags);
                     try {
                         if ($this->compare_better_or_equal($regex,$str,$modifiersstr,$tags,$matcher,$fuzzyexpected,$obtained,true)) {
                             $passcount++;
@@ -129,6 +131,8 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                             $failcount++;
                         }
                     } catch (Exception $e) {
+                        $message = "\nFailed error applying on regex '$regex' and string '$str', applying errors: {$obtained->errors}";
+                        $this->log($message);
                         $werew = 0;
                     }
                     //if ($this->compare_results($regex, $notation, $str, $modifiersstr, $tags, $matcher, $fuzzyexpected, $obtained, $classname, $methodname, $skippartialcheck, true)) {
@@ -141,27 +145,25 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         }
     }
 
-    protected function compare_better_or_equal($regex, $str, $modstr, $tags, $matcher, $expected, $obtained, $dumpfails) {
-        // Do some initialization.
-        $fullpassed = ($expected['full'] === $obtained->full);
-        $ismatchpassed = true;
-        $indexfirstpassed = true;
-        $lengthpassed = true;
-        $fuzzypassed = true;
+    protected function compare_better_or_equal_by_errors($expected, $obtained, &$equalserrorscount = false , &$equalserrors = false, &$leftmostlongest = false, &$betterbypriorty = false) {
+        $equalserrorscount = false;
+        $equalserrors = false;
+        $leftmostlongest = false;
+        $betterbypriorty = false;
 
         $expectederrorscount = isset($expected['errorscount']) ? $expected['errorscount'] : 0;
-        $expectederrorslimit = isset($expected['errorslimit']) ? $expected['errorslimit'] : 0;
-        $expectederrors = isset($expected['errors']) ? $expected['errors'] : [];
 
-        if ($regex =='\d\D\h\H\s\S\v\V\w\W' /*&& ($str == 'ab'*/ /*&& $expectederrorslimit === 1*/) {
-            $qweqwe = 0;
+        // Check by errors count.
+        if ($expectederrorscount > $obtained->errors->count()) {
+            return true;
+        } else if ($expectederrorscount < $obtained->errors->count()) {
+            return false;
         }
 
-        $ismatchwithfuzzy = !$expected['full'] && $obtained->full;
-        $lowererrors = $obtained->errors->count() < $expectederrorscount;
-        $equalserrorcount = $obtained->errors->count() === $expectederrorscount;
-        $moreerrors = !($lowererrors || $equalserrorcount);
-        $equalserrors = $equalserrorcount;
+        // Check errors by equals.
+        $equalserrors = true;
+        $equalserrorscount = true;
+        $expectederrors = isset($expected['errors']) ? $expected['errors'] : [];
         foreach ($expectederrors as $type => $errors) {
             if (!$equalserrors) {
                 break;
@@ -170,28 +172,51 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                 $equalserrors = $equalserrors && $obtained->errors->contains($type, $err['pos'], $err['char']);
             }
         }
-
-        // check if 100% not passed
-        if ($expected['full'] && !$obtained->full || $moreerrors) {
-            $fuzzypassed = false;
+        if ($equalserrors) {
+            return true;
         }
 
-        // Apply errors to string && run normal match
-        $errorsapplyed = false;
-        if ($fuzzypassed && !$equalserrors && $expected['full'] && ($ismatchwithfuzzy || $lowererrors || $equalserrorcount && $expectederrorscount > 0)) {
-            $newstr = $obtained->errors->apply($str);
+        // Check by leftmostlongest.
+        $leftmost = //((!array_key_exists(0, $expected['index_first']) && $obtained->indexfirst[0] === qtype_preg_matching_results::NO_MATCH_FOUND) ||
+                (array_key_exists(0, $expected['index_first']) && $expected['index_first'][0] > $obtained->indexfirst[0]);
 
-            $matcher->maxerrors = 0;
-
-            $obtained = $matcher->match($newstr);
-
-            $fullpassed = $obtained->full === $expected['full'];
-            $ismatchpassed = $fullpassed;
-            $errorsapplyed = true;
+        if ($leftmost) {
+            return $leftmostlongest = true;
         }
 
-        $checkindexes = $expected['full'] && $equalserrors && !$errorsapplyed;
+        $equalindexfirst = (array_key_exists(0, $expected['index_first']) && $expected['index_first'][0] === $obtained->indexfirst[0]);
+        $longestorequal = (array_key_exists(0, $expected['length']) && $expected['length'][0] <= $obtained->length[0]);
 
+        $leftmostlongest = $equalindexfirst && $longestorequal;
+
+        return $leftmostlongest;
+    }
+
+    protected function compare_better_or_equal($regex, $str, $modstr, $tags, $matcher, $expected, $obtained, $dumpfails) {
+        // Do some initialization.
+        $fullpassed = ($expected['full'] === $obtained->full);
+        $indexfirstpassed = true;
+        $lengthpassed = true;
+        $equalserrorscount = true;
+        $equalserrors = true;
+        $leftmostlongest = true;
+
+        $expectederrorscount = isset($expected['errorscount']) ? $expected['errorscount'] : 0;
+        $expectederrorslimit = isset($expected['errorslimit']) ? $expected['errorslimit'] : 0;
+        $expectederrors = isset($expected['errors']) ? $expected['errors'] : [];
+
+        if ($regex =='>\s{2,3}?<' /*&& ($str == 'ab'*/ && $expectederrorslimit === 0) {
+            $qweqwe = 0;
+        }
+
+        $lowererrcount = $obtained->errors->count() < $expectederrorscount;
+
+        $isbetter = false;
+        $isbetter = $isbetter || !$expected['full'] && $obtained->full;
+        $isbetter = $isbetter || $lowererrcount;
+        $isbetter = $isbetter || $this->compare_better_or_equal_by_errors($expected, $obtained , $equalserrorscount,$equalserrors,$leftmostlongest);
+
+        $checkindexes = $isbetter && $expected['full'] && ($equalserrors) && !$lowererrcount;
         // Match existance, indexes and lengths
         if ($checkindexes) {
             if ($matcher->is_supporting(qtype_preg_matcher::PARTIAL_MATCHING)) {
@@ -217,63 +242,77 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             }
         }
 
-        $passed = $ismatchpassed && $fullpassed && $indexfirstpassed && $lengthpassed && $fuzzypassed && !$errorsapplyed
-                || $errorsapplyed && $fullpassed && $fuzzypassed
-                || $ismatchwithfuzzy && $fuzzypassed;
+        // Apply errors to string && run normal match
+        $errorsapplyed = false;
+        if ($isbetter && $obtained->full) {
+            $strafterapplying = $obtained->errors->apply($str);
+
+            $matcher->maxerrors = 0;
+
+            $obtainedafterapplying = $matcher->match($strafterapplying);
+
+            $fullpassedafteraaplying = $obtainedafterapplying->full;
+            $errorsapplyed = true;
+        }
+
+
+        $passed = $isbetter && $indexfirstpassed && $lengthpassed &&
+                (!$errorsapplyed || $fullpassedafteraaplying);
 
         if (!$passed && $dumpfails) {
             $obtainedstr = '';
             $expectedstr = '';
 
-            if ($moreerrors) {
-                $obtainedstr .= $this->dump_indexes('ERRORS COUNT:        ', $obtained->errors->count());
-                $expectedstr .= $this->dump_indexes('ERRORS COUNT:        ', $expectederrorscount);
+            if (!$isbetter) {
+                if (!$fullpassed) {
+                    $obtainedstr .= $this->dump_boolean('FULL:            ', $obtained->full);
+                    $expectedstr .= $this->dump_boolean('FULL:            ', $expected['full']);
+                }
+
+                if (!$equalserrorscount) {
+                    $obtainedstr .= $this->dump_indexes('ERRORS COUNT:        ', $obtained->errors->count());
+                    $expectedstr .= $this->dump_indexes('ERRORS COUNT:        ', $expectederrorscount);
+                }
+
+                if (!$equalserrors && !$leftmostlongest) {
+                    $obtainedstr .= "ERRORS:        \n" . $obtained->errors;
+                    $expectedstr .= "ERRORS:        \n" . $this->dump_errors($expectederrors);
+                }
             }
 
-            if (!$fuzzypassed) {
-                $obtainedstr .= "ERRORS:        \n" . $obtained->errors;
-                $expectedstr .= "ERRORS:        \n" . $this->dump_errors($expectederrors);
+            if ($errorsapplyed && !$fullpassedafteraaplying) {
+                $obtainedstr .= $this->dump_boolean('FULL AFTER ERRORS APPLYING:            ', $obtainedafterapplying->full);
+                $expectedstr .= $this->dump_boolean('FULL AFTER ERRORS APPLYING:            ', true);
             }
 
-            // is_match
-            if (!$ismatchpassed && $errorsapplyed) {
-                $obtainedstr .= $this->dump_boolean('IS_MATCH AFTER ERROR APPLYING:        ', $obtained->is_match());
-                $expectedstr .= $this->dump_boolean('IS_MATCH AFTER ERROR APPLYING:        ', $expected['is_match']);
+            if ($checkindexes) {
+                // index_first
+                if (!$indexfirstpassed) {
+                    $obtainedstr .= $this->dump_indexes('INDEX_FIRST:     ', $obtained->indexfirst);
+                    $expectedstr .= $this->dump_indexes('INDEX_FIRST:     ', $expected['index_first']);
+                }
+
+                // length
+                if (!$lengthpassed) {
+                    $obtainedstr .= $this->dump_indexes('LENGTH:          ', $obtained->length);
+                    $expectedstr .= $this->dump_indexes('LENGTH:          ', $expected['length']);
+                }
             }
 
-            // is_match
-            if (!$ismatchpassed && !$errorsapplyed) {
-                $obtainedstr .= $this->dump_boolean('IS_MATCH:        ', $obtained->is_match());
-                $expectedstr .= $this->dump_boolean('IS_MATCH:        ', $expected['is_match']);
-            }
-
-            // full
-            if (!$fullpassed) {
-                $obtainedstr .= $this->dump_boolean('FULL:            ', $obtained->full);
-                $expectedstr .= $this->dump_boolean('FULL:            ', $expected['full']);
-            }
-
-            // index_first
-            if (!$indexfirstpassed) {
-                $obtainedstr .= $this->dump_indexes('INDEX_FIRST:     ', $obtained->indexfirst);
-                $expectedstr .= $this->dump_indexes('INDEX_FIRST:     ', $expected['index_first']);
-            }
-
-            // length
-            if (!$lengthpassed) {
-                $obtainedstr .= $this->dump_indexes('LENGTH:          ', $obtained->length);
-                $expectedstr .= $this->dump_indexes('LENGTH:          ', $expected['length']);
-            }
 
             $enginename = $matcher->name();
             $merging = in_array(self::TAG_FAIL_MODE_MERGE, $tags) ? "merging is on" : "merging is off";
-            echo $modstr == '' ?
+
+            $message = $modstr == '' ?
                     "$enginename failed on regex '$regex' and string '$str', $merging with errorslimit : $expectederrorslimit:\n" :
                     "$enginename failed on regex '$regex' string '$str' and modifiers '$modstr', $merging with errorslimit : $expectederrorslimit:\n";
-            echo $obtainedstr;
-            echo "expected:\n";
-            echo $expectedstr;
-            echo "\n";
+            $message .= $obtainedstr;
+            $message .= "expected:\n";
+            $message .= $expectedstr;
+            $message .= "\n";
+
+            echo $message;
+            $this->log($message);
         }
 
         // Return true if everything is correct, false otherwise.
@@ -632,8 +671,8 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
 
     public function test() {
-        //$this->run_normal_tests();
-        //$this->serialize_test_data();
+        $this->run_normal_tests();
+        $this->serialize_test_data();
         mt_srand(100);
         $this->unserialize_test_data();
         $this->run_fuzzy_tests();
