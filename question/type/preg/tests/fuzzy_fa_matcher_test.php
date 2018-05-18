@@ -96,7 +96,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                     $options->mode = in_array(self::TAG_MODE_POSIX, $regextags) ? qtype_preg_handling_options::MODE_POSIX : qtype_preg_handling_options::MODE_PCRE;
                     $options->modifiers = qtype_preg_handling_options::string_to_modifiers($modifiersstr);
                     $options->debugmode = in_array(self::TAG_DEBUG_MODE, $regextags);
-                    $options->fuzzymathing = true;
+                    $options->fuzzymatch = true;
                     $options->mergeassertions = true;
                     $options->extensionneeded = !in_array(self::TAG_DONT_CHECK_PARTIAL, $regextags);
                     $matcher = $this->get_matcher($this->engine_name(), $regex, $options);
