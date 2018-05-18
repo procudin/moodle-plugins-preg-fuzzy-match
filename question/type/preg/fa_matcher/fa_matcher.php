@@ -476,7 +476,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                 // If transition consumes char
                 if ($transition->pregleaf->consumes() !== 0) {
-                    if (!$this->options->fuzzymathing || $this->maxerrors <= $curstate->errors->count()) {
+                    if (!$this->options->fuzzymatch || $this->maxerrors <= $curstate->errors->count()) {
                         // If fuzzy disabled or too many errors.
                         continue;
                     }
@@ -966,7 +966,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     } else if ($transition->pregleaf->type !== qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL) {
                         // Handle a non-recursive transition transition
                         $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, true,
-                                $this->options->fuzzymathing && $this->maxerrors >= $curstate->errors->count());
+                                $this->options->fuzzymatch && $this->maxerrors >= $curstate->errors->count());
 
                         if ($full) {
 
@@ -1013,7 +1013,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
 
                 // Try to deletion pseudo transition.
-                if ($this->options->fuzzymathing && $this->maxerrors > $curstate->errors->count()) {
+                if ($this->options->fuzzymatch && $this->maxerrors > $curstate->errors->count()) {
                     $newstate = $this->match_deletion_pseudotransitions($curstate, $curpos);
                     if ($newstate !== null) {
                         self::ensure_index_exists($reached,$index->recursionlevel,$from,null);
