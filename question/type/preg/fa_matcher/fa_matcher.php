@@ -57,6 +57,14 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         return 'fa_matcher';
     }
 
+    public function set_errors_limit($count) {
+        $this->maxerrors = $count;
+    }
+
+    public function get_errors_limit() {
+        return $this->maxerrors;
+    }
+
     protected function get_engine_node_name($nodetype, $nodesubtype) {
         switch($nodetype) {
             case qtype_preg_node::TYPE_NODE_FINITE_QUANT:
@@ -91,6 +99,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             case qtype_preg_matcher::CHARACTERS_LEFT:
             case qtype_preg_matcher::SUBEXPRESSION_CAPTURING:
             case qtype_preg_matcher::CORRECT_ENDING_ALWAYS_FULL:
+            case qtype_preg_matcher::FUZZY_MATCHING:
                 return true;
             default:
                 return false;

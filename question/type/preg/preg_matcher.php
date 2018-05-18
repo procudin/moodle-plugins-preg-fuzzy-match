@@ -457,6 +457,8 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
     const SUBEXPRESSION_CAPTURING = 3;
     // Always return full match as the correct ending (if at all possible).
     const CORRECT_ENDING_ALWAYS_FULL = 4;
+    // Fuzzy matching (same as full with insensitivity to some errors).
+    const FUZZY_MATCHING = 5;
 
     /**
      * Returns true for supported capabilities.
@@ -477,6 +479,16 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
     public function name() {
         return 'preg_matcher';
     }
+
+    public function set_errors_limit($count) {
+        throw new qtype_preg_exception('Error: fuzzy matching has not been implemented for '.$this->name().' class');
+    }
+
+
+    public function get_errors_limit() {
+        throw new qtype_preg_exception('Error: fuzzy matching has not been implemented for '.$this->name().' class');
+    }
+
 
     /**
      * Parse regex and do all necessary preprocessing.
