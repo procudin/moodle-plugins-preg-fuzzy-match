@@ -494,6 +494,10 @@ class qtype_preg_question extends question_graded_automatically
                 $hinttypes[] = 'hintnextlexem';
             }
         }
+        if ($querymatcher->is_supporting(qtype_preg_matcher::FUZZY_MATCHING) && $this->usehowtofixpichint) {
+            $hinttypes[] = 'hinthowtofixpic';
+        }
+
         return $hinttypes;
     }
 

@@ -29,6 +29,14 @@ global $CFG;
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 require_once($CFG->dirroot . '/blocks/formal_langs/block_formal_langs.php');
 
+require_once(dirname(__FILE__) . '/textimagerenderer.php');
+require_once(dirname(__FILE__) . '/classes/mistakesimage/defines.php');
+require_once(dirname(__FILE__) . '/classes/mistakesimage/abstractlabel.php');
+require_once(dirname(__FILE__) . '/classes/mistakesimage/emptylabel.php');
+require_once(dirname(__FILE__) . '/classes/mistakesimage/lexemelabel.php');
+require_once(dirname(__FILE__) . '/classes/mistakesimage/imageblock.php');
+
+
 /**
  * Hint class for showing matching part of a response (along with unmatched head and tail).
  * Also contains some methods common to the all hints, based on $matchresults.
@@ -334,4 +342,128 @@ class qtype_preg_hintnextlexem extends qtype_preg_hintmatchingpart {
                 ( $this->hinttoken->position()->colend() + 1 < core_text::strlen($matchresults->extendedmatch->str()) || // Hinted token ends before generated string end.
                     $matchresults->extendedmatch->full === false ); // Generated string is not full.
     }
+}
+
+class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
+
+    /*
+    /**
+     * @var qtype_correctwriting_lexical_mistake
+
+    protected $mistake;
+    /** @var token(s) descriptions for the hint or value if no description available
+    protected $token = '';*/
+
+    public function hint_type() {
+        return qtype_poasquestion\hint::SINGLE_INSTANCE_HINT;
+    }
+
+
+    /**
+     * Constructs hint object, remember question to use.
+
+    public function __construct($question, $hintkey/*, $mistake) {
+        $this->question = $question;
+        $this->hintkey = $hintkey;
+        /*
+        $this->mistake = $mistake;
+        if ($mistake !== null) {
+            $this->token = $this->mistake->token_descriptions_as_mistake();
+        }
+    }*/
+
+    public function hint_description() {
+        return get_string('howtofixpic', 'qtype_preg'/*, $this->token*/);
+    }
+
+    // "Where" hint is obviously response based, since it used to better understand mistake message.
+    public function hint_response_based() {
+        return true;
+    }
+
+    /**
+     * The hint is disabled when penalty is set above 1.
+     * Mistake === null if attempt to create hint was unsuccessfull.
+     */
+    public function hint_available($response = null) {
+        return /*$this->question->howtofixpichintpenalty <= 1.0 && $this->mistake !== null*/true;
+    }
+
+    public function penalty_for_specific_hint($response = null) {
+        return /*$this->question->howtofixpichintpenalty*/0;
+    }
+
+    // Buttons are rendered by the question to place them in specific feedback near relevant mistake message.
+    public function button_rendered_by_question() {
+        return false;
+    }
+
+    public function render_hint($renderer, question_attempt $qa, question_display_options $options, $response = null) {
+        global $CFG;
+
+        // get matching result
+        $matchingresult = $qa->get_question()->get_best_fit_answer($response)['match'];
+
+        // convert to lexem label format
+        qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
+        list($string, $operations) = $matchingresult->errors->apply_with_ops($matchingresult->str());
+
+        $label = new \qtype_preg_lexeme_label('');
+        $label->set_text($string);
+        $label->set_operations($operations);
+        $label->recompute_size();
+
+        $size = $label->get_size();
+        $currentrect = (object)array(
+                'width' => $size[0],
+                'height' => $size[1],
+                'x' => FRAME_SPACE,
+                'y' => FRAME_SPACE
+        );
+
+        list($im, $palette) = self::create_default_image($size);
+        $label->paint($im, $palette, $currentrect, true);
+
+        // Output image
+        ob_start();
+        imagepng($im);
+        $imagebinary = ob_get_clean();
+        imagedestroy($im);
+        $imagetext  = 'data:image/png;base64,' . base64_encode($imagebinary);
+        $imagesrc = html_writer::empty_tag('image', array('src' => $imagetext));
+        return $imagesrc;
+    }
+
+    protected static function create_default_image($size) {
+        // Create image
+        $sizex = $size[0] + 2 * FRAME_SPACE;
+        $sizey = $size[1] + 2 * FRAME_SPACE;
+        $im = imagecreatetruecolor($sizex, $sizey);
+
+        // Fill palette
+        $palette = array();
+        $palette['white'] = imagecolorallocate($im, 255, 255, 255);
+        $palette['black'] = imagecolorallocate($im, 0, 0, 0);
+        $palette['red']   = imagecolorallocate($im, 255, 0, 0);
+
+        // Set image background to white
+        imagefill($im,0,0,$palette['white']);
+
+        // Draw a rectangle frame
+        imagesetthickness($im, FRAME_THICKNESS);
+        imageline($im, 0, 0, $sizex - 1, 0, $palette['black']);
+        imageline($im, $sizex - 1, 0, $sizex - 1, $sizey - 1, $palette['black']);
+        imageline($im, $sizex - 1, $sizey - 1, 0, $sizey - 1, $palette['black']);
+        imageline($im, 0, $sizey - 1, 0, 0, $palette['black']);
+
+        return array($im, $palette);
+    }
+    /**
+     * Converts token to string
+     * @param  block_formal_langs_token_base  $p
+     * @return string
+
+    protected static function to_string($p) {
+        return $p->value();
+    }*/
 }
