@@ -24,6 +24,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+use \qtype_poasquestion\utf8_string;
 
 class qtype_preg_typo {
     const INSERTION         = 0x0001;   // Insertion typo type.
@@ -52,10 +53,18 @@ class qtype_preg_typo {
         $this->char = $char;
     }
 
+    public function __toString() {
+        $str = "type = \'{$this->typo_description($this->type)}\' pos = {$this->position}";
+        if ($this->type === self::INSERTION || $this->type === self::SUBSTITUTION) {
+            $str .= ", char = \'{$this->char}\'";
+        }
+        return $str;
+    }
+
     /**
      * Returns description for given type
      */
-    public function typo_description($type) {
+    public static function typo_description($type) {
         switch ($type) {
             case self::INSERTION:
                 return 'insertion';
@@ -77,10 +86,11 @@ class qtype_preg_typo {
     public function apply($string) {
         switch ($this->type) {
             case self::DELETION:
-                $string = substr_replace($string, '', $this->position, 1);
+                $string = utf8_string::substr($string, 0, $this->position) . utf8_string::substr($string, $this->position + 1);
                 break;
             case self::SUBSTITUTION:
-                $string[$this->position] = $this->char;
+                $string = utf8_string::substr($string, 0, $this->position) . $this->char . utf8_string::substr($string, $this->position + 1);
+                //$string[$this->position] = $this->char;
                 break;
             case self::TRANSPOSITION:
                 $tmp = $string[$this->position];
@@ -88,7 +98,7 @@ class qtype_preg_typo {
                 $string[$this->position + 1] = $tmp;
                 break;
             case self::INSERTION:
-                $string = substr_replace($string, $this->char, $this->position, 0);
+                $string = utf8_string::substr($string, 0, $this->position) . $this->char . utf8_string::substr($string, $this->position);
                 break;
         }
         return $string;
@@ -99,8 +109,10 @@ class qtype_preg_typo_container {
     /** @var int $count errors count */
     protected $count;
 
-    /** @var array $errors array of typotype => array(qtype_preg_typo1,qtype_preg_typo2) */
+    /** @var array $errors array of typotype => array(qtype_preg_typo1, qtype_preg_typo2) */
     protected $errors;
+
+
 
     public function __construct() {
         $this->errors = [
@@ -112,16 +124,29 @@ class qtype_preg_typo_container {
         $this->count = 0;
     }
 
-    public function contains($type,$pos,$char = '') {
-        $comparebychar = $char !== null && strlen($char) > 0;
+    public function contains($type, $pos, $char = null) {
+        $comparebychar = $type !== qtype_preg_typo::TRANSPOSITION && $type !== qtype_preg_typo::DELETION && $char !== null && strlen($char) > 0;
 
         foreach ($this->errors[$type] as $typo) {
             if ($typo->position === $pos
-                    && (!$comparebychar || strcmp($typo->char,$char) === 0)){
+                    && (!$comparebychar || strcmp($typo->char, $char) === 0)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public function __toString() {
+        $result = "";
+        foreach ($this->errors as $type => $errors) {
+            if (count($errors)) {
+                $result.= "\t" . qtype_preg_typo::typo_description($type) . "s:\n";
+            }
+            foreach($errors as $err) {
+                $result.= "\t\tpos = {$err->position}, char = {$err->char}" . "\n";
+            }
+        }
+        return $result;
     }
 
     public function remove($type, $pos) {
@@ -169,85 +194,141 @@ class qtype_preg_typo_container {
         $this->count++;
     }
 
-
-    public function invalidate() {
-        $this->count = 99999999;
+    public function get_errors() {
+        return $this->errors;
     }
 
-    public function worse_than($other, $orequal = false) {
-        if ($this->count > $other->count) {
-            return true;
-        } else if ($this->count < $other->count) {
-            return false;
+    public static function substitution_as_deletion_and_insertion($container) {
+        $substitutions = $container->errors[qtype_preg_typo::SUBSTITUTION];
+        $subcount = count($substitutions);
+
+        if ($subcount === 0) {
+            return;
         }
 
-        if ($this->count(qtype_preg_typo::TRANSPOSITION) < $other->count(qtype_preg_typo::TRANSPOSITION)) {
-            return true;
-        } else if ($this->count(qtype_preg_typo::TRANSPOSITION) > $other->count(qtype_preg_typo::TRANSPOSITION)) {
-            return false;
+        $container->errors[qtype_preg_typo::SUBSTITUTION] = [];
+        $container->count -= $subcount;
+
+        foreach ($substitutions as $sub) {
+            $container->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $sub->position));
+            $container->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char));
+        }
+    }
+
+    protected function apply_inner($string, $modifycurrent = false , $removedeletions = true) {
+        $container = $this;
+        if (!$modifycurrent) {
+            $container = clone $container;
         }
 
-        if ($this->count(qtype_preg_typo::SUBSTITUTION) < $other->count(qtype_preg_typo::SUBSTITUTION)) {
-            return true;
-        } else if ($this->count(qtype_preg_typo::SUBSTITUTION) > $other->count(qtype_preg_typo::SUBSTITUTION)) {
-            return false;
+        $deletions = $container->errors[qtype_preg_typo::DELETION];
+        $insertions = $container->errors[qtype_preg_typo::INSERTION];
+        $transpositions =  $container->errors[qtype_preg_typo::TRANSPOSITION];
+        $substitutions =  $container->errors[qtype_preg_typo::SUBSTITUTION];
+
+        // Apply transposition.
+        foreach ($transpositions as $typo) {
+            $string = $typo->apply($string);
         }
 
-        if ($this->count(qtype_preg_typo::DELETION) < $other->count(qtype_preg_typo::DELETION)) {
-            return true;
-        } else if ($this->count(qtype_preg_typo::DELETION) > $other->count(qtype_preg_typo::DELETION)) {
-            return false;
+        // Apply substitutions.
+        foreach ($substitutions as $typo) {
+            $string = $typo->apply($string);
         }
 
-        if ($this->count(qtype_preg_typo::INSERTION) < $other->count(qtype_preg_typo::INSERTION)) {
-            return true;
-        } else if ($this->count(qtype_preg_typo::INSERTION) > $other->count(qtype_preg_typo::INSERTION)) {
-            return false;
+        for ($i = 0, $count = count($insertions); $i < $count; $i++) {
+            $string = $insertions[$i]->apply($string);
+
+            for ($j = $i + 1; $j < $count; $j++) {
+                $insertions[$j]->position++;
+            }
+
+            foreach ($deletions as $del) {
+                if ($del->position >= $insertions[$i]->position) {
+                    $del->position++;
+                }
+            }
+            foreach ($transpositions as $tr) {
+                if ($tr->position >= $insertions[$i]->position) {
+                    $tr->position++;
+                }
+            }
+            foreach ($substitutions as $sub) {
+                if ($sub->position >= $insertions[$i]->position) {
+                    $sub->position++;
+                }
+            }
         }
 
-        return $orequal;
+        // Apply deletions.
+        for ($i = 0, $count = count($deletions); $i < $count && $removedeletions; $i++) {
+            $string = $deletions[$i]->apply($string);
+
+            for ($j = $i + 1; $j < $count; $j++) {
+                $deletions[$j]->position--;
+            }
+
+            foreach ($insertions as $ins) {
+                if ($ins->position > $deletions[$i]->position) {
+                    $ins->position--;
+                }
+            }
+            foreach ($transpositions as $tr) {
+                if ($tr->position > $deletions[$i]->position) {
+                    $tr->position--;
+                }
+            }
+            foreach ($substitutions as $sub) {
+                if ($sub->position > $deletions[$i]->position) {
+                    $sub->position--;
+                }
+            }
+        }
+
+        return array($string, $container);
     }
 
     /** Apply all typos to given string
      * @param $string
      * @return string after applying
      */
-    public function apply($string) {
-        // Apply transposition.
-        foreach($this->errors[qtype_preg_typo::TRANSPOSITION] as $typo) {
-            $string = $typo->apply($string);
-        }
-
-        // Apply substitutions.
-        foreach($this->errors[qtype_preg_typo::SUBSTITUTION] as $typo) {
-            $string = $typo->apply($string);
-        }
-
-        // Copy mutable typos
-        $deletions = $this->errors[qtype_preg_typo::DELETION];
-        $insertions = $this->errors[qtype_preg_typo::INSERTION];
-
-        for($i = 0, $count = count($insertions); $i < $count; $i++) {
-            $string = $insertions[$i]->apply($string);
-
-            for ($j = $i; $j < $count; $j++) {
-                $insertions[$j]->position++;
-            }
-
-            foreach($deletions as $del) {
-                if ($del->position >= $insertions[$i]->position){
-                    $del->position++;
-                }
-            }
-        }
-
-        // Apply deletions.
-        foreach($deletions as $del) {
-            $string = $del->apply($string);
-        }
-
-        return $string;
+    public function apply($string, $removedeletions = true) {
+        list($newstring, $newcontainer) = $this->apply_inner($string, false, $removedeletions);
+        return $newstring;
     }
+
+
+    public function apply_with_ops($string) {
+        $container = clone $this;
+
+        self::substitution_as_deletion_and_insertion($container);
+
+        list($string, $container) = $this->apply_inner($string, true,false);
+
+        $deletions = $container->errors[qtype_preg_typo::DELETION];
+        $insertions = $container->errors[qtype_preg_typo::INSERTION];
+        $transpositions =  $container->errors[qtype_preg_typo::TRANSPOSITION];
+        $operations = [];
+
+        foreach($deletions as $del) {
+            $operations[$del->position] = 'strikethrough';
+        }
+        foreach($insertions as $ins) {
+            $operations[$ins->position] = 'insert';
+        }
+        foreach($transpositions as $tr) {
+            $operations[$tr->position] = $operations[$tr->position + 1] = 'transpose';
+        }
+
+        for ($i = 0; $i < utf8_string::strlen($string); $i++) {
+            if (!isset($operations[$i])) {
+                $operations[$i] = 'normal';
+            }
+        }
+
+        return array($string, $operations);
+    }
+
 }
 
 
