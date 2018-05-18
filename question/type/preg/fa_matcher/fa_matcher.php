@@ -157,6 +157,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos));
         $result->backtrack_states = array();
         $result->errors = new qtype_preg_typo_container();
+        $result->transpositioncandidate = false;
         if (in_array($state, $this->backtrackstates)) {
             $result->backtrack_states[] = $result;
         }
@@ -247,14 +248,11 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $result = $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
             if ($result) {
                 // Check for transpositions
-                if ($curpos < $str->length() && $trysubstitution && $tmplength > 0 && $newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $curpos - 1)) {
-                    $lasttr = $newstate->last_transition();
-                    if ($lasttr !== null && $lasttr->pregleaf->consumes() !== 0
-                            && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)
-                            && $lasttr->pregleaf->match($str, $curpos, $tmplength1, $newstate)) {
-                        $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
-                        $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
-                    }
+                if ($curpos < $str->length() && $trysubstitution && $tmplength > 0 && $newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $curpos - 1) &&
+                        $newstate->transpositioncandidate && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)) {
+                    $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
+                    $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
+                    $newstate->transpositioncandidate = false;
                 }
                 $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 //echo "passed $tr\n";
@@ -266,7 +264,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $result = true;
 
                     $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION,$curpos - 1)/* || $newstate->errors->remove(qtype_preg_typo::INSERTION,$curpos)*/;
-
+                    $newstate->transpositioncandidate = false;
                     $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
                     $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 } else {
@@ -277,10 +275,11 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && strlen($char = $char->string()) > 0) {
                         $result = true;
 
-                        // Add insertion.
+                        // Add substitution.
                         $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::SUBSTITUTION, $curpos, $char));
 
                         $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
+                        $newstate->transpositioncandidate =$curpos + 1 < $str->length() && $tr->pregleaf->match($str, $curpos + 1, $tmplength1, $newstate);
                     }
                 }
             } else {
@@ -337,6 +336,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $result = true;
                     // Add insertion
                     $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, $char));
+                    $newstate->transpositioncandidate = false;
                 } else {
                     $result = false;
                 }
@@ -388,6 +388,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         }
 
         $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
+        $newstate->transpositioncandidate = false;
         $this->after_deletion_pseudotransition_passed($newstate);
 
         return $newstate;

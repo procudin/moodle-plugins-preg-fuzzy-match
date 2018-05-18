@@ -285,6 +285,9 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
     // Object of qtype_preg_typo_container, containing all encountered errors.
     public $errors;
 
+    // Is this state transposition candidate(last transition matches afterlast character).
+    public $transpositioncandidate;
+
     public function __clone() {
         $this->str = clone $this->str;  // Needs to be cloned for correct string generation.
         $this->errors = clone $this->errors;
@@ -628,6 +631,13 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             return true;
         } else if ($other_length > $this_length) {
             //echo "wins 2\n";
+            return false;
+        }
+
+        // Check for transposition candidate.
+        if ($thiserrcount > 0 && $this->transpositioncandidate && !$other->transpositioncandidate) {
+            return true;
+        } else if ($thiserrcount > 0 && !$this->transpositioncandidate && $other->transpositioncandidate) {
             return false;
         }
 
