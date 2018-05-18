@@ -1370,6 +1370,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $options = new qtype_preg_matching_options();
         }
         $options->replacesubexprcalls = true;
+        if ($options->fuzzymatch) {
+            $options->mergeassertions = true;
+        }
 
         parent::__construct($regex, $options);
 
