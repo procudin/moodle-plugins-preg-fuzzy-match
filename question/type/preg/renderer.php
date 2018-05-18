@@ -80,7 +80,7 @@ class qtype_preg_renderer extends qtype_shortanswer_renderer {
                 if ($qa->get_last_step()->has_behaviour_var('_render_'.$hintkey)) {
                     $hintobj = $question->hint_object($hintkey);
                     $hintmessage .= $hintobj->render_hint($this, $qa, $options, array('answer' => $currentanswer)) . $br;
-                    if ($hintkey == 'hintnextchar' || $hintkey == 'hintnextlexem') {
+                    if ($hintkey == 'hintnextchar' || $hintkey == 'hintnextlexem' || $hintkey == 'hinthowtofixpic') {
                         $coloredhintrendered = true;
                     }
                 }
