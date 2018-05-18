@@ -178,6 +178,28 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('exactmatch', 'exactmatch', 'qtype_preg');
         $mform->setDefault('exactmatch', 1);
 
+        $mform->addElement('selectyesno', 'fuzzymatch', get_string('fuzzymatch', 'qtype_preg'));
+        $mform->addHelpButton('fuzzymatch', 'fuzzymatch', 'qtype_preg');
+        $mform->setDefault('fuzzymatch', 1);
+
+        $mform->addElement('text', 'maxerrors', get_string('maxerrors', 'qtype_preg'), array('size' => 3));
+        $mform->setDefault('maxerrors', '2');
+        $mform->setType('maxerrors', PARAM_INT);
+        $mform->addHelpButton('maxerrors', 'maxerrors', 'qtype_preg');
+
+        $mform->addElement('text', 'errorspenalty', get_string('errorspenalty', 'qtype_preg'), array('size' => 3));
+        $mform->setDefault('errorspenalty', '0.07');
+        $mform->setType('errorspenalty', PARAM_FLOAT);
+        $mform->addHelpButton('errorspenalty', 'errorspenalty', 'qtype_preg');
+
+        $mform->addElement('selectyesno', 'usehowtofixpichint', get_string('usehowtofixpichint', 'qtype_preg'));
+        $mform->setDefault('usehowtofixpichint', 1);
+        $mform->addHelpButton('usehowtofixpichint', 'usehowtofixpichint', 'qtype_preg');
+        $mform->addElement('text', 'howtofixpichintpenalty', get_string('howtofixpichintpenalty', 'qtype_preg'), array('size' => 3));
+        $mform->setDefault('howtofixpichintpenalty', '0.4');
+        $mform->setType('howtofixpichintpenalty', PARAM_FLOAT);
+        $mform->addHelpButton('howtofixpichintpenalty', 'howtofixpichintpenalty', 'qtype_preg');
+
         $mform->addElement('text', 'correctanswer', get_string('correctanswer', 'qtype_preg'), array('size' => 54));
         $mform->addHelpButton('correctanswer', 'correctanswer', 'qtype_preg');
         $mform->setType('correctanswer', PARAM_RAW);
