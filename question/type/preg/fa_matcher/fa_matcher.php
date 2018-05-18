@@ -281,7 +281,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     list($flag,$char) = $tr->next_character($str, $str, $curpos,0,$newstate);
 
                     // If successfull generated.
-                    if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && strlen($char = $char->string()) > 0) {
+                    if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && ($tmplength = $char->length()) > 0) {
                         $result = true;
 
                         // Add substitution.
@@ -341,7 +341,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 list($flag, $char) = $tr->next_character($str, $str, $curpos, 0, $newstate);
 
                 // If successfull generated.
-                if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && strlen($char = $char->string()) > 0) {
+                if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && $char->length() > 0) {
                     $result = true;
                     // Add insertion
                     $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, $char));
