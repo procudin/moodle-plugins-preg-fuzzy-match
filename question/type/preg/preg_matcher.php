@@ -411,7 +411,7 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
     /** @var boolean Should matcher try to generate extension? */
     public $extensionneeded = true;
     /** @var boolean Should matcher use fuzzy matching */
-    public $fuzzymathing = false;
+    public $fuzzymatch = false;
     /** @var string Unicode property name for preferred alphabet for \w etc when generating extension.*/
     public $preferredalphabet = null;
     /** @var string Unicode property name for preferred characters for dot meta-character when generating extension.*/
