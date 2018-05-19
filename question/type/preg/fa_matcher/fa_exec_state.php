@@ -634,13 +634,6 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             return false;
         }
 
-        // Check for transposition candidate.
-        if ($thiserrcount > 0 && $this->transpositioncandidate && !$other->transpositioncandidate) {
-            return true;
-        } else if ($thiserrcount > 0 && !$this->transpositioncandidate && $other->transpositioncandidate) {
-            return false;
-        }
-
         // Choose by typo priority.
         if ($thiserrcount > 0) {
             if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) > $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
