@@ -65,7 +65,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     }
 
     public function get_errors_limit() {
-        return $this->maxerrors;
+        if ($this->options->fuzzymatch) {
+            return $this->maxerrors;
+        }
+        return 0;
     }
 
     protected function get_engine_node_name($nodetype, $nodesubtype) {
@@ -263,6 +266,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $result = $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
 
             $ischartransition = $tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET;
+            $isassert = $tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_ASSERT && $fuzzyenabled;
             $checkfortranspositioncandidate = $ischartransition && $fuzzyenabled;
             if ($result) {
                 // Check for transpositions
@@ -296,6 +300,37 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::SUBSTITUTION, $curpos, $char));
                         $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                     }
+                }
+            } else if ($isassert) {
+                $errorscount = $newstate->errors->count();
+                switch ($tr->pregleaf->subtype) {
+                    case qtype_preg_leaf_assert::SUBTYPE_ESC_A:
+                        if ($errorscount + $curpos <= $this->currentmaxerrors) {
+                            for ($pos = 0; $pos < $curpos; $pos++) {
+                                $newstate->errors->add(qtype_preg_typo::DELETION, $pos);
+                            }
+                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
+                        }
+                        break;
+
+                    case qtype_preg_leaf_assert::SUBTYPE_SMALL_ESC_Z:
+                        $strlen = $str->length();
+                        if ($errorscount + $strlen - $curpos <= $this->currentmaxerrors) {
+                            for ($pos = $curpos; $pos < $curpos; $pos++) {
+                                $newstate->errors->add(qtype_preg_typo::DELETION, $pos);
+                            }
+                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
+                        }
+                        break;
+
+                    case qtype_preg_leaf_assert::SUBTYPE_DOLLAR:
+                    case qtype_preg_leaf_assert::SUBTYPE_CAPITAL_ESC_Z:
+                    case qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX:
+                        if ($errorscount < $this->currentmaxerrors) {
+                            $newstate->errors->add(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n"));
+                        }
+                        $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
+                        break;
                 }
             } else {
                 $newstate->length += $tmplength;
