@@ -347,7 +347,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         // Test data without modification with bigger error limit, same as normal matching
         $tmpdata = $testdata;
-        $tmpdata['errorslimit'] = rand(2,4);
+        $tmpdata['errorslimit'] = mt_rand(2,4);
         $result []= $tmpdata;
 
         // If string too short
@@ -357,15 +357,15 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         // Test data with 1 substitution
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 1);
-        $result [] = $this->create_error($testdata, qtype_preg_typo::SUBSTITUTION, $ind, chr(rand(0, 127)));
+        $result [] = $this->create_error($testdata, qtype_preg_typo::SUBSTITUTION, $ind, chr(mt_rand(0, 127)));
 
         // Test data with 1 insertion
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 1);
-        $result [] = $this->create_error($testdata, qtype_preg_typo::INSERTION, $ind, chr(rand(0, 127)));
+        $result [] = $this->create_error($testdata, qtype_preg_typo::INSERTION, $ind, chr(mt_rand(0, 127)));
 
         // Test data with 1 deletion
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 1);
-        $result [] = $this->create_error($testdata, qtype_preg_typo::DELETION, $ind, chr(rand(0, 127)));
+        $result [] = $this->create_error($testdata, qtype_preg_typo::DELETION, $ind, chr(mt_rand(0, 127)));
 
         // Test data with 1 transposition
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 2);
@@ -373,7 +373,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         // Test data with 1 random error and 0-error limit (should fails or returns better result)
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 2);
-        $tmpdata = $this->create_error($testdata, 2 ** rand(0, 3), $ind, rand(1, 127));
+        $tmpdata = $this->create_error($testdata, 2 ** mt_rand(0, 3), $ind, mt_rand(1, 127));
         $tmpdata['is_match'] = false;
         $tmpdata['full'] = false;
         $tmpdata['errorslimit'] = 0;
@@ -460,7 +460,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         $result['errorslimit']++;
 
         // Random errorslimit increase.
-        if (rand(0,4) === 0) {
+        if (mt_rand(0,4) === 0) {
             $result['errorslimit']++;
         }
 
