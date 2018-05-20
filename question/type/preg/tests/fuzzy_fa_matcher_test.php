@@ -334,6 +334,16 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
     protected function make_errors($testdata) {
         $result = [];
+
+        //$result = array_merge($result,$this->make_simple_errors($testdata));
+        //$result = array_merge($result,$this->make_nearby_errors($testdata));
+        $result = array_merge($result,$this->make_consecutive_errors($testdata));
+
+        return $result;
+    }
+
+    protected function make_simple_errors($testdata) {
+        $result = [];
         $errorspositions = [];
 
         $str = $testdata['str'];
@@ -382,10 +392,79 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         return $result;
     }
 
-    protected function generate_unique_random_number($from, $to, $oldnumbers = [], $typotype = -1) {
+    protected function make_nearby_errors($testdata) {
+        $result = [];
+        $errorspositions = [];
+
+        $str = $testdata['str'];
+        $ind0 = $testdata['index_first'][0];
+        $len0 = $testdata['length'][0];
+
+        if ($str=='xxxx') {
+            $debug = 0;
+        }
+
+        // If string too short
+        if ($len0 < 5) {
+            return $result;
+        }
+
+        for($i = 1; $i <= 8; $i*=2) {
+            for($j = 1; $j <= 8; $j*=2) {
+                $rightborder = ($i == 8 && $j == 8) ? 4 : (($i == 8 || $j == 8) ? 3 : 2);
+                $ind1 = $this->generate_unique_random_number($ind0, $ind0 + $len0 - $rightborder);
+                $data = $this->create_error($testdata, $i, $ind1, chr(mt_rand(0, 127)));
+                $data = $this->create_error($data, $j, $ind1 + ($i == 8 ? 2 : (($i == 1)? 0 : 1)), chr(mt_rand(0, 127)));
+                $result [] = $data;
+            }
+        }
+
+        return $result;
+    }
+
+    protected function make_consecutive_errors($testdata) {
+        $result = [];
+        $errorspositions = [];
+
+        $str = $testdata['str'];
+        $ind0 = $testdata['index_first'][0];
+        $len0 = $testdata['length'][0];
+
+        // If string too short
+        if ($len0 < 5) {
+            return $result;
+        }
+
+        // Insertions, deletions, substitutions
+        for($i = 1; $i <= 4; $i*=2) {
+            $count = $this->generate_unique_random_number(0, $len0);
+            $first = $this->generate_unique_random_number($ind0, $ind0 + $len0 - $count);
+            $data = $testdata;
+            for ($j = 0; $j < $count; $j++) {
+                $data = $this->create_error($data, $i, $first, chr(mt_rand(0, 127)));
+                if ($i != 1) {
+                    $first++;
+                }
+            }
+            $result [] = $data;
+        }
+
+        // Transpositions
+        $count = $this->generate_unique_random_number(0, $len0 / 2) ;
+        $first = $this->generate_unique_random_number($ind0, $ind0 + $len0 - $count * 2);
+        $data = $testdata;
+        for ($i = 0; $i < $count; $i++, $first+=2) {
+            $data = $this->create_error($data, qtype_preg_typo::TRANSPOSITION, $first, chr(mt_rand(0, 127)));
+        }
+        $result [] = $data;
+
+        return $result;
+    }
+
+    protected function generate_unique_random_number($from, $to, $oldnumbers = null, $typotype = -1) {
         $numb = mt_rand($from, $to);
 
-        if (empty($oldnumbers)) {
+        if ($oldnumbers === null) {
             return $numb;
         }
 
