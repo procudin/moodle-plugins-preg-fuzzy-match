@@ -486,7 +486,7 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
 
 
     public function get_errors_limit() {
-        throw new qtype_preg_exception('Error: fuzzy matching has not been implemented for '.$this->name().' class');
+        return 0;
     }
 
 
@@ -644,7 +644,7 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
         $result->set_source_info($str, $this->get_max_subexpr(), $this->get_subexpr_name_to_number_map());
         $result->invalidate_match();
 
-        if ($this->anchor->start) {
+        if ($this->anchor->start && $this->get_errors_limit() === 0) {
             // The regex is anchored from start, so we really should check only start of the string and every line break if necessary.
             // Results for other offsets would be same.
             $rightborders = array(0);
