@@ -1013,8 +1013,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         }
                     } else if ($transition->pregleaf->type !== qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL) {
                         // Handle a non-recursive transition transition
-                        $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, true,
-                                $this->options->fuzzymatch && $this->maxerrors >= $curstate->errors->count());
+                        $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, true);
 
                         if ($full) {
 
@@ -1114,9 +1113,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
             foreach ($reached as $newstates) {
                 foreach ($newstates as $newstate) {
-                    if ($newstate->errors->count() > $this->maxerrors) {
-                        continue;
-                    }
+
+                    //if ($newstate->errors->count() > $this->currentmaxerrors) {
+                    //   continue;
+                    //}
 
                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
                     self::ensure_index_exists($states, $index->recursionlevel, $index->state, null);
