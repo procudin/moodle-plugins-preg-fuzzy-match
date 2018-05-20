@@ -53,6 +53,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     // Max number of errors for fuzzy matching
     public $maxerrors = 0;
 
+    // Max number of errors for current match
+    protected $currentmaxerrors = 0;
+
     public function name() {
         return 'fa_matcher';
     }
@@ -253,7 +256,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $full = true;
 
         $fuzzyenabled = $this->options->fuzzymatch;
-        $trysubstitution = $fuzzyenabled && $newstate->errors->count() < $this->maxerrors;
+        $trysubstitution = $fuzzyenabled && $newstate->errors->count() < $this->currentmaxerrors;
 
         foreach ($transitions as $tr) {
             $tmplength = 0;
@@ -483,7 +486,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                 // If char transition
                 if ($transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
-                    if (!$this->options->fuzzymatch || $this->maxerrors <= $curstate->errors->count()) {
+                    if (!$this->options->fuzzymatch || $this->currentmaxerrors <= $curstate->errors->count()) {
                         // If fuzzy disabled or too many errors.
                         continue;
                     }
@@ -1031,7 +1034,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
 
                 // Try to deletion pseudo transition.
-                if ($this->options->fuzzymatch && $this->maxerrors > $curstate->errors->count()) {
+                if ($this->options->fuzzymatch && $this->currentmaxerrors > $curstate->errors->count()) {
                     $newstate = $this->match_deletion_pseudotransitions($curstate, $curpos);
                     if ($newstate !== null) {
                         self::ensure_index_exists($reached,$index->recursionlevel,$from,null);
@@ -1091,6 +1094,12 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         if ($startpos + $newstate->length <= $str->length()) {
                             $curstates[] = $index;
                         }
+
+                        // If newstate is full and contains lower errors.
+                        if ($newstate->is_full() && $newstate->recursion_level() === 0 && $newstate->errors->count() < $this->currentmaxerrors) {
+                            $this->currentmaxerrors = $newstate->errors->count();
+                        }
+
                         ++$statescount;
                         $endstatereached = $endstatereached || ($newstate->recursion_level() === 0 && $newstate->is_full());
                     }
@@ -1197,6 +1206,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         if ($this->automaton->is_empty()) {
             $result = $this->create_initial_state(null, $str, $startpos);
             return $result->to_matching_results();
+        }
+
+        if ($startpos == 0) {
+            $this->currentmaxerrors = $this->maxerrors;
         }
 
         // Find all possible matches. Using the fast match method if there are no backreferences.
