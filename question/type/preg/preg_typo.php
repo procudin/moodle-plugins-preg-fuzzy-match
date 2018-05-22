@@ -93,9 +93,9 @@ class qtype_preg_typo {
                 //$string[$this->position] = $this->char;
                 break;
             case self::TRANSPOSITION:
-                $tmp = $string[$this->position];
-                $string[$this->position] = $string[$this->position + 1];
-                $string[$this->position + 1] = $tmp;
+                $tmp1 = utf8_string::substr($string,$this->position,1);
+                $tmp2 = utf8_string::substr($string,$this->position + 1,1);
+                $string = utf8_string::substr($string, 0, $this->position) . $tmp2 . $tmp1 . utf8_string::substr($string, $this->position + 2);
                 break;
             case self::INSERTION:
                 $string = utf8_string::substr($string, 0, $this->position) . $this->char . utf8_string::substr($string, $this->position);
