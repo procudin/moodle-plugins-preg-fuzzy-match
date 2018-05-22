@@ -274,8 +274,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         $newstate->transpositioncandidate && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)) {
                     $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
                     $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
-                    $newstate->transpositioncandidate = false;
-                    $checkfortranspositioncandidate = false;
                 }
                 $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 //echo "passed $tr\n";
@@ -286,8 +284,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 if ($newstate->transpositioncandidate && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)) {
                     $result = true;
                     $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION,$curpos - 1);
-                    $newstate->transpositioncandidate = false;
-                    $checkfortranspositioncandidate = false;
                     $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
                     $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 } else if ($trysubstitution){
@@ -309,6 +305,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                             for ($pos = 0; $pos < $curpos; $pos++) {
                                 $newstate->errors->add(qtype_preg_typo::DELETION, $pos);
                             }
+                            $newstate->length += $curpos;
+                            $newstate->startpos = 0;
+                            $newstate->transpositioncandidate = false;
                             $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                         }
                         break;
@@ -319,6 +318,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                             for ($pos = $curpos; $pos < $curpos; $pos++) {
                                 $newstate->errors->add(qtype_preg_typo::DELETION, $pos);
                             }
+                            $newstate->length += $strlen - $curpos;
+                            $curpos += $strlen - $curpos;
+                            $newstate->transpositioncandidate = false;
                             $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                         }
                         break;
@@ -329,6 +331,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         if ($errorscount < $this->currentmaxerrors) {
                             $newstate->errors->add(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n"));
                         }
+                        $newstate->transpositioncandidate = false;
                         $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                         break;
                 }
