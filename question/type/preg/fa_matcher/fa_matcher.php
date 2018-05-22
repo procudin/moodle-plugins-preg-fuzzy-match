@@ -519,6 +519,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 $length = 0;
                 $full = true;
 
+
+                $empty = $transition->pregleaf->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY
+                        || $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor());
+
                 // If char transition
                 if ($transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
                     if (!$this->options->fuzzymatch || $this->currentmaxerrors <= $curstate->errors->count()) {
@@ -526,10 +530,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         continue;
                     }
                     $newstate = $this->match_insertion_pseudotransition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks);
-                } else if ($transition->pregleaf->subtype != qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
-                    continue;
-                } else {
+                } else if ($empty) {
                     $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks);
+                } else {
+                    continue;
                 }
 
                 if (!$full) {
@@ -985,7 +989,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 //echo "\n";
 
                 foreach ($transitions as $transition) {
-                    if ($transition->pregleaf->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY) {
+                    if ($transition->pregleaf->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY
+                            || $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor())) {
                         continue;
                     }
 
