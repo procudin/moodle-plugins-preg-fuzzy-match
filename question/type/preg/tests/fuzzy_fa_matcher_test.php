@@ -8,6 +8,8 @@ require_once($CFG->dirroot . '/question/type/preg/tests/cross_tester.php');
 $CFG->qtype_preg_fa_transition_limit = 10000;
 $CFG->qtype_preg_fa_state_limit = 10000;
 
+use \qtype_poasquestion\utf8_string;
+
 class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
     public function engine_name() {
@@ -506,23 +508,23 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         switch ($errtype) {
             case qtype_preg_typo::SUBSTITUTION:
-                $newstr[$pos] = $char;
+                $newstr = utf8_string::substr($newstr, 0, $pos) . $char . utf8_string::substr($newstr, $pos + 1);
                 $result['errors'][qtype_preg_typo::SUBSTITUTION] []= ['pos' => $pos, 'char' => $str[$pos]];
                 break;
             case qtype_preg_typo::INSERTION:
                 // Delete insertable char
-                $newstr = substr_replace($newstr, '', $pos, 1);
+                $newstr = utf8_string::substr($newstr, 0, $pos) . utf8_string::substr($newstr, $pos + 1);
                 $result['errors'][qtype_preg_typo::INSERTION] []= ['pos' => $pos, 'char' => $str[$pos]];
                 break;
             case qtype_preg_typo::DELETION:
                 // Insert deletable char
-                $newstr = substr_replace($newstr, $char, $pos, 0);
+                $newstr = utf8_string::substr($newstr, 0, $pos) . $char . utf8_string::substr($newstr, $pos);
                 $result['errors'][qtype_preg_typo::DELETION] []= ['pos' => $pos, 'char' => $char];
                 break;
             case qtype_preg_typo::TRANSPOSITION:
-                $tmp = $newstr[$pos];
-                $newstr[$pos] = $newstr[$pos + 1];
-                $newstr[$pos + 1] = $tmp;
+                $tmp1 = utf8_string::substr($newstr, $pos, 1);
+                $tmp2 = utf8_string::substr($newstr, $pos + 1, 1);
+                $newstr = utf8_string::substr($newstr, 0, $pos) . $tmp2 . $tmp1 . utf8_string::substr($newstr, $pos + 2);
                 $result['errors'][qtype_preg_typo::TRANSPOSITION] []= ['pos' => $pos, 'char' => $char];
                 break;
         }
