@@ -51,7 +51,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     protected $maxstatescount = 1000;
 
     // Max number of errors for fuzzy matching
-    public $maxerrors = 0;
+    protected $maxerrors = 0;
 
     // Max number of errors for current match
     protected $currentmaxerrors = 0;
