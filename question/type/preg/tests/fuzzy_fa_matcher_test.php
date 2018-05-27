@@ -107,7 +107,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                         //$slowbuildtests[] = $classname . ' : ' . $methodname;
                     }
 
-                    $matcher->maxerrors = !isset($fuzzyexpected['errorslimit'])? 0 : $fuzzyexpected['errorslimit'];
+                    $matcher->set_errors_limit((int)(!isset($fuzzyexpected['errorslimit'])? 0 : $fuzzyexpected['errorslimit']));
 
                     //if ($regex =='a\Sb' && ($str == 'ab') /*&& $expectederrorslimit === 1*/) {
                     //    $qweqwe = 0;
@@ -249,7 +249,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         if ($isbetter && $obtained->full) {
             $strafterapplying = $obtained->errors->apply($str);
 
-            $matcher->maxerrors = 0;
+            $matcher->set_errors_limit(0);
 
             $obtainedafterapplying = $matcher->match($strafterapplying);
 
