@@ -258,133 +258,34 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $newstate = clone $curstate;
         $length = 0;
         $full = true;
-
         $fuzzyenabled = $this->options->fuzzymatch && $this->currentmaxerrors > 0;
-        $trysubstitution = $fuzzyenabled && $newstate->errors->count() < $this->currentmaxerrors;
 
         foreach ($transitions as $tr) {
             $tmplength = 0;
             $result = $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
 
             $ischartransition = $tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET;
-            $isassert = $tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_ASSERT && $fuzzyenabled && $newstate->errors->count() <= $this->currentmaxerrors;
             $checkfortranspositioncandidate = $fuzzyenabled && $ischartransition;
             if ($result) {
-                // Check for transpositions
-                if ($newstate->transpositioncandidate && $fuzzyenabled && $ischartransition && $curpos < $str->length() && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)
+                // Check for transpositions if current char passed.
+                if ($fuzzyenabled && $newstate->transpositioncandidate && $ischartransition && $curpos < $str->length() && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)
                         && ($newstate->transpositionpromise || $newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $curpos - 1))) {
                     $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
                     $newstate->transpositionpromise = false;
                     $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
                 }
+
                 $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 //echo "passed $tr\n";
-            } else if ($fuzzyenabled && $ischartransition && $curpos < $str->length()) {
-                $tmplength = 1;
-
-                // If transposition
-                if ($newstate->transpositioncandidate && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)) {
-                    $result = true;
-                    $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION,$curpos - 1);
-                    $newstate->transpositionpromise = false;
-                    $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
-                    $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                } else if ($trysubstitution){
-                    // Try to generate transition character.
-                    list($flag,$char) = $tr->next_character($str, $str, $curpos,0,$newstate);
-                    // If successfull generated.
-                    if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && ($tmplength = $char->length()) > 0) {
-                        $result = true;
-                        // Add substitution.
-                        $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::SUBSTITUTION, $curpos, $char));
-                        $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                    }
-                }
-            } else if ($isassert) {
-                $errorscount = $newstate->errors->count();
-                $strlen = $str->length();
-                $subtype = $tr->pregleaf->subtype;
-                switch (true) {
-                    case $subtype == qtype_preg_leaf_assert::SUBTYPE_ESC_A:
-                        if ($errorscount + $curpos <= $this->currentmaxerrors) {
-                            for ($pos = 0; $pos < $curpos; $pos++) {
-                                $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
-                            }
-                            $result = true;
-                            $newstate->length = $curpos;
-                            $newstate->startpos = 0;
-                            $newstate->transpositioncandidate = false;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                        }
-                        break;
-                    case $subtype == qtype_preg_leaf_assert::SUBTYPE_CAPITAL_ESC_Z:
-                        if ($newstate->transpositioncandidate && ($tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate) || $curpos == $strlen - 1 && $str[$curpos - 1] == "\n")) {
-                            $result = true;
-                            $newstate->transpositionpromise = true;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength1, $addbacktracks);
-                        } else if ($errorscount + $strlen - $curpos <= $this->currentmaxerrors) {
-                            for ($pos = $curpos; $pos < $strlen; $pos++) {
-                                $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
-                            }
-                            $result = true;
-                            $newstate->length += $strlen - $curpos;
-                            $curpos += $strlen - $curpos;
-                            $newstate->transpositioncandidate = false;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                        }
-                        break;
-                    case $subtype == qtype_preg_leaf_assert::SUBTYPE_SMALL_ESC_Z:
-                        // If we can delete all characters from current
-                        if ($errorscount + $strlen - $curpos <= $this->currentmaxerrors) {
-                            for ($pos = $curpos; $pos < $strlen; $pos++) {
-                                $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
-                            }
-                            $result = true;
-                            $newstate->length += $strlen - $curpos;
-                            $curpos += $strlen - $curpos;
-                            $newstate->transpositioncandidate = false;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                        }
-                        break;
-                    case $subtype == qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX:
-                        if ($newstate->transpositioncandidate && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)) {
-                            $result = true;
-                            $newstate->transpositionpromise = true;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength1, $addbacktracks);
-                        } else if ($curpos == 1) {
-                            $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
-                            $result = true;
-                            $newstate->length = $curpos;
-                            $newstate->startpos = 0;
-                            $newstate->transpositioncandidate = false;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                        } else {
-                            $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
-                            $result = true;
-                            $newstate->transpositioncandidate = false;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                        }
-                        break;
-                    case $subtype == qtype_preg_leaf_assert::SUBTYPE_DOLLAR:
-                        //$tmpstr = new \qtype_poasquestion\utf8_string(\qtype_poasquestion\utf8_string::substr($str, 0, $curpos));
-                        if ($newstate->transpositioncandidate && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)) {
-                            $result = true;
-                            $newstate->transpositionpromise = true;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength1, $addbacktracks);
-                        } else if ($curpos == $strlen - 1) {
-                            $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
-                            $result = true;
-                            $newstate->length += 1;
-                            $curpos += 1;
-                            $newstate->transpositioncandidate = false;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                        } else {
-                            $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
-                            $result = true;
-                            $newstate->transpositioncandidate = false;
-                            $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                        }
-                        break;
+            } else if ($fuzzyenabled) {
+                // Try to pseudotransitions.
+                if ($ischartransition && $curpos < $str->length()) {
+                    // Try substitutions && transpositions.
+                    $trysubstitution = $fuzzyenabled && $newstate->errors->count() < $this->currentmaxerrors;
+                    $result = $this->match_substitution_and_transposition_pseudotransition($newstate, $tr, $str, $curpos, $tmplength, $addbacktracks, $trysubstitution, $fuzzyenabled);
+                } else if ($tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_ASSERT) {
+                    // Try to assert pseudotransition.
+                    $result = $this->match_assert_pseudotransition($newstate, $tr, $str, $curpos, $addbacktracks);
                 }
             } else {
                 $newstate->length += $tmplength;
@@ -419,6 +320,126 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         return $newstate;
     }
 
+    protected function match_substitution_and_transposition_pseudotransition($curstate, $transition, $str, &$curpos, &$length, $addbacktracks, $trysubstitution, $trytransposition) {
+        $result = false;
+        $length = 0;
+
+        if ($trytransposition && $curstate->transpositioncandidate && $transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate)) {
+            // If transposition.
+            $result = true;
+            $length = 1;
+            $curstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
+            $curstate->transpositionpromise = false;
+            $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
+            $this->after_transition_passed($curstate, $transition, $curpos, $length, $addbacktracks);
+        } else if ($trysubstitution) {
+            // If substitution.
+            // Try to generate transition character.
+            list($flag, $char) = $transition->next_character($str, $str, $curpos, 0, $curstate);
+            if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && ($length = $char->length()) > 0) {
+                // If successfull generated.
+                $result = true;
+                $length = 1;
+                $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::SUBSTITUTION, $curpos, $char));
+                $this->after_transition_passed($curstate, $transition, $curpos, $length, $addbacktracks);
+            }
+        }
+
+        return $result;
+    }
+
+    protected function match_assert_pseudotransition($curstate, $transition, $str, &$curpos, $addbacktracks) {
+        $result = false;
+        $errorscount = $curstate->errors->count();
+        $strlen = $str->length();
+        $subtype = $transition->pregleaf->subtype;
+        switch ($subtype) {
+            case qtype_preg_leaf_assert::SUBTYPE_ESC_A:
+                if ($errorscount + $curpos <= $this->currentmaxerrors) {
+                    for ($pos = 0; $pos < $curpos; $pos++) {
+                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
+                    }
+                    $result = true;
+                    $curstate->length = $curpos;
+                    $curstate->startpos = 0;
+                    $curstate->transpositioncandidate = false;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                }
+                break;
+            case qtype_preg_leaf_assert::SUBTYPE_CAPITAL_ESC_Z:
+                if ($curstate->transpositioncandidate && ($transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate) || $curpos == $strlen - 1 && $str[$curpos - 1] == "\n")) {
+                    $result = true;
+                    $curstate->transpositionpromise = true;
+                    $this->after_transition_passed($curstate, $transition, $curpos, $tmplength1, $addbacktracks);
+                } else if ($errorscount + $strlen - $curpos <= $this->currentmaxerrors) {
+                    for ($pos = $curpos; $pos < $strlen; $pos++) {
+                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
+                    }
+                    $result = true;
+                    $curstate->length += $strlen - $curpos;
+                    $curpos += $strlen - $curpos;
+                    $curstate->transpositioncandidate = false;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                }
+                break;
+            case qtype_preg_leaf_assert::SUBTYPE_SMALL_ESC_Z:
+                if ($errorscount + $strlen - $curpos <= $this->currentmaxerrors) {
+                    // If we can delete all characters from current.
+                    for ($pos = $curpos; $pos < $strlen; $pos++) {
+                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
+                    }
+                    $result = true;
+                    $curstate->length += $strlen - $curpos;
+                    $curpos += $strlen - $curpos;
+                    $curstate->transpositioncandidate = false;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                }
+                break;
+            case qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX:
+                if ($curstate->transpositioncandidate && $transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate)) {
+                    $result = true;
+                    $curstate->transpositionpromise = true;
+                    $this->after_transition_passed($curstate, $transition, $curpos, $tmplength1, $addbacktracks);
+                } else if ($errorscount < $this->currentmaxerrors) {
+                    if ($curpos == 1) {
+                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
+                        $result = true;
+                        $curstate->length = $curpos;
+                        $curstate->startpos = 0;
+                        $curstate->transpositioncandidate = false;
+                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                    } else {
+                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
+                        $result = true;
+                        $curstate->transpositioncandidate = false;
+                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                    }
+                }
+                break;
+            case qtype_preg_leaf_assert::SUBTYPE_DOLLAR:
+                if ($curstate->transpositioncandidate && $transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate)) {
+                    $result = true;
+                    $curstate->transpositionpromise = true;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                } else if ($errorscount < $this->currentmaxerrors) {
+                    if ($curpos == $strlen - 1) {
+                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
+                        $result = true;
+                        $curstate->length += 1;
+                        $curpos += 1;
+                        $curstate->transpositioncandidate = false;
+                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                    } else {
+                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
+                        $result = true;
+                        $curstate->transpositioncandidate = false;
+                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                    }
+                }
+                break;
+        }
+        return $result;
+    }
 
     protected function match_insertion_pseudotransition($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks) {
         $transitions = array_merge($transition->mergedbefore, array($transition), $transition->mergedafter);
