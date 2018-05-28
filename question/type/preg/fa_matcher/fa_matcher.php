@@ -258,7 +258,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $newstate = clone $curstate;
         $length = 0;
         $full = true;
-        $fuzzyenabled = $this->options->fuzzymatch && $this->currentmaxerrors > 0;
+        $fuzzyenabled = $this->currentmaxerrors > 0;
 
         foreach ($transitions as $tr) {
             $tmplength = 0;
@@ -292,7 +292,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             }
 
             if ($result && $checkfortranspositioncandidate) {
-                $newstate->transpositioncandidate = $trysubstitution && $curpos + 1 < $str->length() && $tr->pregleaf->match($str, $curpos + 1, $tmplength1, $newstate);
+                $newstate->transpositioncandidate = $curpos + 1 < $str->length() && $tr->pregleaf->match($str, $curpos + 1, $tmplength1, $newstate);
             }
 
             // Increase curpos and length anyways, even if the match is partial (backrefs)
@@ -582,6 +582,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
      */
     protected function epsilon_closure($startstates, $str, $addbacktracks) {
         $curstates = $startstates;
+        $fuzzyenabled = $this->currentmaxerrors > 0;
         $result = array(\qtype_preg\fa\transition::GREED_LAZY => array(),
                         \qtype_preg\fa\transition::GREED_GREEDY => $startstates
                         );
@@ -596,7 +597,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
 
                 $empty = $transition->pregleaf->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY
-                        || $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor());
+                        || $fuzzyenabled && $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor());
 
                 // If char transition
                 if ($transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
@@ -1065,7 +1066,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                 foreach ($transitions as $transition) {
                     if ($transition->pregleaf->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY
-                            || $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor())) {
+                            || $this->currentmaxerrors > 0 && $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor())) {
                         continue;
                     }
 
@@ -1323,8 +1324,12 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             return $result->to_matching_results();
         }
 
-        if ($startpos == 0) {
-            $this->currentmaxerrors = $this->maxerrors;
+        if ($this->options->fuzzymatch) {
+            if ($startpos == 0) {
+                $this->currentmaxerrors = $this->maxerrors;
+            }
+        } else {
+            $this->currentmaxerrors = 0;
         }
 
         // Find all possible matches. Using the fast match method if there are no backreferences.
