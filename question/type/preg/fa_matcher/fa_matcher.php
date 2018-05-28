@@ -1324,12 +1324,14 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             return $result->to_matching_results();
         }
 
-        if ($this->options->fuzzymatch) {
+        if ($this->options->fuzzymatch && $this->maxerrors > 0) {
             if ($startpos == 0) {
                 $this->currentmaxerrors = $this->maxerrors;
             }
+            $fuzzyenabled = true;
         } else {
             $this->currentmaxerrors = 0;
+            $fuzzyenabled = false;
         }
 
         // Find all possible matches. Using the fast match method if there are no backreferences.
@@ -1353,6 +1355,14 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $fullmatchexists = true;
                     break;
                 }
+            }
+
+            // If fuzzy match failed run partial match.
+            if (!$fullmatchexists && $fuzzyenabled) {
+                $this->options->fuzzymatch = false;
+                $possiblematches = $this->bruteforcematch
+                        ? $this->match_brute_force($str, $startpos)
+                        : $this->match_fast($str, $startpos);
             }
 
             // If there was no full match, generate extensions for each partial match.
@@ -1391,6 +1401,11 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         if ($result->extendedmatch !== null) {
             $result->extendedmatch = $result->extendedmatch->to_matching_results();
             $result->extendedmatch->extendedmatch = null;   // Holy cow, this is ugly
+        }
+
+        // Enable fuzzy matching.
+        if ($fuzzyenabled) {
+            $this->options->fuzzymatch = true;
         }
 
         return $result->to_matching_results();
