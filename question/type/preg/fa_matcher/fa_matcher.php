@@ -1359,7 +1359,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
             // If fuzzy match failed run partial match.
             if (!$fullmatchexists && $fuzzyenabled) {
-                $this->options->fuzzymatch = false;
+                $this->currentmaxerrors = 0;
                 $possiblematches = $this->bruteforcematch
                         ? $this->match_brute_force($str, $startpos)
                         : $this->match_fast($str, $startpos);
@@ -1401,11 +1401,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         if ($result->extendedmatch !== null) {
             $result->extendedmatch = $result->extendedmatch->to_matching_results();
             $result->extendedmatch->extendedmatch = null;   // Holy cow, this is ugly
-        }
-
-        // Enable fuzzy matching.
-        if ($fuzzyenabled) {
-            $this->options->fuzzymatch = true;
         }
 
         return $result->to_matching_results();
