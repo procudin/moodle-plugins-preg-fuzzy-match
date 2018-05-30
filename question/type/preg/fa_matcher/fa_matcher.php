@@ -1329,6 +1329,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 $this->currentmaxerrors = $this->maxerrors;
             }
             $fuzzyenabled = true;
+            $preverrorscount = $this->currentmaxerrors;
         } else {
             $this->currentmaxerrors = 0;
             $fuzzyenabled = false;
@@ -1359,6 +1360,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
             // If fuzzy match failed run partial match.
             if (!$fullmatchexists && $fuzzyenabled) {
+                $preverrorscount = $this->currentmaxerrors;
                 $this->currentmaxerrors = 0;
                 $possiblematches = $this->bruteforcematch
                         ? $this->match_brute_force($str, $startpos)
@@ -1401,6 +1403,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         if ($result->extendedmatch !== null) {
             $result->extendedmatch = $result->extendedmatch->to_matching_results();
             $result->extendedmatch->extendedmatch = null;   // Holy cow, this is ugly
+        }
+
+        if ($fuzzyenabled) {
+            $this->currentmaxerrors = $preverrorscount;
         }
 
         return $result->to_matching_results();
