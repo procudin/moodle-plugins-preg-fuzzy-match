@@ -255,7 +255,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     /**
      * Matches an array of transitions. If all transitions are matched, that means a full match. Partial match otherwise.
      */
-    protected function match_transitions($curstate, $transitions, $str, $curpos, &$length, &$full, $addbacktracks, $tryfuzzy = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
+    protected function match_transitions($curstate, $transitions, $str, $curpos, &$length, &$full, $addbacktracks, $consumeschar = true, $tryfuzzy = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
         $newstate = clone $curstate;
         $length = 0;
         $full = true;
@@ -282,7 +282,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $result = $this->match_character_pseudotransition($newstate, $tr, $str, $curpos, $tmplength, $addbacktracks, $pseudotype);
                 } else if ($tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_ASSERT) {
                     // Try match assert pseudotransition.
-                    $result = $this->match_assert_pseudotransition($newstate, $tr, $str, $curpos, $addbacktracks, count($transitions) > 1);
+                    $result = $this->match_assert_pseudotransition($newstate, $tr, $str, $curpos, $addbacktracks, $consumeschar);
                 }
             } else {
                 $newstate->length += $tmplength;
@@ -449,7 +449,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
      */
     protected function match_regular_transition($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks, $tryfuzzy = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
         $transitions = array_merge($transition->mergedbefore, array($transition), $transition->mergedafter);
-        $newstate = $this->match_transitions($curstate, $transitions, $str, $curpos, $length, $full, $addbacktracks, $tryfuzzy, $pseudotype);
+        $newstate = $this->match_transitions($curstate, $transitions, $str, $curpos, $length, $full, $addbacktracks, $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET, $tryfuzzy, $pseudotype);
         $this->set_last_transition($newstate, $transition, $newstate->length - $curstate->length, !$full);
         return $newstate;
     }
@@ -1043,7 +1043,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                             }
 
                             foreach ($transitions as $tr) {
-                                $newstate = $this->match_transitions($curstate, $tr, $str, $curpos, $length, $full, true, false);
+                                $newstate = $this->match_transitions($curstate, $tr, $str, $curpos, $length, $full, true, true, false);
                                 if ($full) {
                                     $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos));
                                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
