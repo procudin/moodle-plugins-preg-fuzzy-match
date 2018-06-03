@@ -285,12 +285,6 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
     // Object of qtype_preg_typo_container, containing all encountered errors.
     public $errors;
 
-    // Is this state transposition candidate(last transition matches afterlast character).
-    public $transpositioncandidate;
-
-    // Did this state promise to do transposition at next automaton step.
-    public $transpositionpromise;
-
     public function __clone() {
         $this->str = clone $this->str;  // Needs to be cloned for correct string generation.
         $this->errors = clone $this->errors;
