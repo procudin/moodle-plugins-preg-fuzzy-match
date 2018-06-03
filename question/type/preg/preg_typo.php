@@ -90,7 +90,6 @@ class qtype_preg_typo {
                 break;
             case self::SUBSTITUTION:
                 $string = utf8_string::substr($string, 0, $this->position) . $this->char . utf8_string::substr($string, $this->position + 1);
-                //$string[$this->position] = $this->char;
                 break;
             case self::TRANSPOSITION:
                 $tmp1 = utf8_string::substr($string,$this->position,1);
@@ -198,6 +197,9 @@ class qtype_preg_typo_container {
         return $this->errors;
     }
 
+    /** Convert all substitutions to insertions and deletions.
+     * @param $container
+     */
     public static function substitution_as_deletion_and_insertion($container) {
         $substitutions = $container->errors[qtype_preg_typo::SUBSTITUTION];
         $subcount = count($substitutions);
@@ -215,7 +217,13 @@ class qtype_preg_typo_container {
         }
     }
 
-    protected function apply_inner($string, $modifycurrent = false , $removedeletions = true) {
+    /** Apply typos to given string
+     * @param $string
+     * @param bool $modifycurrent should we modify current object
+     * @param int $ignoredtypos ignored typos
+     * @return pair of (string,container)
+     */
+    protected function apply_inner($string, $modifycurrent = false, $ignoredtypos = 0) {
         $container = $this;
         if (!$modifycurrent) {
             $container = clone $container;
@@ -223,20 +231,30 @@ class qtype_preg_typo_container {
 
         $deletions = $container->errors[qtype_preg_typo::DELETION];
         $insertions = $container->errors[qtype_preg_typo::INSERTION];
-        $transpositions =  $container->errors[qtype_preg_typo::TRANSPOSITION];
+        $transpositions = $container->errors[qtype_preg_typo::TRANSPOSITION];
         $substitutions =  $container->errors[qtype_preg_typo::SUBSTITUTION];
 
+        $applydeletions = ($ignoredtypos & qtype_preg_typo::DELETION) == 0;
+        $applyinsertions = ($ignoredtypos & qtype_preg_typo::INSERTION) == 0;
+        $applytranspositions = ($ignoredtypos & qtype_preg_typo::TRANSPOSITION) == 0;
+        $applysubstitutions = ($ignoredtypos & qtype_preg_typo::SUBSTITUTION) == 0;
+
         // Apply transposition.
-        foreach ($transpositions as $typo) {
-            $string = $typo->apply($string);
+        if ($applytranspositions) {
+            foreach ($transpositions as $typo) {
+                $string = $typo->apply($string);
+            }
         }
 
         // Apply substitutions.
-        foreach ($substitutions as $typo) {
-            $string = $typo->apply($string);
+        if ($applysubstitutions) {
+            foreach ($substitutions as $typo) {
+                $string = $typo->apply($string);
+            }
         }
 
-        for ($i = 0, $count = count($insertions); $i < $count; $i++) {
+        // Apply insertions.
+        for ($i = 0, $count = count($insertions); $applyinsertions && $i < $count; $i++) {
             $string = $insertions[$i]->apply($string);
 
             for ($j = $i + 1; $j < $count; $j++) {
@@ -261,7 +279,7 @@ class qtype_preg_typo_container {
         }
 
         // Apply deletions.
-        for ($i = 0, $count = count($deletions); $i < $count && $removedeletions; $i++) {
+        for ($i = 0, $count = count($deletions); $applydeletions && $i < $count; $i++) {
             $string = $deletions[$i]->apply($string);
 
             for ($j = $i + 1; $j < $count; $j++) {
@@ -290,10 +308,11 @@ class qtype_preg_typo_container {
 
     /** Apply all typos to given string
      * @param $string
-     * @return string after applying
+     * @param $ignoredtypes Ingnored typo types.
+     * @return string
      */
-    public function apply($string, $removedeletions = true) {
-        list($newstring, $newcontainer) = $this->apply_inner($string, false, $removedeletions);
+    public function apply($string, $ignoredtypos = 0) {
+        list($newstring, $newcontainer) = $this->apply_inner($string, false, $ignoredtypos);
         return $newstring;
     }
 
@@ -303,7 +322,7 @@ class qtype_preg_typo_container {
 
         self::substitution_as_deletion_and_insertion($container);
 
-        list($string, $container) = $this->apply_inner($string, true,false);
+        list($string, $container) = $this->apply_inner($string, true,qtype_preg_typo::TRANSPOSITION | qtype_preg_typo::DELETION);
 
         $deletions = $container->errors[qtype_preg_typo::DELETION];
         $insertions = $container->errors[qtype_preg_typo::INSERTION];
