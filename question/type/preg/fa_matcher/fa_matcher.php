@@ -56,6 +56,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     // Max number of errors for current match
     protected $currentmaxerrors = 0;
 
+    // Transpose pseudotransitions, array(fromstate => array(tostate => array(transitions))).
+    protected $transposepseudotransitions = [];
+
     public function name() {
         return 'fa_matcher';
     }
@@ -172,8 +175,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos));
         $result->backtrack_states = array();
         $result->errors = new qtype_preg_typo_container();
-        $result->transpositioncandidate = false;
-        $result->transpositionpromise = false;
         if (in_array($state, $this->backtrackstates)) {
             $result->backtrack_states[] = $result;
         }
@@ -254,45 +255,37 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     /**
      * Matches an array of transitions. If all transitions are matched, that means a full match. Partial match otherwise.
      */
-    protected function match_transitions($curstate, $transitions, $str, $curpos, &$length, &$full, $addbacktracks) {
+    protected function match_transitions($curstate, $transitions, $str, $curpos, &$length, &$full, $addbacktracks, $tryfuzzy = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
         $newstate = clone $curstate;
         $length = 0;
         $full = true;
-        $fuzzyenabled = $this->currentmaxerrors > 0;
+        $fuzzyenabled = $tryfuzzy && $this->currentmaxerrors > 0;
 
         foreach ($transitions as $tr) {
             $tmplength = 0;
-            $result = $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
-
             $ischartransition = $tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET;
-            $checkfortranspositioncandidate = $fuzzyenabled && $ischartransition;
-            if ($result) {
-                // Check for transpositions if current char passed.
-                if ($fuzzyenabled && $newstate->transpositioncandidate && $ischartransition && $curpos < $str->length() && $tr->pregleaf->match($str, $curpos - 1, $tmplength1, $newstate)
-                        && ($newstate->transpositionpromise || $newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $curpos - 1))) {
-                    $newstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
-                    $newstate->transpositionpromise = false;
-                    $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
-                }
 
+            // We shouldn't match char transition for insertion pseudotransition.
+            if (!$fuzzyenabled || !$ischartransition || $pseudotype != qtype_preg_typo::INSERTION) {
+                $result =  $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
+            } else {
+                $result = false;
+            }
+
+            if ($result) {
                 $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 //echo "passed $tr\n";
             } else if ($fuzzyenabled) {
-                // Try to pseudotransitions.
-                if ($ischartransition && $curpos < $str->length()) {
-                    // Try substitutions && transpositions.
-                    $trysubstitution = $fuzzyenabled && $newstate->errors->count() < $this->currentmaxerrors;
-                    $result = $this->match_substitution_and_transposition_pseudotransition($newstate, $tr, $str, $curpos, $tmplength, $addbacktracks, $trysubstitution, $fuzzyenabled);
+                // Try match pseudotransitions.
+                if ($ischartransition && $newstate->errors->count() < $this->currentmaxerrors) {
+                    // Try match character pseudotransition.
+                    $result = $this->match_character_pseudotransition($newstate, $tr, $str, $curpos, $tmplength, $addbacktracks, $pseudotype);
                 } else if ($tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_ASSERT) {
-                    // Try to assert pseudotransition.
-                    $result = $this->match_assert_pseudotransition($newstate, $tr, $str, $curpos, $addbacktracks);
+                    // Try match assert pseudotransition.
+                    $result = $this->match_assert_pseudotransition($newstate, $tr, $str, $curpos, $addbacktracks, count($transitions) > 1);
                 }
             } else {
                 $newstate->length += $tmplength;
-            }
-
-            if ($result && $checkfortranspositioncandidate) {
-                $newstate->transpositioncandidate = $curpos + 1 < $str->length() && $tr->pregleaf->match($str, $curpos + 1, $tmplength1, $newstate);
             }
 
             // Increase curpos and length anyways, even if the match is partial (backrefs)
@@ -320,41 +313,75 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         return $newstate;
     }
 
-    protected function match_substitution_and_transposition_pseudotransition($curstate, $transition, $str, &$curpos, &$length, $addbacktracks, $trysubstitution, $trytransposition) {
+    protected function match_character_pseudotransition($curstate, $transition, $str, &$curpos, &$length, $addbacktracks, $pseudotype) {
         $result = false;
         $length = 0;
+        $issub = $pseudotype == qtype_preg_typo::SUBSTITUTION;
 
-        if ($trytransposition && $curstate->transpositioncandidate && $transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate)) {
-            // If transposition.
+        // Do substitution if only $curpos is inside of string.
+        if ($issub && $curpos >= $str->length()) {
+            return $result;
+        }
+
+        // Try to generate transition character.
+        list($flag, $char) = $transition->next_character($str, $str, $curpos, 0, $curstate);
+        if ($flag != qtype_preg_leaf::NEXT_CHAR_CANNOT_GENERATE) {
+            // If successfull generated.
             $result = true;
-            $length = 1;
-            $curstate->errors->remove(qtype_preg_typo::SUBSTITUTION, $curpos - 1);
-            $curstate->transpositionpromise = false;
-            $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos - 1));
+            $curstate->errors->add(new qtype_preg_typo($pseudotype, $curpos, $char));
+            $length = $issub ? 1 : 0;
             $this->after_transition_passed($curstate, $transition, $curpos, $length, $addbacktracks);
-        } else if ($trysubstitution) {
-            // If substitution.
-            // Try to generate transition character.
-            list($flag, $char) = $transition->next_character($str, $str, $curpos, 0, $curstate);
-            if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && ($length = $char->length()) > 0) {
-                // If successfull generated.
-                $result = true;
-                $length = 1;
-                $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::SUBSTITUTION, $curpos, $char));
-                $this->after_transition_passed($curstate, $transition, $curpos, $length, $addbacktracks);
-            }
         }
 
         return $result;
     }
 
-    protected function match_assert_pseudotransition($curstate, $transition, $str, &$curpos, $addbacktracks) {
+    protected function match_assert_pseudotransition($curstate, $transition, $str, &$curpos, $addbacktracks, $ismerged) {
         $result = false;
         $errorscount = $curstate->errors->count();
         $strlen = $str->length();
         $subtype = $transition->pregleaf->subtype;
         switch ($subtype) {
+            case qtype_preg_leaf_assert::SUBTYPE_DOLLAR:
+                if ($curpos == $strlen - 1) {
+                    // If it's last char - delete it.
+                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
+                    $result = true;
+                    $curstate->length = $curpos;
+                    $curstate->startpos = 0;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                } else if (!$ismerged) {
+                    // If unmerged, generate \n insertion.
+                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
+                    $result = true;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                } else {
+                    // If merged, let char transition generate \n insertion.
+                    $result = true;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                }
+                break;
+            case qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX:
+                if ($curpos == 1) {
+                    // If it's second char - delete it.
+                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
+                    $result = true;
+                    $curstate->length = $curpos;
+                    $curstate->startpos = 0;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                } else if (!$ismerged) {
+                    // If unmerged, generate \n insertion.
+                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
+                    $result = true;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                } else {
+                    // If merged, let char transition generate \n insertion.
+                    $result = true;
+                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                }
+                break;
             case qtype_preg_leaf_assert::SUBTYPE_ESC_A:
+                // Delete all characters before curpos.
                 if ($errorscount + $curpos <= $this->currentmaxerrors) {
                     for ($pos = 0; $pos < $curpos; $pos++) {
                         $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
@@ -362,165 +389,44 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $result = true;
                     $curstate->length = $curpos;
                     $curstate->startpos = 0;
-                    $curstate->transpositioncandidate = false;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 }
                 break;
             case qtype_preg_leaf_assert::SUBTYPE_CAPITAL_ESC_Z:
-                if ($curstate->transpositioncandidate && ($transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate) || $curpos == $strlen - 1 && $str[$curpos - 1] == "\n")) {
+                // If merged and it's last string character, let char transition generate \n insertion.
+                if ($ismerged && $curpos == $strlen - 1) {
                     $result = true;
-                    $curstate->transpositionpromise = true;
-                    $this->after_transition_passed($curstate, $transition, $curpos, $tmplength1, $addbacktracks);
-                } else if ($errorscount + $strlen - $curpos <= $this->currentmaxerrors) {
-                    for ($pos = $curpos; $pos < $strlen; $pos++) {
-                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
-                    }
-                    $result = true;
-                    $curstate->length += $strlen - $curpos;
-                    $curpos += $strlen - $curpos;
-                    $curstate->transpositioncandidate = false;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
+                    break;
                 }
-                break;
+                // Correct missing break statement, we should check \Z same as \z.
             case qtype_preg_leaf_assert::SUBTYPE_SMALL_ESC_Z:
+                // Delete all characters after curpos(including curpos).
                 if ($errorscount + $strlen - $curpos <= $this->currentmaxerrors) {
-                    // If we can delete all characters from current.
                     for ($pos = $curpos; $pos < $strlen; $pos++) {
                         $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
                     }
                     $result = true;
                     $curstate->length += $strlen - $curpos;
                     $curpos += $strlen - $curpos;
-                    $curstate->transpositioncandidate = false;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
-                }
-                break;
-            case qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX:
-                if ($curstate->transpositioncandidate && $transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate)) {
-                    $result = true;
-                    $curstate->transpositionpromise = true;
-                    $this->after_transition_passed($curstate, $transition, $curpos, $tmplength1, $addbacktracks);
-                } else if ($errorscount < $this->currentmaxerrors) {
-                    if ($curpos == 1) {
-                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
-                        $result = true;
-                        $curstate->length = $curpos;
-                        $curstate->startpos = 0;
-                        $curstate->transpositioncandidate = false;
-                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
-                    } else {
-                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
-                        $result = true;
-                        $curstate->transpositioncandidate = false;
-                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
-                    }
-                }
-                break;
-            case qtype_preg_leaf_assert::SUBTYPE_DOLLAR:
-                if ($curstate->transpositioncandidate && $transition->pregleaf->match($str, $curpos - 1, $tmplength1, $curstate)) {
-                    $result = true;
-                    $curstate->transpositionpromise = true;
-                    $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
-                } else if ($errorscount < $this->currentmaxerrors) {
-                    if ($curpos == $strlen - 1) {
-                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
-                        $result = true;
-                        $curstate->length += 1;
-                        $curpos += 1;
-                        $curstate->transpositioncandidate = false;
-                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
-                    } else {
-                        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
-                        $result = true;
-                        $curstate->transpositioncandidate = false;
-                        $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
-                    }
                 }
                 break;
         }
         return $result;
     }
 
-    protected function match_insertion_pseudotransition($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks) {
-        $transitions = array_merge($transition->mergedbefore, array($transition), $transition->mergedafter);
-        $newstate = $this->match_insertion_pseudotransitions($curstate, $transitions, $str, $curpos, $length, $full, $addbacktracks);
-        $this->set_last_transition($newstate, $transition, $newstate->length - $curstate->length, !$full);
-        return $newstate;
-    }
-
-    protected function match_insertion_pseudotransitions($curstate, $transitions, $str, $curpos, &$length, &$full, $addbacktracks) {
-        $newstate = clone $curstate;
-        $length = 0;
-        $full = true;
-
-        foreach ($transitions as $tr) {
-            $tmplength = 0;
-
-            // If transition consumes char.
-            if ($tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
-                list($flag, $char) = $tr->next_character($str, $str, $curpos, 0, $newstate);
-
-                // If successfull generated.
-                if ($flag == qtype_preg_leaf::NEXT_CHAR_OK && $char->length() > 0) {
-                    $result = true;
-                    // Add insertion
-                    $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, $char));
-                    $newstate->transpositioncandidate = false;
-                } else {
-                    $result = false;
-                }
-            } else {
-                $result = $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
-            }
-
-            if ($result) {
-                $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
-                //echo "passed $tr\n";
-            } else {
-                $newstate->length += $tmplength;
-            }
-
-            // Increase curpos and length anyways, even if the match is partial (backrefs)
-            $curpos += $tmplength;
-            $length += $tmplength;
-
-            if (!$result) {
-                $full = false;
-                break;
-            }
-
-            // Unbelievable crutch: we should stop matching merged transitions that
-            // could be placed outside this subexpression in the original automaton
-            if ($newstate->recursion_level() > 0 && $newstate->is_subexpr_captured_top($newstate->subexpr())) {
-                break;
-            }
-        }
-
-        if (!$full) {
-            $newstate->set_state($curstate->state());
-            $newstate->set_full(false);
-            $newstate->left = qtype_preg_matching_results::UNKNOWN_CHARACTERS_LEFT;
-        }
-
-        return $newstate;
-    }
-
-
     protected function match_deletion_pseudotransitions($curstate, $curpos) {
-        $newstate = /*clone*/ $curstate;
-
         // Don't try deletion for initial or end state
-        $subpatt = $newstate->matcher->get_ast_root()->subpattern;
-        if (!isset($newstate->stack[0]->matches[$subpatt]) || $newstate->is_full()) {
-            //$newstate->set_full(false);
-            return null;
+        //$subpatt = $newstate->matcher->get_ast_root()->subpattern;
+        if (!isset($curstate->stack[0]->matches[0]) || $curstate->is_full()) {
+            return false;
         }
 
-        $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
-        $newstate->transpositioncandidate = false;
-        $this->after_deletion_pseudotransition_passed($newstate);
+        $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
+        $curstate->length += 1;
 
-        return $newstate;
+        return true;
     }
 
 
@@ -541,9 +447,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     /**
      * Checks if this transition (with all merged to it) matches a character. Returns a new state.
      */
-    protected function match_regular_transition($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks) {
+    protected function match_regular_transition($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks, $tryfuzzy = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
         $transitions = array_merge($transition->mergedbefore, array($transition), $transition->mergedafter);
-        $newstate = $this->match_transitions($curstate, $transitions, $str, $curpos, $length, $full, $addbacktracks);
+        $newstate = $this->match_transitions($curstate, $transitions, $str, $curpos, $length, $full, $addbacktracks, $tryfuzzy, $pseudotype);
         $this->set_last_transition($newstate, $transition, $newstate->length - $curstate->length, !$full);
         return $newstate;
     }
@@ -563,16 +469,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         if ($addbacktracks && in_array($transition->to, $this->backtrackstates)) {
             $newstate->backtrack_states[] = $newstate;
         }
-    }
-
-    /**
-     * Updates all fields in the newstate after deletion pseudotransition match.
-     */
-    protected function after_deletion_pseudotransition_passed($newstate) {
-        $endstates = $this->automaton->get_end_states($newstate->subexpr());
-        $newstate->set_full(in_array($newstate->state(), $endstates));
-        $newstate->left = $newstate->is_full() ? 0 : qtype_preg_matching_results::UNKNOWN_CHARACTERS_LEFT;
-        $newstate->length += 1;
     }
 
     /**
@@ -600,14 +496,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         || $fuzzyenabled && $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor());
 
                 // If char transition
-                if ($transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET) {
-                    if (!$this->options->fuzzymatch || $this->currentmaxerrors <= $curstate->errors->count()) {
-                        // If fuzzy disabled or too many errors.
-                        continue;
-                    }
-                    $newstate = $this->match_insertion_pseudotransition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks);
-                } else if ($empty) {
-                    $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks);
+                if ($fuzzyenabled && $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET || $empty) {
+                    $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks, true,qtype_preg_typo::INSERTION);
                 } else {
                     continue;
                 }
@@ -1035,8 +925,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $closure = $this->epsilon_closure($reached, $str, true);
         $lazystates = $closure[\qtype_preg\fa\transition::GREED_LAZY];
         $closure = $closure[\qtype_preg\fa\transition::GREED_GREEDY];
-        $transposecandidates = [];
-        $transposecandidatescount = 0;
+        $compareonnextstep = [];
 
         foreach ($closure as $state) {
             $states['0'][$state->state()] = $state;
@@ -1048,17 +937,18 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
         // Do search.
         while (!empty($curstates)) {
-            $reached = array(); // $reached uses stdClass with "recursionlevel" and "state" fields as well
-            $reachedtransposecandidates = array();
+            $reached = $compareonnextstep; // $reached uses stdClass with "recursionlevel" and "state" fields as well
+            $compareonnextstep = array();
             // We'll replace curstates with reached by the end of this loop.
             while (!empty($curstates)) {
                 // Get the current state and iterate over all transitions.
                 $index = array_pop($curstates);
                 $from = $index->state;
-                $curstate = $transposecandidatescount-- <= 0 ? $states[$index->recursionlevel][$index->state] : $transposecandidates[$index->state];
+                $curstate = $states[$index->recursionlevel][$index->state];
                 --$statescount;
                 $curpos = $curstate->startpos + $curstate->length;
                 $cursubexpr = $curstate->subexpr();
+                $curerrcount = $curstate->errors->count();
                 $recursionlevel = $curstate->recursion_level();
                 $transitions = $this->automaton->get_adjacent_transitions($curstate->state(), true);
 
@@ -1094,7 +984,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         }
                     } else if ($transition->pregleaf->type !== qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL) {
                         // Handle a non-recursive transition transition
-                        $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, true);
+                        $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, true, true, qtype_preg_typo::SUBSTITUTION);
 
                         if ($full) {
 
@@ -1117,18 +1007,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                             $skip = $skip || !$full;
 
-                            $istransposecandidate = $newstate->transpositioncandidate && $index->recursionlevel == 0;
-
                             // Save the current result.
                             if (!$skip) {
                                 if ($transition->greediness == \qtype_preg\fa\transition::GREED_LAZY) {
                                     $lazystates[] = $newstate;
-                                } else if ($istransposecandidate){
-                                    // Transposition candidates shouldn't contest with $reached states in this state.
-                                    $state = $newstate->state();
-                                    if (!isset($reachedtransposecandidates[$state]) || $newstate->leftmost_longest($reachedtransposecandidates[$state])) {
-                                        $reachedtransposecandidates[$state] = $newstate;
-                                    }
                                 } else {
                                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
                                     self::ensure_index_exists($reached, $index->recursionlevel, $index->state, null);
@@ -1148,14 +1030,41 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     }
                 }
 
-                // Try to deletion pseudo transition.
-                if ($this->options->fuzzymatch && $this->currentmaxerrors > $curstate->errors->count()) {
-                    $newstate = $this->match_deletion_pseudotransitions($curstate, $curpos);
-                    if ($newstate !== null) {
-                        self::ensure_index_exists($reached,$index->recursionlevel,$from,null);
-                        if ($reached[$index->recursionlevel][$from] === null ||
-                                $newstate->leftmost_longest($reached[$index->recursionlevel][$from])) {
-                            $reached[$index->recursionlevel][$from] = $newstate;
+                // Try transpose pseudotransitions.
+                if ($curerrcount < $this->currentmaxerrors && $curpos < $str->length() - 1) {
+                    $tmp1 = $str[$curpos];
+                    $tmp2 = $str[$curpos + 1];
+                    if (strcmp($tmp1, $tmp2) !== 0) {
+                        $str[$curpos + 1] = $tmp1;
+                        $str[$curpos] = $tmp2;
+                        foreach ($this->transposepseudotransitions[$from] as $to => $transitions) {
+                            if (isset($reached[$recursionlevel][$to]) && $reached[$recursionlevel][$to]->errors->count() < $curerrcount) {
+                                continue;
+                            }
+
+                            foreach ($transitions as $tr) {
+                                $newstate = $this->match_transitions($curstate, $tr, $str, $curpos, $length, $full, true, false);
+                                if ($full) {
+                                    $newstate->errors->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos));
+                                    $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
+                                    self::ensure_index_exists($compareonnextstep, $index->recursionlevel, $index->state, null);
+                                    if ($compareonnextstep[$index->recursionlevel][$index->state] === null || $newstate->leftmost_longest($compareonnextstep[$index->recursionlevel][$index->state])) {
+                                        $compareonnextstep[$index->recursionlevel][$index->state] = $newstate;
+                                    }
+                                }
+                            }
+                        }
+                        $str[$curpos + 1] = $tmp2;
+                        $str[$curpos] = $tmp1;
+                    }
+                }
+
+                // Try to deletion pseudotransition.
+                if ($curerrcount < $this->currentmaxerrors) {
+                    if ($this->match_deletion_pseudotransitions($curstate, $curpos)) {
+                        self::ensure_index_exists($reached, $recursionlevel, $from, null);
+                        if ($reached[$recursionlevel][$from] === null || $curstate->leftmost_longest($reached[$recursionlevel][$from])) {
+                            $reached[$recursionlevel][$from] = $curstate;
                         }
                     }
                 }
@@ -1169,28 +1078,12 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 $reached[$index->recursionlevel][$index->state] = $lazy;
             }
 
-            // Try to beat $reached states with transposition candidates.
-            $transposecandidatesindexes = [];
-            foreach($reachedtransposecandidates as $ind => $cand) {
-                $index = self::create_index($cand->recursive_calls_sequence(), $cand->state());
-                self::ensure_index_exists($reached, $index->recursionlevel, $index->state, null);
-                if ($reached[$index->recursionlevel][$index->state] === null || $cand->leftmost_longest($reached[$index->recursionlevel][$index->state])) {
-                    $reached[$index->recursionlevel][$index->state] = $cand;
-                    unset($reachedtransposecandidates[$ind]);
-                    continue;
-                }
-                $transposecandidatesindexes []= $index;
-            }
-
             // Iterate over reached states. Get epsilon-closure for each recursion level.
             foreach ($reached as $recursionlevel => $reachedforlevel) {
                 $reached[$recursionlevel] = $this->epsilon_closure($reachedforlevel, $str, true);
                 $lazystates = array_merge($lazystates, $reached[$recursionlevel][\qtype_preg\fa\transition::GREED_LAZY]);
                 $reached[$recursionlevel] = $reached[$recursionlevel][\qtype_preg\fa\transition::GREED_GREEDY];
             }
-            // Get epsilon-closure for each transposition candidates(without insertion pseudotransitions).
-            //$reachedtransposecandidates = $this->epsilon_closure($reachedtransposecandidates, $str, true, false);
-            //$reachedtransposecandidates = $reachedtransposecandidates[\qtype_preg\fa\transition::GREED_GREEDY];
 
             foreach ($reached as $newstates) {
                 foreach ($newstates as $newstate) {
@@ -1221,11 +1114,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     }
                 }
             }
-
-            // Add transposition candidates to top of curstates.
-            $curstates = array_merge($curstates, $transposecandidatesindexes);
-            $transposecandidatescount = count($transposecandidatesindexes);
-            $transposecandidates = $reachedtransposecandidates;
         }
 
         // Return array of all possible matches.
@@ -1342,7 +1230,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
         //$matchescount = count($possiblematches);
         //echo "\n FOUND $matchescount matches\n\n";
-
+        $fullmatchexists = false;
         if (empty($possiblematches)) {
             $result = $this->create_initial_state(null, $str, $startpos);
             if ($this->options->extensionneeded) {
@@ -1350,7 +1238,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             }
         } else {
             // Check if a full match was found.
-            $fullmatchexists = false;
             foreach ($possiblematches as $match) {
                 if ($match->is_full()) {
                     $fullmatchexists = true;
@@ -1405,7 +1292,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $result->extendedmatch->extendedmatch = null;   // Holy cow, this is ugly
         }
 
-        if ($fuzzyenabled) {
+        if (!$fullmatchexists && $fuzzyenabled) {
             $this->currentmaxerrors = $preverrorscount;
         }
 
@@ -1539,6 +1426,28 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         }
     }
 
+    protected function calculate_transpose_pseudotransitions() {
+        foreach ($this->automaton->get_states() as $state) {
+            foreach ($this->automaton->get_adjacent_transitions($state) as $tr1) {
+                if ($tr1->pregleaf->type != qtype_preg_node::TYPE_LEAF_CHARSET) {
+                    continue;
+                }
+                foreach ($this->automaton->get_adjacent_transitions($tr1->to) as $tr2) {
+                    if ($tr2->pregleaf->type != qtype_preg_node::TYPE_LEAF_CHARSET) {
+                        continue;
+                    }
+                    $transitions1 = array_merge($tr1->mergedbefore, array($tr1), $tr1->mergedafter);
+                    $transitions2 = array_merge($tr2->mergedbefore, array($tr2), $tr2->mergedafter);
+                    $this->transposepseudotransitions[$state][$tr2->to] []= array_merge($transitions1, $transitions2);
+                }
+            }
+
+            if (!isset($this->transposepseudotransitions[$state])) {
+                $this->transposepseudotransitions[$state] = [];
+            }
+        }
+    }
+
     public function __construct($regex = null, $options = null) {
         global $CFG;
 
@@ -1582,6 +1491,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $this->calculate_nesting_map($this->astroot, array($this->astroot->subpattern));
         $this->calculate_backtrackstates();
         $this->calculate_bruteforce();
+
+        if ($options->fuzzymatch) {
+            $this->calculate_transpose_pseudotransitions();
+        }
 
         //echo "backtrack states:\n";
         //var_dump($this->backtrackstates);
