@@ -158,7 +158,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
 
             if (!isset($matchresults->length[-2]) || $matchresults->length[-2] == qtype_preg_matching_results::NO_MATCH_FOUND) {
                 // No selection or no match with selection.
-                $correctpart = $renderer->render_matched($matchresults->matched_part());
+                $correctpart = $this->render_matched_with_errors($renderer, $matchresults);
             } else {
                 // We need to substract index_first of the match from all indexes when cuttring from matched part.
                 $correctstr = $matchresults->matched_part();
@@ -177,6 +177,47 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
         }
 
          return $wronghead.$correctpart.$wrongtail;
+    }
+
+    /**
+     * Renders matched string part with errors.
+     */
+    public function render_matched_with_errors($renderer, $matchresults) {
+        if ($matchresults->errors->count() === 0) {
+            return $renderer->render_matched($matchresults->matched_part());
+        }
+
+        $result = '';
+        $str = $matchresults->str()->string();
+        $index_first = $matchresults->index_first();
+        $length = $index_first + $matchresults->length();
+        $checkinsertion = true;
+        for ($i = $index_first; $i < $length; $i++) {
+            switch (true) {
+                case $checkinsertion && $matchresults->errors->contains(qtype_preg_typo::INSERTION, $i):
+                    $result .= $renderer->render_hinted(core_text::code2utf8(0x2026));
+                    $i--;
+                    $checkinsertion = false;
+                    break;
+                case $matchresults->errors->contains(qtype_preg_typo::TRANSPOSITION, $i):
+                    $result .= $renderer->render_hinted(core_text::substr($str, $i++, 2));
+                    $checkinsertion = true;
+                    break;
+                case $matchresults->errors->contains(qtype_preg_typo::SUBSTITUTION, $i):
+                case $matchresults->errors->contains(qtype_preg_typo::DELETION, $i):
+                    $result .= $renderer->render_hinted(core_text::substr($str, $i, 1));
+                    $checkinsertion = true;
+                    break;
+                default:
+                    $result .= $renderer->render_matched(core_text::substr($str, $i, 1));
+                    $checkinsertion = true;
+            }
+        }
+        if ($matchresults->errors->contains(qtype_preg_typo::INSERTION, $length)) {
+            $result .= $renderer->render_hinted(core_text::code2utf8(0x2026));
+        }
+
+        return $result;
     }
 
     public function could_show_hint($matchresults, $testing) {
