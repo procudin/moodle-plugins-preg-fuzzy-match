@@ -1,5 +1,6 @@
 <?php
 
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -12,13 +13,18 @@ use \qtype_poasquestion\utf8_string;
 
 class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
+    /** @var Array of passed full match tests*/
+    protected $passednormaltests = [];
+
+    /** @var Logfile's name*/
+    protected $logfilename = __DIR__  . '/errorslog.txt';
+
+    /** @var Logs for saving*/
+    protected $logcontent = '';
+
     public function engine_name() {
         return 'fa_matcher';
     }
-    protected $passednormaltests = [];
-
-    protected $logfilename = 'C:/Users/Admin/YandexDisk/Diplom/moodle/server/moodle/question/type/preg/tests/errorslog.txt';
-    protected $logcontent = '';
 
     public function log($message) {
         $this->logcontent .= $message;
@@ -26,19 +32,18 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
     }
 
     public function accept_regex($regex) {
-        return !preg_match('/\\\\\d+|\*\?|\+\?|\?\?|\}\?|\^|\$|\\\\b|\\\\B|\\\\A|\\\\z|\\\\Z|\\\\g|\(\?\=|\(\?\!|\(\?\<\=|\(\?\<\!|\(\?/', $regex);
+        return !preg_match('/\\\\\d+|\*\?|\+\?|\?\?|\}\?|\\\\g|\(\?\=|\(\?\!|\(\?\<\=|\(\?\<\!|\(\?/', $regex);
     }
 
-    protected function serialize_test_data($filename = 'C:/Users/Admin/YandexDisk/Diplom/moodle/server/moodle/question/type/preg/tests/fuzzytests.txt') {
+    protected function serialize_test_data($filename) {
         $serialized = serialize($this->passednormaltests);
-        echo $serialized;
-        $content = file_get_contents($filename);
         mb_internal_encoding('UTF-8');
-        file_put_contents($filename, /*$content .*/ $serialized);
+        file_put_contents($filename, $serialized);
         $result = 'Data Added ok!!';
         return $result;
     }
-    protected function unserialize_test_data($filename = 'C:/Users/Admin/YandexDisk/Diplom/moodle/server/moodle/question/type/preg/tests/fuzzytests.txt') {
+
+    protected function unserialize_test_data($filename) {
         $content = file_get_contents($filename);
         $this->passednormaltests = unserialize($content);
     }
@@ -73,10 +78,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             $regextags [] = self::TAG_FAIL_MODE_MERGE;
             $regextags [] = self::TAG_ALLOW_FUZZY;
 
-            if ($regex !== 'XXXXXX' /*&& ($str == 'ab'*/ /*&& $expectederrorslimit === 0*/) {
-                //continue;
-            }
-
             $matcher_merged = null;
             $matcher_unmerged = null;
 
@@ -104,46 +105,66 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                     $matcher = $this->get_matcher($this->engine_name(), $regex, $options);
                     $timeend = round(microtime(true) * 1000);
                     if ($timeend - $timestart > self::MAX_BUILDING_TIME) {
-                        //$slowbuildtests[] = $classname . ' : ' . $methodname;
+                        $message = "\nSlow building on regex : '$regex', str : '$str', errorslimit : {$matcher->get_errors_limit()}";
+                        $this->log($message);
+                        $slowbuildtests[] = $message;
                     }
 
-                    $matcher->set_errors_limit((int)(!isset($fuzzyexpected['errorslimit'])? 0 : $fuzzyexpected['errorslimit']));
-
-                    //if ($regex =='a\Sb' && ($str == 'ab') /*&& $expectederrorslimit === 1*/) {
-                    //    $qweqwe = 0;
-                    //}
+                    // Set errors limit.
+                    $matcher->set_errors_limit((int) (!isset($fuzzyexpected['errorslimit']) ? 0 : $fuzzyexpected['errorslimit']));
 
                     $timestart = round(microtime(true) * 1000);
                     try {
                         $matcher->match($str);
                         $obtained = $matcher->get_match_results();
                     } catch (Exception $e) {
+                        $message = "\nFailed matching on regex '$regex' and string '$str', errorslimit : {$matcher->get_errors_limit()}";
+                        $this->log($message);
                         continue;
                     }
                     $timeend = round(microtime(true) * 1000);
                     if ($timeend - $timestart > self::MAX_BUILDING_TIME) {
-                        //$slowmatchtests[] = $classname . ' : ' . $methodname;
+                        $message = "\nSlow match on regex : '$regex', str : '$str', errorslimit : {$matcher->get_errors_limit()}";
+                        $this->log($message);
+                        $slowmatchtests[] = $message;
                     }
 
                     // Results obtained, check them.
                     try {
-                        if ($this->compare_better_or_equal($regex,$str,$modifiersstr,$tags,$matcher,$fuzzyexpected,$obtained,true)) {
+                        if ($this->compare_better_or_equal($regex, $str, $modifiersstr, $tags, $matcher, $fuzzyexpected, $obtained, true)) {
                             $passcount++;
                         } else {
                             $failcount++;
                         }
                     } catch (Exception $e) {
-                        $message = "\nFailed error applying on regex '$regex' and string '$str', applying errors: {$obtained->errors}";
+                        $message = "\nFailed error applying on regex '$regex' and string '$str', applying errors: \n{$obtained->errors}";
                         $this->log($message);
-                        $werew = 0;
                     }
-                    //if ($this->compare_results($regex, $notation, $str, $modifiersstr, $tags, $matcher, $fuzzyexpected, $obtained, $classname, $methodname, $skippartialcheck, true)) {
-                    //    $passcount++;
-                    //} else {
-                    //    $failcount++;
-                    //}
                 }
             }
+        }
+        if ($failcount == 0 && empty($exceptiontests) && $passcount > 0) {
+            echo "\n\nWow! All tests passed!\n\n";
+        }
+        echo "======================\n";
+        echo 'PASSED:     ' . $passcount . "\n";
+        echo 'FAILED:     ' . $failcount . "\n";
+        echo 'SKIPPED:    ' . $skipcount . "\n";
+        echo "======================\n";
+        if (!empty($slowbuildtests)) {
+            echo "tests with slow matcher building:\n";
+            echo implode("\n", $slowbuildtests) . "\n";
+            echo "======================\n";
+        }
+        if (!empty($slowmatchtests)) {
+            echo "tests with slow matching:\n";
+            echo implode("\n", $slowmatchtests) . "\n";
+            echo "======================\n";
+        }
+        if (!empty($exceptiontests)) {
+            echo "tests with unhandled exceptions:\n";
+            echo implode("\n", $exceptiontests) . "\n";
+            echo "======================\n";
         }
     }
 
@@ -174,22 +195,52 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                 $equalserrors = $equalserrors && $obtained->errors->contains($type, $err['pos'], $err['char']);
             }
         }
-        if ($equalserrors) {
-            return true;
-        }
 
         // Check by leftmostlongest.
-        $leftmost = //((!array_key_exists(0, $expected['index_first']) && $obtained->indexfirst[0] === qtype_preg_matching_results::NO_MATCH_FOUND) ||
-                (array_key_exists(0, $expected['index_first']) && $expected['index_first'][0] > $obtained->indexfirst[0]);
+        $leftmost = array_key_exists(0, $expected['index_first']) && $expected['index_first'][0] > $obtained->indexfirst[0];
 
         if ($leftmost) {
             return $leftmostlongest = true;
         }
+        if ($equalserrors) {
+            return true;
+        }
 
         $equalindexfirst = (array_key_exists(0, $expected['index_first']) && $expected['index_first'][0] === $obtained->indexfirst[0]);
-        $longestorequal = (array_key_exists(0, $expected['length']) && $expected['length'][0] <= $obtained->length[0]);
-
+        $longest = array_key_exists(0, $expected['length']) && $expected['length'][0] < $obtained->length[0];
+        $longestorequal = $longest || (array_key_exists(0, $expected['length']) && $expected['length'][0] === $obtained->length[0]);
         $leftmostlongest = $equalindexfirst && $longestorequal;
+        if (!$leftmostlongest) {
+            return false;
+        }
+
+        // Check by typo priority.
+        if (!$longest) {
+            if (!isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && $obtained->errors->count(qtype_preg_typo::TRANSPOSITION) > 0
+                    || isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && count($expectederrors[qtype_preg_typo::TRANSPOSITION]) < $obtained->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+                return true;
+            } else if (isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && count($expectederrors[qtype_preg_typo::TRANSPOSITION]) > $obtained->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+                return false;
+            }
+            if (!isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && $obtained->errors->count(qtype_preg_typo::SUBSTITUTION) > 0
+                    || isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && count($expectederrors[qtype_preg_typo::SUBSTITUTION]) < $obtained->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+                return true;
+            } else if (isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && count($expectederrors[qtype_preg_typo::SUBSTITUTION]) > $obtained->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+                return false;
+            }
+            if (!isset($expectederrors[qtype_preg_typo::DELETION]) && $obtained->errors->count(qtype_preg_typo::DELETION) > 0
+                    || isset($expectederrors[qtype_preg_typo::DELETION]) && count($expectederrors[qtype_preg_typo::DELETION]) < $obtained->errors->count(qtype_preg_typo::DELETION)) {
+                return true;
+            } else if (isset($expectederrors[qtype_preg_typo::DELETION]) && count($expectederrors[qtype_preg_typo::DELETION]) > $obtained->errors->count(qtype_preg_typo::DELETION)) {
+                return false;
+            }
+            if (!isset($expectederrors[qtype_preg_typo::INSERTION]) && $obtained->errors->count(qtype_preg_typo::INSERTION) > 0
+                    || isset($expectederrors[qtype_preg_typo::INSERTION]) && count($expectederrors[qtype_preg_typo::INSERTION]) < $obtained->errors->count(qtype_preg_typo::INSERTION)) {
+                return true;
+            } else if (isset($expectederrors[qtype_preg_typo::INSERTION]) && count($expectederrors[qtype_preg_typo::INSERTION]) > $obtained->errors->count(qtype_preg_typo::INSERTION)) {
+                return false;
+            }
+        }
 
         return $leftmostlongest;
     }
@@ -207,26 +258,16 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         $expectederrorslimit = isset($expected['errorslimit']) ? $expected['errorslimit'] : 0;
         $expectederrors = isset($expected['errors']) ? $expected['errors'] : [];
 
-        if ($regex =='>\s{2,3}?<' /*&& ($str == 'ab'*/ && $expectederrorslimit === 0) {
-            $qweqwe = 0;
-        }
-
         $lowererrcount = $obtained->errors->count() < $expectederrorscount;
 
-        $isbetter = false;
+        $isbetter = $fullpassed && !$obtained->full;
         $isbetter = $isbetter || !$expected['full'] && $obtained->full;
         $isbetter = $isbetter || $lowererrcount;
         $isbetter = $isbetter || $this->compare_better_or_equal_by_errors($expected, $obtained , $equalserrorscount,$equalserrors,$leftmostlongest);
 
-        $checkindexes = $isbetter && $expected['full'] && ($equalserrors) && !$lowererrcount;
-        // Match existance, indexes and lengths
+        $checkindexes = $isbetter && $expected['full'] && ($equalserrors) && !$lowererrcount && !$leftmostlongest;
+        // Match existance, indexes and lengths.
         if ($checkindexes) {
-            if ($matcher->is_supporting(qtype_preg_matcher::PARTIAL_MATCHING)) {
-                $ismatchpassed = ($expected['is_match'] === $obtained->is_match());
-            } else {
-                $ismatchpassed = $fullpassed;
-            }
-
             $subexprsupported = $matcher->is_supporting(qtype_preg_matcher::SUBEXPRESSION_CAPTURING);
             foreach ($obtained->indexfirst as $key => $index) {
                 if (!$subexprsupported && $key != 0) {
@@ -244,7 +285,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             }
         }
 
-        // Apply errors to string && run normal match
+        // Apply errors to string && run normal match.
         $errorsapplyed = false;
         if ($isbetter && $obtained->full) {
             $strafterapplying = $obtained->errors->apply($str);
@@ -272,8 +313,8 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                 }
 
                 if (!$equalserrorscount) {
-                    $obtainedstr .= $this->dump_indexes('ERRORS COUNT:        ', $obtained->errors->count());
-                    $expectedstr .= $this->dump_indexes('ERRORS COUNT:        ', $expectederrorscount);
+                    $obtainedstr .= $this->dump_scalar('ERRORS COUNT:        ', $obtained->errors->count());
+                    $expectedstr .= $this->dump_scalar('ERRORS COUNT:        ', $expectederrorscount);
                 }
 
                 if (!$equalserrors && !$leftmostlongest) {
@@ -301,7 +342,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                 }
             }
 
-
             $enginename = $matcher->name();
             $merging = in_array(self::TAG_FAIL_MODE_MERGE, $tags) ? "merging is on" : "merging is off";
 
@@ -325,10 +365,10 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         $result = "";
         foreach ($values as $type => $errors) {
             if (count($errors)) {
-                $result.= "\t" . qtype_preg_typo::typo_description($type) . "s:\n";
+                $result .= "\t" . qtype_preg_typo::typo_description($type) . "s:\n";
             }
-            foreach($errors as $err) {
-                $result.= "\t\tpos = {$err['pos']}, char = {$err['char']}" . "\n";
+            foreach ($errors as $err) {
+                $result .= "\t\tpos = {$err['pos']}, char = {$err['char']}" . "\n";
             }
         }
         return $result;
@@ -337,53 +377,52 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
     protected function make_errors($testdata) {
         $result = [];
 
-        //$result = array_merge($result,$this->make_simple_errors($testdata));
-        //$result = array_merge($result,$this->make_nearby_errors($testdata));
-        $result = array_merge($result,$this->make_consecutive_errors($testdata));
+        $result = array_merge($result, $this->make_simple_errors($testdata));
+        $result = array_merge($result, $this->make_nearby_errors($testdata));
+        $result = array_merge($result, $this->make_consecutive_errors($testdata));
 
         return $result;
     }
 
     protected function make_simple_errors($testdata) {
         $result = [];
-        $errorspositions = [];
 
         $str = $testdata['str'];
         $ind0 = $testdata['index_first'][0];
         $len0 = $testdata['length'][0];
 
-        // Test data without modification, same as normal matching
+        // Test data without modification, same as normal matching.
         $tmpdata = $testdata;
         $tmpdata['errorslimit'] = 1;
         $result [] = $tmpdata;
 
-        // Test data without modification with bigger error limit, same as normal matching
+        // Test data without modification with bigger error limit, same as normal matching.
         $tmpdata = $testdata;
-        $tmpdata['errorslimit'] = mt_rand(2,4);
-        $result []= $tmpdata;
+        $tmpdata['errorslimit'] = mt_rand(2, 4);
+        $result [] = $tmpdata;
 
-        // If string too short
+        // If string too short.
         if ($len0 < 2) {
             return $result;
         }
 
-        // Test data with 1 substitution
+        // Test data with 1 substitution.
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 1);
         $result [] = $this->create_error($testdata, qtype_preg_typo::SUBSTITUTION, $ind, chr(mt_rand(0, 127)));
 
-        // Test data with 1 insertion
+        // Test data with 1 insertion.
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 1);
         $result [] = $this->create_error($testdata, qtype_preg_typo::INSERTION, $ind, chr(mt_rand(0, 127)));
 
-        // Test data with 1 deletion
+        // Test data with 1 deletion.
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 1);
         $result [] = $this->create_error($testdata, qtype_preg_typo::DELETION, $ind, chr(mt_rand(0, 127)));
 
-        // Test data with 1 transposition
+        // Test data with 1 transposition.
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 2);
         $result [] = $this->create_error($testdata, qtype_preg_typo::TRANSPOSITION, $ind);
 
-        // Test data with 1 random error and 0-error limit (should fails or returns better result)
+        // Test data with 1 random error and 0-error limit (should fails or returns better result).
         $ind = $this->generate_unique_random_number($ind0, $ind0 + $len0 - 2);
         $tmpdata = $this->create_error($testdata, 2 ** mt_rand(0, 3), $ind, mt_rand(1, 127));
         $tmpdata['is_match'] = false;
@@ -396,27 +435,22 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
     protected function make_nearby_errors($testdata) {
         $result = [];
-        $errorspositions = [];
 
-        $str = $testdata['str'];
         $ind0 = $testdata['index_first'][0];
         $len0 = $testdata['length'][0];
 
-        if ($str=='xxxx') {
-            $debug = 0;
-        }
-
-        // If string too short
+        // If string too short.
         if ($len0 < 5) {
             return $result;
         }
 
-        for($i = 1; $i <= 8; $i*=2) {
-            for($j = 1; $j <= 8; $j*=2) {
+        // Generate all error pairs.
+        for ($i = 1; $i <= 8; $i *= 2) {
+            for ($j = 1; $j <= 8; $j *= 2) {
                 $rightborder = ($i == 8 && $j == 8) ? 4 : (($i == 8 || $j == 8) ? 3 : 2);
                 $ind1 = $this->generate_unique_random_number($ind0, $ind0 + $len0 - $rightborder);
                 $data = $this->create_error($testdata, $i, $ind1, chr(mt_rand(0, 127)));
-                $data = $this->create_error($data, $j, $ind1 + ($i == 8 ? 2 : (($i == 1)? 0 : 1)), chr(mt_rand(0, 127)));
+                $data = $this->create_error($data, $j, $ind1 + ($i == 8 ? 2 : (($i == 1) ? 0 : 1)), chr(mt_rand(0, 127)));
                 $result [] = $data;
             }
         }
@@ -426,20 +460,18 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
     protected function make_consecutive_errors($testdata) {
         $result = [];
-        $errorspositions = [];
 
-        $str = $testdata['str'];
         $ind0 = $testdata['index_first'][0];
         $len0 = $testdata['length'][0];
 
-        // If string too short
+        // If string too short.
         if ($len0 < 5) {
             return $result;
         }
 
-        // Insertions, deletions, substitutions
-        for($i = 1; $i <= 4; $i*=2) {
-            $count = $this->generate_unique_random_number(0, $len0);
+        // Insertions, deletions, substitutions.
+        for ($i = 1; $i <= 4; $i *= 2) {
+            $count = $this->generate_unique_random_number(0, ($len0 <= 6) ? $len0 : 6);
             $first = $this->generate_unique_random_number($ind0, $ind0 + $len0 - $count);
             $data = $testdata;
             for ($j = 0; $j < $count; $j++) {
@@ -451,11 +483,11 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             $result [] = $data;
         }
 
-        // Transpositions
-        $count = $this->generate_unique_random_number(0, $len0 / 2) ;
+        // Transpositions.
+        $count = $this->generate_unique_random_number(0, ($len0 / 2 <= 6) ? $len0 / 2 : 6);
         $first = $this->generate_unique_random_number($ind0, $ind0 + $len0 - $count * 2);
         $data = $testdata;
-        for ($i = 0; $i < $count; $i++, $first+=2) {
+        for ($i = 0; $i < $count; $i++, $first += 2) {
             $data = $this->create_error($data, qtype_preg_typo::TRANSPOSITION, $first, chr(mt_rand(0, 127)));
         }
         $result [] = $data;
@@ -509,23 +541,23 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         switch ($errtype) {
             case qtype_preg_typo::SUBSTITUTION:
                 $newstr = utf8_string::substr($newstr, 0, $pos) . $char . utf8_string::substr($newstr, $pos + 1);
-                $result['errors'][qtype_preg_typo::SUBSTITUTION] []= ['pos' => $pos, 'char' => $str[$pos]];
+                $result['errors'][qtype_preg_typo::SUBSTITUTION] [] = ['pos' => $pos, 'char' => $str[$pos]];
                 break;
             case qtype_preg_typo::INSERTION:
                 // Delete insertable char
                 $newstr = utf8_string::substr($newstr, 0, $pos) . utf8_string::substr($newstr, $pos + 1);
-                $result['errors'][qtype_preg_typo::INSERTION] []= ['pos' => $pos, 'char' => $str[$pos]];
+                $result['errors'][qtype_preg_typo::INSERTION] [] = ['pos' => $pos, 'char' => $str[$pos]];
                 break;
             case qtype_preg_typo::DELETION:
                 // Insert deletable char
                 $newstr = utf8_string::substr($newstr, 0, $pos) . $char . utf8_string::substr($newstr, $pos);
-                $result['errors'][qtype_preg_typo::DELETION] []= ['pos' => $pos, 'char' => $char];
+                $result['errors'][qtype_preg_typo::DELETION] [] = ['pos' => $pos, 'char' => $char];
                 break;
             case qtype_preg_typo::TRANSPOSITION:
                 $tmp1 = utf8_string::substr($newstr, $pos, 1);
                 $tmp2 = utf8_string::substr($newstr, $pos + 1, 1);
                 $newstr = utf8_string::substr($newstr, 0, $pos) . $tmp2 . $tmp1 . utf8_string::substr($newstr, $pos + 2);
-                $result['errors'][qtype_preg_typo::TRANSPOSITION] []= ['pos' => $pos, 'char' => $char];
+                $result['errors'][qtype_preg_typo::TRANSPOSITION] [] = ['pos' => $pos, 'char' => $char];
                 break;
         }
 
@@ -541,12 +573,11 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         $result['errorslimit']++;
 
         // Random errorslimit increase.
-        if (mt_rand(0,4) === 0) {
+        if (mt_rand(0, 4) === 0) {
             $result['errorslimit']++;
         }
 
-
-        // Update submatches
+        // Update submatches.
         if ($errtype === qtype_preg_typo::DELETION) {
             foreach ($result['index_first'] as $key => $value) {
                 if ($pos > $result['index_first'][$key] && $pos < $result['index_first'][$key] + $result['length'][$key]) {
@@ -561,7 +592,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         }
         if ($errtype === qtype_preg_typo::INSERTION) {
-
             foreach ($result['index_first'] as $key => $value) {
                 if ($pos >= $result['index_first'][$key] && $pos < $result['index_first'][$key] + $result['length'][$key]) {
                     $result['length'][$key]--;
@@ -573,20 +603,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                 }
             }
         }
-        /*
-        if ($errtype === qtype_preg_typo::INSERTION) {
-            $subcount = count($result['index_first']);
-            for($i = 0; $i < $subcount; $i++) {
-                if ($pos >= $result['index_first'][$i] && $pos < $result['index_first'][$i] + $result['length'][$i]) {
-                    $result['length'][$i]--;
-                    for($j = $i + 1; $j < $subcount; $j++) {
-                        if ($pos < $result['index_first'][$j]) {
-                            $result['index_first'][$j]--;
-                        }
-                    }
-                }
-            }
-        }*/
 
         return $result;
     }
@@ -749,13 +765,11 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         }
     }
 
-
-
     public function test() {
         $this->run_normal_tests();
-        $this->serialize_test_data();
+        //$serializabletests = __DIR__ . '/fuzzytests.txt';
+        //$this->unserialize_test_data($serializabletests);
         mt_srand(100);
-        $this->unserialize_test_data();
         $this->run_fuzzy_tests();
     }
 }
