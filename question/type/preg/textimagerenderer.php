@@ -96,7 +96,7 @@ function qtype_preg_get_text_bounding_box($text)  {
     $r->width = 0;
     for($i = 0; $i < core_text::strlen($text); $i++) {
         $letter = core_text::substr($text, $i, 1);
-        $nominalletterwidth = qtype_correctwriting_letter_width($letter);
+        $nominalletterwidth = qtype_preg_letter_width($letter);
         $r->width += $nominalletterwidth;
     }
     return $r;
@@ -126,7 +126,7 @@ function qtype_preg_render_text(&$im, $x, $y, $text, $color) {
     $length = core_text::strlen($text);
     for($i = 0; $i < $length; $i++) {
         $letter = core_text::substr($text, $i, 1);
-        $nominalletterwidth = qtype_correctwriting_letter_width($letter);
+        $nominalletterwidth = qtype_preg_letter_width($letter);
         $bbox = imagettfbbox(FONT_SIZE, 0, FONT, $letter);
         $letterwidth = $bbox[2] - $bbox[0];
         imagettftext($im, FONT_SIZE, 0.0, $x + ($nominalletterwidth - $letterwidth) / 2.0, $y + $metrics['baseline'], $color, FONT, $letter);

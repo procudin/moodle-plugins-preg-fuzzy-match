@@ -387,34 +387,12 @@ class qtype_preg_hintnextlexem extends qtype_preg_hintmatchingpart {
 
 class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
 
-    /*
-    /**
-     * @var qtype_correctwriting_lexical_mistake
-
-    protected $mistake;
-    /** @var token(s) descriptions for the hint or value if no description available
-    protected $token = '';*/
-
     public function hint_type() {
         return qtype_poasquestion\hint::SINGLE_INSTANCE_HINT;
     }
 
-
-    /**
-     * Constructs hint object, remember question to use.
-
-    public function __construct($question, $hintkey/*, $mistake) {
-        $this->question = $question;
-        $this->hintkey = $hintkey;
-        /*
-        $this->mistake = $mistake;
-        if ($mistake !== null) {
-            $this->token = $this->mistake->token_descriptions_as_mistake();
-        }
-    }*/
-
     public function hint_description() {
-        return get_string('howtofixpic', 'qtype_preg'/*, $this->token*/);
+        return get_string('hinthowtofixpic', 'qtype_preg');
     }
 
     // "Where" hint is obviously response based, since it used to better understand mistake message.
@@ -424,28 +402,25 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
 
     /**
      * The hint is disabled when penalty is set above 1.
-     * Mistake === null if attempt to create hint was unsuccessfull.
      */
     public function hint_available($response = null) {
-        return /*$this->question->howtofixpichintpenalty <= 1.0 && $this->mistake !== null*/true;
+        if ($response !== null && $this->question->usehowtofixpichint) {
+            $bestfit = $this->question->get_best_fit_answer($response);
+            $matchresults = $bestfit['match'];
+            return $matchresults->full && $matchresults->errors->count() > 0;
+        }
+        return $this->question->usehowtofixpichint;
     }
 
     public function penalty_for_specific_hint($response = null) {
-        return /*$this->question->howtofixpichintpenalty*/0;
-    }
-
-    // Buttons are rendered by the question to place them in specific feedback near relevant mistake message.
-    public function button_rendered_by_question() {
-        return false;
+        return $this->question->howtofixpichintpenalty;
     }
 
     public function render_hint($renderer, question_attempt $qa, question_display_options $options, $response = null) {
-        global $CFG;
+        // Get matching result.
+        $matchingresult = $this->question->get_best_fit_answer($response)['match'];
 
-        // get matching result
-        $matchingresult = $qa->get_question()->get_best_fit_answer($response)['match'];
-
-        // convert to lexem label format
+        // Convert to lexem label format.
         qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
         list($string, $operations) = $matchingresult->errors->apply_with_ops($matchingresult->str());
 
@@ -465,7 +440,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         list($im, $palette) = self::create_default_image($size);
         $label->paint($im, $palette, $currentrect, true);
 
-        // Output image
+        // Output image.
         ob_start();
         imagepng($im);
         $imagebinary = ob_get_clean();
@@ -499,12 +474,4 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
 
         return array($im, $palette);
     }
-    /**
-     * Converts token to string
-     * @param  block_formal_langs_token_base  $p
-     * @return string
-
-    protected static function to_string($p) {
-        return $p->value();
-    }*/
 }

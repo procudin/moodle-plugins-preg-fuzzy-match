@@ -70,7 +70,8 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         $hintoptions = array(
             'hintmatchingpart' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hintcolouredstring', 'qtype_preg')),
             'hintnextchar' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hintnextchar', 'qtype_preg')),
-            'hintnextlexem' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hintnextlexem', 'qtype_preg', $langobj->lexem_name()))
+            'hintnextlexem' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hintnextlexem', 'qtype_preg', $langobj->lexem_name())),
+            'hinthowtofixpic' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hinthowtofixpic', 'qtype_preg', $langobj->lexem_name()))
         );
 
         $repeated[] = $mform->createElement('select', 'interactivehint',
@@ -251,6 +252,10 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
             $data['uselexemhint'] = false;
         }
 
+        if (!array_key_exists('usehowtofixpichint', $data)) {
+            $data['usehowtofixpichint'] = false;
+        }
+
         $i = 0;
         question_bank::load_question_definition_classes($this->qtype());
         $questionobj = new qtype_preg_question;
@@ -313,6 +318,9 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
                 $langs = block_formal_langs::available_langs();
                 $langobj = block_formal_langs::lang_object(array_keys($langs)[0]);
                 $errors['interactivehint['.$key.']'] = get_string('unallowedhint', 'qtype_preg', get_string('hintnextlexem', 'qtype_preg', $langobj->lexem_name()));
+            }
+            if ($hint == 'hinthowtofixpic') {
+                $errors['interactivehint['.$key.']'] = get_string('unallowedhint', 'qtype_preg', get_string('hinthowtofixpic', 'qtype_preg'));
             }
         }
 

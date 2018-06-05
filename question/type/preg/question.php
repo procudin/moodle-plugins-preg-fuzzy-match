@@ -163,7 +163,7 @@ class qtype_preg_question extends question_graded_automatically
             foreach ($this->answers as $answer) {
                 if ($answer->fraction >= $hintgradeborder) {
                     $bestfitanswer = $answer;
-                    $hintneeded = ($this->usecharhint || $this->uselexemhint);// We already know that $answer->fraction >= $hintgradeborder.
+                    $hintneeded = ($this->usecharhint || $this->uselexemhint || $this->usehowtofixpichint);// We already know that $answer->fraction >= $hintgradeborder.
                     $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation, $this->fuzzymatch);
                     $matcher = $this->get_matcher($this->engine, $answer->answer, $options, $answer->id, $hintneeded, $this->maxerrors);
                     $bestmatchresult = $matcher->match($response['answer']);
@@ -183,17 +183,25 @@ class qtype_preg_question extends question_graded_automatically
 
         // fitness = (the number of correct letters in response) or  (-1)*(the number of letters left to complete response) so we always look for maximum fitness.
         foreach ($this->answers as $answer) {
-            $hintneeded = ($this->usecharhint || $this->uselexemhint) && $answer->fraction >= $hintgradeborder;
+            $hintneeded = ($this->usecharhint || $this->uselexemhint || $this->usehowtofixpichint) && $answer->fraction >= $hintgradeborder;
             $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation, $this->fuzzymatch);
             $matcher = $this->get_matcher($this->engine, $answer->answer, $options, $answer->id, $hintneeded, $this->maxerrors);
             $matchresults = $matcher->match($response['answer']);
 
-            // Check full match.
-            if ($matchresults->full && $matchresults->errors->count() === 0) {// Don't need to look more if we find full match.
+            // Check full or fuzzy match.
+            if ($matchresults->full) {
                 $bestfitanswer = $answer;
                 $bestmatchresult = $matchresults;
                 $fitness = core_text::strlen($response['answer']);
-                break;
+
+                if ($matchresults->errors->count() === 0) {
+                    // Don't need to look more if we find full match.
+                    break;
+                } else {
+                    // Apply errors penalty.
+                    $bestfitanswer->fraction -= $matchresults->errors->count() * $this->errorspenalty;
+                    continue;
+                }
             }
 
             // When hinting we should use only answers within hint border except full matching case and there is some match at all.
@@ -241,7 +249,7 @@ class qtype_preg_question extends question_graded_automatically
         $grade = 0;
         $state = question_state::$gradedwrong;
         if ($bestfitanswer['match']->is_match() && $bestfitanswer['match']->full) {// TODO - implement partial grades for partially correct answers.
-            $grade = $bestfitanswer['answer']->fraction - $bestfitanswer['match']->errors->count() * $this->errorspenalty;
+            $grade = $bestfitanswer['answer']->fraction;
             $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction);
         }
 
