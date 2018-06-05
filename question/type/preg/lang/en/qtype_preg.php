@@ -112,6 +112,18 @@ $string['usecharhint_help'] = 'In behaviours which allow multiple tries (e.g. ad
 $string['uselexemhint'] = 'Allow next lexem (word, number, punctuation mark) hinting';
 $string['uselexemhint_help'] = '<p>In behaviours which allow multiple tries (e.g. adaptive or interactive) show students the \'Hint next word\' button that allows to get a hint either completing current lexem or showing next one if lexem is complete with applying the \'Hint next lexem penalty\'. Not all matching engines support hinting.</p><p><b>Lexeme</b> is an atomic part of the language: a word, number, punctuation mark, operator etc.</p>';
 
+$string['hinthowtofixpic'] = 'how to fix answer';
+$string['fuzzymatch'] = 'Fuzzy matching';
+$string['fuzzymatch_help'] = 'Fuzzy match provides match with insensitivity for some errors count. If matcher encounters errors, match becames partial.';
+$string['maxerrors'] = 'Errors limit for fuzzy matching';
+$string['maxerrors_help'] = 'Upper errors limit limit for fuzzy matching. Exceeding the limit leads to incorrect match.';
+$string['errorspenalty'] = 'Penalty for each encountered errors';
+$string['errorspenalty_help'] = 'Penalty for each encountered errors';
+$string['usehowtofixpichint'] = 'Allow how to fix picture hiniting';
+$string['usehowtofixpichint_help'] = 'Shows the student, what he should do to make string correct.';
+$string['howtofixpichintpenalty'] = 'Penalty for how to fix picture hiniting';
+$string['howtofixpichintpenalty_help'] = 'Penalty for how to fix picture hiniting';
+
 /******* Abstract syntax tree nodes descriptions *******/
 // Types.
 $string['leaf_charset']                = 'character set';
