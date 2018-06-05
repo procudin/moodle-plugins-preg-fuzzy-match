@@ -644,7 +644,7 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
         $result->set_source_info($str, $this->get_max_subexpr(), $this->get_subexpr_name_to_number_map());
         $result->invalidate_match();
 
-        if ($this->anchor->start && $this->get_errors_limit() === 0) {
+        if ($this->anchor->start && (!$this->is_supporting(qtype_preg_matcher::FUZZY_MATCHING) || $this->get_errors_limit() === 0)) {
             // The regex is anchored from start, so we really should check only start of the string and every line break if necessary.
             // Results for other offsets would be same.
             $rightborders = array(0);
