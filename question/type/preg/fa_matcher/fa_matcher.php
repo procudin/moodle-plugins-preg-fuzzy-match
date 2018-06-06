@@ -1060,12 +1060,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
 
                 // Try to deletion pseudotransition.
-                if ($curerrcount < $this->currentmaxerrors) {
-                    if ($this->match_deletion_pseudotransitions($curstate, $curpos)) {
-                        self::ensure_index_exists($reached, $recursionlevel, $from, null);
-                        if ($reached[$recursionlevel][$from] === null || $curstate->leftmost_longest($reached[$recursionlevel][$from])) {
-                            $reached[$recursionlevel][$from] = $curstate;
-                        }
+                if ($curerrcount < $this->currentmaxerrors && $this->match_deletion_pseudotransitions($curstate, $curpos)) {
+                    self::ensure_index_exists($reached, $recursionlevel, $from, null);
+                    if ($reached[$recursionlevel][$from] === null || $curstate->leftmost_longest($reached[$recursionlevel][$from])) {
+                        $reached[$recursionlevel][$from] = $curstate;
                     }
                 }
             }
