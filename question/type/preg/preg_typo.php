@@ -213,7 +213,24 @@ class qtype_preg_typo_container {
 
         foreach ($substitutions as $sub) {
             $container->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $sub->position));
-            $container->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char));
+
+            // Find postion for insertion.
+            $posforinsertion = -1;
+            foreach ($container->errors[qtype_preg_typo::INSERTION] as $ind => $error) {
+                if ($error->position >= $sub->position + 1) {
+                    $posforinsertion = $ind;
+                    break;
+                }
+            }
+
+            if ($posforinsertion === -1) {
+                // Add to the end of insertion container.
+                $container->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char));
+            } else {
+                // Insert to found position.
+                array_splice($container->errors[qtype_preg_typo::INSERTION], $ind, 0, array(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char)));
+                $container->count++;
+            }
         }
     }
 
