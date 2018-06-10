@@ -124,6 +124,9 @@ $string['usehowtofixpichint_help'] = 'Shows the student, what he should do to ma
 $string['howtofixpichintpenalty'] = 'Penalty for how to fix picture hiniting';
 $string['howtofixpichintpenalty_help'] = 'Penalty for how to fix picture hiniting';
 
+$string['backreforrecursionforfuzzy'] = 'Backreferences or recursion for fuzzy match';
+$string['lazyquantforfuzzy'] = 'Lazy quantifiers for fuzzy match';
+
 /******* Abstract syntax tree nodes descriptions *******/
 // Types.
 $string['leaf_charset']                = 'character set';
