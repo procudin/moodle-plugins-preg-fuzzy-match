@@ -28,13 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 require_once($CFG->dirroot . '/blocks/formal_langs/block_formal_langs.php');
-
-require_once(dirname(__FILE__) . '/textimagerenderer.php');
-require_once(dirname(__FILE__) . '/classes/mistakesimage/defines.php');
-require_once(dirname(__FILE__) . '/classes/mistakesimage/abstractlabel.php');
-require_once(dirname(__FILE__) . '/classes/mistakesimage/emptylabel.php');
-require_once(dirname(__FILE__) . '/classes/mistakesimage/lexemelabel.php');
-require_once(dirname(__FILE__) . '/classes/mistakesimage/imageblock.php');
+require_once($CFG->dirroot . '/blocks/formal_langs/mistakesimage.php');
 
 
 /**
@@ -424,7 +418,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
         list($string, $operations) = $matchingresult->errors->apply_with_ops($matchingresult->str());
 
-        $label = new \qtype_preg_lexeme_label('');
+        $label = new \block_formal_langs_lexeme_label('');
         $label->set_text($string);
         $label->set_operations($operations);
         $label->recompute_size();
@@ -437,7 +431,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
                 'y' => FRAME_SPACE
         );
 
-        list($im, $palette) = self::create_default_image($size);
+        list($im, $palette) = \block_formal_langs_image_generator::create_default_image($size);
         $label->paint($im, $palette, $currentrect, true);
 
         // Output image.
@@ -448,30 +442,5 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         $imagetext  = 'data:image/png;base64,' . base64_encode($imagebinary);
         $imagesrc = html_writer::empty_tag('image', array('src' => $imagetext));
         return $imagesrc;
-    }
-
-    protected static function create_default_image($size) {
-        // Create image
-        $sizex = $size[0] + 2 * FRAME_SPACE;
-        $sizey = $size[1] + 2 * FRAME_SPACE;
-        $im = imagecreatetruecolor($sizex, $sizey);
-
-        // Fill palette
-        $palette = array();
-        $palette['white'] = imagecolorallocate($im, 255, 255, 255);
-        $palette['black'] = imagecolorallocate($im, 0, 0, 0);
-        $palette['red']   = imagecolorallocate($im, 255, 0, 0);
-
-        // Set image background to white
-        imagefill($im,0,0,$palette['white']);
-
-        // Draw a rectangle frame
-        imagesetthickness($im, FRAME_THICKNESS);
-        imageline($im, 0, 0, $sizex - 1, 0, $palette['black']);
-        imageline($im, $sizex - 1, 0, $sizex - 1, $sizey - 1, $palette['black']);
-        imageline($im, $sizex - 1, $sizey - 1, 0, $sizey - 1, $palette['black']);
-        imageline($im, 0, $sizey - 1, 0, 0, $palette['black']);
-
-        return array($im, $palette);
     }
 }
