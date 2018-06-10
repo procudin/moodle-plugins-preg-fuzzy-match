@@ -263,7 +263,7 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         foreach ($answers as $key => $answer) {
             $trimmedanswer = trim($answer);
             if ($trimmedanswer !== '') {
-                $hintused = ($data['usecharhint'] || $data['uselexemhint']) && $fractions[$key] >= $data['hintgradeborder'];
+                $hintused = ($data['usecharhint'] || $data['uselexemhint'] || $data['usehowtofixpichint']) && $fractions[$key] >= $data['hintgradeborder'];
                 // Create matcher to check regex for errors and try to match correct answer.
                 $options = $questionobj->get_matching_options($data['exactmatch'], $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation'], $data['fuzzymatch']);
                 $matcher = $questionobj->get_matcher($data['engine'], $trimmedanswer, $options, (-1)*$i, $hintused);
