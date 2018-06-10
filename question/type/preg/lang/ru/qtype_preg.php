@@ -124,6 +124,9 @@ $string['usehowtofixpichint_help'] = 'Позволяет визуально ук
 $string['howtofixpichintpenalty'] = 'Штраф за подсказку о том, как исправить строку';
 $string['howtofixpichintpenalty_help'] = 'Штраф за подсказку о том, как исправить строку.';
 
+$string['backreforrecursionforfuzzy'] = 'Обратные ссылки или рекурсия для нечеткого поиска';
+$string['lazyquantforfuzzy'] = 'Ленивые квантификаторы для нечеткого поиска';
+
 /******* Abstract syntax tree nodes descriptions *******/
 // Types.
 $string['leaf_charset']                = 'символьный класс';
