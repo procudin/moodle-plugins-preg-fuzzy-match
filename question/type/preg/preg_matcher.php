@@ -66,7 +66,7 @@ class qtype_preg_matching_results {
      */
     public $extensionstart;
 
-    /** @var object of qtype_preg_typo_container, containing all errors encountered by fuzzy matching */
+    /** @var object of qtype_preg_typo_container, containing all errors encountered by approximate matching */
     public $errors;
     //      Source data.
     /** @var qtype_poasquestion\utf8_string A string being matched. */
@@ -410,8 +410,8 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
     public $mergeassertions = false;
     /** @var boolean Should matcher try to generate extension? */
     public $extensionneeded = true;
-    /** @var boolean Should matcher use fuzzy matching */
-    public $fuzzymatch = false;
+    /** @var boolean Should matcher use approximate matching */
+    public $approximatematch = false;
     /** @var string Unicode property name for preferred alphabet for \w etc when generating extension.*/
     public $preferredalphabet = null;
     /** @var string Unicode property name for preferred characters for dot meta-character when generating extension.*/
@@ -481,7 +481,7 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
     }
 
     public function set_errors_limit($count) {
-        throw new qtype_preg_exception('Error: fuzzy matching has not been implemented for '.$this->name().' class');
+        throw new qtype_preg_exception('Error: approximate matching has not been implemented for '.$this->name().' class');
     }
 
 

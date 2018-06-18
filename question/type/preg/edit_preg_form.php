@@ -179,9 +179,9 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('exactmatch', 'exactmatch', 'qtype_preg');
         $mform->setDefault('exactmatch', 1);
 
-        $mform->addElement('selectyesno', 'fuzzymatch', get_string('fuzzymatch', 'qtype_preg'));
-        $mform->addHelpButton('fuzzymatch', 'fuzzymatch', 'qtype_preg');
-        $mform->setDefault('fuzzymatch', 1);
+        $mform->addElement('selectyesno', 'approximatematch', get_string('approximatematch', 'qtype_preg'));
+        $mform->addHelpButton('approximatematch', 'approximatematch', 'qtype_preg');
+        $mform->setDefault('approximatematch', 1);
 
         $mform->addElement('text', 'maxerrors', get_string('maxerrors', 'qtype_preg'), array('size' => 3));
         $mform->setDefault('maxerrors', '2');
@@ -265,7 +265,7 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
             if ($trimmedanswer !== '') {
                 $hintused = ($data['usecharhint'] || $data['uselexemhint'] || $data['usehowtofixpichint']) && $fractions[$key] >= $data['hintgradeborder'];
                 // Create matcher to check regex for errors and try to match correct answer.
-                $options = $questionobj->get_matching_options($data['exactmatch'], $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation'], $data['fuzzymatch']);
+                $options = $questionobj->get_matching_options($data['exactmatch'], $questionobj->get_modifiers($data['usecase']), (-1)*$i, $data['notation'], $data['approximatematch']);
                 $matcher = $questionobj->get_matcher($data['engine'], $trimmedanswer, $options, (-1)*$i, $hintused);
                 if ($matcher->errors_exist()) {// There were errors in the matching process.
                     $regexerrors = $matcher->get_error_messages();// Show no more than max errors.
