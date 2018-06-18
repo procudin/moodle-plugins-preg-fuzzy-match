@@ -1247,9 +1247,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             if (!$fullmatchexists && $approximateenabled) {
                 $preverrorscount = $this->currentmaxerrors;
                 $this->currentmaxerrors = 0;
-                $possiblematches = $this->bruteforcematch
-                        ? $this->match_brute_force($str, $startpos)
-                        : $this->match_fast($str, $startpos);
+                //$possiblematches = $this->bruteforcematch
+                //        ? $this->match_brute_force($str, $startpos)
+                //        : $this->match_fast($str, $startpos);
             }
 
             // If there was no full match, generate extensions for each partial match.
@@ -1273,8 +1273,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     if ($ext === null) {
                         continue;
                     }
-                    if ($result->extendedmatch === null || $match->left < $result->left) {
+                    if ($result->extendedmatch === null || $match->left < $result->left || $match->left == $result->left && $match->errors->count() < $result->errors->count()) {
                         $result->extendedmatch = $ext;
+                        $result->errors = clone $ext->errors;
                         $result->left = $match->left;
                     }
                 }
