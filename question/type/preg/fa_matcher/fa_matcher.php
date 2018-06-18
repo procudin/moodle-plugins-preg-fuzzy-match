@@ -50,7 +50,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     // Max number of states during simulation
     protected $maxstatescount = 1000;
 
-    // Max number of errors for fuzzy matching
+    // Max number of errors for approximate matching
     protected $maxerrors = 0;
 
     // Max number of errors for current match
@@ -68,7 +68,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     }
 
     public function get_errors_limit() {
-        if ($this->options->fuzzymatch) {
+        if ($this->options->approximatematch) {
             return $this->maxerrors;
         }
         return 0;
@@ -255,18 +255,18 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     /**
      * Matches an array of transitions. If all transitions are matched, that means a full match. Partial match otherwise.
      */
-    protected function match_transitions($curstate, $transitions, $str, $curpos, &$length, &$full, $addbacktracks, $consumeschar = true, $tryfuzzy = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
+    protected function match_transitions($curstate, $transitions, $str, $curpos, &$length, &$full, $addbacktracks, $consumeschar = true, $tryapproximate = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
         $newstate = clone $curstate;
         $length = 0;
         $full = true;
-        $fuzzyenabled = $tryfuzzy && $this->currentmaxerrors > 0;
+        $approximateenabled = $tryapproximate && $this->currentmaxerrors > 0;
 
         foreach ($transitions as $tr) {
             $tmplength = 0;
             $ischartransition = $tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET;
 
             // We shouldn't match char transition for insertion pseudotransition.
-            if (!$fuzzyenabled || !$ischartransition || $pseudotype != qtype_preg_typo::INSERTION) {
+            if (!$approximateenabled || !$ischartransition || $pseudotype != qtype_preg_typo::INSERTION) {
                 $result =  $tr->pregleaf->match($str, $curpos, $tmplength, $newstate);
             } else {
                 $result = false;
@@ -275,7 +275,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             if ($result) {
                 $this->after_transition_passed($newstate, $tr, $curpos, $tmplength, $addbacktracks);
                 //echo "passed $tr\n";
-            } else if ($fuzzyenabled) {
+            } else if ($approximateenabled) {
                 // Try match pseudotransitions.
                 if ($ischartransition && $newstate->errors->count() < $this->currentmaxerrors) {
                     // Try match character pseudotransition.
@@ -447,9 +447,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     /**
      * Checks if this transition (with all merged to it) matches a character. Returns a new state.
      */
-    protected function match_regular_transition($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks, $tryfuzzy = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
+    protected function match_regular_transition($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks, $tryapproximate = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
         $transitions = array_merge($transition->mergedbefore, array($transition), $transition->mergedafter);
-        $newstate = $this->match_transitions($curstate, $transitions, $str, $curpos, $length, $full, $addbacktracks, $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET, $tryfuzzy, $pseudotype);
+        $newstate = $this->match_transitions($curstate, $transitions, $str, $curpos, $length, $full, $addbacktracks, $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET, $tryapproximate, $pseudotype);
         $this->set_last_transition($newstate, $transition, $newstate->length - $curstate->length, !$full);
         return $newstate;
     }
@@ -478,7 +478,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
      */
     protected function epsilon_closure($startstates, $str, $addbacktracks) {
         $curstates = $startstates;
-        $fuzzyenabled = $this->currentmaxerrors > 0;
+        $approximateenabled = $this->currentmaxerrors > 0;
         $result = array(\qtype_preg\fa\transition::GREED_LAZY => array(),
                         \qtype_preg\fa\transition::GREED_GREEDY => $startstates
                         );
@@ -493,10 +493,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
 
                 $empty = $transition->pregleaf->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY
-                        || $fuzzyenabled && $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor());
+                        || $approximateenabled && $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor());
 
                 // If char transition
-                if ($fuzzyenabled && $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET || $empty) {
+                if ($approximateenabled && $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET || $empty) {
                     $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks, true,qtype_preg_typo::INSERTION);
                 } else {
                     continue;
@@ -1210,15 +1210,15 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             return $result->to_matching_results();
         }
 
-        if ($this->options->fuzzymatch && $this->maxerrors > 0) {
+        if ($this->options->approximatematch && $this->maxerrors > 0) {
             if ($startpos == 0) {
                 $this->currentmaxerrors = $this->maxerrors;
             }
-            $fuzzyenabled = true;
+            $approximateenabled = true;
             $preverrorscount = $this->currentmaxerrors;
         } else {
             $this->currentmaxerrors = 0;
-            $fuzzyenabled = false;
+            $approximateenabled = false;
         }
 
         // Find all possible matches. Using the fast match method if there are no backreferences.
@@ -1243,8 +1243,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
             }
 
-            // If fuzzy match failed run partial match.
-            if (!$fullmatchexists && $fuzzyenabled) {
+            // If approximate match failed run partial match.
+            if (!$fullmatchexists && $approximateenabled) {
                 $preverrorscount = $this->currentmaxerrors;
                 $this->currentmaxerrors = 0;
                 $possiblematches = $this->bruteforcematch
@@ -1290,7 +1290,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $result->extendedmatch->extendedmatch = null;   // Holy cow, this is ugly
         }
 
-        if (!$fullmatchexists && $fuzzyenabled) {
+        if (!$fullmatchexists && $approximateenabled) {
             $this->currentmaxerrors = $preverrorscount;
         }
 
@@ -1453,7 +1453,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $options = new qtype_preg_matching_options();
         }
         $options->replacesubexprcalls = true;
-        if ($options->fuzzymatch) {
+        if ($options->approximatematch) {
             $options->mergeassertions = true;
         }
 
@@ -1490,7 +1490,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $this->calculate_backtrackstates();
         $this->calculate_bruteforce();
 
-        if ($options->fuzzymatch) {
+        if ($options->approximatematch && empty($this->errors)) {
             $this->calculate_transpose_pseudotransitions();
         }
 

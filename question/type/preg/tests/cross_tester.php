@@ -84,7 +84,7 @@ abstract class qtype_preg_cross_tester extends PHPUnit_Framework_TestCase {
 
     const TAG_SKIP_TEST          = 0x4000;            // Skip test with this tag.
 
-    const TAG_ALLOW_FUZZY        = 0x8000;            // Allow fuzzy matching.
+    const TAG_ALLOW_FUZZY        = 0x8000;            // Allow approximate matching.
 
 
     const MAX_BUILDING_TIME      = 2000;   // Max time for matchers to be compiled from regex, milliseconds.

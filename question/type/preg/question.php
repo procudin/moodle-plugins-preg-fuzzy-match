@@ -48,11 +48,11 @@ class qtype_preg_question extends question_graded_automatically
     public $correctanswer;
     /** @var boolean should the match be exact or any match within answer is ok. */
     public $exactmatch;
-    /** @var boolean should the match be fuzzy. */
-    public $fuzzymatch;
-    /** @var int max errors border for fuzzy matching. */
+    /** @var boolean should the match be approximate. */
+    public $approximatematch;
+    /** @var int max errors border for approximate matching. */
     public $maxerrors;
-    /** @var int max errors border for fuzzy matching. */
+    /** @var int max errors border for approximate matching. */
     public $errorspenalty;
     /** @var boolean availability of hint 'how to fix'. */
     public $usehowtofixpichint;
@@ -90,13 +90,13 @@ class qtype_preg_question extends question_graded_automatically
         parent::__construct();
     }
 
-    public static function question_from_regex($regex, $usecase, $exactmatch, $fuzzymatch, $engine, $notation) {
+    public static function question_from_regex($regex, $usecase, $exactmatch, $approximatematch, $engine, $notation) {
 
         $question = new qtype_preg_question;
         $question->usecase = $usecase;
         $question->correctanswer = '';
         $question->exactmatch = $exactmatch;
-        $question->fuzzymatch = $fuzzymatch;
+        $question->approximatematch = $approximatematch;
         $querymatcher = $question->get_query_matcher($engine);
         $question->usecharhint = $querymatcher->is_supporting(qtype_preg_matcher::CORRECT_ENDING);
         $question->charhintpenalty = 0;
@@ -164,7 +164,7 @@ class qtype_preg_question extends question_graded_automatically
                 if ($answer->fraction >= $hintgradeborder) {
                     $bestfitanswer = $answer;
                     $hintneeded = ($this->usecharhint || $this->uselexemhint || $this->usehowtofixpichint);// We already know that $answer->fraction >= $hintgradeborder.
-                    $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation, $this->fuzzymatch);
+                    $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation, $this->approximatematch);
                     $matcher = $this->get_matcher($this->engine, $answer->answer, $options, $answer->id, $hintneeded, $this->maxerrors);
                     $bestmatchresult = $matcher->match($response['answer']);
                     if ($knowleftcharacters) {
@@ -176,7 +176,7 @@ class qtype_preg_question extends question_graded_automatically
                 }
             }
         } else {// Just use first answer and not bother with maxfitness. But we still should fill $bestmatchresults from matcher to correctly fill matching results arrays.
-            $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $bestfitanswer->id, $this->notation, $this->fuzzymatch);
+            $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $bestfitanswer->id, $this->notation, $this->approximatematch);
             $matcher = $this->get_matcher($this->engine, $bestfitanswer->answer, $options, $bestfitanswer->id, true, $this->maxerrors);
             $bestmatchresult = $matcher->match($response['answer']);
         }
@@ -184,11 +184,11 @@ class qtype_preg_question extends question_graded_automatically
         // fitness = (the number of correct letters in response) or  (-1)*(the number of letters left to complete response) so we always look for maximum fitness.
         foreach ($this->answers as $answer) {
             $hintneeded = ($this->usecharhint || $this->uselexemhint || $this->usehowtofixpichint) && $answer->fraction >= $hintgradeborder;
-            $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation, $this->fuzzymatch);
+            $options = $this->get_matching_options($this->exactmatch, $this->get_modifiers($this->usecase), $answer->id, $this->notation, $this->approximatematch);
             $matcher = $this->get_matcher($this->engine, $answer->answer, $options, $answer->id, $hintneeded, $this->maxerrors);
             $matchresults = $matcher->match($response['answer']);
 
-            // Check full or fuzzy match.
+            // Check full or approximate match.
             if ($matchresults->full) {
                 $bestfitanswer = $answer;
                 $bestmatchresult = $matchresults;
@@ -280,7 +280,7 @@ class qtype_preg_question extends question_graded_automatically
      * @param $notation string notation, in which regex is written
      * @return matching options object
      */
-    public function get_matching_options($exact = false, $modifiers = 0, $answerid = null, $notation = 'native', $fuzzymatch = false) {
+    public function get_matching_options($exact = false, $modifiers = 0, $answerid = null, $notation = 'native', $approximatematch = false) {
         global $CFG;
         // Create and fill options object.
         $matchingoptions = new qtype_preg_matching_options();
@@ -297,7 +297,7 @@ class qtype_preg_question extends question_graded_automatically
 
         $matchingoptions->notation = $notation;
         $matchingoptions->exactmatch = $exact;
-        $matchingoptions->fuzzymatch = (bool)$fuzzymatch;
+        $matchingoptions->approximatematch = (bool)$approximatematch;
         if(! is_null($CFG->qtype_preg_assertfailmode)) {
             $matchingoptions->mergeassertions = $CFG->qtype_preg_assertfailmode;
         }

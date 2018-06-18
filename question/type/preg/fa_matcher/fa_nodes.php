@@ -398,8 +398,8 @@ abstract class qtype_preg_fa_node {
 class qtype_preg_fa_leaf extends qtype_preg_fa_node {
 
     public function accept($options) {
-        if ($options->fuzzymatch && ($this->pregnode->type == qtype_preg_node::TYPE_LEAF_BACKREF || $this->pregnode->type == qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL)) {
-            return get_string('backreforrecursionforfuzzy', 'qtype_preg');
+        if ($options->approximatematch && ($this->pregnode->type == qtype_preg_node::TYPE_LEAF_BACKREF || $this->pregnode->type == qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL)) {
+            return get_string('backreforrecursionforapproximate', 'qtype_preg');
         }
         return true;
     }
@@ -753,8 +753,8 @@ abstract class qtype_preg_fa_node_quant extends qtype_preg_fa_operator {
         if ($this->pregnode->possessive) {
             return get_string('possessivequant', 'qtype_preg');
         }
-        if ($options->fuzzymatch && $this->pregnode->lazy) {
-            return get_string('lazyquantforfuzzy', 'qtype_preg');
+        if ($options->approximatematch && $this->pregnode->lazy) {
+            return get_string('lazyquantforapproximate', 'qtype_preg');
         }
         return true;
     }
@@ -1090,8 +1090,8 @@ class qtype_preg_fa_node_cond_subexpr extends qtype_preg_fa_operator {
             $this->pregnode->subtype != qtype_preg_node_cond_subexpr::SUBTYPE_DEFINE) {
             return get_string($this->pregnode->subtype, 'qtype_preg');
         }
-        if ($options->fuzzymatch) {
-            return get_string('backreforrecursionforfuzzy', 'qtype_preg');
+        if ($options->approximatematch) {
+            return get_string('backreforrecursionforapproximate', 'qtype_preg');
         }
         return true;
     }

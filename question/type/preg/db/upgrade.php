@@ -283,19 +283,19 @@ function xmldb_qtype_preg_upgrade($oldversion=0) {
     }
 
 
-    // Upgrade for fuzzy matching.
+    // Upgrade for approximate matching.
     if ($oldversion < 2018060500) {
         // Add some fields to qtype_preg_options table.
         $table = new xmldb_table('qtype_preg_options');
 
         // Fuzzy match field.
-        $field = new xmldb_field('fuzzymatch', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'exactmatch');
+        $field = new xmldb_field('approximatematch', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'exactmatch');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
         // Maxerrors count.
-        $field = new xmldb_field('maxerrors', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0', 'fuzzymatch');
+        $field = new xmldb_field('maxerrors', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0', 'approximatematch');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
