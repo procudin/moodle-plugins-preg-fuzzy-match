@@ -126,6 +126,7 @@ $string['howtofixpichintpenalty_help'] = 'Penalty for how to fix picture hinitin
 
 $string['backreforrecursionforapproximate'] = 'Backreferences or recursion for match with typo detection';
 $string['lazyquantforapproximate'] = 'Lazy quantifiers for approximate match with typo detection';
+$string['typosfound'] = 'Typos found';
 
 /******* Abstract syntax tree nodes descriptions *******/
 // Types.

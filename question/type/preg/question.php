@@ -418,9 +418,12 @@ class qtype_preg_question extends question_graded_automatically
         $state = $qa->get_state();
         if (isset($bestfit['answer']) && ($bestfit['match']->full  || $bestfit['match']->is_match() && $state->is_finished()) ) {
             $answer = $bestfit['answer'];
+            if ($bestfit['match']->errors->count() > 0) {
+                $feedback .= get_string('typosfound', 'qtype_preg') . ": " . $bestfit['match']->errors->count() . "\n";
+            }
             if ($answer->feedback) {
                 $feedbacktext = $this->insert_subexpressions($answer->feedback, $response, $bestfit['match']);
-                $feedback = $this->format_text($feedbacktext, $answer->feedbackformat,
+                $feedback .= $this->format_text($feedbacktext, $answer->feedbackformat,
                     $qa, 'question', 'answerfeedback', $answer->id);
             }
         }
