@@ -126,6 +126,7 @@ $string['howtofixpichintpenalty_help'] = 'Штраф за подсказку о 
 
 $string['backreforrecursionforapproximate'] = 'Обратные ссылки или рекурсия для поиска с учетом опечтаток';
 $string['lazyquantforapproximate'] = 'Ленивые квантификаторы для поиска с учетом опечаток';
+$string['typosfound'] = 'Найдено опечаток';
 
 /******* Abstract syntax tree nodes descriptions *******/
 // Types.
