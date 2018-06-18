@@ -421,10 +421,8 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         // Add '...' character.
         if (!$matchingresult->full) {
             $insertions = $matchingresult->errors->get_errors()[qtype_preg_typo::INSERTION];
-            if ($matchingresult->errors->contains(qtype_preg_typo::INSERTION, $matchingresult->indexfirst[0] + $matchingresult->length[0])) {
-                $matchingresult->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $matchingresult->indexfirst[0] + $matchingresult->length[0], core_text::code2utf8(0x2026)));
-            } else if (count($insertions) > 0 && $insertions[count($insertions) - 1]->position == 0) {
-                $matchingresult->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, 0, core_text::code2utf8(0x2026)));
+            if (count($insertions) > 0) {
+                $matchingresult->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $insertions[count($insertions) - 1]->position, core_text::code2utf8(0x2026)));
             } else {
                 $str .= core_text::code2utf8(0x2026);
             }
