@@ -182,9 +182,9 @@ class qtype_preg_matching_results {
         // More errors count.
         $thiserrcount = $this->errors->count();
         $othererrcount = $other->errors->count();
-        if ($thiserrcount > $othererrcount) {
+        if ($this->full && $thiserrcount > $othererrcount) {
             return true;
-        } else if ($thiserrcount < $othererrcount) {
+        } else if ($this->full && $thiserrcount < $othererrcount) {
             return false;
         }
 
@@ -196,7 +196,7 @@ class qtype_preg_matching_results {
         }
 
         // Rightmost if contains errors.
-        if ($thiserrcount > 0) {
+        if ($this->full && $thiserrcount > 0) {
             if ($this->indexfirst > $other->indexfirst) {
                 return true;
             } else if ($this->indexfirst < $other->indexfirst) {
