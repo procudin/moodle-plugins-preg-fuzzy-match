@@ -61,7 +61,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
         if ($response !== null) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return $this->could_show_hint($matchresults, false) && $bestfit['answer']->fraction >= $this->question->hintgradeborder;
+            return $this->could_show_hint($matchresults, false) /*&& $bestfit['answer']->fraction >= $this->question->hintgradeborder*/;
         }
         return false;
     }
@@ -246,7 +246,7 @@ class qtype_preg_hintnextchar extends qtype_preg_hintmatchingpart {
         if ($response !== null) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return parent::hint_available($response) && $this->question->usecharhint && !$matchresults->full;
+            return parent::hint_available($response) && $this->question->usecharhint && !$matchresults->full && $matchresults->errors->count() === 0;
         } else {
             return $this->question->usecharhint;
         }
@@ -314,7 +314,7 @@ class qtype_preg_hintnextlexem extends qtype_preg_hintmatchingpart {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
             // TODO check that there is lexem after current situation.
-            return parent::hint_available($response) && $this->question->uselexemhint && !$matchresults->full && is_object($matchresults->extendedmatch);
+            return parent::hint_available($response) && $this->question->uselexemhint && !$matchresults->full && is_object($matchresults->extendedmatch) && $matchresults->errors->count() === 0;
         } else {
             return $this->question->uselexemhint;
         }
@@ -401,7 +401,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         if ($response !== null && $this->question->usehowtofixpichint) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return $matchresults->full && $matchresults->errors->count() > 0;
+            return /*$matchresults->full && */$matchresults->errors->count() > 0;
         }
         return $this->question->usehowtofixpichint;
     }
@@ -412,11 +412,26 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
 
     public function render_hint($renderer, question_attempt $qa, question_display_options $options, $response = null) {
         // Get matching result.
-        $matchingresult = $this->question->get_best_fit_answer($response)['match'];
+        $matchingresult = clone $this->question->get_best_fit_answer($response)['match'];
+        $str = $matchingresult->str();
+
+        // Replace substitutions with deletion and insertion.
+        qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
+
+        // Add '...' character.
+        if (!$matchingresult->full) {
+            $insertions = $matchingresult->errors->get_errors()[qtype_preg_typo::INSERTION];
+            if ($matchingresult->errors->contains(qtype_preg_typo::INSERTION, $matchingresult->indexfirst[0] + $matchingresult->length[0])) {
+                $matchingresult->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $matchingresult->indexfirst[0] + $matchingresult->length[0], core_text::code2utf8(0x2026)));
+            } else if (count($insertions) > 0 && $insertions[count($insertions) - 1]->position == 0) {
+                $matchingresult->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, 0, core_text::code2utf8(0x2026)));
+            } else {
+                $str .= core_text::code2utf8(0x2026);
+            }
+        }
 
         // Convert to lexem label format.
-        qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
-        list($string, $operations) = $matchingresult->errors->apply_with_ops($matchingresult->str());
+        list($string, $operations) = $matchingresult->errors->apply_with_ops($str);
 
         $label = new \block_formal_langs_lexeme_label('');
         $label->set_text($string);

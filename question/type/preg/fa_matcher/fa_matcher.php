@@ -1243,13 +1243,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
             }
 
-            // If approximate match failed run partial match.
+            // If approximate match failed set errors limit to zero.
             if (!$fullmatchexists && $approximateenabled) {
                 $preverrorscount = $this->currentmaxerrors;
                 $this->currentmaxerrors = 0;
-                //$possiblematches = $this->bruteforcematch
-                //        ? $this->match_brute_force($str, $startpos)
-                //        : $this->match_fast($str, $startpos);
             }
 
             // If there was no full match, generate extensions for each partial match.
@@ -1291,6 +1288,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $result->extendedmatch->extendedmatch = null;   // Holy cow, this is ugly
         }
 
+        // If result is partial bring errors limit back.
         if (!$fullmatchexists && $approximateenabled) {
             $this->currentmaxerrors = $preverrorscount;
         }
