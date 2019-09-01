@@ -7,7 +7,7 @@
  * @package questions
  */
 
-M.poasquestion_text_and_button = (function ($) {
+M.poasquestion_text_and_button = (function () {
 
     var self = {
 
@@ -69,7 +69,7 @@ M.poasquestion_text_and_button = (function ($) {
      * @param {string} input_id id of input from witch you want to read data
      * @param {int} pagewidth width of modal window
      */
-    set_handler : function (Y, button_id, input_id, pagewidth) {
+    set_handler : function (Y, input_id, button_id, button_tooltip, button_img_url, pagewidth) {
         //this.Y = this.Y || Y;
         if (button_id == null || input_id == null) {
             return;
@@ -80,8 +80,11 @@ M.poasquestion_text_and_button = (function ($) {
         if (input_id.indexOf('#') != 0) {
             input_id = '#' + input_id;
         }
-        var testregexbtn = $(button_id);
         var testregexlineedit = $(input_id);
+        testregexlineedit.after('<a href="#" name="button_' + input_id.substr(1) + '" id="' + button_id.substr(1) + '" title="' + button_tooltip + '" style="margin-left: 5px" >' +
+                                    '<img src="' + button_img_url + '" />' +
+                                '</a>');
+        var testregexbtn = $(button_id);
         var eventdata = {
             pagewidth: pagewidth,
             targetinput: testregexlineedit
@@ -196,4 +199,4 @@ M.poasquestion_text_and_button = (function ($) {
 
 return self;
 
-})(jQuery);
+})();

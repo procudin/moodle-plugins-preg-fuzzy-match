@@ -103,20 +103,21 @@ class qtype_poasquestion_text_and_button extends MoodleQuickForm_textarea {
     }
 
     /**
-     * Returns HTML for this form element.
+     * Returns HTML for regex visualizer button.
+     * This medthod replaces '{help}' placeholder from 'default' textarea template (see $CFG->libdir/formslib.php)
      */
-    public function toHtml() {
+    public function getHelpButton() {
         global $PAGE;
 
         $jsargs = array(
+            $this->getTextareaId(),
             $this->getButtonId(),
-            $this->getTextareaId()
+            $this->getTooltip(),
+            $this->linkToBtnImage,
         );
 
         $PAGE->requires->js_init_call('M.poasquestion_text_and_button.set_handler', $jsargs, true, $this->jsmodule);
 
-        return parent::toHtml() . '<a href="#" name="button_' . $this->getTextareaId() . '" id="' . $this->getButtonId() . '" title="' . $this->getTooltip() . '" style="margin-left: 5px" >' .
-                                      '<img src="' . $this->linkToBtnImage . '" />' .
-                                  '</a>';
+        return '';
     }
 }
