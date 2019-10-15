@@ -8,7 +8,18 @@
  * https://github.com/timmywil/jquery.panzoom/blob/master/MIT-License.txt
  */
 
-(function($) {
+(function (factory) {
+    if ( typeof define === 'function' && define.amd ) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS style for Browserify
+        module.exports = factory;
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function($) {
     'use strict';
 
     var document = window.document;
@@ -1290,4 +1301,4 @@
     };
 
     return Panzoom;
-}) ($); 
+})); 

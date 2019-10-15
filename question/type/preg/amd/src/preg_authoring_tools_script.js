@@ -25,8 +25,8 @@
 /**
  * This object extends M.poasquestion_text_and_button with onfirstpresscallback()
  * function and oneachpresscallback()
- */
-M.preg_authoring_tools_script = (function ($) {
+ */ 
+define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function ($) {
 
     var self = {
 
@@ -71,12 +71,11 @@ M.preg_authoring_tools_script = (function ($) {
 
     /**
      * setups module
-     * @param {Object} Y NOT USED! It's needed because moodle passes this object anyway
      * @param {string} _www_root string with www host of moodle
      * (smth like 'http://moodle.site.ru/')
      * @param {string} poasquestion_text_and_button_objname name of qtype_preg_textbutton parent object
      */
-    init : function (Y, _www_root, poasquestion_text_and_button_objname) {
+    init : function (_www_root, poasquestion_text_and_button_objname) {
         this.www_root = _www_root;
         this.textbutton_widget = M.poasquestion_text_and_button;
         this.setup_parent_object();
@@ -1437,6 +1436,6 @@ M.preg_authoring_tools_script = (function ($) {
     RECTANGLE_HEIGHT : 0
 };
 
-return self;
+return (M.preg_authoring_tools_script = self);
 
-})(jQuery);
+}));
