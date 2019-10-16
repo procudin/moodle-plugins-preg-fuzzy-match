@@ -38,8 +38,6 @@ require_once($CFG->dirroot . '/question/type/preg/questiontype.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_hints.php');
 require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_collapsible_info_block.php');
 
-$PAGE->requires->jquery_plugin('poasquestion-jquerymodule', 'qtype_poasquestion');
-
 class qtype_preg_authoring_form extends moodleform {
 
     private $isblock;

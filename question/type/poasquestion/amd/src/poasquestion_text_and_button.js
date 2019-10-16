@@ -9,13 +9,15 @@
 
 define(['jquery', 
         'jqueryui',
+        'qtype_poasquestion/interface',
         'qtype_poasquestion/jquery.elastic.1.6.11',
         'qtype_poasquestion/jquery.mousewheel',
         'qtype_poasquestion/jquery.scrollstop',
         'qtype_poasquestion/jquery.textarea-highlighter',
         'qtype_poasquestion/jquery.panzoom',
         'qtype_poasquestion/jquery-textrange',
-        'qtype_poasquestion/panzoomtools'], (function ($) {
+        'qtype_poasquestion/panzoomtools'], 
+    (function ($) {
 
     var self = {
 
@@ -204,4 +206,5 @@ define(['jquery',
     };
 
     return (window.M.poasquestion_text_and_button = self);
+
 }));
