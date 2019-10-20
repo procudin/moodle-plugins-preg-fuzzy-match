@@ -61,13 +61,13 @@ class qtype_poasquestion_text_and_button extends MoodleQuickForm_textarea {
         $this->linkToPage = $elementLinks['link_to_page'];
         $this->linkToBtnImage = $elementLinks['link_to_button_image'];
         if ($dialogWidth === null) {
-            $dialogWidth = '70%';
+            $dialogWidth = '90%';
         }
 
         //$PAGE->requires->jquery();
         //$PAGE->requires->jquery_plugin('ui');
-        $PAGE->requires->jquery_plugin('ui-css');
-        //$PAGE->requires->css('/theme/jquery.php/core/ui-1.11.4/theme/smoothness/jquery-ui.min.css');
+        //$PAGE->requires->jquery_plugin('ui-css');
+        $PAGE->requires->css('/theme/jquery.php/core/ui-1.12.1/theme/smoothness/jquery-ui.min.css');
         
         $PAGE->requires->string_for_js('savechanges', 'moodle');
         $PAGE->requires->string_for_js('cancel', 'moodle');

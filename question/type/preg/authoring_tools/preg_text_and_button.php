@@ -46,7 +46,7 @@ class qtype_preg_text_and_button extends qtype_poasquestion_text_and_button {
             'link_to_button_image' => $CFG->wwwroot . '/theme/image.php/clean/core/1410350174/t/edit',
             'link_to_page' => $CFG->wwwroot . '/question/type/preg/authoring_tools/preg_authoring.php'
         );
-        $dialogWidth = '70%';
+        $dialogWidth = '90%';
 
         parent::__construct($textareaName, $textareaLabel, $attributes, $buttonName, $elementLinks, $dialogWidth);
 

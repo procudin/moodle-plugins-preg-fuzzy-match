@@ -58,6 +58,7 @@ class qtype_preg_authoring_form extends moodleform {
 
         $mform->addElement('html', '<link href="' . $CFG->wwwroot . '/question/type/poasquestion/shadow.css" id="SL_resources" rel="stylesheet" type="text/css">');
         $mform->addElement('html', '<link href="' . $CFG->wwwroot . '/question/type/poasquestion/rect.css" id="SL_rect" rel="stylesheet" type="text/css">');
+        $mform->addElement('html', '<link href="' . $CFG->wwwroot . '/question/type/preg/dialog.css" id="SL_rect" rel="stylesheet" type="text/css">');
 
         // Add header.
         $mform->addElement('html', '<div align="center"><h2>' . get_string('authoring_form_page_header', 'qtype_preg') . '</h2></div>');

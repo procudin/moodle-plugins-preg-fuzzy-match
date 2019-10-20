@@ -1,0 +1,11 @@
+.ui-dialog {
+    z-index: 9999 !important;
+}
+
+.qtype-preg-highlighted-regex-text .textarea-highlighter-wrap * {
+    width: 100%;
+}
+
+#id_regex_testing_header .felement {
+    display: flex;
+}
