@@ -201,6 +201,7 @@ class qtype_preg_typo_container {
      * @param $container
      */
     public static function substitution_as_deletion_and_insertion($container) {
+        $container = clone $container;
         $substitutions = $container->errors[qtype_preg_typo::SUBSTITUTION];
         $subcount = count($substitutions);
 
@@ -232,6 +233,8 @@ class qtype_preg_typo_container {
                 $container->count++;
             }
         }
+        
+        return $container;
     }
 
     /** Apply typos to given string
@@ -335,9 +338,7 @@ class qtype_preg_typo_container {
 
 
     public function apply_with_ops($string) {
-        $container = clone $this;
-
-        self::substitution_as_deletion_and_insertion($container);
+        $container = self::substitution_as_deletion_and_insertion($this);
 
         list($string, $container) = $this->apply_inner($string, true,qtype_preg_typo::TRANSPOSITION | qtype_preg_typo::DELETION);
 
