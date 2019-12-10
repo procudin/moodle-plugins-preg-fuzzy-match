@@ -199,6 +199,7 @@ class qtype_preg_typo_container {
 
     /** Convert all substitutions to insertions and deletions.
      * @param $container
+     * @return new container
      */
     public static function substitution_as_deletion_and_insertion($container) {
         $container = clone $container;
