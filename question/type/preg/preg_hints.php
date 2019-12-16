@@ -414,11 +414,9 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         // Get matching result.
         $matchingresult = clone $this->question->get_best_fit_answer($response)['match'];
         $str = $matchingresult->str();
-
-        // Replace substitutions with deletion and insertion.
-        if (is_object($matchingresult->errors)) {
-            $matchingresult->errors = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
-        }        
+                
+        // Replace substitutions with deletion and insertion.    
+        $matchingresult->errors = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);            
 
         // Add '...' character.
         if (!$matchingresult->full) {
