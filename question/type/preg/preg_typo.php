@@ -207,7 +207,7 @@ class qtype_preg_typo_container {
         $subcount = count($substitutions);
 
         if ($subcount === 0) {
-            return;
+            return $container;
         }
 
         $container->errors[qtype_preg_typo::SUBSTITUTION] = [];
