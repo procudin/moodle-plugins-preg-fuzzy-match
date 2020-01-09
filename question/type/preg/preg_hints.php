@@ -401,7 +401,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         if ($response !== null && $this->question->usehowtofixpichint) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return /*$matchresults->full && */$matchresults->errors->count() > 0;
+            return $matchresults->full && $matchresults->errors->count() > 0;
         }
         return $this->question->usehowtofixpichint;
     }
@@ -429,7 +429,9 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         }
 
         // Convert to lexem label format.
-        list($string, $operations) = $matchingresult->errors->apply_with_ops($str);
+        $startpos = $matchingresult->indexfirst[0];
+        $length = $matchingresult->length[0];
+        list($string, $operations) = $matchingresult->errors->apply_with_ops($str, $startpos, $length);
 
         $label = new \block_formal_langs_lexeme_label('');
         $label->set_text($string);
