@@ -337,15 +337,30 @@ class qtype_preg_typo_container {
         return $newstring;
     }
 
+    private function shift_left($offset) {
+        if ($offset > 0) {
+            foreach ($this->errors as $typos) {
+                foreach ($typos as $typo) {
+                    $typo->position -= $offset;
+                }
+            }     
+        }               
+    }
 
-    public function apply_with_ops($string) {
+    public function apply_with_ops($string, $startpos = 0, $length = -1) {
         $container = self::substitution_as_deletion_and_insertion($this);
-
-        list($string, $container) = $this->apply_inner($string, true,qtype_preg_typo::TRANSPOSITION | qtype_preg_typo::DELETION);
+        
+        // crop string
+        $container->shift_left($startpos);
+        $startpos = $startpos >= 0 ? $startpos : 0;
+        $length = $length !== -1 ? $length : utf8_string::strlen($string);
+        $string = utf8_string::substr($string, $startpos, $length); 
+        
+        list($string, $container) = $this->apply_inner($string, true, qtype_preg_typo::TRANSPOSITION | qtype_preg_typo::DELETION);
 
         $deletions = $container->errors[qtype_preg_typo::DELETION];
         $insertions = $container->errors[qtype_preg_typo::INSERTION];
-        $transpositions =  $container->errors[qtype_preg_typo::TRANSPOSITION];
+        $transpositions = $container->errors[qtype_preg_typo::TRANSPOSITION];
         $operations = [];
 
         foreach($deletions as $del) {
