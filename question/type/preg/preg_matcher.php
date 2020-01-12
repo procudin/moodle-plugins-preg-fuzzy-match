@@ -214,6 +214,14 @@ class qtype_preg_matching_results {
                 return false;
             }
 
+            if (!$this->full) {
+                if ($thiserrcount > $othererrcount) {
+                    return true;
+                } else if ($thiserrcount < $othererrcount) {
+                    return false;
+                }
+            }
+
             // 4. Longest match.
             if ($other->length[0] > $this->length[0]) {
                 return true;
