@@ -631,6 +631,17 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             return false;
         }
 
+        // If both states have partial match, choose one with minimal left
+        if (!$matchinginprogress && !$this->is_full() && !$other->is_full()) {
+            if ($this->left < $other->left) {
+                //echo "wins 1\n";
+                return true;
+            } else if ($other->left < $this->left) {
+                //echo "wins 2\n";
+                return false;
+            }
+        }
+
         // Choose by typo priority.
         if ($thiserrcount > 0) {
             if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) > $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
@@ -651,18 +662,6 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             if ($this->errors->count(qtype_preg_typo::INSERTION) > $other->errors->count(qtype_preg_typo::INSERTION)) {
                 return true;
             } else if ($this->errors->count(qtype_preg_typo::INSERTION) < $other->errors->count(qtype_preg_typo::INSERTION)) {
-                return false;
-            }
-        }
-
-
-        // If both states have partial match, choose one with minimal left
-        if (!$matchinginprogress && !$this->is_full() && !$other->is_full()) {
-            if ($this->left < $other->left) {
-                //echo "wins 1\n";
-                return true;
-            } else if ($other->left < $this->left) {
-                //echo "wins 2\n";
                 return false;
             }
         }
@@ -789,6 +788,15 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         if ($this->is_full() && !$other->is_full()) {
             return true;
         } else if (!$this->is_full() && $other->is_full()) {
+            return false;
+        }
+
+        // Check for min errors.
+        $thiserrcount = $this->errors->count();
+        $othererrcount = $other->errors->count();
+        if ($thiserrcount < $othererrcount) {
+            return true;
+        } else if ($thiserrcount > $othererrcount) {
             return false;
         }
 
