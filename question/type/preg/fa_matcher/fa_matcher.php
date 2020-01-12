@@ -1273,9 +1273,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     if ($ext === null) {
                         continue;
                     }
-                    if ($result->extendedmatch === null || $match->left < $result->left || $match->left == $result->left && $match->errors->count() < $result->errors->count()) {
+                    if ($result->extendedmatch === null || $match->left < $result->left && $result->errors->count() === 0 && $match->errors->count() === 0) {
                         $result->extendedmatch = $ext;
-                        $result->errors = clone $ext->errors;
                         $result->left = $match->left;
                     }
                 }
