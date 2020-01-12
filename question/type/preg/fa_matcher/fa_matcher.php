@@ -497,7 +497,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                 // If char transition
                 if ($approximateenabled && $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET || $empty) {
-                    $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks, true,qtype_preg_typo::INSERTION);
+                    $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks, true, qtype_preg_typo::INSERTION);
                 } else {
                     continue;
                 }
@@ -1023,8 +1023,11 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         }
                     }
 
-                    if (!$full && !$endstatereached) {
-                        // Handle a partial match.
+                    if (!$full && !$endstatereached
+                        && !$newstate->errors->contains(qtype_preg_typo::INSERTION, $curpos)
+                        && !$newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $curpos - 1)
+                        && !$newstate->errors->contains(qtype_preg_typo::DELETION, $curpos)) {
+                        // Handle a partial match. Partial match shouldn't contain any typos at the end of the match.
                         //echo "level $recursionlevel: not matched, partial match length is $length\n";
                         $partialmatches[] = $newstate;
                     }
