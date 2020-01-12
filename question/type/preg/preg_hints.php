@@ -85,7 +85,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
         if ($this->could_show_hint($matchresults, false)) {// Hint could be computed.
             if (!$matchresults->full) {// There is a hint to show.
                 $wronghead = $renderer->render_unmatched($matchresults->match_heading());
-                $correctpart = $renderer->render_matched($matchresults->correct_before_hint());
+                $correctpart = $this->render_matched_with_errors($renderer, $matchresults);
                 $hint = $renderer->render_hinted($this->hinted_string($matchresults));
                 if ($this->to_be_continued($matchresults)) {
                     $hint .= $renderer->render_tobecontinued();
@@ -198,8 +198,11 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
                     $checkinsertion = true;
                     break;
                 case $matchresults->errors->contains(qtype_preg_typo::SUBSTITUTION, $i):
-                case $matchresults->errors->contains(qtype_preg_typo::DELETION, $i):
                     $result .= $renderer->render_hinted(core_text::substr($str, $i, 1));
+                    $checkinsertion = true;
+                    break;
+                case $matchresults->errors->contains(qtype_preg_typo::DELETION, $i):
+                    $result .= $renderer->render_unmatched(core_text::substr($str, $i, 1));
                     $checkinsertion = true;
                     break;
                 default:
