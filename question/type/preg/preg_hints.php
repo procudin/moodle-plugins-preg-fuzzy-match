@@ -249,7 +249,7 @@ class qtype_preg_hintnextchar extends qtype_preg_hintmatchingpart {
         if ($response !== null) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return parent::hint_available($response) && $this->question->usecharhint && !$matchresults->full && $matchresults->errors->count() === 0;
+            return parent::hint_available($response) && $this->question->usecharhint && !$matchresults->full;
         } else {
             return $this->question->usecharhint;
         }
@@ -317,7 +317,7 @@ class qtype_preg_hintnextlexem extends qtype_preg_hintmatchingpart {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
             // TODO check that there is lexem after current situation.
-            return parent::hint_available($response) && $this->question->uselexemhint && !$matchresults->full && is_object($matchresults->extendedmatch) && $matchresults->errors->count() === 0;
+            return parent::hint_available($response) && $this->question->uselexemhint && !$matchresults->full && is_object($matchresults->extendedmatch);
         } else {
             return $this->question->uselexemhint;
         }
@@ -404,7 +404,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         if ($response !== null && $this->question->usehowtofixpichint) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return $matchresults->full && $matchresults->errors->count() > 0;
+            return $matchresults->errors->count() > 0;
         }
         return $this->question->usehowtofixpichint;
     }
@@ -423,17 +423,13 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
 
         // Add '...' character.
         if (!$matchingresult->full) {
-            $insertions = $matchingresult->errors->get_errors()[qtype_preg_typo::INSERTION];
-            if (count($insertions) > 0) {
-                $matchingresult->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $insertions[count($insertions) - 1]->position, core_text::code2utf8(0x2026)));
-            } else {
-                $str .= core_text::code2utf8(0x2026);
-            }
+            $str .= core_text::code2utf8(0x2026);
         }
 
         // Convert to lexem label format.
         $startpos = $matchingresult->indexfirst[0];
         $length = $matchingresult->length[0];
+        $length = !$matchingresult->full ? $length + 1 : $length;
         list($string, $operations) = $matchingresult->errors->apply_with_ops($str, $startpos, $length);
 
         $label = new \block_formal_langs_lexeme_label('');
