@@ -417,19 +417,19 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         // Get matching result.
         $matchingresult = clone $this->question->get_best_fit_answer($response)['match'];
         $str = $matchingresult->str();
-                
-        // Replace substitutions with deletion and insertion.    
-        $matchingresult->errors = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);            
+
+        // Replace substitutions with deletion and insertion.
+        $matchingresult->errors = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
 
         // Add '...' character.
+        $startpos = $matchingresult->indexfirst[0];
+        $length = $matchingresult->length[0];
         if (!$matchingresult->full) {
-            $str .= core_text::code2utf8(0x2026);
+            $str = \qtype_poasquestion\utf8_string::substr($str, 0, $startpos + $length) . core_text::code2utf8(0x2026);
+            $length++;
         }
 
         // Convert to lexem label format.
-        $startpos = $matchingresult->indexfirst[0];
-        $length = $matchingresult->length[0];
-        $length = !$matchingresult->full ? $length + 1 : $length;
         list($string, $operations) = $matchingresult->errors->apply_with_ops($str, $startpos, $length);
 
         $label = new \block_formal_langs_lexeme_label('');

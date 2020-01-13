@@ -1023,13 +1023,23 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         }
                     }
 
-                    if (!$full && !$endstatereached
-                        && !$newstate->errors->contains(qtype_preg_typo::INSERTION, $curpos)
-                        && !$newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $curpos - 1)
-                        && !$newstate->errors->contains(qtype_preg_typo::DELETION, $curpos)) {
+                    if (!$full && !$endstatereached) {
                         // Handle a partial match. Partial match shouldn't contain any typos at the end of the match.
-                        //echo "level $recursionlevel: not matched, partial match length is $length\n";
-                        $partialmatches[] = $newstate;
+                        $pos = $newstate->startpos + $newstate->length;
+                        if (!$newstate->errors->contains(qtype_preg_typo::INSERTION, $pos)
+                            && !$newstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $pos - 1)
+                            && !$newstate->errors->contains(qtype_preg_typo::DELETION, $pos - 1)) {
+                            $partialmatches[] = $newstate;
+                        }
+                    } elseif ($full && !$endstatereached
+                        && $newstate->errors->count(qtype_preg_typo::SUBSTITUTION) > $curstate->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+                        // Handle a partial match when last state consumed char with substitution pseudo-transition.
+                        $pos = $curstate->startpos + $curstate->length;
+                        if (!$curstate->errors->contains(qtype_preg_typo::INSERTION, $pos)
+                            && !$curstate->errors->contains(qtype_preg_typo::SUBSTITUTION, $pos - 1)
+                            && !$curstate->errors->contains(qtype_preg_typo::DELETION, $pos - 1)) {
+                            $partialmatches[] = clone $curstate;
+                        }
                     }
                 }
 
