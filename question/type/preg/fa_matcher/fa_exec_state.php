@@ -594,10 +594,12 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         // Check for min errors.
         $thiserrcount = $this->errors->count();
         $othererrcount = $other->errors->count();
-        if ($thiserrcount < $othererrcount) {
-            return true;
-        } else if ($thiserrcount > $othererrcount) {
-            return false;
+        if ($matchinginprogress) {
+            if ($thiserrcount < $othererrcount) {
+                return true;
+            } else if ($thiserrcount > $othererrcount) {
+                return false;
+            }
         }
 
         // Choose the leftmost match
@@ -643,7 +645,7 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         }
 
         // Choose by typo priority.
-        if ($thiserrcount > 0) {
+        if ($thiserrcount > 0 && $matchinginprogress) {
             if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) > $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
                 return true;
             } else if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) < $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
