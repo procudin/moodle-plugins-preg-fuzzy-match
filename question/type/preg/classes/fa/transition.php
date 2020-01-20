@@ -404,7 +404,16 @@ class transition {
             }
         }
 
-        return array(\qtype_preg_leaf::NEXT_CHAR_OK, new \qtype_poasquestion\utf8_string(\core_text::code2utf8($result_ranges[0][0])));
+        $result = new \qtype_poasquestion\utf8_string(\core_text::code2utf8($result_ranges[0][0]));
+
+        // we should prefer lowercase chars
+        $resultlower = new \qtype_poasquestion\utf8_string($result->string());
+        $resultlower->tolower();
+        if ($this->pregleaf->match($resultlower, 0, $length)) {
+            return array(\qtype_preg_leaf::NEXT_CHAR_OK, $resultlower);
+        }
+
+        return array(\qtype_preg_leaf::NEXT_CHAR_OK, $result);
     }
 
     public function is_start_anchor() {
