@@ -413,6 +413,11 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
     }
 
     public function penalty_for_specific_hint($response = null) {
+        if ($response !== null && $this->question->howtofixpichintpenalty) {
+            $bestfit = $this->question->get_best_fit_answer($response);
+            $matchresults = $bestfit['match'];
+            return $matchresults->errors->count() > 0 ? $this->question->howtofixpichintpenalty : 0;
+        }
         return $this->question->howtofixpichintpenalty;
     }
 
