@@ -181,6 +181,9 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
             return $renderer->render_matched($matchresults->matched_part());
         }
 
+        $matchresults = clone $matchresults;
+        $matchresults->errors = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchresults->errors);
+
         $result = '';
         $str = $matchresults->str()->string();
         $index_first = $matchresults->index_first();
