@@ -189,19 +189,11 @@ class qtype_preg_question extends question_graded_automatically
             $matchresults = $matcher->match($response['answer']);
 
             // Check full or approximate match.
-            if ($matchresults->full) {
+            if ($matchresults->full && $matchresults->errors->count() === 0) {
                 $bestfitanswer = $answer;
                 $bestmatchresult = $matchresults;
                 $fitness = core_text::strlen($response['answer']);
-
-                if ($matchresults->errors->count() === 0) {
-                    // Don't need to look more if we find full match.
-                    break;
-                } else {
-                    // Apply errors penalty.
-                    $bestfitanswer->fraction -= $matchresults->errors->count() * $this->errorspenalty;
-                    continue;
-                }
+                break;
             }
 
             // When hinting we should use only answers within hint border except full matching case and there is some match at all.
@@ -215,6 +207,10 @@ class qtype_preg_question extends question_graded_automatically
                 $fitness = (-1)*$matchresults->left;// -1 cause the less we need to add the better.
             } else {// We should rely on the length of correct response part.
                 $fitness = $matchresults->length[0];
+            }
+
+            if ($matchresults->errors->count() > 0) {
+                $fitness -= $matchresults->errors->count() * 0.01;
             }
 
             if ($fitness > $maxfitness) {
@@ -250,6 +246,7 @@ class qtype_preg_question extends question_graded_automatically
         $state = question_state::$gradedwrong;
         if ($bestfitanswer['match']->is_match() && $bestfitanswer['match']->full) {// TODO - implement partial grades for partially correct answers.
             $grade = $bestfitanswer['answer']->fraction;
+            $grade -= $bestfitanswer['match']->errors->count() * $this->errorspenalty;
             $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction);
         }
 
