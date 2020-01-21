@@ -71,7 +71,7 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
             'hintmatchingpart' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hintcolouredstring', 'qtype_preg')),
             'hintnextchar' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hintnextchar', 'qtype_preg')),
             'hintnextlexem' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hintnextlexem', 'qtype_preg', $langobj->lexem_name())),
-            'hinthowtofixpic' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hinthowtofixpic', 'qtype_preg', $langobj->lexem_name()))
+            'hinthowtofixpic' => get_string('hintbtn', 'qbehaviour_adaptivehints', get_string('hinthowtofixpic', 'qtype_preg'))
         );
 
         $repeated[] = $mform->createElement('select', 'interactivehint',
@@ -319,7 +319,7 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
                 $langobj = block_formal_langs::lang_object(array_keys($langs)[0]);
                 $errors['interactivehint['.$key.']'] = get_string('unallowedhint', 'qtype_preg', get_string('hintnextlexem', 'qtype_preg', $langobj->lexem_name()));
             }
-            if ($hint == 'hinthowtofixpic') {
+            if ($hint == 'hinthowtofixpic' && $data['usehowtofixpichint'] != true) {
                 $errors['interactivehint['.$key.']'] = get_string('unallowedhint', 'qtype_preg', get_string('hinthowtofixpic', 'qtype_preg'));
             }
         }
