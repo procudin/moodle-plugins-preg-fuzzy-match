@@ -246,8 +246,9 @@ class qtype_preg_question extends question_graded_automatically
         $state = question_state::$gradedwrong;
         if ($bestfitanswer['match']->is_match() && $bestfitanswer['match']->full) {// TODO - implement partial grades for partially correct answers.
             $grade = $bestfitanswer['answer']->fraction;
-            $grade -= $bestfitanswer['match']->errors->count() * $this->errorspenalty;
-            $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction);
+            $typopenalty = $bestfitanswer['match']->errors->count() * $this->errorspenalty;
+            $grade -= $typopenalty;
+            $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction - $typopenalty);
         }
 
         return array($grade, $state);
