@@ -34,6 +34,32 @@ require_once($CFG->dirroot . '/question/type/preg/authoring_tools/preg_text_and_
  * Preg editing form definition.
  */
 class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
+
+    private $hintfields = [
+        'charhint' => [
+            'defaultpenlty' => '0.2',
+            'enabled' => 0,
+            'enginerequirements' => [qtype_preg_matcher::PARTIAL_MATCHING, qtype_preg_matcher::CORRECT_ENDING ],
+        ],
+        'lexemhint' => [
+            'defaultpenlty' => '0.4',
+            'enabled' => 0,
+            'enginerequirements' => [qtype_preg_matcher::PARTIAL_MATCHING, qtype_preg_matcher::CORRECT_ENDING ],
+        ],
+        'howtofixpichint' => [
+            'defaultpenlty' => '0.4',
+            'enabled' => 0,
+            'enginerequirements' => [ qtype_preg_matcher::FUZZY_MATCHING ],
+        ],
+    ];
+
+    private $enabledspecificenginefields = [
+        qtype_preg_matcher::PARTIAL_MATCHING => ['hintgradeborder', 'langid', 'lexemusername'],
+        qtype_preg_matcher::CORRECT_ENDING => ['hintgradeborder', 'langid', 'lexemusername'],
+        qtype_preg_matcher::FUZZY_MATCHING => ['approximatematch', 'maxerrors', 'errorspenalty'],
+    ];
+
+
     /**
      * This is overloaded method.
      * Get the list of form elements to repeat, one for each answer.
@@ -125,22 +151,6 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
-        $mform->addElement('selectyesno', 'usecharhint', get_string('usecharhint', 'qtype_preg'));
-        $mform->setDefault('usecharhint', 0);
-        $mform->addHelpButton('usecharhint', 'usecharhint', 'qtype_preg');
-        $mform->addElement('text', 'charhintpenalty', get_string('charhintpenalty', 'qtype_preg'), array('size' => 3));
-        $mform->setDefault('charhintpenalty', '0.2');
-        $mform->setType('charhintpenalty', PARAM_FLOAT);
-        $mform->addHelpButton('charhintpenalty', 'charhintpenalty', 'qtype_preg');
-
-        $mform->addElement('selectyesno', 'uselexemhint', get_string('uselexemhint', 'qtype_preg'));
-        $mform->setDefault('uselexemhint', 0);
-        $mform->addHelpButton('uselexemhint', 'uselexemhint', 'qtype_preg');
-        $mform->addElement('text', 'lexemhintpenalty', get_string('lexemhintpenalty', 'qtype_preg'), array('size' => 3));
-        $mform->setDefault('lexemhintpenalty', '0.4');
-        $mform->setType('lexemhintpenalty', PARAM_FLOAT);
-        $mform->addHelpButton('lexemhintpenalty', 'lexemhintpenalty', 'qtype_preg');
-
         // Fetch course context if it is possible.
         $context = null;
         if ($COURSE != null) {
@@ -179,28 +189,6 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         $mform->addHelpButton('exactmatch', 'exactmatch', 'qtype_preg');
         $mform->setDefault('exactmatch', 1);
 
-        $mform->addElement('selectyesno', 'approximatematch', get_string('approximatematch', 'qtype_preg'));
-        $mform->addHelpButton('approximatematch', 'approximatematch', 'qtype_preg');
-        $mform->setDefault('approximatematch', 1);
-
-        $mform->addElement('text', 'maxerrors', get_string('maxerrors', 'qtype_preg'), array('size' => 3));
-        $mform->setDefault('maxerrors', '2');
-        $mform->setType('maxerrors', PARAM_INT);
-        $mform->addHelpButton('maxerrors', 'maxerrors', 'qtype_preg');
-
-        $mform->addElement('text', 'errorspenalty', get_string('errorspenalty', 'qtype_preg'), array('size' => 3));
-        $mform->setDefault('errorspenalty', '0.07');
-        $mform->setType('errorspenalty', PARAM_FLOAT);
-        $mform->addHelpButton('errorspenalty', 'errorspenalty', 'qtype_preg');
-
-        $mform->addElement('selectyesno', 'usehowtofixpichint', get_string('usehowtofixpichint', 'qtype_preg'));
-        $mform->setDefault('usehowtofixpichint', 1);
-        $mform->addHelpButton('usehowtofixpichint', 'usehowtofixpichint', 'qtype_preg');
-        $mform->addElement('text', 'howtofixpichintpenalty', get_string('howtofixpichintpenalty', 'qtype_preg'), array('size' => 3));
-        $mform->setDefault('howtofixpichintpenalty', '0.4');
-        $mform->setType('howtofixpichintpenalty', PARAM_FLOAT);
-        $mform->addHelpButton('howtofixpichintpenalty', 'howtofixpichintpenalty', 'qtype_preg');
-
         $mform->addElement('text', 'correctanswer', get_string('correctanswer', 'qtype_preg'), array('size' => 54));
         $mform->addHelpButton('correctanswer', 'correctanswer', 'qtype_preg');
         $mform->setType('correctanswer', PARAM_RAW);
@@ -209,16 +197,12 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         foreach ($engines as $engine => $enginename) {
             $questionobj = new qtype_preg_question;
             $querymatcher = $questionobj->get_query_matcher($engine);
-            if (!$querymatcher->is_supporting(qtype_preg_matcher::PARTIAL_MATCHING) ||
-                !$querymatcher->is_supporting(qtype_preg_matcher::CORRECT_ENDING)
-                ) {
-                $mform->disabledIf('hintgradeborder', 'engine', 'eq', $engine);
-                $mform->disabledIf('usecharhint', 'engine', 'eq', $engine);
-                $mform->disabledIf('charhintpenalty', 'engine', 'eq', $engine);
-                $mform->disabledIf('uselexemhint', 'engine', 'eq', $engine);
-                $mform->disabledIf('lexemhintpenalty', 'engine', 'eq', $engine);
-                $mform->disabledIf('langid', 'engine', 'eq', $engine);
-                $mform->disabledIf('lexemusername', 'engine', 'eq', $engine);
+            foreach ($this->enabledspecificenginefields as $option => $fields) {
+                if (!$querymatcher->is_supporting($option)) {
+                    foreach ($fields as $f) {
+                        $mform->disabledIf($f, 'engine', 'eq', $engine);
+                    }
+                }
             }
         }
 
@@ -227,6 +211,77 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         $answersinstruct = $mform->getElement('answersinstruct');
         $answersinstruct->setText(get_string('answersinstruct', 'qtype_preg'));
 
+    }
+
+    /** Overload parent function to add other controls before answer fields.
+     *  @param MoodleQuickForm $mform
+     *  @param $label
+     *  @param $gradeoptions
+     *  @param $minoptions
+     *  @param $addoptions
+     */
+    protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
+                                             $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+        // Adding custom sections.
+        $this->definition_additional_sections($mform);
+        // Calling parent to actually add fields.
+        parent::add_per_answer_fields($mform, $label, $gradeoptions, $minoptions, $addoptions);
+    }
+
+    /** Place additional sections on the form:
+     * one section for each analyzer and a hinting options section.
+     * @var MoodleQuickForm $mform
+     */
+    protected function definition_additional_sections(&$mform) {
+        $qtypeclass = 'qtype_'.$this->qtype();
+        $qtype = new $qtypeclass;
+        $engines = $qtype->available_engines();
+
+        // typos section
+        $mform->addElement('header', 'typoanlyzinghdr', get_string('typoanalysis', 'qtype_preg'));
+        $mform->addHelpButton('typoanlyzinghdr', 'typoanalysis', 'qtype_preg');
+        $mform->addElement('selectyesno', 'approximatematch', get_string('approximatematch', 'qtype_preg'));
+        $mform->addHelpButton('approximatematch', 'approximatematch', 'qtype_preg');
+        $mform->setDefault('approximatematch', 1);
+        $mform->addElement('text', 'maxerrors', get_string('maxerrors', 'qtype_preg'), array('size' => 3));
+        $mform->setDefault('maxerrors', '2');
+        $mform->setType('maxerrors', PARAM_INT);
+        $mform->addHelpButton('maxerrors', 'maxerrors', 'qtype_preg');
+        $mform->addElement('text', 'errorspenalty', get_string('errorspenalty', 'qtype_preg'), array('size' => 3));
+        $mform->setDefault('errorspenalty', '0.07');
+        $mform->setType('errorspenalty', PARAM_FLOAT);
+        $mform->addHelpButton('errorspenalty', 'errorspenalty', 'qtype_preg');
+        $mform->disabledIf('maxerrors', 'approximatematch', 'eq', 0);
+        $mform->disabledIf('errorspenalty', 'approximatematch', 'eq', 0);
+
+        // Hinting section.
+        $mform->addElement('header', 'hintinghdr', get_string('hinting', 'qtype_preg'));
+        $mform->addHelpButton('hintinghdr', 'hinting', 'qtype_preg');
+        foreach ($this->hintfields as $name => $params) {
+            $mform->addElement('selectyesno', "use$name", get_string("use$name", 'qtype_preg'));
+            $mform->setDefault("use$name", $params['enabled']);
+            $mform->addHelpButton("use$name", "use$name", 'qtype_preg');
+            $mform->addElement('text', "{$name}penalty", get_string('howtofixpichintpenalty', 'qtype_preg'), array('size' => 3));
+            $mform->setDefault("{$name}penalty", $params['defaultpenlty']);
+            $mform->setType("{$name}penalty", PARAM_FLOAT);
+            $mform->addHelpButton("{$name}penalty", "{$name}penalty", 'qtype_preg');
+            $mform->disabledIf("{$name}penalty", "use$name", 'eq', 0);
+
+            // Set hint availability determined by engine capabilities.
+            foreach ($engines as $engine => $enginename) {
+                $questionobj = new qtype_preg_question;
+                $querymatcher = $questionobj->get_query_matcher($engine);
+                $issupporting = true;
+                foreach ($params['enginerequirements'] as $option) {
+                    $issupporting = $issupporting && $querymatcher->is_supporting($option);
+                }
+
+                if (!$issupporting) {
+                    $mform->disabledIf("use$name", 'engine', 'eq', $engine);
+                    $mform->disabledIf("{$name}penalty", 'engine', 'eq', $engine);
+                }
+            }
+        }
     }
 
     public function validation($data, $files) {
@@ -243,17 +298,16 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         if (!array_key_exists('hintgradeborder', $data)) {
             $data['hintgradeborder'] = 1;
         }
-
-        if (!array_key_exists('usecharhint', $data)) {
-            $data['usecharhint'] = false;
+        foreach ($this->hintfields as $hintname => $_) {
+            if (!array_key_exists("use$hintname", $data)) {
+                $data["use$hintname"] = false;
+            }
         }
-
-        if (!array_key_exists('uselexemhint', $data)) {
-            $data['uselexemhint'] = false;
+        if (!array_key_exists('approximatematch', $data)) {
+            $data['approximatematch'] = false;
         }
-
-        if (!array_key_exists('usehowtofixpichint', $data)) {
-            $data['usehowtofixpichint'] = false;
+        if (!array_key_exists('maxerrors', $data)) {
+            $data['maxerrors'] = 0;
         }
 
         $i = 0;
@@ -322,6 +376,11 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
             if ($hint == 'hinthowtofixpic' && $data['usehowtofixpichint'] != true) {
                 $errors['interactivehint['.$key.']'] = get_string('unallowedhint', 'qtype_preg', get_string('hinthowtofixpic', 'qtype_preg'));
             }
+        }
+
+        // how to fix hint should be available only if approximate math is enabled
+        if ($data['usehowtofixpichint'] && (!$data['approximatematch'] || $data['maxerrors'] == 0)) {
+            $errors['usehowtofixpichint'] = get_string('noapproximateforhowtofixpichint', 'qtype_preg');
         }
 
         return $errors;
