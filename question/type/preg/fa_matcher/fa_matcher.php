@@ -23,12 +23,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use qtype_poasquestion\utf8_string;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/question/type/preg/preg_matcher.php');
 require_once($CFG->dirroot . '/question/type/preg/preg_typo.php');
 require_once($CFG->dirroot . '/question/type/preg/fa_matcher/fa_exec_state.php');
+require_once($CFG->dirroot . '/blocks/formal_langs/block_formal_langs.php');
 
 class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
@@ -55,6 +58,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
     // Max number of errors for current match
     protected $currentmaxerrors = 0;
+
+    // Object of \block_formal_langs_abstract_language (cf. blocks/formal_langs for more details).
+    protected $langobj = null;
 
     // Transpose pseudotransitions, array(fromstate => array(tostate => array(transitions))).
     protected $transposepseudotransitions = [];
@@ -318,6 +324,11 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $length = 0;
         $issub = $pseudotype == qtype_preg_typo::SUBSTITUTION;
 
+        // Do nothing if current char is in language blacklist
+        if ($this->langobj !== null && $str[$curpos] !== null && utf8_string::strpos($this->langobj->typo_blacklist(), $str[$curpos]) !== false) {
+            return $result;
+        }
+
         // Do substitution if only $curpos is inside of string.
         if ($issub && $curpos >= $str->length()) {
             return $result;
@@ -352,7 +363,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else if (!$ismerged) {
                     // If unmerged, generate \n insertion.
-                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
+                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new utf8_string("\n")));
                     $result = true;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else {
@@ -371,7 +382,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else if (!$ismerged) {
                     // If unmerged, generate \n insertion.
-                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new \qtype_poasquestion\utf8_string("\n")));
+                    $curstate->errors->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new utf8_string("\n")));
                     $result = true;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else {
@@ -420,6 +431,11 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         // Don't try deletion for initial or end state
         //$subpatt = $newstate->matcher->get_ast_root()->subpattern;
         if (!isset($curstate->stack[0]->matches[0]) || $curstate->is_full()) {
+            return false;
+        }
+
+        // Do nothing if current char is in language blacklist
+        if ($this->langobj !== null && $curstate->str[$curpos] !== null && utf8_string::strpos($this->langobj->typo_blacklist(), $curstate->str[$curpos]) !== false) {
             return false;
         }
 
@@ -1503,6 +1519,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
         if ($options->approximatematch && empty($this->errors)) {
             $this->calculate_transpose_pseudotransitions();
+        }
+
+        if ($options->langid) {
+            $this->langobj = \block_formal_langs::lang_object($options->langid);
         }
 
         //echo "backtrack states:\n";

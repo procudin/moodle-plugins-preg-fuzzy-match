@@ -426,6 +426,8 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
     public $preferredalphabet = null;
     /** @var string Unicode property name for preferred characters for dot meta-character when generating extension.*/
     public $preferfordot = null;
+    /** @var string id of the language, used to write answers (cf. blocks/formal_langs for more details). */
+    public $langid = null;
 
     /** @var boolean Should matcher look for subexpression captures or the whole match only? */
     // TODO - does we need to specify subexpressions we are looking for or there is no sense in it?
@@ -433,6 +435,19 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
 
     /** @var bool True if matcher will be used in equivalence checking. It affects accepting, as equivalence may not support some nodes.*/
     public $equivalencecheck = false;
+
+    public function __construct()
+    {
+        global $CFG;
+        $this->mergeassertions = false;
+        $this->extensionneeded = true;
+        $this->approximatematch = false;
+        $this->preferredalphabet = null;
+        $this->preferfordot = null;
+        $this->langid = $CFG->qtype_preg_defaultlang;
+        $this->capturesubexpressions = true;
+        $this->equivalencecheck = false;
+    }
 }
 
 /**
