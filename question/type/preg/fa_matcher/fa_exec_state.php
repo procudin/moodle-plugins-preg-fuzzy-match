@@ -282,12 +282,12 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
     // States to backtrack to when generating extensions of partial matches.
     public $backtrack_states;
 
-    // Object of qtype_preg_typo_container, containing all encountered errors.
-    public $errors;
+    // Object of qtype_preg_typo_container, containing all encountered typos.
+    public $typos;
 
     public function __clone() {
         $this->str = clone $this->str;  // Needs to be cloned for correct string generation.
-        $this->errors = clone $this->errors;
+        $this->typos = clone $this->typos;
         foreach ($this->stack as $key => $item) {
             $this->stack[$key] = clone $item;
         }
@@ -556,7 +556,7 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
                 $length[-2] = $this->length_minus_nonconsuming() - $cur[0];
             }
         }
-        $result = new qtype_preg_matching_results($this->is_full(), $index, $length, $this->left, $this->extendedmatch, $this->errors);
+        $result = new qtype_preg_matching_results($this->is_full(), $index, $length, $this->left, $this->extendedmatch, $this->typos);
         $result->set_source_info($this->str, $this->matcher->get_max_subexpr(), $this->matcher->get_subexpr_name_to_number_map());
         return $result;
     }
@@ -591,13 +591,13 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             return false;
         }
 
-        // Check for min errors.
-        $thiserrcount = $this->errors->count();
-        $othererrcount = $other->errors->count();
+        // Check for min typos.
+        $thistypocount = $this->typos->count();
+        $othertypocount = $other->typos->count();
         if ($matchinginprogress) {
-            if ($thiserrcount < $othererrcount) {
+            if ($thistypocount < $othertypocount) {
                 return true;
-            } else if ($thiserrcount > $othererrcount) {
+            } else if ($thistypocount > $othertypocount) {
                 return false;
             }
         }
@@ -645,25 +645,25 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         }
 
         // Choose by typo priority.
-        if ($thiserrcount > 0 && $matchinginprogress) {
-            if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) > $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+        if ($thistypocount > 0 && $matchinginprogress) {
+            if ($this->typos->count(qtype_preg_typo::TRANSPOSITION) > $other->typos->count(qtype_preg_typo::TRANSPOSITION)) {
                 return true;
-            } else if ($this->errors->count(qtype_preg_typo::TRANSPOSITION) < $other->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+            } else if ($this->typos->count(qtype_preg_typo::TRANSPOSITION) < $other->typos->count(qtype_preg_typo::TRANSPOSITION)) {
                 return false;
             }
-            if ($this->errors->count(qtype_preg_typo::SUBSTITUTION) > $other->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+            if ($this->typos->count(qtype_preg_typo::SUBSTITUTION) > $other->typos->count(qtype_preg_typo::SUBSTITUTION)) {
                 return true;
-            } else if ($this->errors->count(qtype_preg_typo::SUBSTITUTION) < $other->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+            } else if ($this->typos->count(qtype_preg_typo::SUBSTITUTION) < $other->typos->count(qtype_preg_typo::SUBSTITUTION)) {
                 return false;
             }
-            if ($this->errors->count(qtype_preg_typo::DELETION) > $other->errors->count(qtype_preg_typo::DELETION)) {
+            if ($this->typos->count(qtype_preg_typo::DELETION) > $other->typos->count(qtype_preg_typo::DELETION)) {
                 return true;
-            } else if ($this->errors->count(qtype_preg_typo::DELETION) < $other->errors->count(qtype_preg_typo::DELETION)) {
+            } else if ($this->typos->count(qtype_preg_typo::DELETION) < $other->typos->count(qtype_preg_typo::DELETION)) {
                 return false;
             }
-            if ($this->errors->count(qtype_preg_typo::INSERTION) > $other->errors->count(qtype_preg_typo::INSERTION)) {
+            if ($this->typos->count(qtype_preg_typo::INSERTION) > $other->typos->count(qtype_preg_typo::INSERTION)) {
                 return true;
-            } else if ($this->errors->count(qtype_preg_typo::INSERTION) < $other->errors->count(qtype_preg_typo::INSERTION)) {
+            } else if ($this->typos->count(qtype_preg_typo::INSERTION) < $other->typos->count(qtype_preg_typo::INSERTION)) {
                 return false;
             }
         }
@@ -793,12 +793,12 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             return false;
         }
 
-        // Check for min errors.
-        $thiserrcount = $this->errors->count();
-        $othererrcount = $other->errors->count();
-        if ($thiserrcount < $othererrcount) {
+        // Check for min typos.
+        $thistypocount = $this->typos->count();
+        $othertypocount = $other->typos->count();
+        if ($thistypocount < $othertypocount) {
             return true;
-        } else if ($thiserrcount > $othererrcount) {
+        } else if ($thistypocount > $othertypocount) {
             return false;
         }
 

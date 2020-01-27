@@ -66,8 +66,8 @@ class qtype_preg_matching_results {
      */
     public $extensionstart;
 
-    /** @var object of qtype_preg_typo_container, containing all errors encountered by approximate matching */
-    public $errors;
+    /** @var object of qtype_preg_typo_container, containing all typos encountered by approximate matching */
+    public $typos;
     //      Source data.
     /** @var qtype_poasquestion\utf8_string A string being matched. */
     protected $str;
@@ -76,14 +76,14 @@ class qtype_preg_matching_results {
     /** @var array A map where keys are subexpression names and values are their numbers. */
     protected $subexprmap;
 
-    public function __construct($full = false, $indexfirst = array(), $length = array(), $left = self::UNKNOWN_CHARACTERS_LEFT, $extendedmatch = null, $errors = null) {
+    public function __construct($full = false, $indexfirst = array(), $length = array(), $left = self::UNKNOWN_CHARACTERS_LEFT, $extendedmatch = null, $typos = null) {
         $this->full = $full;
         $this->indexfirst = $indexfirst;
         $this->length = $length;
         $this->left = $left;
         $this->extendedmatch = $extendedmatch;
         $this->extensionstart = self::NO_MATCH_FOUND;
-        $this->errors = $errors;
+        $this->typos = $typos;
     }
 
     /**
@@ -154,7 +154,7 @@ class qtype_preg_matching_results {
      * For now the first (leftmost) full match is enought.
      */
     public function best() {
-        return $this->full && $this->errors->count() === 0;
+        return $this->full && $this->typos->count() === 0;
     }
 
     /**
@@ -186,19 +186,19 @@ class qtype_preg_matching_results {
             return false;
         }
 
-        // More errors count.
-        $thiserrcount = $this->errors->count();
-        $othererrcount = $other->errors->count();
+        // More typos count.
+        $thistypocount = $this->typos->count();
+        $othertypocount = $other->typos->count();
         if ($this->full) {
-            if ($thiserrcount > $othererrcount) {
+            if ($thistypocount > $othertypocount) {
                 return true;
-            } else if ($thiserrcount < $othererrcount) {
+            } else if ($thistypocount < $othertypocount) {
                 return false;
             }
         }
 
-        // Rightmost if contains errors.
-        if ($this->full && $thiserrcount > 0) {
+        // Rightmost if contains typos.
+        if ($this->full && $thistypocount > 0) {
             if ($this->indexfirst > $other->indexfirst) {
                 return true;
             } else if ($this->indexfirst < $other->indexfirst) {
@@ -215,9 +215,9 @@ class qtype_preg_matching_results {
             }
 
             if (!$this->full) {
-                if ($thiserrcount > $othererrcount) {
+                if ($thistypocount > $othertypocount) {
                     return true;
-                } else if ($thiserrcount < $othererrcount) {
+                } else if ($thistypocount < $othertypocount) {
                     return false;
                 }
             }
@@ -259,7 +259,7 @@ class qtype_preg_matching_results {
         // $this->left = self::UNKNOWN_CHARACTERS_LEFT;
         $this->indexfirst = array();
         $this->length = array();
-        $this->errors = new qtype_preg_typo_container();
+        $this->typos = new qtype_preg_typo_container();
         for ($i = 0; $i <= $this->maxsubexpr; $i++) {
             $this->indexfirst[$i] = self::NO_MATCH_FOUND;
             $this->length[$i] = self::NO_MATCH_FOUND;
@@ -482,7 +482,7 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
     const SUBEXPRESSION_CAPTURING = 3;
     // Always return full match as the correct ending (if at all possible).
     const CORRECT_ENDING_ALWAYS_FULL = 4;
-    // Fuzzy matching (same as full with insensitivity to some errors).
+    // Fuzzy matching (same as full with insensitivity to some typos).
     const FUZZY_MATCHING = 5;
 
     /**

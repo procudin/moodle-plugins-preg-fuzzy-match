@@ -174,15 +174,15 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
     }
 
     /**
-     * Renders matched string part with errors.
+     * Renders matched string part with typos.
      */
     public function render_matched_with_errors($renderer, $matchresults) {
-        if ($matchresults->errors->count() === 0) {
+        if ($matchresults->typos->count() === 0) {
             return $renderer->render_matched($matchresults->matched_part());
         }
 
         $matchresults = clone $matchresults;
-        $matchresults->errors = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchresults->errors);
+        $matchresults->typos = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchresults->typos);
 
         $result = '';
         $str = $matchresults->str()->string();
@@ -191,20 +191,20 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
         $checkinsertion = true;
         for ($i = $index_first; $i < $length; $i++) {
             switch (true) {
-                case $checkinsertion && $matchresults->errors->contains(qtype_preg_typo::INSERTION, $i):
+                case $checkinsertion && $matchresults->typos->contains(qtype_preg_typo::INSERTION, $i):
                     $result .= $renderer->render_hinted(core_text::code2utf8(0x2026));
                     $i--;
                     $checkinsertion = false;
                     break;
-                case $matchresults->errors->contains(qtype_preg_typo::TRANSPOSITION, $i):
+                case $matchresults->typos->contains(qtype_preg_typo::TRANSPOSITION, $i):
                     $result .= $renderer->render_hinted(core_text::substr($str, $i++, 2));
                     $checkinsertion = true;
                     break;
-                case $matchresults->errors->contains(qtype_preg_typo::SUBSTITUTION, $i):
+                case $matchresults->typos->contains(qtype_preg_typo::SUBSTITUTION, $i):
                     $result .= $renderer->render_hinted(core_text::substr($str, $i, 1));
                     $checkinsertion = true;
                     break;
-                case $matchresults->errors->contains(qtype_preg_typo::DELETION, $i):
+                case $matchresults->typos->contains(qtype_preg_typo::DELETION, $i):
                     $result .= $renderer->render_unmatched(core_text::substr($str, $i, 1));
                     $checkinsertion = true;
                     break;
@@ -213,7 +213,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
                     $checkinsertion = true;
             }
         }
-        if ($matchresults->errors->contains(qtype_preg_typo::INSERTION, $length)) {
+        if ($matchresults->typos->contains(qtype_preg_typo::INSERTION, $length)) {
             $result .= $renderer->render_hinted(core_text::code2utf8(0x2026));
         }
 
@@ -407,7 +407,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         if ($response !== null && $this->question->usehowtofixpichint) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return $matchresults->errors->count() > 0;
+            return $matchresults->typos->count() > 0;
         }
         return $this->question->usehowtofixpichint;
     }
@@ -416,7 +416,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         if ($response !== null && $this->question->howtofixpichintpenalty) {
             $bestfit = $this->question->get_best_fit_answer($response);
             $matchresults = $bestfit['match'];
-            return $matchresults->errors->count() > 0 ? $this->question->howtofixpichintpenalty : 0;
+            return $matchresults->typos->count() > 0 ? $this->question->howtofixpichintpenalty : 0;
         }
         return $this->question->howtofixpichintpenalty;
     }
@@ -427,7 +427,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         $str = $matchingresult->str();
 
         // Replace substitutions with deletion and insertion.
-        $matchingresult->errors = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->errors);
+        $matchingresult->typos = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->typos);
 
         // Add '...' character.
         $startpos = $matchingresult->indexfirst[0];
@@ -438,7 +438,7 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         }
 
         // Convert to lexem label format.
-        list($string, $operations) = $matchingresult->errors->apply_with_ops($str, $startpos, $length);
+        list($string, $operations) = $matchingresult->typos->apply_with_ops($str, $startpos, $length);
 
         $label = new \block_formal_langs_lexeme_label('');
         $label->set_text($string);
