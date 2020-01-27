@@ -110,7 +110,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                         $slowbuildtests[] = $message;
                     }
 
-                    // Set errors limit.
+                    // Set typo limit.
                     $matcher->set_errors_limit((int) (!isset($fuzzyexpected['errorslimit']) ? 0 : $fuzzyexpected['errorslimit']));
 
                     $timestart = round(microtime(true) * 1000);
@@ -137,7 +137,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                             $failcount++;
                         }
                     } catch (Exception $e) {
-                        $message = "\nFailed error applying on regex '$regex' and string '$str', applying errors: \n{$obtained->errors}";
+                        $message = "\nFailed error applying on regex '$regex' and string '$str', applying typos: \n{$obtained->typos}";
                         $this->log($message);
                     }
                 }
@@ -176,23 +176,23 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         $expectederrorscount = isset($expected['errorscount']) ? $expected['errorscount'] : 0;
 
-        // Check by errors count.
-        if ($expectederrorscount > $obtained->errors->count()) {
+        // Check by typos count.
+        if ($expectederrorscount > $obtained->typos->count()) {
             return true;
-        } else if ($expectederrorscount < $obtained->errors->count()) {
+        } else if ($expectederrorscount < $obtained->typos->count()) {
             return false;
         }
 
-        // Check errors by equals.
+        // Check typos by equals.
         $equalserrors = true;
         $equalserrorscount = true;
-        $expectederrors = isset($expected['errors']) ? $expected['errors'] : [];
+        $expectederrors = isset($expected['typos']) ? $expected['typos'] : [];
         foreach ($expectederrors as $type => $errors) {
             if (!$equalserrors) {
                 break;
             }
             foreach ($errors as $err) {
-                $equalserrors = $equalserrors && $obtained->errors->contains($type, $err['pos'], $err['char']);
+                $equalserrors = $equalserrors && $obtained->typos->contains($type, $err['pos'], $err['char']);
             }
         }
 
@@ -216,28 +216,28 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         // Check by typo priority.
         if (!$longest) {
-            if (!isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && $obtained->errors->count(qtype_preg_typo::TRANSPOSITION) > 0
-                    || isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && count($expectederrors[qtype_preg_typo::TRANSPOSITION]) < $obtained->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+            if (!isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && $obtained->typos->count(qtype_preg_typo::TRANSPOSITION) > 0
+                    || isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && count($expectederrors[qtype_preg_typo::TRANSPOSITION]) < $obtained->typos->count(qtype_preg_typo::TRANSPOSITION)) {
                 return true;
-            } else if (isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && count($expectederrors[qtype_preg_typo::TRANSPOSITION]) > $obtained->errors->count(qtype_preg_typo::TRANSPOSITION)) {
+            } else if (isset($expectederrors[qtype_preg_typo::TRANSPOSITION]) && count($expectederrors[qtype_preg_typo::TRANSPOSITION]) > $obtained->typos->count(qtype_preg_typo::TRANSPOSITION)) {
                 return false;
             }
-            if (!isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && $obtained->errors->count(qtype_preg_typo::SUBSTITUTION) > 0
-                    || isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && count($expectederrors[qtype_preg_typo::SUBSTITUTION]) < $obtained->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+            if (!isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && $obtained->typos->count(qtype_preg_typo::SUBSTITUTION) > 0
+                    || isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && count($expectederrors[qtype_preg_typo::SUBSTITUTION]) < $obtained->typos->count(qtype_preg_typo::SUBSTITUTION)) {
                 return true;
-            } else if (isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && count($expectederrors[qtype_preg_typo::SUBSTITUTION]) > $obtained->errors->count(qtype_preg_typo::SUBSTITUTION)) {
+            } else if (isset($expectederrors[qtype_preg_typo::SUBSTITUTION]) && count($expectederrors[qtype_preg_typo::SUBSTITUTION]) > $obtained->typos->count(qtype_preg_typo::SUBSTITUTION)) {
                 return false;
             }
-            if (!isset($expectederrors[qtype_preg_typo::DELETION]) && $obtained->errors->count(qtype_preg_typo::DELETION) > 0
-                    || isset($expectederrors[qtype_preg_typo::DELETION]) && count($expectederrors[qtype_preg_typo::DELETION]) < $obtained->errors->count(qtype_preg_typo::DELETION)) {
+            if (!isset($expectederrors[qtype_preg_typo::DELETION]) && $obtained->typos->count(qtype_preg_typo::DELETION) > 0
+                    || isset($expectederrors[qtype_preg_typo::DELETION]) && count($expectederrors[qtype_preg_typo::DELETION]) < $obtained->typos->count(qtype_preg_typo::DELETION)) {
                 return true;
-            } else if (isset($expectederrors[qtype_preg_typo::DELETION]) && count($expectederrors[qtype_preg_typo::DELETION]) > $obtained->errors->count(qtype_preg_typo::DELETION)) {
+            } else if (isset($expectederrors[qtype_preg_typo::DELETION]) && count($expectederrors[qtype_preg_typo::DELETION]) > $obtained->typos->count(qtype_preg_typo::DELETION)) {
                 return false;
             }
-            if (!isset($expectederrors[qtype_preg_typo::INSERTION]) && $obtained->errors->count(qtype_preg_typo::INSERTION) > 0
-                    || isset($expectederrors[qtype_preg_typo::INSERTION]) && count($expectederrors[qtype_preg_typo::INSERTION]) < $obtained->errors->count(qtype_preg_typo::INSERTION)) {
+            if (!isset($expectederrors[qtype_preg_typo::INSERTION]) && $obtained->typos->count(qtype_preg_typo::INSERTION) > 0
+                    || isset($expectederrors[qtype_preg_typo::INSERTION]) && count($expectederrors[qtype_preg_typo::INSERTION]) < $obtained->typos->count(qtype_preg_typo::INSERTION)) {
                 return true;
-            } else if (isset($expectederrors[qtype_preg_typo::INSERTION]) && count($expectederrors[qtype_preg_typo::INSERTION]) > $obtained->errors->count(qtype_preg_typo::INSERTION)) {
+            } else if (isset($expectederrors[qtype_preg_typo::INSERTION]) && count($expectederrors[qtype_preg_typo::INSERTION]) > $obtained->typos->count(qtype_preg_typo::INSERTION)) {
                 return false;
             }
         }
@@ -256,9 +256,9 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
 
         $expectederrorscount = isset($expected['errorscount']) ? $expected['errorscount'] : 0;
         $expectederrorslimit = isset($expected['errorslimit']) ? $expected['errorslimit'] : 0;
-        $expectederrors = isset($expected['errors']) ? $expected['errors'] : [];
+        $expectederrors = isset($expected['typos']) ? $expected['typos'] : [];
 
-        $lowererrcount = $obtained->errors->count() < $expectederrorscount;
+        $lowererrcount = $obtained->typos->count() < $expectederrorscount;
 
         $isbetter = $fullpassed && !$obtained->full;
         $isbetter = $isbetter || !$expected['full'] && $obtained->full;
@@ -285,10 +285,10 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             }
         }
 
-        // Apply errors to string && run normal match.
+        // Apply typos to string && run normal match.
         $errorsapplyed = false;
         if ($isbetter && $obtained->full) {
-            $strafterapplying = $obtained->errors->apply($str);
+            $strafterapplying = $obtained->typos->apply($str);
 
             $matcher->set_errors_limit(0);
 
@@ -313,19 +313,19 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                 }
 
                 if (!$equalserrorscount) {
-                    $obtainedstr .= $this->dump_scalar('ERRORS COUNT:        ', $obtained->errors->count());
-                    $expectedstr .= $this->dump_scalar('ERRORS COUNT:        ', $expectederrorscount);
+                    $obtainedstr .= $this->dump_scalar('TYPOS COUNT:        ', $obtained->typos->count());
+                    $expectedstr .= $this->dump_scalar('TYPOS COUNT:        ', $expectederrorscount);
                 }
 
                 if (!$equalserrors && !$leftmostlongest) {
-                    $obtainedstr .= "ERRORS:        \n" . $obtained->errors;
-                    $expectedstr .= "ERRORS:        \n" . $this->dump_errors($expectederrors);
+                    $obtainedstr .= "TYPOS:        \n" . $obtained->typos;
+                    $expectedstr .= "TYPOS:        \n" . $this->dump_errors($expectederrors);
                 }
             }
 
             if ($errorsapplyed && !$fullpassedafteraaplying) {
-                $obtainedstr .= $this->dump_boolean('FULL AFTER ERRORS APPLYING:            ', $obtainedafterapplying->full);
-                $expectedstr .= $this->dump_boolean('FULL AFTER ERRORS APPLYING:            ', true);
+                $obtainedstr .= $this->dump_boolean('FULL AFTER TYPOS APPLYING:            ', $obtainedafterapplying->full);
+                $expectedstr .= $this->dump_boolean('FULL AFTER TYPOS APPLYING:            ', true);
             }
 
             if ($checkindexes) {
@@ -541,23 +541,23 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         switch ($errtype) {
             case qtype_preg_typo::SUBSTITUTION:
                 $newstr = utf8_string::substr($newstr, 0, $pos) . $char . utf8_string::substr($newstr, $pos + 1);
-                $result['errors'][qtype_preg_typo::SUBSTITUTION] [] = ['pos' => $pos, 'char' => $str[$pos]];
+                $result['typos'][qtype_preg_typo::SUBSTITUTION] [] = ['pos' => $pos, 'char' => $str[$pos]];
                 break;
             case qtype_preg_typo::INSERTION:
                 // Delete insertable char
                 $newstr = utf8_string::substr($newstr, 0, $pos) . utf8_string::substr($newstr, $pos + 1);
-                $result['errors'][qtype_preg_typo::INSERTION] [] = ['pos' => $pos, 'char' => $str[$pos]];
+                $result['typos'][qtype_preg_typo::INSERTION] [] = ['pos' => $pos, 'char' => $str[$pos]];
                 break;
             case qtype_preg_typo::DELETION:
                 // Insert deletable char
                 $newstr = utf8_string::substr($newstr, 0, $pos) . $char . utf8_string::substr($newstr, $pos);
-                $result['errors'][qtype_preg_typo::DELETION] [] = ['pos' => $pos, 'char' => $char];
+                $result['typos'][qtype_preg_typo::DELETION] [] = ['pos' => $pos, 'char' => $char];
                 break;
             case qtype_preg_typo::TRANSPOSITION:
                 $tmp1 = utf8_string::substr($newstr, $pos, 1);
                 $tmp2 = utf8_string::substr($newstr, $pos + 1, 1);
                 $newstr = utf8_string::substr($newstr, 0, $pos) . $tmp2 . $tmp1 . utf8_string::substr($newstr, $pos + 2);
-                $result['errors'][qtype_preg_typo::TRANSPOSITION] [] = ['pos' => $pos, 'char' => $char];
+                $result['typos'][qtype_preg_typo::TRANSPOSITION] [] = ['pos' => $pos, 'char' => $char];
                 break;
         }
 

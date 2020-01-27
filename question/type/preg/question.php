@@ -189,7 +189,7 @@ class qtype_preg_question extends question_graded_automatically
             $matchresults = $matcher->match($response['answer']);
 
             // Check full or approximate match.
-            if ($matchresults->full && $matchresults->errors->count() === 0) {
+            if ($matchresults->full && $matchresults->typos->count() === 0) {
                 $bestfitanswer = $answer;
                 $bestmatchresult = $matchresults;
                 $fitness = core_text::strlen($response['answer']);
@@ -209,8 +209,8 @@ class qtype_preg_question extends question_graded_automatically
                 $fitness = $matchresults->length[0];
             }
 
-            if ($matchresults->errors->count() > 0) {
-                $fitness -= $matchresults->errors->count() * 0.01;
+            if ($matchresults->typos->count() > 0) {
+                $fitness -= $matchresults->typos->count() * 0.01;
             }
 
             if ($fitness > $maxfitness) {
@@ -246,7 +246,7 @@ class qtype_preg_question extends question_graded_automatically
         $state = question_state::$gradedwrong;
         if ($bestfitanswer['match']->is_match() && $bestfitanswer['match']->full) {// TODO - implement partial grades for partially correct answers.
             $grade = $bestfitanswer['answer']->fraction;
-            $typopenalty = $bestfitanswer['match']->errors->count() * $this->errorspenalty;
+            $typopenalty = $bestfitanswer['match']->typos->count() * $this->errorspenalty;
             $grade -= $typopenalty;
             $state = question_state::graded_state_for_fraction($bestfitanswer['answer']->fraction - $typopenalty);
         }
@@ -417,8 +417,8 @@ class qtype_preg_question extends question_graded_automatically
         $state = $qa->get_state();
         if (isset($bestfit['answer']) && ($bestfit['match']->full  || $bestfit['match']->is_match() && $state->is_finished()) ) {
             $answer = $bestfit['answer'];
-            if ($bestfit['match']->errors->count() > 0) {
-                $feedback .= get_string('typosfound', 'qtype_preg') . ": " . $bestfit['match']->errors->count() . "\n";
+            if ($bestfit['match']->typos->count() > 0) {
+                $feedback .= get_string('typosfound', 'qtype_preg') . ": " . $bestfit['match']->typos->count() . "\n";
             }
             if ($answer->feedback) {
                 $feedbacktext = $this->insert_subexpressions($answer->feedback, $response, $bestfit['match']);
