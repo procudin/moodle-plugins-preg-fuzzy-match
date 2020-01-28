@@ -142,12 +142,12 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         $PAGE->requires->js('/question/type/poasquestion/bootstrap/js/bootstrap-tooltip.js');
 
         $mform->addElement('select', 'engine', get_string('engine', 'qtype_preg'), $engines);
-        $mform->setDefault('engine', $CFG->qtype_preg_defaultengine);
+        $mform->setDefault('engine', get_config('qtype_preg', 'defaultengine'));
         $mform->addHelpButton('engine', 'engine', 'qtype_preg');
 
         $notations = $qtype->available_notations();
         $mform->addElement('select', 'notation', get_string('notation', 'qtype_preg'), $notations);
-        $mform->setDefault('notation', $CFG->qtype_preg_defaultnotation);
+        $mform->setDefault('notation', get_config('qtype_preg', 'defaultnotation'));
         $mform->addHelpButton('notation', 'notation', 'qtype_preg');
 
         // Fetch course context if it is possible.
@@ -170,7 +170,7 @@ class qtype_preg_edit_form extends qtype_shortanswer_edit_form {
         }
         $currentlanguages = block_formal_langs::available_langs( $context, $pickedlanguage );
         $mform->addElement('select', 'langid', get_string('langselect', 'qtype_preg'), $currentlanguages);
-        $mform->setDefault('langid', $CFG->qtype_preg_defaultlang);
+        $mform->setDefault('langid', get_config('qtype_preg', 'defaultlang'));
         $mform->addHelpButton('langid', 'langselect', 'qtype_preg');
         $mform->addElement('text', 'lexemusername', get_string('lexemusername', 'qtype_preg'), array('size' => 54));
         $mform->setDefault('lexemusername', '');

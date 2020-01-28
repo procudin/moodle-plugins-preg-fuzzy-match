@@ -298,8 +298,9 @@ class qtype_preg_question extends question_graded_automatically
         $matchingoptions->approximatematch = (bool)$approximatematch;
         $matchingoptions->typolimit = (int)$typolimit;
         $matchingoptions->langid = $this->langid;
-        if(! is_null($CFG->qtype_preg_assertfailmode)) {
-            $matchingoptions->mergeassertions = $CFG->qtype_preg_assertfailmode;
+        $assertfailmode = get_config('qtype_preg', 'assertfailmode');
+        if (! is_null($assertfailmode)) {
+            $matchingoptions->mergeassertions = $assertfailmode;
         }
 
         return $matchingoptions;

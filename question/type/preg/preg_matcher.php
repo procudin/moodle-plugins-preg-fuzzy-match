@@ -440,14 +440,13 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
 
     public function __construct()
     {
-        global $CFG;
         $this->mergeassertions = false;
         $this->extensionneeded = true;
         $this->approximatematch = false;
         $this->typolimit = 0;
         $this->preferredalphabet = null;
         $this->preferfordot = null;
-        $this->langid = $CFG->qtype_preg_defaultlang;
+        $this->langid = get_config('qtype_preg', 'defaultlang');
         $this->capturesubexpressions = true;
         $this->equivalencecheck = false;
     }
