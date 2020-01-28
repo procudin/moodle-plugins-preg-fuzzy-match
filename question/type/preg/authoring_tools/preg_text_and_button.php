@@ -59,7 +59,8 @@ class qtype_preg_text_and_button extends qtype_poasquestion_text_and_button {
                 $CFG->wwwroot,
                 'TODO - poasquestion_text_and_button_objname',  // 'M.poasquestion_text_and_button' ?
             );
-            $PAGE->requires->js_init_call('M.preg_authoring_tools_script.init', $jsargs, true, $jsmodule);
+            $PAGE->requires->js_call_amd('qtype_preg/preg_authoring_tools_script', 'init', $jsargs);
+            //$PAGE->requires->js_init_call('M.preg_authoring_tools_script.init', $jsargs, true, $jsmodule);
             self::$_preg_authoring_tools_script_included = true;
         }
     }
