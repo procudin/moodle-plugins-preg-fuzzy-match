@@ -59,7 +59,7 @@ class qtype_preg extends qtype_shortanswer {
     public function extra_question_fields() {
         $extraquestionfields = parent::extra_question_fields();
         array_splice($extraquestionfields, 0, 1, 'qtype_preg_options');
-        array_push($extraquestionfields, 'correctanswer', 'exactmatch', 'approximatematch', 'maxerrors', 'errorspenalty', 'usehowtofixpichint', 'howtofixpichintpenalty', 'usecharhint', 'charhintpenalty', 'hintgradeborder',
+        array_push($extraquestionfields, 'correctanswer', 'exactmatch', 'approximatematch', 'maxtypos', 'typospenalty', 'usehowtofixpichint', 'howtofixpichintpenalty', 'usecharhint', 'charhintpenalty', 'hintgradeborder',
                 'engine', 'notation', 'uselexemhint', 'lexemhintpenalty', 'langid', 'lexemusername');
         return $extraquestionfields;
     }

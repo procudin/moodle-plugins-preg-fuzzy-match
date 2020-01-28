@@ -422,6 +422,8 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
     public $extensionneeded = true;
     /** @var boolean Should matcher use approximate matching */
     public $approximatematch = false;
+    /** @var integer Typo limit for approximate matching */
+    public $typolimit = 0;
     /** @var string Unicode property name for preferred alphabet for \w etc when generating extension.*/
     public $preferredalphabet = null;
     /** @var string Unicode property name for preferred characters for dot meta-character when generating extension.*/
@@ -442,6 +444,7 @@ class qtype_preg_matching_options extends qtype_preg_handling_options {
         $this->mergeassertions = false;
         $this->extensionneeded = true;
         $this->approximatematch = false;
+        $this->typolimit = 0;
         $this->preferredalphabet = null;
         $this->preferfordot = null;
         $this->langid = $CFG->qtype_preg_defaultlang;
@@ -504,16 +507,6 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
     public function name() {
         return 'preg_matcher';
     }
-
-    public function set_errors_limit($count) {
-        throw new qtype_preg_exception('Error: approximate matching has not been implemented for '.$this->name().' class');
-    }
-
-
-    public function get_errors_limit() {
-        return 0;
-    }
-
 
     /**
      * Parse regex and do all necessary preprocessing.
@@ -669,7 +662,7 @@ class qtype_preg_matcher extends qtype_preg_regex_handler {
         $result->set_source_info($str, $this->get_max_subexpr(), $this->get_subexpr_name_to_number_map());
         $result->invalidate_match();
 
-        if ($this->anchor->start && (!$this->is_supporting(qtype_preg_matcher::FUZZY_MATCHING) || $this->get_errors_limit() === 0)) {
+        if ($this->anchor->start && (!$this->is_supporting(qtype_preg_matcher::FUZZY_MATCHING) || $this->options->typolimit === 0)) {
             // The regex is anchored from start, so we really should check only start of the string and every line break if necessary.
             // Results for other offsets would be same.
             $rightborders = array(0);
