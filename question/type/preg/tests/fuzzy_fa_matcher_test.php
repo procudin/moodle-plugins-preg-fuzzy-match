@@ -100,31 +100,30 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                     $options->modifiers = qtype_preg_handling_options::string_to_modifiers($modifiersstr);
                     $options->debugmode = in_array(self::TAG_DEBUG_MODE, $regextags);
                     $options->approximatematch = true;
+                    $options->typolimit = (int)(!isset($fuzzyexpected['errorslimit']) ? 0 : $fuzzyexpected['errorslimit']);
                     $options->mergeassertions = true;
                     $options->extensionneeded = !in_array(self::TAG_DONT_CHECK_PARTIAL, $regextags);
                     $matcher = $this->get_matcher($this->engine_name(), $regex, $options);
                     $timeend = round(microtime(true) * 1000);
                     if ($timeend - $timestart > self::MAX_BUILDING_TIME) {
-                        $message = "\nSlow building on regex : '$regex', str : '$str', errorslimit : {$matcher->get_errors_limit()}";
+                        $message = "\nSlow building on regex : '$regex', str : '$str', errorslimit : {$matcher->options->typolimit}";
                         $this->log($message);
                         $slowbuildtests[] = $message;
                     }
 
-                    // Set typo limit.
-                    $matcher->set_errors_limit((int) (!isset($fuzzyexpected['errorslimit']) ? 0 : $fuzzyexpected['errorslimit']));
 
                     $timestart = round(microtime(true) * 1000);
                     try {
                         $matcher->match($str);
                         $obtained = $matcher->get_match_results();
                     } catch (Exception $e) {
-                        $message = "\nFailed matching on regex '$regex' and string '$str', errorslimit : {$matcher->get_errors_limit()}";
+                        $message = "\nFailed matching on regex '$regex' and string '$str', errorslimit : {$matcher->get_options()->typolimit}";
                         $this->log($message);
                         continue;
                     }
                     $timeend = round(microtime(true) * 1000);
                     if ($timeend - $timestart > self::MAX_BUILDING_TIME) {
-                        $message = "\nSlow match on regex : '$regex', str : '$str', errorslimit : {$matcher->get_errors_limit()}";
+                        $message = "\nSlow match on regex : '$regex', str : '$str', errorslimit : {$matcher->get_options()->typolimit}";
                         $this->log($message);
                         $slowmatchtests[] = $message;
                     }
@@ -290,7 +289,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         if ($isbetter && $obtained->full) {
             $strafterapplying = $obtained->typos->apply($str);
 
-            $matcher->set_errors_limit(0);
+            $matcher->get_options()->typolimit = 0;
 
             $obtainedafterapplying = $matcher->match($strafterapplying);
 

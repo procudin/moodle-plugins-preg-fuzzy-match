@@ -294,20 +294,20 @@ function xmldb_qtype_preg_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        // Maxerrors count.
-        $field = new xmldb_field('maxerrors', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0', 'approximatematch');
+        // Maxtypos count.
+        $field = new xmldb_field('maxtypos', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0', 'approximatematch');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
         // Errorspenalty.
-        $field = new xmldb_field('errorspenalty', XMLDB_TYPE_FLOAT, '4, 2', null, XMLDB_NOTNULL, null, '0.07', 'maxerrors');
+        $field = new xmldb_field('typospenalty', XMLDB_TYPE_FLOAT, '4, 2', null, XMLDB_NOTNULL, null, '0.07', 'maxtypos');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
         // Usehowtofixpichint.
-        $field = new xmldb_field('usehowtofixpichint', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'errorspenalty');
+        $field = new xmldb_field('usehowtofixpichint', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'typospenalty');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
