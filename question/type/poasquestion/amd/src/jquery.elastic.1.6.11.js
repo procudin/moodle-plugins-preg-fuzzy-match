@@ -1,22 +1,22 @@
 /**
- *	@name							Elastic
- *	@descripton						Elastic is jQuery plugin that grow and shrink your textareas automatically
- *	@version						1.6.11
- *	@requires						jQuery 1.2.6+
+ *  @name                           Elastic
+ *  @descripton                     Elastic is jQuery plugin that grow and shrink your textareas automatically
+ *  @version                        1.6.11
+ *  @requires                       jQuery 1.2.6+
  *
- *	@author							Jan Jarfalk
- *	@author-email					jan.jarfalk@unwrongest.com
- *	@author-website					http://www.unwrongest.com
+ *  @author                         Jan Jarfalk
+ *  @author-email                   jan.jarfalk@unwrongest.com
+ *  @author-website                 http://www.unwrongest.com
  *
- *	@licence						MIT License - http://www.opensource.org/licenses/mit-license.php
+ *  @licence                        MIT License - http://www.opensource.org/licenses/mit-license.php
  */
 
-(function($){
+define(['jquery'], (function(jQuery){
     jQuery.fn.extend({
         elastic: function() {
 
-            //	We will create a div clone of the textarea
-            //	by copying these attributes from the textarea to the div.
+            //  We will create a div clone of the textarea
+            //  by copying these attributes from the textarea to the div.
             var mimics = [
                 'paddingTop',
                 'paddingRight',
@@ -48,17 +48,17 @@
                     return false;
                 }
 
-                var $textarea	= jQuery(this),
-                    $twin		= jQuery('<div />').css({
-                        'position'		: 'absolute',
-                        'display'		: 'none',
-                        'word-wrap'		: 'break-word',
-                        'white-space'	:'pre-wrap'
+                var $textarea   = jQuery(this),
+                    $twin       = jQuery('<div />').css({
+                        'position'      : 'absolute',
+                        'display'       : 'none',
+                        'word-wrap'     : 'break-word',
+                        'white-space'   :'pre-wrap'
                     }),
-                    lineHeight	= parseInt($textarea.css('line-height'),10) || parseInt($textarea.css('font-size'),'10'),
-                    minheight	= parseInt($textarea.css('height'),10) || lineHeight*3,
-                    maxheight	= parseInt($textarea.css('max-height'),10) || Number.MAX_VALUE,
-                    goalheight	= 0;
+                    lineHeight  = parseInt($textarea.css('line-height'),10) || parseInt($textarea.css('font-size'),'10'),
+                    minheight   = parseInt($textarea.css('height'),10) || lineHeight*3,
+                    maxheight   = parseInt($textarea.css('max-height'),10) || Number.MAX_VALUE,
+                    goalheight  = 0;
 
                 // Opera returns max-height of -1 if not set
                 if (maxheight < 0) { maxheight = Number.MAX_VALUE; }
@@ -159,4 +159,4 @@
 
         }
     });
-})(jQuery);
+}));
