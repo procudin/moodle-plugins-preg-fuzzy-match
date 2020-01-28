@@ -125,9 +125,12 @@ class fa {
         global $CFG;
         $this->statelimit = 250;
         $this->transitionlimit = 250;
-        if (isset($CFG->qtype_preg_fa_state_limit)) {
-            $this->statelimit = $CFG->qtype_preg_fa_state_limit;
+
+        $statelimit = get_config('qtype_preg', 'fa_state_limit');
+        if ($statelimit) {
+            $this->statelimit = $statelimit;
         }
+
         if (isset($CFG->transition_limit)) {
             $this->transitionlimit = $CFG->transition_limit;
         }
