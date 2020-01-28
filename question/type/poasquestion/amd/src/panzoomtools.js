@@ -10,7 +10,8 @@
 /**
  * Calling this object adds panzoom to every image of 'img_panzoom' class.
  */
-M.panzoomtools = (function($) {
+define(['jquery', 'qtype_poasquestion/jquery.panzoom'], (function (jQuery) {
+    M.panzoomtools = (function($) {
 
     return function() {
         $(document).ready(function() {
@@ -31,4 +32,7 @@ M.panzoomtools = (function($) {
         });
     };
 
-})(jQuery);
+    })(jQuery);
+    
+    return $;  
+})); 

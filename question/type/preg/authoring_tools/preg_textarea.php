@@ -38,17 +38,6 @@ class MoodleQuickForm_preg_textarea extends MoodleQuickForm_textarea {
 
 
     function MoodleQuickForm_preg_textarea($elementName=null, $elementLabel=null, $attributes=null) {
-        parent::__construct($elementName, $elementLabel, $attributes);
-    }
-
-    /**
-     * Returns HTML for this form element.
-     *
-     * @return string
-     */
-    function toHtml() {
-        return '<div style="width:100%; display:inline-block">' .
-                    parent::toHTML() .
-                '&nbsp;<div style="display:inline-block" id="id_test_regex" class="que"></div></div>';
+        parent::__construct($elementName, $elementLabel, $attributes);        
     }
 }
