@@ -6,8 +6,8 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/preg/tests/cross_tester.php');
 
-$CFG->qtype_preg_fa_transition_limit = 10000;
-$CFG->qtype_preg_fa_state_limit = 10000;
+set_config('fa_transition_limit', 10000, 'qtype_preg');
+set_config('fa_state_limit', 10000, 'qtype_preg');
 
 use \qtype_poasquestion\utf8_string;
 

@@ -1472,8 +1472,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
         parent::__construct($regex, $options);
 
-        if (isset($CFG->qtype_preg_fa_simulation_state_limit)) {
-            $this->maxstatescount = $CFG->qtype_preg_fa_simulation_state_limit;
+        $maxstatescount = get_config('qtype_preg', 'fa_simulation_state_limit');
+        if ($maxstatescount) {
+            $this->maxstatescount = $maxstatescount;
         }
         $this->maxstatescount = max($this->maxstatescount, 100);
 

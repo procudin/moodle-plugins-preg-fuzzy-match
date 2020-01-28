@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Preg question type upgrade code.
  *
@@ -282,9 +284,39 @@ function xmldb_qtype_preg_upgrade($oldversion=0) {
         upgrade_plugin_savepoint(true, 2014042200, 'qtype', 'preg');
     }
 
+    if ($oldversion < 2016102000) {
+        // Move global settings from config table to config_plugins table.
+        $DB->execute(
+            "DELETE FROM {config_log} WHERE " . $DB->sql_like('name', ':name'),
+            ['name' => 'qtype_preg%']
+        );
+
+        $configs = $DB->get_records_sql(
+            "SELECT * from {config} WHERE " . $DB->sql_like('name', ':name'),
+            ['name' => 'qtype_preg%']
+        );
+
+        $newconfigs = array_map(function ($config) {
+            return (object)[
+                'plugin' => 'qtype_preg',
+                'name' => str_replace('qtype_preg_', '', $config->name),
+                'value' => $config->value,
+            ];
+        }, $configs);
+        $DB->insert_records('config_plugins', $newconfigs);
+
+        $DB->execute(
+            "DELETE FROM {config} WHERE " . $DB->sql_like('name', ':name'),
+            ['name' => 'qtype_preg%']
+        );
+
+        // Preg savepoint reached.
+        upgrade_plugin_savepoint(true, 2016102000, 'qtype', 'preg');
+    }
+
 
     // Upgrade for approximate matching.
-    if ($oldversion < 2018060500) {
+    if ($oldversion < 2020012801) {
         // Add some fields to qtype_preg_options table.
         $table = new xmldb_table('qtype_preg_options');
 
@@ -319,7 +351,7 @@ function xmldb_qtype_preg_upgrade($oldversion=0) {
         }
 
         // Preg savepoint reached.
-        upgrade_plugin_savepoint(true, 2018060500, 'qtype', 'preg');
+        upgrade_plugin_savepoint(true, 2020012801, 'qtype', 'preg');
     }
 
     return true;

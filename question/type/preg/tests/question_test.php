@@ -334,7 +334,7 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
         // -------------------- Tests for empty automata. ----------------------------
         // Regular expression that can not match due to start/end string assertions.
         // In that case get_matcher should return fa_matcher even if PHP matcher can match expression.
-        $CFG->qtype_preg_assertfailmode = 1; // Fail mode merge on.
+        set_config('assertfailmode', 1, 'qtype_preg'); // Fail mode merge on.
         $options = $testquestion->get_matching_options(false, 0, null, 'native');
         $matcher = $testquestion->get_matcher('fa_matcher', 'a^b', $options, null, false);
         $errors = $matcher->get_errors();
