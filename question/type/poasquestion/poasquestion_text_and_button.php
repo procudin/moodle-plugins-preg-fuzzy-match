@@ -64,24 +64,26 @@ class qtype_poasquestion_text_and_button extends MoodleQuickForm_textarea {
             $dialogWidth = '90%';
         }
 
-        $PAGE->requires->jquery();
-        $PAGE->requires->jquery_plugin('ui');
-        $PAGE->requires->jquery_plugin('ui-css');
-
+        //$PAGE->requires->jquery();
+        //$PAGE->requires->jquery_plugin('ui');
+        //$PAGE->requires->jquery_plugin('ui-css');
+        $PAGE->requires->css('/theme/jquery.php/core/ui-1.12.1/theme/smoothness/jquery-ui.min.css');
+        
         $PAGE->requires->string_for_js('savechanges', 'moodle');
         $PAGE->requires->string_for_js('cancel', 'moodle');
         $PAGE->requires->string_for_js('close', 'editor');
 
         // dependencies
         //$PAGE->requires->js('/question/type/poasquestion/jquery.elastic.1.6.11.js');
-        $PAGE->requires->jquery_plugin('poasquestion-jquerymodule', 'qtype_poasquestion');
+        //$PAGE->requires->jquery_plugin('poasquestion-jquerymodule', 'qtype_poasquestion');
 
         if (!self::$_poasquestion_text_and_button_included) {
             $jsargs = array(
                 $dialogWidth,
                 $this->getDialogTitle()
             );
-            $PAGE->requires->js_init_call('M.poasquestion_text_and_button.init', $jsargs, true, $this->jsmodule);
+            $PAGE->requires->js_call_amd('qtype_poasquestion/poasquestion_text_and_button', 'init', $jsargs);
+            //$PAGE->requires->js_init_call('M.poasquestion_text_and_button.init', $jsargs, true, $this->jsmodule);
             self::$_poasquestion_text_and_button_included = true;
         }
     }
@@ -103,20 +105,22 @@ class qtype_poasquestion_text_and_button extends MoodleQuickForm_textarea {
     }
 
     /**
-     * Returns HTML for this form element.
+     * Returns HTML for regex visualizer button.
+     * This medthod replaces '{help}' placeholder from 'default' textarea template (see $CFG->libdir/formslib.php)
      */
-    public function toHtml() {
+    public function getHelpButton() {
         global $PAGE;
 
         $jsargs = array(
+            $this->getTextareaId(),
             $this->getButtonId(),
-            $this->getTextareaId()
+            $this->getTooltip(),
+            $this->linkToBtnImage,
         );
 
-        $PAGE->requires->js_init_call('M.poasquestion_text_and_button.set_handler', $jsargs, true, $this->jsmodule);
+        $PAGE->requires->js_call_amd('qtype_poasquestion/poasquestion_text_and_button', 'set_handler', $jsargs);
+        //$PAGE->requires->js_init_call('M.poasquestion_text_and_button.set_handler', $jsargs, true, $this->jsmodule);
 
-        return parent::toHtml() . '<a href="#" name="button_' . $this->getTextareaId() . '" id="' . $this->getButtonId() . '" title="' . $this->getTooltip() . '" style="margin-left: 5px" >' .
-                                      '<img src="' . $this->linkToBtnImage . '" />' .
-                                  '</a>';
+        return '';
     }
 }
