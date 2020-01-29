@@ -29,5 +29,5 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/question/behaviour/interactive/renderer.php');
 
 class qbehaviour_interactivehints_renderer extends qbehaviour_interactive_renderer {
-//TODO: there seems nothing to do here
+    // TODO: there seems nothing to do here.
 }
