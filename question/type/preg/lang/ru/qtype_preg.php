@@ -88,7 +88,7 @@ $string['subexpression'] = 'Подвыражение';
 $string['syntax_tree_tool'] = 'Синтаксическое дерево';
 $string['syntax_tree_tool_collapsing_mode'] = 'Режим свёртки';
 $string['syntax_tree_tool_help'] = 'Здесь вы можете видеть синтаксическое дерево. При нажатии на узел дерева выделится соответствующее поддерево, подграф и часть в словесном описании. Вы так же можете сворачивать/разворачивать узлы, включив режим свёртки.';
-// TODO: check strings from another moodle lang files for simplification_tool key
+// TODO: check strings from another moodle lang files for simplification_tool key.
 $string['simplification_tool'] = 'Упрощение регулярного выражения';
 $string['simplification_tool_help'] = 'Здесь вы можете увидеть подсказки для упрощения регулярного выражения, если они нужны. Подсказки бывают трех типов: эквивалентность (замена части выражения на более оптимальное, эквивалентное выражение), советы (предусматривают случаи, которые могли быть упущены) и ошибки (случаи, в которых регулярное выражение совпадает с любой строкой или не совпадает ни с чем).';
 $string['simplification_tool_apply'] = 'Применить и следующая подсказка';
@@ -245,7 +245,7 @@ $string['lnu_unsupported_node_error']              = 'Последователь
 $string['unknown_template_node_error']             = 'Неизвестный шаблон: {$a->addinfo}';
 $string['wrong_template_params_count_node_error']  = 'Неверное количество параметров шаблона: {$a->addinfo->expected} ожидалось, {$a->addinfo->given} передано';
 
-// Types and subtypes needed for authoring tools
+// Types and subtypes needed for authoring tools.
 $string['leaf_charset_neg'] = 'отрицательный символьный класс';
 $string['leaf_charset_error'] = 'ошибка в символьном классе';
 
@@ -288,12 +288,12 @@ $string['authoring_form_check_strings'] = 'Проверить строку (ст
 $string['authoring_form_rect_selection_mode'] =  'Режим выделения прямоугольником';
 $string['authoring_form_rect_selection_select'] =  'Отправить';
 
-// Strings for node description
+// Strings for node description.
 $string['description_operand'] = 'операнд';
 $string['description_range'] = 'от {$a->start} до {$a->end}';
-// TYPE_LEAF_META
+// TYPE_LEAF_META !
 $string['description_empty_leaf_meta'] = 'ничего';
-// TYPE_LEAF_ASSERT
+// TYPE_LEAF_ASSERT !
 $string['description_esc_b_leaf_assert'] = 'граница слова';
 $string['description_esc_a_leaf_assert'] = 'начало строки';
 $string['description_small_esc_z_leaf_assert'] = 'конец строки';
@@ -302,17 +302,17 @@ $string['description_esc_g_leaf_assert'] = 'первая позиция матч
 $string['description_circumflex_leaf_assert'] = 'начало строки';
 $string['description_dollar_leaf_assert'] = 'конец строки';
 $string['description_esc_b_leaf_assert_neg'] = 'не граница слова';
-// TYPE_LEAF_BACKREF
+// TYPE_LEAF_BACKREF !
 $string['description_leaf_backref'] = 'текст, совпавший с подвыражением #{$a}';
 $string['description_leaf_backref_name'] = 'текст, совпавший с подвыражением "{$a}"';
-// TYPE_LEAF_SUBEXPR_CALL
+// TYPE_LEAF_SUBEXPR_CALL !
 $string['description_leaf_subexpr_call'] = 'вызов подмаски #{$a}';
 $string['description_leaf_subexpr_call_all'] = 'вызов проверки совпадения со всем регулярным выражением';
 $string['description_leaf_subexpr_call_name'] = 'вызов подмаски "{$a}"';
 $string['description_leaf_subexpr_call_recursive'] = 'рекурсивный вызов подмаски #{$a}';
 $string['description_leaf_subexpr_call_all_recursive'] = 'рекурсивный вызов проверки совпадения со всем регулярным выражением';
 $string['description_leaf_subexpr_call_name_recursive'] = 'рекурсивный вызов подмаски "{$a}"';
-// TYPE_LEAF_TEMPLATE
+// TYPE_LEAF_TEMPLATE !
 $string['description_leaf_template'] = 'шаблон без параметров';
 $string['description_template_word'] = 'любое слово';
 $string['description_template_integer'] = 'любое число, включая + или -';
@@ -322,7 +322,7 @@ $string['description_template_brackets_req'] = 'текст в квадратны
 $string['description_template_brackets_opt'] = 'тект в квадратных скобках или без';
 $string['description_template_custom_parens_req'] = 'текст в в особых скобках';
 $string['description_template_custom_parens_opt'] = 'тект в особых скобках или без';
-// TYPE_LEAF_CONTROL
+// TYPE_LEAF_CONTROL !
 $string['description_accept_leaf_control'] = 'спровоцировать удачное совпадение';
 $string['description_fail_leaf_control'] = 'спровоцировать неудачу';
 $string['description_mark_name_leaf_control'] = 'задайте имя для {$a->name}, которое будет возвращено';
@@ -342,7 +342,7 @@ $string['description_no_start_opt_leaf_control'] = 'no start-match optimization'
 $string['description_utf8_leaf_control'] = 'режим UTF-8';
 $string['description_utf16_leaf_control'] = 'режим UTF-16';
 $string['description_ucp_leaf_control'] = 'PCRE_UCP';
-// TYPE_LEAF_OPTIONS
+// TYPE_LEAF_OPTIONS !
 $string['description_option_i'] = 'регистронезависимо';
 $string['description_unsetoption_i'] = 'регистрозависимо';
 $string['description_option_s'] = 'точка захватывает \n';
@@ -356,31 +356,31 @@ $string['description_unsetoption_U'] = 'квантификаторы жадны�
 $string['description_option_J'] = 'повторение имен разрешено';
 $string['description_unsetoption_J'] = 'повторение имен запрещено';
 $string['description_leaf_options'] = '{$a}:';
-// TYPE_NODE_FINITE_QUANT
+// TYPE_NODE_FINITE_QUANT !
 $string['description_node_finite_quant'] = '{$a->firstoperand} повторяется от {$a->leftborder} до {$a->rightborder} раз(а){$a->greedy}';
 $string['description_node_finite_quant_strict'] = '{$a->firstoperand} повторяется {$a->leftborder} раз(а){$a->greedy}';
 $string['description_node_finite_quant_0'] = '{$a->firstoperand} повторяется не более {$a->rightborder} раз или отсутствует{$a->greedy}';
 $string['description_node_finite_quant_1'] = '{$a->firstoperand} повторяется не более {$a->rightborder} раз{$a->greedy}';
 $string['description_node_finite_quant_01'] = '{$a->firstoperand} может отсутствовать{$a->greedy}';
 $string['description_node_finite_quant_borders_err'] = ' (некорректные границы у квантификатора)';
-// TYPE_NODE_INFINITE_QUANT
+// TYPE_NODE_INFINITE_QUANT !
 $string['description_node_infinite_quant'] = '{$a->firstoperand} повторяется хотябы {$a->leftborder} раз(а){$a->greedy}';
 $string['description_node_infinite_quant_0'] = '{$a->firstoperand} повторяется любое количество раз или отсутствует{$a->greedy}';
 $string['description_node_infinite_quant_1'] = '{$a->firstoperand} повторяется любое количество раз{$a->greedy}';
-// {$a->greedy}
+// For {$a->greedy}.
 $string['description_quant_lazy'] = ' (ленивый квантификатор)';
 $string['description_quant_greedy'] = '';
 $string['description_quant_possessive'] = ' (сверхжадный квантификатор)';
-// TYPE_NODE_CONCAT
+// TYPE_NODE_CONCAT !
 $string['description_node_concat'] = '{$a->firstoperand} затем {$a->secondoperand}';
 $string['description_node_concat_wcomma'] = '{$a->firstoperand}, затем {$a->secondoperand}';
 $string['description_node_concat_space'] = '{$a->firstoperand} {$a->secondoperand}';
 $string['description_node_concat_and'] = '{$a->firstoperand} и {$a->secondoperand}';
 $string['description_node_concat_short'] = '{$a->firstoperand}{$a->secondoperand}';
-// TYPE_NODE_ALT
+// TYPE_NODE_ALT !
 $string['description_node_alt'] = '{$a->firstoperand} или {$a->secondoperand}';
 $string['description_node_alt_wcomma'] = '{$a->firstoperand}, или {$a->secondoperand}';
-// TYPE_NODE_ASSERT
+// TYPE_NODE_ASSERT !
 $string['description_pla_node_assert'] = 'текст далее должен соответствовать: [{$a->firstoperand}]';
 $string['description_nla_node_assert'] = 'текст далее не должен соответствовать: [{$a->firstoperand}]';
 $string['description_plb_node_assert'] = 'предыдущий текст должен соответствовать: [{$a->firstoperand}]';
@@ -389,14 +389,14 @@ $string['description_pla_node_assert_cond'] = 'текст далее соотв�
 $string['description_nla_node_assert_cond'] = 'текст далее не соответсвует: [{$a->firstoperand}]';
 $string['description_plb_node_assert_cond'] = 'предшествующий текст соответсвует: [{$a->firstoperand}]';
 $string['description_nlb_node_assert_cond'] = 'предшествующий текст не соответствует: [{$a->firstoperand}]';
-// TYPE_NODE_SUBEXPR
+// TYPE_NODE_SUBEXPR !
 $string['description_subexpr_node_subexpr'] = 'подмаска #{$a->number}: [ {$a->firstoperand} ]';
 $string['description_subexpr_node_subexpr_name'] = 'подмаска "{$a->name} #{$a->number}": [ {$a->firstoperand} ]';
 $string['description_onceonly_node_subexpr_once'] = 'однократная подмаска #{$a->number}: [ {$a->firstoperand} ]';
 $string['description_onceonly_node_subexpr_once_name'] = 'однократная подмаска "{$a->name} #{$a->number}": [ {$a->firstoperand} ]';
 $string['description_grouping_node_subexpr'] = 'группировка: [ {$a->firstoperand} ]';
 $string['description_duplicate_node_subexpr'] = 'группировка (номера подмасок сбрасываются в каждой из альтернатив): [ {$a->firstoperand} ]';
-// TYPE_NODE_COND_SUBEXPR ({$a->firstoperand} - first option; {$a->secondoperand} - second option; {$a->cond} - condition )
+// TYPE_NODE_COND_SUBEXPR ({$a->firstoperand} - first option; {$a->secondoperand} - second option; {$a->cond} - condition ).
 $string['description_subexpr_node_cond_subexpr'] = 'подмаска #{$a->number} была успешно сопоставлена';
 $string['description_subexpr_node_cond_subexpr_name'] = 'подмаска "{$a->name}" была успешно сопоставлена';
 $string['description_recursion_node_cond_subexpr'] = 'подмаска #{$a->number} рекурсивно сопоставляется';
@@ -406,17 +406,17 @@ $string['description_subexpr_node_cond_subexpr_wrapper'] = 'если {$a->cond},
 $string['description_define_node_cond_subexpr'] = 'описание {$a->firstoperand}';
 $string['description_node_cond_subexpr'] = 'если {$a->cond}, тогда проверить: [{$a->firstoperand}]{$a->else}';
 $string['description_node_cond_subexpr_else'] = ' иначе проверить: [{$a->secondoperand}]';
-// TYPE_NODE_TEMPLATE
+// TYPE_NODE_TEMPLATE !
 $string['description_node_template'] = 'шаблон с параметрами';
-// TYPE_LEAF_CHARSET
+// TYPE_LEAF_CHARSET !
 $string['description_charset'] = 'один из следующих символов: {$a->characters};';
 $string['description_charset_neg'] = 'любой из символов кроме следующих: {$a->characters};';
 $string['description_charset_neg_one'] = 'не {$a->characters}';
 $string['description_charset_range'] = 'любой символ {$a}';
 $string['description_char'] = '<span class="text-info" class=\'font-family:"Courier New", Courier, monospace;\'>{$a->char}</span>';
 $string['description_char_16value'] = 'символ с кодом 0x{$a->code}';
-//$string['description_charset_one'] = '{$a->characters}';
-// non-printing characters
+// Commented out $string['description_charset_one'] = '{$a->characters}'; .
+// Non-printing characters.
 $string['description_char0'] = 'ноль-символ(NUL)';
 $string['description_char1'] = 'символ начала заголовка(SOH)';
 $string['description_char2'] = 'символ начала текста(STX)';
@@ -458,7 +458,7 @@ $string['description_char2003'] = 'em пробел';
 $string['description_char2009'] = 'тонкий пробел';
 $string['description_char200C'] = 'zero width non-joiner';
 $string['description_char200D'] = 'zero width joiner';
-//CHARSET FLAGS
+// CHARSET FLAGS !
 $string['description_charflag_dot'] = 'любой символ';
 $string['description_charflag_slashd'] = 'десятичная цифра';
 $string['description_charflag_slashh'] = 'горизонтальный белый разделитель';
@@ -470,7 +470,7 @@ $string['description_charflag_slashh_neg'] = 'не горизонтальный 
 $string['description_charflag_slashs_neg'] = 'не белый разделитель';
 $string['description_charflag_slashv_neg'] = 'не вертикальный белый разделитель';
 $string['description_charflag_slashw_neg'] = 'не символ слова';
-// POSIX flags
+// POSIX flags !
 $string['description_charflag_alnum'] = 'буква или цифра';
 $string['description_charflag_alpha'] = 'буква';
 $string['description_charflag_ascii'] = 'символы с кодом 0-127';
@@ -485,7 +485,7 @@ $string['description_charflag_space'] = 'пробел';
 $string['description_charflag_upper'] = 'заглавная буква';
 $string['description_charflag_word'] = 'символ-слово';
 $string['description_charflag_xdigit'] = 'шестнадцатеричное число';
-// POSIX flags - negative
+// POSIX flags - negative !
 $string['description_charflag_alnum_neg'] = 'не буква и не цифра';
 $string['description_charflag_alpha_neg'] = 'не буква';
 $string['description_charflag_ascii_neg'] = 'не символ с кодом 0-127';
@@ -500,7 +500,7 @@ $string['description_charflag_space_neg'] = 'не пробел';
 $string['description_charflag_upper_neg'] = 'не заглавная буква';
 $string['description_charflag_word_neg'] = 'не символ-слово';
 $string['description_charflag_xdigit_neg'] = 'не шестнадцатиричное число';
-// Unicode flags
+// Unicode flags !
 $string['description_charflag_Cc'] = 'ASCII или Latin-1 служебный символ';
 $string['description_charflag_Cf'] = 'непечатные символы форматирования (Unicode)';
 $string['description_charflag_Cn'] = 'символ, отсутствующий в Unicode,';// ??
@@ -634,7 +634,7 @@ $string['description_charflag_Tifinagh'] = 'Tifinagh символ';
 $string['description_charflag_Ugaritic'] = 'Ugaritic символ';
 $string['description_charflag_Vai'] = 'Vai символ';
 $string['description_charflag_Yi'] = 'Yi символ';
-// Unicode flags - negative
+// Unicode flags - negative !
 $string['description_charflag_Cc_neg'] = 'не ASCII или Latin-1 служебный символ';
 $string['description_charflag_Cf_neg'] = 'не непечатные символы форматирования (Unicode)';
 $string['description_charflag_Cn_neg'] = 'не символ, отсутствующий в Unicode,';// ??
@@ -768,11 +768,11 @@ $string['description_charflag_Tifinagh_neg'] = 'не Tifinagh символ';
 $string['description_charflag_Ugaritic_neg'] = 'не Ugaritic символ';
 $string['description_charflag_Vai_neg'] = 'не Vai символ';
 $string['description_charflag_Yi_neg'] = 'не Yi символ';
-// description errors
+// Description errors.
 $string['description_errorbefore'] = '<span style="color:red">';
 $string['description_errorafter'] = '</span>';
 
-// Strings for explaining graph
+// Strings for explaining graph.
 $string['explain_define'] = 'TODO';
 $string['explain_unknow_meta'] = 'неизвестный мета-узел';
 $string['explain_any_char'] = 'Любой символ из';
@@ -784,7 +784,7 @@ $string['explain_false'] = 'ложь';
 $string['explain_unknow_template'] = 'неизвестный шаблон';
 $string['explain_parameter'] = 'параметр';
 
-// Strings for simplification tool
+// Strings for simplification tool.
 $string['simplification_equivalences_short_1'] = 'Подряд идущие простые утверждения';
 $string['simplification_equivalences_full_1'] = 'Простое утверждение является лишним, т.к. рядом уже есть такое же';
 $string['simplification_equivalences_short_2'] = 'Пустые скобки "(?:)"';

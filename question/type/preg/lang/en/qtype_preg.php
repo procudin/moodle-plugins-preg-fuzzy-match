@@ -30,8 +30,8 @@ $string['assertfailmodemerge'] = 'Full';
 $string['answerno'] = 'Answer {$a}';
 $string['charhintpenalty'] = 'Penalty for the next character hint';
 $string['charhintpenalty_help'] = 'Penalty for getting the one-character hint. Typically will be greater than usual Moodle question penalty (which applies to any new attempt to answer question without hints). These penalties are mutually exclusive.';
-$string['lexemhintpenalty'] = 'Penalty for the next lexem hint';
-$string['lexemhintpenalty_help'] = 'Penalty for getting the next lexem hint. Typically will be greater than usual Moodle question penalty (which applies to any new attempt to answer question without hints) and next character one. These penalties are mutually exclusive.';
+$string['lexemhintpenalty'] = 'Penalty for the next lexeme hint';
+$string['lexemhintpenalty_help'] = 'Penalty for getting the next lexeme hint. Typically will be greater than usual Moodle question penalty (which applies to any new attempt to answer question without hints) and next character one. These penalties are mutually exclusive.';
 $string['correctanswer'] = 'Correct answer';
 $string['correctanswer_help'] = 'Enter a correct answer (not a regular expression) to be shown to students. If you leave it empty the matching engine will try to generate a correct answer itself, taking heed to get the closest one to the student\'s response. For now only finite state automata engine can generate correct answers.';
 $string['debugheading'] = 'Debug settings';
@@ -42,14 +42,14 @@ $string['defaultlanglabel'] = 'Default language';
 $string['defaultnotationdescription'] = 'Notation selected by default when creating a new question';
 $string['defaultnotationlabel'] = 'Default notation';
 $string['description_tool'] = 'Description';
-$string['description_tool_help'] = 'Here you can see description of regular expression. Pressing the node of the tree marks corresponding subgraph marks corresponding part of description with yellow color.';
+$string['description_tool_help'] = 'Here you can see a description of your regular expression. Pressing the node of the tree highlights the corresponding subgraph and also marks the corresponding part of the description with a yellow color.';
 $string['doterror'] = 'Can\'t draw {$a->name} for this regex';
 $string['engine'] = 'Matching engine';
-$string['engine_help'] = '<p>There is no \'best\' matching engine, so you can choose the engine that fits the particular question best.</p><p>Native <b>PHP preg matching engine</b> works using preg_match() function from PHP language. It\'s almost 100% bug-free and able to work with full PCRE syntax, but can\'t support advanced features (showing partial matches and hinting).</p><p><b>FA matching engine</b> uses custom matching code. It supports partial matching and hinting, but don\'t support lookaround assertions (you\'ll be notified when trying to save a question with unsupported expressions) and potentially can contain bugs.</p><p>If the difference between engines is too hard to you, just try them all to see how their capabilities suit your needs. If one engine fails in a question then try another engines to see if they can handle it better.</p><p>FA engine is probably the best choice if you don\'t use lookaround assertions.</p>';
+$string['engine_help'] = '<p>There is no \'best\' matching engine, so you can choose the engine that fits the particular question best.</p><p>Native <b>PHP preg matching engine</b> works using preg_match() function from PHP language. It\'s almost 100% bug-free and able to work with full PCRE syntax, but can\'t support advanced features (showing partial matches and hinting).</p><p><b>FA matching engine</b> uses custom matching code. It supports partial matching and hinting, but don\'t support lookaround assertions (you\'ll be notified when trying to save a question with unsupported expressions) and potentially can contain bugs.</p><p>If the difference between engines is too hard for you, just try them all to see how their capabilities suit your needs. If one engine fails in a question then try another engines to see if they can handle it better.</p><p>FA engine is probably the best choice if you don\'t use lookaround assertions.</p>';
 $string['exactmatch'] = 'Exact matching';
 $string['exactmatch_help'] = '<p>By default regular expression matching returns true if there is at least one match in the given string (answer). Exact matching means that the match must be the entire string.</p><p>Set this to Yes, if you write regular expressions for full student\'s answers. Setting this to No gives you additional flexibility: you can specify an answer with low (or zero) grade to catch common errors and give comments on them. You still can specify exact matches for some of your regular expressions if you start them with ^ and end with $.</p>';
 $string['explaining_graph_tool'] = 'Explaining graph';
-$string['explaining_graph_tool_help'] = 'Here you can see explaining graph. Pressing the node of the tree marks corresponding subgraph with dark green rectangle. You can also select multiple nodes at once rectangle, enabling mode selection rectangle.';
+$string['explaining_graph_tool_help'] = 'Here you can see an explaining graph. Pressing the node of the tree marks the corresponding subgraph with a dark green rectangle. You can also select multiple nodes at once inside a rectangle by enabling the Rectangle selection mode checkbox.';
 $string['fa_matcher'] = 'Finite state automata';
 $string['groupspaircountoverlimit'] = 'Possible count of groups pairs at single step of automata equivalence check algorithm overflowed. This limit is necessary to protect from long duration of comparison. Ask your site administrator to change settings if it is necessary.';
 $string['hintcolouredstring'] = 'matched part of the response';
@@ -58,9 +58,9 @@ $string['hintgradeborder_help'] = 'Answers with the grade less than the hint gra
 $string['hintnextchar'] = 'next correct character';
 $string['hintnextlexem'] = 'next correct {$a}';
 $string['langselect'] = 'Language';
-$string['langselect_help'] = 'For next lexem hint you should choose a language, which is used to break answers down to lexemes. Each language has it own rules for lexemes. Languages are defined using \'Formal languages block\'';
-$string['lexemusername'] = 'Student-visible name for lexem';
-$string['lexemusername_help'] = 'Your students probably won\'t know that an atomic part of the language they learn is called <b>lexem</b>. They may prefer to call it "word" or "number" or something. You may define a name for lexem that would be shown on the "Hint next lexem" button there.';
+$string['langselect_help'] = 'For next lexeme hint you should choose a language, which is used to break answers down to lexemes. Each language has it own rules for lexemes. Languages are defined using \'Formal languages block\'';
+$string['lexemusername'] = 'Student-visible name for lexeme';
+$string['lexemusername_help'] = 'Your students probably won\'t know that an atomic part of the language they learn is called <b>lexeme</b>. They may prefer to call it "word" or "number" or something. You may define a name for lexeme that would be shown on the "Hint next lexeme" button there.';
 $string['maxerrorsshowndescription'] = 'Maximum number of errors shown for each regular expression in the question editing form';
 $string['maxerrorsshownlabel'] = 'Maximum number of errors shown';
 $string['mergemodeforassertion'] = 'Please select full assertion support in the settings. In fast mode {$a}';
@@ -81,14 +81,14 @@ $string['php_preg_matcher'] = 'PHP preg extension';
 $string['pluginname_link'] = 'question/type/preg';
 $string['pluginnameadding'] = 'Adding a regular expression question';
 $string['pluginnameediting'] = 'Editing a regular expression question';
-$string['pluginnamesummary'] = 'Enter a string response from student that can be matched against several regular expressions. Shows to the student the correct part of his response. Using behaviours with multiple tries can give a hint by telling a next correct character or lexem.<br/>You can use it without knowing regular expression to get hinting by using the \'Moodle shortanswer\' notation.';
+$string['pluginnamesummary'] = 'Enter a string response from student that can be matched against several regular expressions. Shows to the student the correct part of his response. Using behaviours with multiple tries can give a hint by telling a next correct character or lexeme.<br/>You can use it without knowing regular expression to get hinting by using the \'Moodle shortanswer\' notation.';
 $string['questioneditingheading'] = 'Question editing settings';
 $string['regex_handler'] = 'Regex handler';
 $string['subexpression'] = 'Subpattern';
 $string['syntax_tree_tool'] = 'Syntax tree';
 $string['syntax_tree_tool_collapsing_mode'] = 'Collapsing mode';
-$string['syntax_tree_tool_help'] = 'Here you can see syntax tree of you expression. Pressing the node of tree marks corresponding subtree, subgraph and corresponding part of description. You can also collapse / expand the nodes by turning on convolution.';
-// TODO: check strings from another moodle lang files for simplification_tool key
+$string['syntax_tree_tool_help'] = 'Here you can see syntax tree of you expression. Pressing the node of tree marks corresponding subtree, subgraph and corresponding part of description. You can also collapse / expand the nodes by turning on Collapsing mode.';
+// TODO: check strings from another moodle lang files for simplification_tool key.
 $string['simplification_tool'] = 'Simplification of regular expression';
 $string['simplification_tool_help'] = 'Here you can see tips to simplify regular expressions if they are needed. Tips come of three types: equivalences (replacement of expression on more optimal equivalent expression), tips (include cases that could be missed) and errors (cases in which the regular expression matches any string or does not match with anything).';
 $string['simplification_tool_apply'] = 'Apply and next';
@@ -109,8 +109,8 @@ $string['unsupportedmodifier'] = 'Error: modifier {$a->modifier} isn\'t supporte
 $string['usehint_help'] = 'In behaviours which allow multiple tries (e.g. adaptive or interactive) show students the \'Hint next character\' button that allows to get a one-character hint with applying the \'Hint next character penalty\'. Not all matching engines support hinting.';
 $string['usecharhint'] = 'Allow next character hinting';
 $string['usecharhint_help'] = 'In behaviours which allow multiple tries (e.g. adaptive or interactive) show students the \'Hint next character\' button that allows to get a one-character hint with applying the \'Hint next character penalty\'. Not all matching engines support hinting.';
-$string['uselexemhint'] = 'Allow next lexem (word, number, punctuation mark) hinting';
-$string['uselexemhint_help'] = '<p>In behaviours which allow multiple tries (e.g. adaptive or interactive) show students the \'Hint next word\' button that allows to get a hint either completing current lexem or showing next one if lexem is complete with applying the \'Hint next lexem penalty\'. Not all matching engines support hinting.</p><p><b>Lexeme</b> is an atomic part of the language: a word, number, punctuation mark, operator etc.</p>';
+$string['uselexemhint'] = 'Allow next lexeme (word, number, punctuation mark) hinting';
+$string['uselexemhint_help'] = '<p>In behaviours which allow multiple tries (e.g. adaptive or interactive) show students the \'Hint next word\' button that allows to get a hint either completing current lexeme or showing next one if the lexeme is complete with applying the \'Hint next lexeme penalty\'. Not all matching engines support hinting.</p><p><b>Lexeme</b> is an atomic part of the language: a word, number, punctuation mark, operator etc.</p>';
 $string['noapproximateforhowtofixpichint'] = 'Typo analysis and typo limit above 0 are required. Try to enable typo detection or set typo limit to above zero. Selected matching engine could affect availability of typo section.';
 
 $string['hinting'] = 'Hinting options';
@@ -167,7 +167,7 @@ $string['dollar_leaf_assert']          = 'end of the string';
 $string['subexpr_leaf_assert']         = 'fictive';
 $string['recursion_leaf_assert']       = 'fictive';
 $string['truefalse_leaf_assert']       = 'fictive';
-$string['accept_leaf_control']         = '';   // TODO
+$string['accept_leaf_control']         = '';   // TODO.
 $string['fail_leaf_control']           = '';
 $string['mark_name_leaf_control']      = '';
 $string['commit_leaf_control']         = '';
@@ -245,7 +245,7 @@ $string['lnu_unsupported_node_error']              = 'Sequences \L, \l, \N{name}
 $string['unknown_template_node_error']             = 'Unknown template: {$a->addinfo}';
 $string['wrong_template_params_count_node_error']  = 'Wrong template parameters count: {$a->addinfo->expected} expected, {$a->addinfo->given} given';
 
-// Types and subtypes needed for authoring tools
+// Types and subtypes needed for authoring tools.
 $string['leaf_charset_neg'] = 'negative character set';
 $string['leaf_charset_error'] = 'incorrect character set';
 
@@ -275,25 +275,25 @@ $string['authoring_form_charset_mode'] = 'Display mode for complex character cla
 $string['authoring_form_charset_flags'] = 'real meaning (unified format)';
 $string['authoring_form_charset_userinscription'] = 'as written in regular expressions';
 $string['authoring_form_edit_header'] = 'Regular expression';
-$string['authoring_form_edit_header_help'] = 'Input your regex here. You\'ll see corresponding syntax tree, explaining graph and description. Click "Update" to commit changes in the regex.';
+$string['authoring_form_edit_header_help'] = 'Input your regex here. You\'ll see corresponding syntax tree, explaining graph and description. Click "Save changes" to commit changes in the regex.';
 $string['authoring_form_options_header'] = 'Matching options';
 $string['authoring_form_options_header_help'] = 'Here you can tune the matching. These options will be saved in the question editing form.';
 $string['authoring_form_text'] = 'Enter your regex here:';
 $string['authoring_form_tree_build'] = 'Building the tree...';
 $string['authoring_form_graph_build'] = 'Building the graph...';
 $string['authoring_form_testing_header'] = 'Regular expression testing';
-$string['authoring_form_testing_header_help'] = 'Here you can input some strings (one per line) to test your regex. After clicking "Check the string(s)" you\'ll see results on the right: matched parts are green, unmatched parts are red. Icon shows you whether given string matched entire regex (green check mark) or not (reg cross).';
+$string['authoring_form_testing_header_help'] = 'Here you can input some strings (one per line) to test your regex. After clicking "Check the string(s)", you\'ll see results on the right: matched parts are green, unmatched parts are red. An icon shows you whether the given string matched the entire regex (green check mark) or not (red cross).';
 $string['authoring_form_testing_textarea'] = 'Input strings to match (one per line)';
 $string['authoring_form_check_strings'] = 'Check the string(s)';
-$string['authoring_form_rect_selection_mode'] =  'Rectangle selection mode';
-$string['authoring_form_rect_selection_select'] =  'Select';
+$string['authoring_form_rect_selection_mode'] = 'Rectangle selection mode';
+$string['authoring_form_rect_selection_select'] = 'Select';
 
-// Strings for node description
+// Strings for node description.
 $string['description_operand'] = 'operand';
 $string['description_range'] = 'from {$a->start} to {$a->end}';
-// TYPE_LEAF_META
+// TYPE_LEAF_META !
 $string['description_empty_leaf_meta'] = 'nothing';
-// TYPE_LEAF_ASSERT
+// TYPE_LEAF_ASSERT !
 $string['description_esc_b_leaf_assert'] = 'a word boundary';
 $string['description_esc_a_leaf_assert'] = 'start of the string';
 $string['description_small_esc_z_leaf_assert'] = 'end of the string';
@@ -302,17 +302,17 @@ $string['description_esc_g_leaf_assert'] = 'first matching position in the strin
 $string['description_circumflex_leaf_assert'] = 'start of the string';
 $string['description_dollar_leaf_assert'] = 'end of the string';
 $string['description_esc_b_leaf_assert_neg'] = 'not a word boundary';
-// TYPE_LEAF_BACKREF
+// TYPE_LEAF_BACKREF !
 $string['description_leaf_backref'] = 'text matched by subpattern #{$a}';
 $string['description_leaf_backref_name'] = 'text matched by subpattern "{$a}"';
-// TYPE_LEAF_SUBEXPR_CALL
+// TYPE_LEAF_SUBEXPR_CALL !
 $string['description_leaf_subexpr_call'] = 'call of the subpattern #{$a}';
 $string['description_leaf_subexpr_call_all'] = 'call of the whole regular expression';
 $string['description_leaf_subexpr_call_name'] = 'call of the subpattern "{$a}"';
 $string['description_leaf_subexpr_call_recursive'] = 'recursive call of the subpattern #{$a}';
 $string['description_leaf_subexpr_call_all_recursive'] = 'recursive call of the whole regular expression';
 $string['description_leaf_subexpr_call_name_recursive'] = 'recursive call of the subpattern "{$a}"';
-// TYPE_LEAF_TEMPLATE
+// TYPE_LEAF_TEMPLATE !
 $string['description_leaf_template'] = 'template without params';
 $string['description_template_word'] = 'any word';
 $string['description_template_integer'] = 'any number including + or -';
@@ -322,7 +322,7 @@ $string['description_template_brackets_req'] = 'text in square brackets';
 $string['description_template_brackets_opt'] = 'text in square brackets or without';
 $string['description_template_custom_parens_req'] = 'text in optional custom brackets';
 $string['description_template_custom_parens_opt'] = 'text in optional custom brackets or without';
-// TYPE_LEAF_CONTROL
+// TYPE_LEAF_CONTROL !
 $string['description_accept_leaf_control'] = 'force successful subpattern match';
 $string['description_fail_leaf_control'] = 'force fail';
 $string['description_mark_name_leaf_control'] = 'set name to {$a->name} to be passed back';
@@ -342,7 +342,7 @@ $string['description_no_start_opt_leaf_control'] = 'no start-match optimization'
 $string['description_utf8_leaf_control'] = 'UTF-8 mode';
 $string['description_utf16_leaf_control'] = 'UTF-16 mode';
 $string['description_ucp_leaf_control'] = 'PCRE_UCP';
-// TYPE_LEAF_OPTIONS
+// TYPE_LEAF_OPTIONS !
 $string['description_option_i'] = 'caseless';
 $string['description_unsetoption_i'] = 'case sensitive';
 $string['description_option_s'] = 'dot metacharacter matches \n';
@@ -356,31 +356,31 @@ $string['description_unsetoption_U'] = 'quantifiers greedy by default';
 $string['description_option_J'] = 'allow duplicate names';
 $string['description_unsetoption_J'] = 'disallow duplicate names';
 $string['description_leaf_options'] = '{$a}:';
-// TYPE_NODE_FINITE_QUANT
+// TYPE_NODE_FINITE_QUANT !
 $string['description_node_finite_quant'] = '{$a->firstoperand} repeated from {$a->leftborder} to {$a->rightborder} times{$a->greedy}';
 $string['description_node_finite_quant_strict'] = '{$a->firstoperand} repeated {$a->leftborder} times{$a->greedy}';
 $string['description_node_finite_quant_0'] = '{$a->firstoperand} repeated no more than {$a->rightborder} times or missing{$a->greedy}';
 $string['description_node_finite_quant_1'] = '{$a->firstoperand} repeated no more than {$a->rightborder} times{$a->greedy}';
 $string['description_node_finite_quant_01'] = '{$a->firstoperand} may be missing{$a->greedy}';
 $string['description_node_finite_quant_borders_err'] = ' (incorrect quantifier borders)';
-// TYPE_NODE_INFINITE_QUANT
+// TYPE_NODE_INFINITE_QUANT !
 $string['description_node_infinite_quant'] = '{$a->firstoperand} repeated at least {$a->leftborder} times{$a->greedy}';
 $string['description_node_infinite_quant_0'] = '{$a->firstoperand} repeated any number of times or missing{$a->greedy}';
 $string['description_node_infinite_quant_1'] = '{$a->firstoperand} repeated any number of times{$a->greedy}';
-// {$a->greedy}
+// For {$a->greedy} parameter .
 $string['description_quant_lazy'] = ' (lazy quantifier)';
 $string['description_quant_greedy'] = '';
 $string['description_quant_possessive'] = ' (possessive quantifier)';
-// TYPE_NODE_CONCAT
+// TYPE_NODE_CONCAT !
 $string['description_node_concat'] = '{$a->firstoperand} then {$a->secondoperand}';
 $string['description_node_concat_wcomma'] = '{$a->firstoperand} then {$a->secondoperand}';
 $string['description_node_concat_space'] = '{$a->firstoperand} {$a->secondoperand}';
 $string['description_node_concat_and'] = '{$a->firstoperand} and {$a->secondoperand}';
 $string['description_node_concat_short'] = '{$a->firstoperand}{$a->secondoperand}';
-// TYPE_NODE_ALT
+// TYPE_NODE_ALT !
 $string['description_node_alt'] = '{$a->firstoperand} or {$a->secondoperand}';
 $string['description_node_alt_wcomma'] = '{$a->firstoperand} or {$a->secondoperand}';
-// TYPE_NODE_ASSERT
+// TYPE_NODE_ASSERT !
 $string['description_pla_node_assert'] = 'further text should match: [{$a->firstoperand}]';
 $string['description_nla_node_assert'] = 'further text should not match: [{$a->firstoperand}]';
 $string['description_plb_node_assert'] = 'preceding text should match: [{$a->firstoperand}]';
@@ -389,14 +389,14 @@ $string['description_pla_node_assert_cond'] = 'further text matches: [{$a->first
 $string['description_nla_node_assert_cond'] = 'further text does not match: [{$a->firstoperand}]';
 $string['description_plb_node_assert_cond'] = 'preceding text matches: [{$a->firstoperand}]';
 $string['description_nlb_node_assert_cond'] = 'preceding text does not match: [{$a->firstoperand}]';
-// TYPE_NODE_SUBEXPR
+// TYPE_NODE_SUBEXPR !
 $string['description_subexpr_node_subexpr'] = 'subpattern #{$a->number}: [ {$a->firstoperand} ]';
 $string['description_subexpr_node_subexpr_name'] = 'subpattern "{$a->name}" #{$a->number}: [ {$a->firstoperand} ]';
 $string['description_onceonly_node_subexpr'] = 'once checked subpattern #{$a->number}: [ {$a->firstoperand} ]';
 $string['description_onceonly_node_subexpr_name'] = 'once checked subpattern "{$a->name} #{$a->number}": [ {$a->firstoperand} ]';
 $string['description_grouping_node_subexpr'] = 'grouping: [ {$a->firstoperand} ]';
 $string['description_duplicate_node_subexpr'] = 'grouping (reset group numbers for capturing groups in each alternation): [ {$a->firstoperand} ]';
-// TYPE_NODE_COND_SUBEXPR ({$a->firstoperand} - first option; {$a->secondoperand} - second option; {$a->cond} - condition )
+// TYPE_NODE_COND_SUBEXPR ({$a->firstoperand} - first option; {$a->secondoperand} - second option; {$a->cond} - condition ).
 $string['description_subexpr_node_cond_subexpr'] = 'the subpattern #{$a->number} has been successfully matched';
 $string['description_subexpr_node_cond_subexpr_name'] = 'the subpattern "{$a->name}" has been successfully matched';
 $string['description_recursion_node_cond_subexpr'] = 'the pattern #{$a->number} is in recursive matching';
@@ -406,17 +406,17 @@ $string['description_subexpr_node_cond_subexpr_wrapper'] = 'if {$a->cond} then c
 $string['description_define_node_cond_subexpr'] = 'definition of {$a->firstoperand}';
 $string['description_node_cond_subexpr'] = 'if {$a->cond} then check: [{$a->firstoperand}]{$a->else}';
 $string['description_node_cond_subexpr_else'] = ' else check: [{$a->secondoperand}]';
-// TYPE_NODE_TEMPLATE
+// TYPE_NODE_TEMPLATE !
 $string['description_node_template'] = 'template with params';
-// TYPE_LEAF_CHARSET
+// TYPE_LEAF_CHARSET !
 $string['description_charset'] = 'one of the following characters: {$a->characters};';
 $string['description_charset_neg'] = 'any character except the following: {$a->characters};';
 $string['description_charset_neg_one'] = 'not {$a->characters}';
 $string['description_charset_range'] = 'any character {$a}';
 $string['description_char'] = '<span class="text-info" class=\'font-family:"Courier New", Courier, monospace;\'>{$a->char}</span>';
 $string['description_char_16value'] = 'character with code 0x{$a->code}';
-//$string['description_charset_one'] = '{$a->characters}';
-// non-printing characters
+// Commented out $string['description_charset_one'] = '{$a->characters}'; .
+// Non-printing characters !
 $string['description_char0'] = 'null character(NUL)';
 $string['description_char1'] = 'start of header character (SOH)';
 $string['description_char2'] = 'start of text character(STX)';
@@ -458,7 +458,7 @@ $string['description_char2003'] = 'em space';
 $string['description_char2009'] = 'thin space';
 $string['description_char200C'] = 'zero width non-joiner';
 $string['description_char200D'] = 'zero width joiner';
-//CHARSET FLAGS
+// CHARSET FLAGS !
 $string['description_charflag_dot'] = 'any character';
 $string['description_charflag_slashd'] = 'a decimal digit';
 $string['description_charflag_slashh'] = 'a horizontal white space character';
@@ -470,7 +470,7 @@ $string['description_charflag_slashh_neg'] = 'not a horizontal white space chara
 $string['description_charflag_slashs_neg'] = 'not a white space';
 $string['description_charflag_slashv_neg'] = 'not a vertical white space character';
 $string['description_charflag_slashw_neg'] = 'not a word character';
-// POSIX flags
+// POSIX flags !
 $string['description_charflag_alnum'] = 'a letter or digit';
 $string['description_charflag_alpha'] = 'a letter';
 $string['description_charflag_ascii'] = 'a character with codes 0-127';
@@ -485,7 +485,7 @@ $string['description_charflag_space'] = 'a white space';
 $string['description_charflag_upper'] = 'an upper case letter';
 $string['description_charflag_word'] = 'a word character';
 $string['description_charflag_xdigit'] = 'a hexadecimal digit';
-// POSIX flags - negative
+// POSIX flags - negative !
 $string['description_charflag_alnum_neg'] = 'not a letter and not digit';
 $string['description_charflag_alpha_neg'] = 'not a letter';
 $string['description_charflag_ascii_neg'] = 'not a character with codes 0-127';
@@ -500,7 +500,7 @@ $string['description_charflag_space_neg'] = 'not a white space';
 $string['description_charflag_upper_neg'] = 'not an upper case letter';
 $string['description_charflag_word_neg'] = 'not a word character';
 $string['description_charflag_xdigit_neg'] = 'not a hexadecimal digit';
-// Unicode flags
+// Unicode flags !
 $string['description_charflag_Cc'] = 'control';
 $string['description_charflag_Cf'] = 'format';
 $string['description_charflag_Cn'] = 'unassigned';
@@ -634,7 +634,7 @@ $string['description_charflag_Tifinagh'] = 'Tifinagh character';
 $string['description_charflag_Ugaritic'] = 'Ugaritic character';
 $string['description_charflag_Vai'] = 'Vai character';
 $string['description_charflag_Yi'] = 'Yi character';
-// Unicode flags - negative
+// Unicode flags - negative !
 $string['description_charflag_Cc_neg'] = 'not control';
 $string['description_charflag_Cf_neg'] = 'not format';
 $string['description_charflag_Cn_neg'] = 'not unassigned';
@@ -768,11 +768,11 @@ $string['description_charflag_Tifinagh_neg'] = 'not Tifinagh character';
 $string['description_charflag_Ugaritic_neg'] = 'not Ugaritic character';
 $string['description_charflag_Vai_neg'] = 'not Vai character';
 $string['description_charflag_Yi_neg'] = 'not Yi character';
-// description errors
+// Description errors.
 $string['description_errorbefore'] = '<span style="color:red">';
 $string['description_errorafter'] = '</span>';
 
-// Strings for explaining graph
+// Strings for explaining graph.
 $string['explain_define'] = 'TODO';
 $string['explain_unknow_meta'] = 'unknown meta';
 $string['explain_any_char'] = 'Any character from';
@@ -784,7 +784,7 @@ $string['explain_false'] = 'false';
 $string['explain_unknow_template'] = 'unknow template';
 $string['explain_parameter'] = 'parameter';
 
-// Strings for simplification tool
+// Strings for simplification tool.
 $string['simplification_equivalences_short_1'] = 'Consecutive simple assertions';
 $string['simplification_equivalences_full_1'] = 'A simple assertions is superfluous because next to already have the same';
 $string['simplification_equivalences_short_2'] = 'The empty brackets "(?:)"';
