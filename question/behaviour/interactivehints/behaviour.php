@@ -26,21 +26,21 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Question behaviour for question with hints in interactive mode.
- *
- * Behaviour variables:
- * _triesleft - a number of tries student can still do (inherited from interactive)
- * _hashint - there was hint requested in the step
- * _render_<hintname> - true if hint with hintname should be rendered when rendering question next time
- *
- * Behaviour controls:
- * submit - submit answer to grading (inherited from interactive)
- * tryagain - start another try (inherited from interactive)
- *
- * @copyright  2013 Oleg Sychev, Volgograd State Technical University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+//
+// Question behaviour for question with hints in interactive mode.
+//
+// Behaviour variables:
+// _triesleft - a number of tries student can still do (inherited from interactive)
+// _hashint - there was hint requested in the step
+// _render_<hintname> - true if hint with hintname should be rendered when rendering question next time
+//
+// Behaviour controls:
+// submit - submit answer to grading (inherited from interactive)
+// tryagain - start another try (inherited from interactive)
+//
+// @copyright  2013 Oleg Sychev, Volgograd State Technical University
+// @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+//
 
 require_once($CFG->dirroot . '/question/behaviour/interactive/behaviour.php');
 
@@ -54,11 +54,11 @@ class qbehaviour_interactivehints extends qbehaviour_interactive implements qtyp
     public function process_submit(question_attempt_pending_step $pendingstep) {
         $result = parent::process_submit($pendingstep);
 
-
-        if ($pendingstep->get_state() == question_state::$todo) {//Hint was used
+        if ($pendingstep->get_state() == question_state::$todo) {
+            // Hint was used.
             $moodlehint = $this->question->get_hint(count($this->question->hints) -
                 $pendingstep->get_behaviour_var('_triesleft'), $this->qa);
-            $pendingstep->set_behaviour_var('_hashint',true);
+            $pendingstep->set_behaviour_var('_hashint', true);
             $hints = $this->adjust_hints($moodlehint->hintkeys());
             $hints = $this->expand_choosen_mi_hints($hints, $pendingstep);
             foreach ($hints as $hintkey) {
@@ -76,7 +76,8 @@ class qbehaviour_interactivehints extends qbehaviour_interactive implements qtyp
      */
     public function adjust_hintkey($hintkey) {
         if (substr($hintkey, -1) == '#') {
-            //$i = count($this->question->hints) + 1 - $this->qa->get_last_behaviour_var('_triesleft');//This is simplier, but not suitable for other sequential hints than moodle ones.
+            // $i = count($this->question->hints) + 1 - $this->qa->get_last_behaviour_var('_triesleft');
+            // This is simplier, but not suitable for other sequential hints than moodle ones.
             $i = 0;
             while ($this->qa->get_last_behaviour_var('_render_' . $hintkey . $i) !== null) {
                 $i++;
@@ -87,7 +88,7 @@ class qbehaviour_interactivehints extends qbehaviour_interactive implements qtyp
     }
 
     /**
-     * Adjust hints array, replacing every hintkey that ends with # with a whole 
+     * Adjust hints array, replacing every hintkey that ends with # with a whole
      * bunch of hint numbers for hints, that should be shown in this step.
      *
      * For this behaviour only current hint is shown for sequential hint.
@@ -113,9 +114,9 @@ class qbehaviour_interactivehints extends qbehaviour_interactive implements qtyp
         $response = $pendingstep->get_qt_data();
         $availablehints = $this->question->available_specific_hints($response);
         foreach ($hints as $hintkey) {
-            if (substr($hintkey, -1) == '_') {//Choosen multiple instance hints.
-                foreach($availablehints as $realhint) {
-                    if (substr($realhint, 0, strlen($hintkey)) == $hintkey) {//The hint should be rendered.
+            if (substr($hintkey, -1) == '_') {// Choosen multiple instance hints.
+                foreach ($availablehints as $realhint) {
+                    if (substr($realhint, 0, strlen($hintkey)) == $hintkey) {// The hint should be rendered.
                         $result[] = $realhint;
                     }
                 }
