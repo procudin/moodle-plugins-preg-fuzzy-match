@@ -59,6 +59,9 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     // Object of \block_formal_langs_abstract_language (cf. blocks/formal_langs for more details).
     protected $langobj = null;
 
+    // Set of chars that cant be used as a typo.
+    protected $typoblacklist = '';
+
     // Transpose pseudotransitions, array(fromstate => array(tostate => array(transitions))).
     protected $transposepseudotransitions = [];
 
@@ -310,8 +313,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $length = 0;
         $issub = $pseudotype == qtype_preg_typo::SUBSTITUTION;
 
-        // Do nothing if current char is in language blacklist
-        if ($this->langobj !== null && $str[$curpos] !== null && utf8_string::strpos($this->langobj->typo_blacklist(), $str[$curpos]) !== false) {
+        // Do nothing if it's substitution and current char is in language blacklist
+        if ($issub && $this->is_char_in_lang_typo_blacklist($str[$curpos])) {
             return $result;
         }
 
@@ -320,8 +323,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             return $result;
         }
 
-        // Try to generate transition character.
-        list($flag, $char) = $transition->next_character($str, $str, $curpos, 0, $curstate);
+        // Try to generate transition character.        
+        list($flag, $char) = $transition->next_character($str, $str, $curpos, 0, $curstate, $this->typoblacklist);
         if ($flag != qtype_preg_leaf::NEXT_CHAR_CANNOT_GENERATE) {
             // If successfull generated.
             $result = true;
@@ -421,7 +424,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         }
 
         // Do nothing if current char is in language blacklist
-        if ($this->langobj !== null && $curstate->str[$curpos] !== null && utf8_string::strpos($this->langobj->typo_blacklist(), $curstate->str[$curpos]) !== false) {
+        if ($this->is_char_in_lang_typo_blacklist($curstate->str[$curpos])) {
             return false;
         }
 
@@ -1046,7 +1049,10 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
 
                 // Try transpose pseudotransitions.
-                if ($curerrcount < $this->currentmaxtypos && $curpos < $str->length() - 1) {
+                if ($curerrcount < $this->currentmaxtypos 
+                    && $curpos < $str->length() - 1 
+                    && !$this->is_char_in_lang_typo_blacklist($str[$curpos])
+                    && !$this->is_char_in_lang_typo_blacklist($str[$curpos + 1])) {
                     $tmp1 = $str[$curpos];
                     $tmp2 = $str[$curpos + 1];
                     if (strcmp($tmp1, $tmp2) !== 0) {
@@ -1410,6 +1416,13 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         return $result;
     }
 
+    protected function is_char_in_lang_typo_blacklist($chr) {
+        if ($chr !== null && utf8_string::strpos($this->typoblacklist, $chr) !== false) {
+            return true;
+        }
+        return false;
+    }
+
     protected function check_for_infinite_recursion() {
         $end = $this->automaton->get_end_states();
         $front = $this->automaton->get_start_states();
@@ -1510,6 +1523,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
         if ($options->langid) {
             $this->langobj = \block_formal_langs::lang_object($options->langid);
+            $this->typoblacklist = $this->langobj->typo_blacklist();
         }
 
         //echo "backtrack states:\n";
