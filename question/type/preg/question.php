@@ -172,6 +172,7 @@ class qtype_preg_question extends question_graded_automatically
                     } else {
                         $maxfitness = $bestmatchresult->length();
                     }
+                    $maxfitness -= $bestmatchresult->typos->count() * 0.01;
                     break;// Any one that fits border helps.
                 }
             }
