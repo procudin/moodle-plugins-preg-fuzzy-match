@@ -32,6 +32,7 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
 
     protected $testquestion;
     protected $subexprquestion;
+    protected $typosquestion;
 
     /**
      * Creates a number of questions for testing.
@@ -132,6 +133,41 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
         $subexpr->answers = array(200=>$answer1, 201=>$answer2, 202=>$answer3, 203=>$answer4);
         $this->subexprquestion = $subexpr;
 
+        // Special question to test typos.
+        $typos = new qtype_preg_question;
+        $typos->usecase = true;
+        $typos->correctanswer = 'foozot';
+        $typos->exactmatch = true;
+        $typos->usecharhint = true;
+        $typos->penalty = 0.1;
+        $typos->charhintpenalty = 0.2;
+        $typos->hintgradeborder = 0.6;
+        $typos->engine = 'fa_matcher';
+        $typos->notation = 'native';
+        $typos->approximatematch = true;
+        $typos->typospenalty = 0.02;
+        $typos->maxtypos = 2;
+
+        $answer1 = new stdClass;
+        $answer1->id = 300;
+        $answer1->answer = 'f(oo){1,2}((zup)*|(bar)*|(zap)*)*zot';
+        $answer1->fraction = 1;
+        $answer1->feedback = '';
+
+        $answer2 = new stdClass;
+        $answer2->id = 301;
+        $answer2->answer = 'foo(oo){1,2}((zp)*|(bar)*|(zp)*)*zp';
+        $answer2->fraction = 0.7;
+        $answer2->feedback = '';
+
+        $answer3 = new stdClass;
+        $answer3->id = 303;
+        $answer3->answer = 'fo((zp)*|(br)*|(zp)*)*zt?';
+        $answer3->fraction = 0.3;
+        $answer3->feedback = '';
+
+        $typos->answers = array(300 => $answer1, 301 => $answer2, 303 => $answer3);
+        $this->typosquestion = $typos;
     }
 
     public function test_get_best_fit_answer() {
@@ -219,6 +255,47 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
         $this->assertTrue($bestfit['answer']->fraction == 1);
         $this->assertTrue($bestfit['match']->is_match() === false);
         $this->assertTrue($bestfit['match']->full === false);
+
+
+        // Match with typos
+        $testquestion = clone $this->typosquestion;
+
+        // 1st answer has full match without typos.
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'foooobarzot'));
+        $this->assertTrue($bestfit['answer']->fraction == 1);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === true);
+        $this->assertTrue($bestfit['match']->typos->count() === 0);
+
+        // 2nd answer has full match without typos
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'foooobarzpzp'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.7);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === true);
+        $this->assertTrue($bestfit['match']->typos->count() === 0);
+
+        // 3rd answer has full match without typos.
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'fobrz'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.3);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === true);
+        $this->assertTrue($bestfit['match']->typos->count() === 0);
+
+        // 3rd answer has full match with 1 typo, but it has lost to the 1st which has 2 typos because of gradeborder.
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'fobrzot'));
+        $this->assertTrue($bestfit['answer']->fraction == 1);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === true);
+        $this->assertTrue($bestfit['match']->typos->count() === 2);
+
+        // change gradeborder and now 3rd answer has full match without 1 typo
+        $testquestion = clone $this->typosquestion;
+        $testquestion->hintgradeborder = 0.1;
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'fobrzot'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.3);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === true);
+        $this->assertTrue($bestfit['match']->typos->count() === 1);
 
         //      TODO question with engine which supports partial matching, but not characters left - when we would have such engine - like backtracking.
     }
