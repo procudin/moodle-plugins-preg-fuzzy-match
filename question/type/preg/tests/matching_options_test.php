@@ -48,6 +48,7 @@ class qtype_preg_matching_options_test extends PHPUnit_Framework_TestCase {
         $this->options->modifiers = $this->question->get_modifiers(); // Usecase = true by default.
         $this->options->extensionneeded = false; // No character generation for PHP preg matcher.
         $this->options->capturesubexpressions = true;
+        $this->options->langid = null;
         $this->matchers = array('php_preg_matcher', 'fa_matcher');
     }
 
@@ -209,6 +210,107 @@ class qtype_preg_matching_options_test extends PHPUnit_Framework_TestCase {
             $this->assertFalse($results->full, $failmsg);
             $results = $matcher->match('1+??aa');
             $this->assertFalse($results->full, $failmsg);
+        }
+    }
+
+    public function test_approximate_matching() {
+        foreach ($this->matchers as $matchername) {
+            $classname = 'qtype_preg_' . $matchername;
+            $failmsg = $matchername . ' has failed';
+            $matcher = new $classname();
+            if (!$matcher->is_supporting(\qtype_preg_matcher::FUZZY_MATCHING)) {
+                continue;
+            }
+
+            // approximate disabled
+            $options = clone $this->options;
+            $matcher = new $classname("abc", $options);
+            $results = $matcher->match('abd');
+            $this->assertFalse($results->full, $failmsg);
+
+            // approximate enabled but typo threshold is 0
+            $options = clone $this->options;
+            $options->approximatematch = true;
+            $options->typolimit = 0;
+            $matcher = new $classname("abc", $options);
+            $results = $matcher->match('abd');
+            $this->assertFalse($results->full, $failmsg);
+
+            // approximate disabled and typo threshold is above 0
+            $options = clone $this->options;
+            $options->approximatematch = false;
+            $options->typolimit = 1;
+            $matcher = new $classname("abc", $options);
+            $results = $matcher->match('abd');
+            $this->assertFalse($results->full, $failmsg);
+
+            // approximate enabled and typo threshold is above 0
+            $options = clone $this->options;
+            $options->approximatematch = true;
+            $options->typolimit = 1;
+            $matcher = new $classname("abc", $options);
+            $results = $matcher->match('abd');
+            $this->assertTrue($results->full, $failmsg);
+            $this->assertEquals(1, $results->typos->count(), $failmsg);
+        }
+    }
+
+    public function test_typos_blacklist() {
+        foreach ($this->matchers as $matchername) {
+            $classname = 'qtype_preg_' . $matchername;
+            $failmsg = $matchername . ' has failed';
+            $matcher = new $classname();
+            if (!$matcher->is_supporting(\qtype_preg_matcher::FUZZY_MATCHING)) {
+                continue;
+            }
+
+            $options = clone $this->options;
+            $options->langid = "1";  // english language
+            $options->approximatematch = true;
+            $options->typolimit = 1;
+            $blacklist = \block_formal_langs::lang_object($options->langid)->typo_blacklist();
+            $this->assertGreaterThan(0, strlen($blacklist), $failmsg);
+
+            // regex with blacklisted char - test all typos
+            $blcklistchr = $blacklist[rand(0,(strlen($blacklist) - 1))];
+            $matcher = new $classname("ab" . $blcklistchr . "cd", $options);
+
+            $results = $matcher->match('abc'. $blcklistchr .'d'); // transpose
+            $this->assertFalse($results->full, $failmsg);
+
+            $results = $matcher->match('ab=cd'); // substitution
+            $this->assertFalse($results->full, $failmsg);
+            $this->assertEquals(0, $results->index_first(), $failmsg);
+            $this->assertEquals(2, $results->length(), $failmsg);
+            $this->assertEquals(0, $results->typos->count(), $failmsg);
+
+            $results = $matcher->match('abcd'); // insertion
+            $this->assertFalse($results->full, $failmsg);
+            $this->assertEquals(0, $results->index_first(), $failmsg);
+            $this->assertEquals(2, $results->length(), $failmsg);
+            $this->assertEquals(0, $results->typos->count(), $failmsg);
+
+            $results = $matcher->match('ab'. $blcklistchr . $blcklistchr . 'cd'); // deletion
+            $this->assertFalse($results->full, $failmsg);
+            $this->assertEquals(0, $results->index_first(), $failmsg);
+            $this->assertEquals(3, $results->length(), $failmsg);
+            $this->assertEquals(0, $results->typos->count(), $failmsg);
+
+
+            // regex without blacklisted char - test all typos
+            $matcher = new $classname("abcd", $options);
+
+            $results = $matcher->match('a' . $blcklistchr . 'cd'); // substitution
+            $this->assertFalse($results->full, $failmsg);
+            $this->assertEquals(0, $results->index_first(), $failmsg);
+            $this->assertEquals(1, $results->length(), $failmsg);
+            $this->assertEquals(0, $results->typos->count(), $failmsg);
+
+            $results = $matcher->match('ab'. $blcklistchr . 'cd'); // deletion
+            $this->assertFalse($results->full, $failmsg);
+            $this->assertEquals(0, $results->index_first(), $failmsg);
+            $this->assertEquals(2, $results->length(), $failmsg);
+            $this->assertEquals(0, $results->typos->count(), $failmsg);
         }
     }
 
