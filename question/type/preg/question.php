@@ -155,6 +155,7 @@ class qtype_preg_question extends question_graded_automatically
         $querymatcher = $this->get_query_matcher($this->engine);// This matcher will be used to query engine capabilities.
         $knowleftcharacters = $querymatcher->is_supporting(qtype_preg_matcher::CHARACTERS_LEFT);
         $ispartialmatching = $querymatcher->is_supporting(qtype_preg_matcher::PARTIAL_MATCHING);
+        $typofitnessmultipier = ($this->approximatematch && $this->maxtypos > 0) ? 0.5 / $this->maxtypos : 0;
 
         // Set an initial value for best fit. This is tricky, since when hinting we need first element within hint grade border.
         reset($this->answers);
@@ -172,7 +173,7 @@ class qtype_preg_question extends question_graded_automatically
                     } else {
                         $maxfitness = $bestmatchresult->length();
                     }
-                    $maxfitness -= $bestmatchresult->typos->count() * 0.01;
+                    $maxfitness -= $bestmatchresult->typos->count() * $typofitnessmultipier;
                     break;// Any one that fits border helps.
                 }
             }
@@ -211,7 +212,7 @@ class qtype_preg_question extends question_graded_automatically
             }
 
             if ($matchresults->typos->count() > 0) {
-                $fitness -= $matchresults->typos->count() * 0.01;
+                $fitness -= $matchresults->typos->count() * $typofitnessmultipier;
             }
 
             if ($fitness > $maxfitness) {
