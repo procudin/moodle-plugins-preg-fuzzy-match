@@ -22,14 +22,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
     /** @var Logs for saving*/
     protected $logcontent = '';
 
-    // Object of \block_formal_langs_abstract_language (cf. blocks/formal_langs for more details).
-    protected $langobj = null;
-
-    public function setUp() {
-        $langid = get_config('qtype_preg', 'defaultlang');
-        $this->langobj = \block_formal_langs::lang_object($langid);
-    }
-
     public function engine_name() {
         return 'fa_matcher';
     }
@@ -108,6 +100,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                     $options->modifiers = qtype_preg_handling_options::string_to_modifiers($modifiersstr);
                     $options->debugmode = in_array(self::TAG_DEBUG_MODE, $regextags);
                     $options->approximatematch = true;
+                    $options->langid = null;
                     $options->typolimit = (int)(!isset($fuzzyexpected['errorslimit']) ? 0 : $fuzzyexpected['errorslimit']);
                     $options->mergeassertions = true;
                     $options->extensionneeded = !in_array(self::TAG_DONT_CHECK_PARTIAL, $regextags);
@@ -544,10 +537,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         $str = $testdata['str'];
         $newstr = $str;
         $result = $testdata;
-
-        while (utf8_string::strlen($char) > 0 && utf8_string::strpos($this->langobj->typo_blacklist(), $char) !== false) {
-            $char = chr((ord($char) + 1) % 255);
-        }
 
         switch ($errtype) {
             case qtype_preg_typo::SUBSTITUTION:
