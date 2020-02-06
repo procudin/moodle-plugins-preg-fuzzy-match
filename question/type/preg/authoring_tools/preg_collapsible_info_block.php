@@ -35,7 +35,7 @@ MoodleQuickForm::registerElementType('preg_collapsible_info_block',
 
 class qtype_preg_collapsible_info_block extends MoodleQuickForm_textarea {
 
-    public function qtype_preg_collapsible_info_block() {
+    public function __construct() {
         global $PAGE;
 
         parent::__construct();

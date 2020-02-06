@@ -37,7 +37,7 @@ MoodleQuickForm::registerElementType('preg_textarea',
 class MoodleQuickForm_preg_textarea extends MoodleQuickForm_textarea {
 
 
-    function MoodleQuickForm_preg_textarea($elementName=null, $elementLabel=null, $attributes=null) {
+    function __construct($elementName=null, $elementLabel=null, $attributes=null) {
         parent::__construct($elementName, $elementLabel, $attributes);        
     }
 }
