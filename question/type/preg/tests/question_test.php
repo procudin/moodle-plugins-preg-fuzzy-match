@@ -33,6 +33,7 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
     protected $testquestion;
     protected $subexprquestion;
     protected $typosquestion;
+    protected $typospartialquestion;
 
     /**
      * Creates a number of questions for testing.
@@ -168,6 +169,37 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
 
         $typos->answers = array(300 => $answer1, 301 => $answer2, 303 => $answer3);
         $this->typosquestion = $typos;
+
+
+        // Special question to test typos with partial matching.
+        $typospartial = new qtype_preg_question;
+        $typospartial->usecase = true;
+        $typospartial->correctanswer = 'foozot';
+        $typospartial->exactmatch = true;
+        $typospartial->usecharhint = true;
+        $typospartial->penalty = 0.1;
+        $typospartial->charhintpenalty = 0.2;
+        $typospartial->hintgradeborder = 0.6;
+        $typospartial->engine = 'fa_matcher';
+        $typospartial->notation = 'native';
+        $typospartial->approximatematch = true;
+        $typospartial->typospenalty = 0.02;
+        $typospartial->maxtypos = 2;
+
+        $answer1 = new stdClass;
+        $answer1->id = 400;
+        $answer1->answer = 'ab{3,}cdef';
+        $answer1->fraction = 1;
+        $answer1->feedback = '';
+
+        $answer2 = new stdClass;
+        $answer2->id = 401;
+        $answer2->answer = 'ab{2,}cdef';
+        $answer2->fraction = 0.7;
+        $answer2->feedback = '';
+
+        $typospartial->answers = array(400 => $answer1, 401 => $answer2,);
+        $this->typospartialquestion = $typospartial;
     }
 
     public function test_get_best_fit_answer() {
@@ -266,28 +298,24 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
         $this->assertTrue($bestfit['match']->is_match() === true);
         $this->assertTrue($bestfit['match']->full === true);
         $this->assertTrue($bestfit['match']->typos->count() === 0);
-
         // 2nd answer has full match without typos
         $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'foooobarzpzp'));
         $this->assertTrue($bestfit['answer']->fraction == 0.7);
         $this->assertTrue($bestfit['match']->is_match() === true);
         $this->assertTrue($bestfit['match']->full === true);
         $this->assertTrue($bestfit['match']->typos->count() === 0);
-
         // 3rd answer has full match without typos.
         $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'fobrz'));
         $this->assertTrue($bestfit['answer']->fraction == 0.3);
         $this->assertTrue($bestfit['match']->is_match() === true);
         $this->assertTrue($bestfit['match']->full === true);
         $this->assertTrue($bestfit['match']->typos->count() === 0);
-
         // 3rd answer has full match with 1 typo, but it has lost to the 1st which has 2 typos because of gradeborder.
         $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'fobrzot'));
         $this->assertTrue($bestfit['answer']->fraction == 1);
         $this->assertTrue($bestfit['match']->is_match() === true);
         $this->assertTrue($bestfit['match']->full === true);
         $this->assertTrue($bestfit['match']->typos->count() === 2);
-
         // change gradeborder and now 3rd answer has full match without 1 typo
         $testquestion = clone $this->typosquestion;
         $testquestion->hintgradeborder = 0.1;
@@ -296,6 +324,60 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
         $this->assertTrue($bestfit['match']->is_match() === true);
         $this->assertTrue($bestfit['match']->full === true);
         $this->assertTrue($bestfit['match']->typos->count() === 1);
+
+
+        // test partial mathing with typos
+        $testquestion = clone $this->typospartialquestion;
+        // parial without typos - chose match with minimal extension
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'ab'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.7);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === false);
+        $this->assertTrue($bestfit['match']->typos->count() === 0);
+        $this->assertTrue($bestfit['match']->left === 5);
+        // parial without typos - chose match with minimal extension
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'abb'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.7);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === false);
+        $this->assertTrue($bestfit['match']->typos->count() === 0);
+        $this->assertTrue($bestfit['match']->left === 4);
+        // parial without typos - chose match with minimal extension
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'abbb'));
+        $this->assertTrue($bestfit['answer']->fraction == 1);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === false);
+        $this->assertTrue($bestfit['match']->typos->count() === 0);
+        $this->assertTrue($bestfit['match']->left === 4);
+        // both extensions are equal, so chose match with minimal typos
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'abcd'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.7);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === false);
+        $this->assertTrue($bestfit['match']->typos->count() === 1);
+        $this->assertTrue($bestfit['match']->left === 2);
+        // both extensions are equal, so chose match with minimal typos
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'abcd'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.7);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === false);
+        $this->assertTrue($bestfit['match']->typos->count() === 1);
+        $this->assertTrue($bestfit['match']->left === 2);
+        // both extensions are equal, so chose match with minimal typos
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'acd'));
+        $this->assertTrue($bestfit['answer']->fraction == 0.7);
+        $this->assertTrue($bestfit['match']->is_match() === true);
+        $this->assertTrue($bestfit['match']->full === false);
+        $this->assertTrue($bestfit['match']->typos->count() === 2);
+        $this->assertTrue($bestfit['match']->left === 2);
+        // no match - chose first answer
+        $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'cd'));
+        $this->assertTrue($bestfit['answer']->fraction == 1);
+        $this->assertTrue($bestfit['match']->is_match() === false);
+        $this->assertTrue($bestfit['match']->full === false);
+        $this->assertTrue($bestfit['match']->typos->count() === 0);
+        $this->assertTrue($bestfit['match']->left === 8);
+
 
         //      TODO question with engine which supports partial matching, but not characters left - when we would have such engine - like backtracking.
     }
