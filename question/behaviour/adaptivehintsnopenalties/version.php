@@ -24,12 +24,12 @@
  */
 
 $plugin->component = 'qbehaviour_adaptivehintsnopenalties';
-$plugin->version  = 2017111900;
-$plugin->requires = 2016052305;
-$plugin->release = 'Adaptive with hints (no penalties) behaviour 3.1';
+$plugin->version  = 2020020700;
+$plugin->requires = 2016120509;
+$plugin->release = 'Adaptive with hints (no penalties) behaviour 3.2';
 $plugin->maturity = MATURITY_STABLE;
 
 $plugin->dependencies = array(
-    'qbehaviour_adaptivehints' => 2017111900,
+    'qbehaviour_adaptivehints' => 2020020700,
 );
 ?>
