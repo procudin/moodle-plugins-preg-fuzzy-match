@@ -134,8 +134,8 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
                     $("#simplification_tool_apply_btn").click(self.btn_apply_hint_click);
 
                     // Add handlers for the radiobuttons.
-                    $('#fgroup_id_tree_orientation_radioset input').change(self.rbtn_changed);
-                    $('#fgroup_id_charset_process_radioset input').change(self.rbtn_changed);
+                    $('input[name="authoring_tools_tree_orientation"]').change(self.rbtn_changed);
+                    $('input[name="authoring_tools_charset_process"]').change(self.rbtn_changed);
 
                     // Add handlers for the regex textarea.
                     //self.regex_input = $('.qtype-preg-highlighted-regex-text');//$('#id_regex_text');
@@ -1335,11 +1335,11 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
     },
 
     get_orientation : function () {
-        return $('#fgroup_id_tree_orientation_radioset input:checked').val();
+        return $('input[name="authoring_tools_tree_orientation"]:checked').val();
     },
 
     get_displayas : function () {
-        return $('#fgroup_id_charset_process_radioset input:checked').val();
+        return $('input[name="authoring_tools_charset_process"]:checked').val();
     },
 
     get_hint : function () {
