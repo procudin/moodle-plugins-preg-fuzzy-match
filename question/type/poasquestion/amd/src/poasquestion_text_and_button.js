@@ -82,10 +82,10 @@ define(['jquery',
             if (button_id == null || input_id == null) {
                 return;
             }
-            if (button_id.indexOf('#') != 0) {
+            if (button_id.length > 0 && button_id.indexOf('#') != 0) {
                 button_id = '#' + button_id;
             }
-            if (input_id.indexOf('#') != 0) {
+            if (input_id.length > 0 && input_id.indexOf('#') != 0) {
                 input_id = '#' + input_id;
             }
             var testregexlineedit = $(input_id);

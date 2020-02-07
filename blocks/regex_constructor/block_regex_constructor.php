@@ -39,12 +39,15 @@ class block_regex_constructor extends block_base {
     function get_required_javascript() {
         parent::get_required_javascript();
 
+        /*
         $this->page->requires->jquery_plugin('poasquestion-jquerymodule', 'qtype_poasquestion');
         $this->page->requires->jquery();
         $this->page->requires->jquery_plugin('ui');
         $this->page->requires->jquery_plugin('ui-css');
         $this->page->requires->jquery_plugin('poasquestion-jquerymodule', 'qtype_poasquestion');
-
+        */
+        $this->page->requires->css('/theme/jquery.php/core/ui-1.12.1/theme/smoothness/jquery-ui.min.css');
+        
         $this->page->requires->string_for_js('collapseall', 'moodle');
         $this->page->requires->string_for_js('expandall', 'moodle');
         $this->page->requires->string_for_js('savechanges', 'moodle');
@@ -71,14 +74,14 @@ class block_regex_constructor extends block_base {
                     '90%',
                     get_string('regex_constructor', 'block_regex_constructor')
                 );
-        $this->page->requires->js_init_call('M.poasquestion_text_and_button.init', $jsargs, true, $jsmodule);
+        $this->page->requires->js_call_amd('qtype_poasquestion/poasquestion_text_and_button', 'init', $jsargs);
 
         $jsargshandler = array(
+                '',
                 $this->id,
-                ''
             );
 
-        $this->page->requires->js_init_call('M.poasquestion_text_and_button.set_handler', $jsargshandler, true, $jsmodule);
+        $this->page->requires->js_call_amd('qtype_poasquestion/poasquestion_text_and_button', 'set_handler', $jsargshandler);
 
         $pregjsmodule = array(
                     'name' => 'preg_authoring_tools_script',
@@ -92,7 +95,7 @@ class block_regex_constructor extends block_base {
             'M.form.shortforms',
             array(array("formid"=>"mformauthoring"))
         );
-        $this->page->requires->js_init_call('M.preg_authoring_tools_script.init', $pregjsargs, true, $pregjsmodule);
+        $this->page->requires->js_call_amd('qtype_preg/preg_authoring_tools_script', 'init', $pregjsargs);        
 
         return $this->content;
     }
