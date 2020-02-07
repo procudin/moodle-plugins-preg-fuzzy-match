@@ -131,8 +131,9 @@ class fa {
             $this->statelimit = $statelimit;
         }
 
-        if (isset($CFG->transition_limit)) {
-            $this->transitionlimit = $CFG->transition_limit;
+        $transitionlimit = get_config('qtype_preg', 'fa_transition_limit');
+        if (isset($transitionlimit)) {
+            $this->transitionlimit = $transitionlimit;
         }
     }
 
