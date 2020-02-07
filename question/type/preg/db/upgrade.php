@@ -339,7 +339,7 @@ function xmldb_qtype_preg_upgrade($oldversion=0) {
         }
 
         // Usehowtofixpichint.
-        $field = new xmldb_field('usehowtofixpichint', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'typospenalty');
+        $field = new xmldb_field('usehowtofixpichint', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'typospenalty');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
