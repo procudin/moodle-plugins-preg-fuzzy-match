@@ -374,14 +374,15 @@ class qtype_preg_regex_handler {
      * @param string $limit configuration field name for the maximum number of shown messages.
      * @return array of error messages.
      */
-    public function get_error_messages($limit = 'qtype_preg_maxerrorsshown') {
+    public function get_error_messages($limit = 'maxerrorsshown') {
         global $CFG;
         $res = array();
         $maxerrors = 5;
         if ($limit) {
             // Determine maximum number of errors to show.
-            if (isset($CFG->$limit)) {
-                $maxerrors = $CFG->$limit;
+            $configmaxerrors = get_config('qtype_preg', $limit);
+            if (isset($configmaxerrors)) {
+                $maxerrors = $configmaxerrors;
             }
         }
         $i = 0;
