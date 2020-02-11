@@ -2,6 +2,10 @@
     z-index: 9999 !important;
 }
 
+.popover {
+    z-index: 10010 !important;
+}
+
 .qtype-preg-highlighted-regex-text .textarea-highlighter-wrap * {
     width: 100%;
 }
