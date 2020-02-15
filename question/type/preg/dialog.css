@@ -2,7 +2,8 @@
     z-index: 9999 !important;
 }
 
-.popover {
+.popover, .moodle-dialogue-base .moodle-dialogue-wrap {
+    position: relative !important;
     z-index: 10010 !important;
 }
 
