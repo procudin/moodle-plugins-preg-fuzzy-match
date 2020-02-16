@@ -42,6 +42,8 @@ class qtype_preg_regex_testing_tool implements qtype_preg_i_authoring_tool {
     private $engine = null;
     private $notation = null;
     private $exactmatch = null;
+    private $approximatematch = null;
+    private $maxtypos = null;
     private $usecase = null;
     private $strings = null;
 
@@ -49,7 +51,7 @@ class qtype_preg_regex_testing_tool implements qtype_preg_i_authoring_tool {
     private $matcher = null;
     private $errormsgs = null;
 
-    public function __construct($regex, $strings, $usecase, $exactmatch, $engine, $notation, $selection) {
+    public function __construct($regex, $strings, $usecase, $exactmatch, $engine, $notation, $selection, $approximatematch, $maxtypos) {
         global $CFG;
 
         $this->regex = $regex;
@@ -58,6 +60,8 @@ class qtype_preg_regex_testing_tool implements qtype_preg_i_authoring_tool {
         $this->exactmatch = $exactmatch;
         $this->usecase = $usecase;
         $this->strings = $strings;
+        $this->approximatematch = $approximatematch;
+        $this->maxtypos = $maxtypos;
 
         if ($this->regex == '') {
             return;
@@ -71,7 +75,7 @@ class qtype_preg_regex_testing_tool implements qtype_preg_i_authoring_tool {
 
         // Create matcher to use for testing regexes.
         $this->question = $regular;
-        $matchingoptions = $regular->get_matching_options($exactmatch, $regular->get_modifiers($usecase), null, $notation);
+        $matchingoptions = $regular->get_matching_options($exactmatch, $regular->get_modifiers($usecase), null, $notation, $approximatematch, $maxtypos);
         $matchingoptions->extensionneeded = false; // No need to generate next characters there.
         $matchingoptions->capturesubexpressions = true;
         $matchingoptions->selection = $selection;
@@ -106,6 +110,8 @@ class qtype_preg_regex_testing_tool implements qtype_preg_i_authoring_tool {
         $json['indfirst'] = $selectednode !== null ? $selectednode->position->indfirst : -2;
         $json['indlast'] = $selectednode !== null ? $selectednode->position->indlast : -2;
         $json['strings'] = $this->strings;
+        $json['approximatematch'] = (int)$this->approximatematch;
+        $json['maxtypos'] = (int)$this->maxtypos;
 
         if ($this->regex == '') {
             $json[$this->json_key()] = $this->data_for_empty_regex();
