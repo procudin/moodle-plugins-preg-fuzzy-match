@@ -55,7 +55,7 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
     /** @var {Object} reference to the regex textarea */
     regex_input : null,
 
-    matching_options : ['engine', 'notation', 'exactmatch', 'usecase'],
+    matching_options : ['engine', 'notation', 'exactmatch', 'usecase', 'approximatematch', 'maxtypos'],
 
     prevdata : null,
 
@@ -607,6 +607,8 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
             $('#id_engine_auth').val() +
             $('#id_notation_auth').val() +
             $('#id_exactmatch_auth').val() +
+            $('#id_approximatematch_auth').val() +
+            $('#id_maxtypos_auth').val() +
             $('#id_usecase_auth').val() +
             $('#id_regex_match_text').val() +
             indfirst + ',' + indlast;
@@ -618,6 +620,8 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
             //engine = json['engine'],
             notation = json['notation'],
             exactmatch = json['exactmatch'],
+            approximatematch = json['approximatematch'],
+            maxtypos = json['maxtypos'],
             usecase = json['usecase'],
             treeorientation = json['treeorientation'],
             displayas = json['displayas'],
@@ -629,7 +633,7 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
             g = json[self.GRAPH_KEY],
             d = json[self.DESCRIPTION_KEY],
             si = json[self.SIMPLIFICATION_KEY],
-            k = '' + regex + notation + exactmatch + usecase + treeorientation + displayas + indfirst + ',' + indlast;
+            k = '' + regex + notation + exactmatch + approximatematch + maxtypos + usecase + treeorientation + displayas + indfirst + ',' + indlast;
 
         // Cache the content.
         self.cache[self.TREE_KEY][k] = t;
@@ -648,6 +652,8 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
             engine = json['engine'],
             notation = json['notation'],
             exactmatch = json['exactmatch'],
+            approximatematch = json['approximatematch'],
+            maxtypos = json['maxtypos'],
             usecase = json['usecase'],
             treeorientation = json['treeorientation'],
             displayas = json['displayas'],
@@ -655,7 +661,7 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
             indlast = json['indlast'],
             strings = json['strings'],
             s = json[self.STRINGS_KEY],
-            k = '' + regex + engine + notation + exactmatch + usecase + strings + indfirst + ',' + indlast;
+            k = '' + regex + engine + notation + exactmatch + approximatematch + maxtypos + usecase + strings + indfirst + ',' + indlast;
 
         // Cache the strings.
         self.cache[self.STRINGS_KEY][k] = s;
@@ -1267,6 +1273,8 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
                 engine: $('#id_engine_auth :selected').val(),
                 notation: $('#id_notation_auth :selected').val(),
                 exactmatch: $('#id_exactmatch_auth :selected').val(),
+                approximatematch: $('#id_approximatematch_auth :selected').val(),
+                maxtypos: $('#id_maxtypos_auth').val(),
                 usecase: $('#id_usecase_auth :selected').val(),
                 indfirst: indfirst,
                 indlast: indlast,
@@ -1303,6 +1311,8 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
                 engine: $('#id_engine_auth :selected').val(),
                 notation: $('#id_notation_auth :selected').val(),
                 exactmatch: $('#id_exactmatch_auth :selected').val(),
+                approximatematch: $('#id_approximatematch_auth :selected').val(),
+                maxtypos: $('#id_maxtypos_auth').val(),
                 usecase: $('#id_usecase_auth :selected').val(),
                 indfirst: indfirst,
                 indlast: indlast,

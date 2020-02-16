@@ -149,10 +149,10 @@ class qtype_preg_renderer extends qtype_shortanswer_renderer {
     }
 
     /** Renders correct icon if $correct = true, incorrect otherwise.*/
-    public function render_match_icon($correct) {
+    public function render_match_icon($correct, $typoscount = 0) {
         $fraction = 0;
         if ($correct) {
-            $fraction = 1;
+            $fraction = $typoscount > 0 ? 0.5 : 1;
         }
         return $this->feedback_image($fraction);
     }

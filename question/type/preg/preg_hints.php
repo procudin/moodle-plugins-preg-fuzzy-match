@@ -143,7 +143,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
         $correctpart = '';
         $wrongtail = '';
         if ($testing) { // Add icon, showing whether match is full or no.
-           $wronghead .= $renderer->render_match_icon($matchresults->full);
+           $wronghead .= $renderer->render_match_icon($matchresults->full, $matchresults->typos->count());
         }
 
         if ($this->could_show_hint($matchresults, $testing)) {
@@ -176,7 +176,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
     /**
      * Renders matched string part with typos.
      */
-    public function render_matched_with_errors($renderer, $matchresults) {
+    private function render_matched_with_errors($renderer, $matchresults) {
         if ($matchresults->typos->count() === 0) {
             return $renderer->render_matched($matchresults->matched_part());
         }

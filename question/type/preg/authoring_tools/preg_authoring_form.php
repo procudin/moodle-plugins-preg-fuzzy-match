@@ -107,6 +107,17 @@ class qtype_preg_authoring_form extends moodleform {
         $mform->setDefault('exactmatch_auth', 0);
 
         $mform->addElement('select', 'usecase_auth', get_string('casesensitive', 'qtype_shortanswer'), array(get_string('caseno', 'qtype_shortanswer'), get_string('caseyes', 'qtype_shortanswer')));
+                
+        // typos section
+        $mform->addElement('header', 'typoanlyzinghdr', get_string('typoanalysis', 'qtype_preg'));
+        $mform->addHelpButton('typoanlyzinghdr', 'typoanalysis', 'qtype_preg');
+        $mform->addElement('selectyesno', 'approximatematch_auth', get_string('approximatematch', 'qtype_preg'));
+        $mform->addHelpButton('approximatematch_auth', 'approximatematch', 'qtype_preg');
+        $mform->setDefault('approximatematch_auth', 1);
+        $mform->addElement('text', 'maxtypos_auth', get_string('maxtypos', 'qtype_preg'), array('size' => 3));
+        $mform->setDefault('maxtypos_auth', '2');
+        $mform->setType('maxtypos_auth', PARAM_INT);
+        $mform->addHelpButton('maxtypos_auth', 'maxtypos', 'qtype_preg');    
 
         // Add syntax tree tool.
         $mform->addElement('header', 'regex_tree_header', get_string('syntax_tree_tool', 'qtype_preg'));
