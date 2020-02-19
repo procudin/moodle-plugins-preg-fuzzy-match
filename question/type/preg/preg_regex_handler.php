@@ -724,14 +724,14 @@ class qtype_preg_regex_handler {
 
             // Add necessary nodes.
             if ($this->astroot !== null && $this->options->exactmatch) {
-                $newroot = $this->add_exact_match_nodes($this->astroot);
                 $this->astroot->subpattern = -1;
+                $newroot = $this->add_exact_match_nodes($this->astroot);
                 $this->astroot = $newroot;
                 $this->astroot->subpattern = 0;
             }
             if ($this->astroot !== null && $this->options->selection->indfirst != -2) {
-                $newroot = $this->add_selection_nodes($this->astroot);
                 $this->astroot->subpattern = -1;
+                $newroot = $this->add_selection_nodes($this->astroot);                
                 $this->astroot = $newroot;
                 $this->astroot->subpattern = 0;
             }
