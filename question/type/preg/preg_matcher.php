@@ -186,7 +186,7 @@ class qtype_preg_matching_results {
             return false;
         }
 
-        // More typos count.
+        // 3. By typos if both are full.
         $thistypocount = $this->typos->count();
         $othertypocount = $other->typos->count();
         if ($this->full) {
@@ -197,7 +197,7 @@ class qtype_preg_matching_results {
             }
         }
 
-        // Rightmost if contains typos.
+        // 4. Prefer leftmost if both are full and have same typos.
         if ($this->full && $thistypocount > 0) {
             if ($this->indexfirst > $other->indexfirst) {
                 return true;
@@ -207,42 +207,42 @@ class qtype_preg_matching_results {
         }
 
         if (!$longestmatch) {
-            // 3. Less characters left.
+            // 5. Less characters left.
             if ($other->left < $this->left) {
                 return true;
             } else if ($this->left < $other->left) {
                 return false;
             }
 
-            if (!$this->full) {
-                if ($thistypocount > $othertypocount) {
-                    return true;
-                } else if ($thistypocount < $othertypocount) {
-                    return false;
-                }
-            }
-
-            // 4. Longest match.
+            // 6. Longest match.
             if ($other->length[0] > $this->length[0]) {
                 return true;
             } else if ($this->length[0] > $other->length[0]) {
                 return false;
             }
         } else {
-            // 3. Longest match.
+            // 5. Longest match.
             if ($other->length[0] > $this->length[0]) {
                 return true;
             } else if ($this->length[0] > $other->length[0]) {
                 return false;
             }
 
-            // 4. Less characters left.
+            // 6. Less characters left.
             if ($other->left < $this->left) {
                 return true;
             } else if ($this->left < $other->left) {
                 return false;
             }
+        }
 
+        // 7. By typos if both aren't full.
+        if (!$this->full) {
+            if ($thistypocount > $othertypocount) {
+                return true;
+            } else if ($thistypocount < $othertypocount) {
+                return false;
+            }
         }
 
         if ($areequal !== null) {

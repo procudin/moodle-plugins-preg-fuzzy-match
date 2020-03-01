@@ -495,13 +495,13 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             foreach ($transitions as $transition) {
                 $length = 0;
                 $full = true;
-
+                $isinsertion = $approximateenabled && $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET;
 
                 $empty = $transition->pregleaf->subtype == qtype_preg_leaf_meta::SUBTYPE_EMPTY
                         || $approximateenabled && $transition->pregleaf->type == qtype_preg_leaf::TYPE_LEAF_ASSERT && ($transition->pregleaf->is_start_anchor() || $transition->pregleaf->is_end_anchor());
 
-                // If char transition
-                if ($approximateenabled && $transition->pregleaf->type == qtype_preg_node::TYPE_LEAF_CHARSET || $empty) {
+                // Try match empty or insertion transition
+                if ($isinsertion || $empty) {
                     $newstate = $this->match_regular_transition($curstate, $transition, $str, $curpos, $length, $full, $addbacktracks, true, qtype_preg_typo::INSERTION);
                 } else {
                     continue;
@@ -529,7 +529,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                      : \qtype_preg\fa\transition::GREED_GREEDY;
                 if (!isset($result[$key][$number]) || $newstate->leftmost_longest($result[$key][$number])) {
                     $result[$key][$number] = $newstate;
-                    if ($key != \qtype_preg\fa\transition::GREED_LAZY) {
+                    if ($key != \qtype_preg\fa\transition::GREED_LAZY && !($isinsertion && $transition->from === $transition->to)) {
                         $curstates[] = $newstate;
                     }
                 }
