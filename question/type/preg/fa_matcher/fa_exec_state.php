@@ -49,6 +49,16 @@ class qtype_preg_fa_stack_item {
     // Each subpattern is initialized with (-1,-1) at start.
     public $matches;
 
+    // 2-dimensional array of matches; 1st is subpattern number; 2nd is repetitions of the subpattern.
+    // Each subpattern is initialized with (-1,-1) at start.
+    public $approximatematches;
+
+    // special string representation
+    public $strwithtypos;
+
+    // Object of qtype_preg_typo_container, containing all encountered typos.
+    public $typos;
+
     // Array used mostly for disambiguation when there are duplicate subpexpressions numbers.
     // Keys are subexpr numbers, values are qtype_preg_node objects.
     public $subexpr_to_subpatt;
@@ -61,6 +71,10 @@ class qtype_preg_fa_stack_item {
 
     // Was the last transition matched partially? E.g. backreference, or a few merged transitions
     public $last_match_is_partial;
+
+    public function __clone() {
+        $this->typos = clone $this->typos;
+    }
 
     public function current_match($subpatt) {
         return isset($this->matches[$subpatt]) ? end($this->matches[$subpatt]) : null;
@@ -282,12 +296,8 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
     // States to backtrack to when generating extensions of partial matches.
     public $backtrack_states;
 
-    // Object of qtype_preg_typo_container, containing all encountered typos.
-    public $typos;
-
     public function __clone() {
         $this->str = clone $this->str;  // Needs to be cloned for correct string generation.
-        $this->typos = clone $this->typos;
         foreach ($this->stack as $key => $item) {
             $this->stack[$key] = clone $item;
         }
@@ -310,6 +320,11 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
     public function subexpr() {
         $end = end($this->stack);
         return $end->subexpr;
+    }
+
+    public function typos() {
+        $end = end($this->stack);
+        return $end->typos;
     }
 
     public function recursion_level() {
@@ -556,7 +571,7 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
                 $length[-2] = $this->length_minus_nonconsuming() - $cur[0];
             }
         }
-        $result = new qtype_preg_matching_results($this->is_full(), $index, $length, $this->left, $this->extendedmatch, $this->typos);
+        $result = new qtype_preg_matching_results($this->is_full(), $index, $length, $this->left, $this->extendedmatch, $this->typos());
         $result->set_source_info($this->str, $this->matcher->get_max_subexpr(), $this->matcher->get_subexpr_name_to_number_map());
         return $result;
     }
@@ -592,8 +607,8 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         }
 
         // Check for min typos.
-        $thistypocount = $this->typos->count();
-        $othertypocount = $other->typos->count();
+        $thistypocount = $this->typos()->count();
+        $othertypocount = $other->typos()->count();
         if ($matchinginprogress) {
             if ($thistypocount < $othertypocount) {
                 return true;
@@ -646,24 +661,24 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
 
         // Choose by typo priority.
         if ($thistypocount > 0 && $matchinginprogress) {
-            if ($this->typos->count(qtype_preg_typo::TRANSPOSITION) > $other->typos->count(qtype_preg_typo::TRANSPOSITION)) {
+            if ($this->typos()->count(qtype_preg_typo::TRANSPOSITION) > $other->typos()->count(qtype_preg_typo::TRANSPOSITION)) {
                 return true;
-            } else if ($this->typos->count(qtype_preg_typo::TRANSPOSITION) < $other->typos->count(qtype_preg_typo::TRANSPOSITION)) {
+            } else if ($this->typos()->count(qtype_preg_typo::TRANSPOSITION) < $other->typos()->count(qtype_preg_typo::TRANSPOSITION)) {
                 return false;
             }
-            if ($this->typos->count(qtype_preg_typo::SUBSTITUTION) > $other->typos->count(qtype_preg_typo::SUBSTITUTION)) {
+            if ($this->typos()->count(qtype_preg_typo::SUBSTITUTION) > $other->typos()->count(qtype_preg_typo::SUBSTITUTION)) {
                 return true;
-            } else if ($this->typos->count(qtype_preg_typo::SUBSTITUTION) < $other->typos->count(qtype_preg_typo::SUBSTITUTION)) {
+            } else if ($this->typos()->count(qtype_preg_typo::SUBSTITUTION) < $other->typos()->count(qtype_preg_typo::SUBSTITUTION)) {
                 return false;
             }
-            if ($this->typos->count(qtype_preg_typo::DELETION) > $other->typos->count(qtype_preg_typo::DELETION)) {
+            if ($this->typos()->count(qtype_preg_typo::DELETION) > $other->typos()->count(qtype_preg_typo::DELETION)) {
                 return true;
-            } else if ($this->typos->count(qtype_preg_typo::DELETION) < $other->typos->count(qtype_preg_typo::DELETION)) {
+            } else if ($this->typos()->count(qtype_preg_typo::DELETION) < $other->typos()->count(qtype_preg_typo::DELETION)) {
                 return false;
             }
-            if ($this->typos->count(qtype_preg_typo::INSERTION) > $other->typos->count(qtype_preg_typo::INSERTION)) {
+            if ($this->typos()->count(qtype_preg_typo::INSERTION) > $other->typos()->count(qtype_preg_typo::INSERTION)) {
                 return true;
-            } else if ($this->typos->count(qtype_preg_typo::INSERTION) < $other->typos->count(qtype_preg_typo::INSERTION)) {
+            } else if ($this->typos()->count(qtype_preg_typo::INSERTION) < $other->typos()->count(qtype_preg_typo::INSERTION)) {
                 return false;
             }
         }
@@ -794,8 +809,8 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         }
 
         // Check for min typos.
-        $thistypocount = $this->typos->count();
-        $othertypocount = $other->typos->count();
+        $thistypocount = $this->typos()->count();
+        $othertypocount = $other->typos()->count();
         if ($thistypocount < $othertypocount) {
             return true;
         } else if ($thistypocount > $othertypocount) {

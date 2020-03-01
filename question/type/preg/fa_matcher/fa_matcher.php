@@ -141,7 +141,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         }
     }
 
-    protected function create_fa_exec_stack_item($subexpr, $state, $startpos) {
+    protected function create_fa_exec_stack_item($subexpr, $state, $startpos, $typos) {
         $stackitem = new qtype_preg_fa_stack_item();
         $stackitem->subexpr = $subexpr;
         $stackitem->recursionstartpos = $startpos;
@@ -153,6 +153,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $stackitem->last_transition = null;
         $stackitem->last_match_len = 0;
         $stackitem->last_match_is_partial = false;
+        $stackitem->typos = clone $typos;
         return $stackitem;
     }
 
@@ -167,9 +168,8 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $result->left = qtype_preg_matching_results::UNKNOWN_CHARACTERS_LEFT;
         $result->extendedmatch = null;
         $result->str = clone $str;
-        $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos));
+        $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos, new qtype_preg_typo_container()));
         $result->backtrack_states = array();
-        $result->typos = new qtype_preg_typo_container();
         if (in_array($state, $this->backtrackstates)) {
             $result->backtrack_states[] = $result;
         }
@@ -272,7 +272,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 //echo "passed $tr\n";
             } else if ($approximateenabled) {
                 // Try match pseudotransitions.
-                if ($ischartransition && $newstate->typos->count() < $this->currentmaxtypos) {
+                if ($ischartransition && $newstate->typos()->count() < $this->currentmaxtypos) {
                     // Try match character pseudotransition.
                     $result = $this->match_character_pseudotransition($newstate, $tr, $str, $curpos, $tmplength, $addbacktracks, $pseudotype);
                 } else if ($tr->pregleaf->type == qtype_preg_node::TYPE_LEAF_ASSERT) {
@@ -328,7 +328,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         if ($flag != qtype_preg_leaf::NEXT_CHAR_CANNOT_GENERATE) {
             // If successfull generated.
             $result = true;
-            $curstate->typos->add(new qtype_preg_typo($pseudotype, $curpos, $char));
+            $curstate->typos()->add(new qtype_preg_typo($pseudotype, $curpos, $char));
             $length = $issub ? 1 : 0;
             $this->after_transition_passed($curstate, $transition, $curpos, $length, $addbacktracks);
         }
@@ -338,21 +338,21 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
     protected function match_assert_pseudotransition($curstate, $transition, $str, &$curpos, $addbacktracks, $ismerged) {
         $result = false;
-        $errorscount = $curstate->typos->count();
+        $errorscount = $curstate->typos()->count();
         $strlen = $str->length();
         $subtype = $transition->pregleaf->subtype;
         switch ($subtype) {
             case qtype_preg_leaf_assert::SUBTYPE_DOLLAR:
                 if ($curpos == $strlen - 1) {
                     // If it's last char - delete it.
-                    $curstate->typos->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
+                    $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
                     $result = true;
                     $curstate->length = $curpos;
                     $curstate->startpos = 0;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else if (!$ismerged) {
                     // If unmerged, generate \n insertion.
-                    $curstate->typos->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new utf8_string("\n")));
+                    $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new utf8_string("\n")));
                     $result = true;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else {
@@ -364,14 +364,14 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             case qtype_preg_leaf_assert::SUBTYPE_CIRCUMFLEX:
                 if ($curpos == 1) {
                     // If it's second char - delete it.
-                    $curstate->typos->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
+                    $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
                     $result = true;
                     $curstate->length = $curpos;
                     $curstate->startpos = 0;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else if (!$ismerged) {
                     // If unmerged, generate \n insertion.
-                    $curstate->typos->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new utf8_string("\n")));
+                    $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $curpos, new utf8_string("\n")));
                     $result = true;
                     $this->after_transition_passed($curstate, $transition, $curpos, 0, $addbacktracks);
                 } else {
@@ -384,7 +384,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 // Delete all characters before curpos.
                 if ($errorscount + $curpos <= $this->currentmaxtypos) {
                     for ($pos = 0; $pos < $curpos; $pos++) {
-                        $curstate->typos->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
+                        $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
                     }
                     $result = true;
                     $curstate->length = $curpos;
@@ -404,7 +404,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 // Delete all characters after curpos(including curpos).
                 if ($errorscount + $strlen - $curpos <= $this->currentmaxtypos) {
                     for ($pos = $curpos; $pos < $strlen; $pos++) {
-                        $curstate->typos->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
+                        $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $pos));
                     }
                     $result = true;
                     $curstate->length += $strlen - $curpos;
@@ -428,25 +428,25 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             return false;
         }
 
-        $curstate->typos->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
+        $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
         $curstate->length += 1;
 
         return true;
     }
 
 
-    protected function match_recursive_transition_begin($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks) {
-        $result = $this->match_transitions($curstate, $transition->mergedbefore, $str, $curpos, $length, $full, $addbacktracks);
+    protected function match_recursive_transition_begin($curstate, $transition, $str, $curpos, &$length, &$full, $addbacktracks, $tryapproximate = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
+        $result = $this->match_transitions($curstate, $transition->mergedbefore, $str, $curpos, $length, $full, $addbacktracks, $tryapproximate, $pseudotype);
         if ($full) {
             $this->set_last_transition($result, $transition, $length, false);
         }
         return $result;
     }
 
-    protected function match_recursive_transition_end($newstate, $recursionstartpos, $recursionlength, $str, $curpos, &$length, &$full, $addbacktracks) {
+    protected function match_recursive_transition_end($newstate, $recursionstartpos, $recursionlength, $str, $curpos, &$length, &$full, $addbacktracks, $tryapproximate = false, $pseudotype = qtype_preg_typo::SUBSTITUTION) {
         $this->after_transition_passed($newstate, $newstate->last_transition(), $recursionstartpos, $recursionlength, $addbacktracks);
         $newstate->length -= $recursionlength;
-        return $this->match_transitions($newstate, $newstate->last_transition()->mergedafter, $str, $curpos, $length, $full, $addbacktracks);
+        return $this->match_transitions($newstate, $newstate->last_transition()->mergedafter, $str, $curpos, $length, $full, $addbacktracks, $tryapproximate, $pseudotype);
     }
 
     /**
@@ -515,7 +515,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 while ($full && $newstate->recursion_level() > 0 && $newstate->is_full()) {
                     $topitem = array_pop($newstate->stack);
                     $recursionmatch = $topitem->last_subexpr_match($this->get_options()->mode, $topitem->subexpr);
-                    $newstate = $this->match_recursive_transition_end($newstate, $topitem->recursionstartpos, $recursionmatch[1], $str, $curpos, $length, $full, $addbacktracks);
+                    $newstate = $this->match_recursive_transition_end($newstate, $topitem->recursionstartpos, $recursionmatch[1], $str, $curpos, $length, $full, $addbacktracks, true, qtype_preg_typo::INSERTION);
                 }
 
                 if (!$full) {
@@ -800,7 +800,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                             $startstates = $this->automaton->get_start_states($transition->pregleaf->number);
                             foreach ($startstates as $state) {
                                 $newnewstate = clone $newstate;
-                                $newnewstate->stack[] = $this->create_fa_exec_stack_item($transition->pregleaf->number, $state, $curpos);
+                                $newnewstate->stack[] = $this->create_fa_exec_stack_item($transition->pregleaf->number, $state, $curpos, $newstate->typos());
                                 //echo "add recursive state {$newnewstate->state()}\n";
                                 $reached[] = $newnewstate;
                             }
@@ -953,7 +953,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 --$statescount;
                 $curpos = $curstate->startpos + $curstate->length;
                 $cursubexpr = $curstate->subexpr();
-                $curerrcount = $curstate->typos->count();
+                $curerrcount = $curstate->typos()->count();
                 $recursionlevel = $curstate->recursion_level();
                 $transitions = $this->automaton->get_adjacent_transitions($curstate->state(), true);
 
@@ -973,12 +973,12 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
                     if ($transition->pregleaf->type === qtype_preg_node::TYPE_LEAF_SUBEXPR_CALL && $recursionlevel < $maxrecursionlevel) {
                         // Handle a recursive transition
-                        $newstate = $this->match_recursive_transition_begin($curstate, $transition, $str, $curpos, $length, $full, true);
+                        $newstate = $this->match_recursive_transition_begin($curstate, $transition, $str, $curpos, $length, $full, true, true, qtype_preg_typo::SUBSTITUTION);
                         if ($full) {
                             $startstates = $this->automaton->get_start_states($transition->pregleaf->number);
                             foreach ($startstates as $state) {
                                 $newnewstate = clone $newstate;
-                                $newnewstate->stack[] = $this->create_fa_exec_stack_item($transition->pregleaf->number, $state, $curpos);
+                                $newnewstate->stack[] = $this->create_fa_exec_stack_item($transition->pregleaf->number, $state, $curpos, $newnewstate->typos());
                                 $index = self::create_index($newnewstate->recursive_calls_sequence(), $newnewstate->state());
                                 self::ensure_index_exists($reached, $index->recursionlevel, $index->state, null);
                                 if ($reached[$index->recursionlevel][$index->state] === null || $newnewstate->leftmost_longest($reached[$index->recursionlevel][$index->state])) {
@@ -1005,7 +1005,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                             while (!$skip && $full && $newstate->recursion_level() > 0 && $newstate->is_full()) {
                                 $topitem = array_pop($newstate->stack);
                                 $recursionmatch = $topitem->last_subexpr_match($this->get_options()->mode, $topitem->subexpr);
-                                $newstate = $this->match_recursive_transition_end($newstate, $topitem->recursionstartpos, $recursionmatch[1], $str, $curpos, $length, $full, true);
+                                $newstate = $this->match_recursive_transition_end($newstate, $topitem->recursionstartpos, $recursionmatch[1], $str, $curpos, $length, $full, true, true, qtype_preg_typo::SUBSTITUTION);
                                 //$newtopitem = end($newstate->stack);
                                 //echo "ended matching of {$topitem->subexpr}, now matching {$newtopitem->subexpr} from state {$newstate->state()}\n";
                             }
@@ -1031,26 +1031,27 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     if (!$full && !$endstatereached) {
                         // Handle a partial match. Partial match shouldn't contain any typos at the end of the match.
                         $pos = $newstate->startpos + $newstate->length;
-                        if (!$newstate->typos->contains(qtype_preg_typo::INSERTION, $pos)
-                            && !$newstate->typos->contains(qtype_preg_typo::SUBSTITUTION, $pos - 1)
-                            && !$newstate->typos->contains(qtype_preg_typo::DELETION, $pos - 1)) {
+                        if (!$newstate->typos()->contains(qtype_preg_typo::INSERTION, $pos)
+                            && !$newstate->typos()->contains(qtype_preg_typo::SUBSTITUTION, $pos - 1)
+                            && !$newstate->typos()->contains(qtype_preg_typo::DELETION, $pos - 1)) {
                             $partialmatches[] = $newstate;
                         }
                     } elseif ($full && !$endstatereached
-                        && $newstate->typos->count(qtype_preg_typo::SUBSTITUTION) > $curstate->typos->count(qtype_preg_typo::SUBSTITUTION)) {
+                        && $newstate->typos()->count(qtype_preg_typo::SUBSTITUTION) > $curstate->typos()->count(qtype_preg_typo::SUBSTITUTION)) {
                         // Handle a partial match when last state consumed char with substitution pseudo-transition.
                         $pos = $curstate->startpos + $curstate->length;
-                        if (!$curstate->typos->contains(qtype_preg_typo::INSERTION, $pos)
-                            && !$curstate->typos->contains(qtype_preg_typo::SUBSTITUTION, $pos - 1)
-                            && !$curstate->typos->contains(qtype_preg_typo::DELETION, $pos - 1)) {
+                        if (!$curstate->typos()->contains(qtype_preg_typo::INSERTION, $pos)
+                            && !$curstate->typos()->contains(qtype_preg_typo::SUBSTITUTION, $pos - 1)
+                            && !$curstate->typos()->contains(qtype_preg_typo::DELETION, $pos - 1)) {
                             $partialmatches[] = clone $curstate;
                         }
                     }
                 }
 
                 // Try transpose pseudotransitions.
-                if ($curerrcount < $this->currentmaxtypos 
-                    && $curpos < $str->length() - 1 
+                if ($this->options->mergeassertions
+                    && $curerrcount < $this->currentmaxtypos
+                    && $curpos < $str->length() - 1
                     && !$this->is_char_in_lang_typo_blacklist($str[$curpos])
                     && !$this->is_char_in_lang_typo_blacklist($str[$curpos + 1])) {
                     $tmp1 = $str[$curpos];
@@ -1059,14 +1060,14 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                         $str[$curpos + 1] = $tmp1;
                         $str[$curpos] = $tmp2;
                         foreach ($this->transposepseudotransitions[$from] as $to => $transitions) {
-                            if (isset($reached[$recursionlevel][$to]) && $reached[$recursionlevel][$to]->typos->count() < $curerrcount) {
+                            if (isset($reached[$recursionlevel][$to]) && $reached[$recursionlevel][$to]->typos()->count() < $curerrcount) {
                                 continue;
                             }
 
                             foreach ($transitions as $tr) {
                                 $newstate = $this->match_transitions($curstate, $tr, $str, $curpos, $length, $full, true, true, false);
                                 if ($full) {
-                                    $newstate->typos->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos));
+                                    $newstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::TRANSPOSITION, $curpos));
                                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
                                     self::ensure_index_exists($compareonnextstep, $index->recursionlevel, $index->state, null);
                                     if ($compareonnextstep[$index->recursionlevel][$index->state] === null || $newstate->leftmost_longest($compareonnextstep[$index->recursionlevel][$index->state])) {
@@ -1106,7 +1107,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
 
             foreach ($reached as $newstates) {
                 foreach ($newstates as $newstate) {
-                    $errorscount = $newstate->typos->count();
+                    $errorscount = $newstate->typos()->count();
                     if ($errorscount > $this->currentmaxtypos) {
                        continue;
                     }
@@ -1291,7 +1292,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     if ($ext === null) {
                         continue;
                     }
-                    if ($result->extendedmatch === null || $match->left < $result->left && $result->typos->count() === 0 && $match->typos->count() === 0) {
+                    if ($result->extendedmatch === null || $match->left < $result->left && $result->typos()->count() === 0 && $match->typos()->count() === 0) {
                         $result->extendedmatch = $ext;
                         $result->left = $match->left;
                     }
@@ -1479,10 +1480,6 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $options = new qtype_preg_matching_options();
         }
         $options->replacesubexprcalls = true;
-        if ($options->approximatematch) {
-            $options->mergeassertions = true;
-        }
-
         parent::__construct($regex, $options);
 
         $maxstatescount = get_config('qtype_preg', 'fa_simulation_state_limit');
@@ -1517,7 +1514,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $this->calculate_backtrackstates();
         $this->calculate_bruteforce();
 
-        if ($options->approximatematch && empty($this->errors)) {
+        if ($options->approximatematch && $options->mergeassertions && empty($this->errors)) {
             $this->calculate_transpose_pseudotransitions();
         }
 
