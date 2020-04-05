@@ -53,9 +53,6 @@ class qtype_preg_fa_stack_item {
     // Each subpattern is initialized with (-1,-1) at start.
     public $approximatematches;
 
-    // special string representation
-    public $strwithtypos;
-
     // Object of qtype_preg_typo_container, containing all encountered typos.
     public $typos;
 
@@ -88,10 +85,42 @@ class qtype_preg_fa_stack_item {
         $this->matches[$subpatt][$count - 1] = array($index, $length);
     }
 
-    public function last_match($mode, $subpatt) {
+    public function current_approximate_match($subpatt) {
+        return isset($this->approximatematches[$subpatt]) ? end($this->approximatematches[$subpatt]) : null;
+    }
+
+    public function set_current_approximate_match_start($subpatt, $index, $length, $afterinsertion) {
+        if (!array_key_exists($subpatt, $this->approximatematches)) {
+            return;
+        }
+        $count = count($this->approximatematches[$subpatt]);
+        $insertions = $this->typos->count(qtype_preg_typo::INSERTION);
+        if ($afterinsertion) {
+            --$insertions;
+        }
+        if (!array_key_exists(2, $this->approximatematches[$subpatt][$count - 1])) {
+            $tmpo =123;
+        }
+        $this->approximatematches[$subpatt][$count - 1] = array($index + $insertions, $this->approximatematches[$subpatt][$count - 1][1], $insertions);
+    }
+
+    public function set_current_approximate_match_end($subpatt, $index, $length) {
+        if (!array_key_exists($subpatt, $this->approximatematches)) {
+            return;
+        }
+        $count = count($this->approximatematches[$subpatt]);
+        if (!array_key_exists(2, $this->approximatematches[$subpatt][$count - 1])) {
+            $tmpo =123;
+        }
+        $this->approximatematches[$subpatt][$count - 1] = array($this->approximatematches[$subpatt][$count - 1][0], $length + $this->typos->count(qtype_preg_typo::INSERTION) - $this->approximatematches[$subpatt][$count - 1][2], $this->approximatematches[$subpatt][$count - 1][2]);
+    }
+
+    protected function last_match_inner($mode, $subpatt, $isapproximate) {
         // POSIX mode
         if ($mode === qtype_preg_handling_options::MODE_POSIX) {
-            $result = $this->current_match($subpatt);
+            $result = !$isapproximate
+                ? $this->current_match($subpatt)
+                : $this->current_approximate_match($subpatt);
             if ($result === null) {
                 return null;
             }
@@ -100,11 +129,13 @@ class qtype_preg_fa_stack_item {
         }
 
         // PCRE mode
-        if (!isset($this->matches[$subpatt])) {
+        if (!$isapproximate && !isset($this->matches[$subpatt]) || $isapproximate && !isset($this->approximatematches[$subpatt])) {
             return null;
         }
 
-        $matches = $this->matches[$subpatt];
+        $matches = !$isapproximate
+            ? $this->matches[$subpatt]
+            : $this->approximatematches[$subpatt];
         $count = count($matches);
 
         // It's a tricky thing. PCRE uses last successful match for situations like "(a|b\1)*" and string "ababbabbba".
@@ -119,12 +150,32 @@ class qtype_preg_fa_stack_item {
         return qtype_preg_fa_exec_state::empty_subpatt_match();
     }
 
+    public function last_match($mode, $subpatt) {
+        return $this->last_match_inner($mode, $subpatt, false);
+    }
+
+    public function last_approximate_match($mode, $subpatt) {
+        return $this->last_match_inner($mode, $subpatt, true);
+    }
+
     public function last_subexpr_match($mode, $subexpr) {
         if (!isset($this->subexpr_to_subpatt[$subexpr])) {
             return null;
         }
         $subpatt = $this->subexpr_to_subpatt[$subexpr]->subpattern;
         $last = $this->last_match($mode, $subpatt);
+        if (qtype_preg_fa_exec_state::is_completely_captured($last[0], $last[1])) {
+            return $last;
+        }
+        return qtype_preg_fa_exec_state::empty_subpatt_match();
+    }
+
+    public function last_subexpr_approximate_match($mode, $subexpr) {
+        if (!isset($this->subexpr_to_subpatt[$subexpr])) {
+            return null;
+        }
+        $subpatt = $this->subexpr_to_subpatt[$subexpr]->subpattern;
+        $last = $this->last_approximate_match($mode, $subpatt);
         if (qtype_preg_fa_exec_state::is_completely_captured($last[0], $last[1])) {
             return $last;
         }
@@ -161,6 +212,7 @@ class qtype_preg_fa_stack_item {
 
             if ($cur === null) {
                 $this->matches[$node->subpattern] = array(); // Very first iteration.
+                $this->approximatematches[$node->subpattern] = array(); // Very first iteration.
             }
 
             if ($cur[0] === qtype_preg_matching_results::NO_MATCH_FOUND && $cur[1] === qtype_preg_matching_results::NO_MATCH_FOUND) {
@@ -168,10 +220,11 @@ class qtype_preg_fa_stack_item {
             }
 
             $this->matches[$node->subpattern][] = qtype_preg_fa_exec_state::empty_subpatt_match();
+            $this->approximatematches[$node->subpattern][] = array(qtype_preg_matching_results::NO_MATCH_FOUND, qtype_preg_matching_results::NO_MATCH_FOUND, 0);
         }
     }
 
-    public function write_tag_values($transition, $strpos, $matchlen, $matcher) {
+    public function write_tag_values($transition, $strpos, $matchlen, $matcher, $afterinsertion = false) {
         // Begin a new iteration of a subpattern. All "bigger" (inner) subpatterns will start a new iteration recursively.
         if ($transition->minopentag !== null) {
             $this->begin_subpatt_iteration($transition->minopentag, $matcher);
@@ -187,6 +240,7 @@ class qtype_preg_fa_stack_item {
             // Starting indexes are always the same, equal $strpos
             $index = $strpos;
             $this->set_current_match($tag->subpattern, $index, qtype_preg_matching_results::NO_MATCH_FOUND);
+            $this->set_current_approximate_match_start($tag->subpattern, $index, qtype_preg_matching_results::NO_MATCH_FOUND, $afterinsertion);
             //echo "open tag {$tag->subpattern}: ($index, -1)\n";
         }
 
@@ -200,6 +254,7 @@ class qtype_preg_fa_stack_item {
             $length = $strpos - $index + $matchlen;
             if ($index !== qtype_preg_matching_results::NO_MATCH_FOUND) {
                 $this->set_current_match($tag->subpattern, $index, $length);
+                $this->set_current_approximate_match_end($tag->subpattern, $index, $length);
                 //echo "close tag {$tag->subpattern}: ($index, $length)\n";
             }
         }
@@ -417,6 +472,19 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         return null;
     }
 
+    protected function current_approximate_match($subpatt/*, $wholestack = false*/) {
+        $array = /*$wholestack
+               ? array_reverse($this->stack)
+               :*/ array(end($this->stack));
+        foreach ($array as $item) {
+            $tmp = $item->current_approximate_match($subpatt);
+            if ($tmp !== null) {
+                return $tmp;
+            }
+        }
+        return null;
+    }
+
     /**
      * Sets the current match for the given subpattern number. Always works with the top stack item.
      */
@@ -466,6 +534,22 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
 
         foreach ($array as $item) {
             $cur = $item->last_subexpr_match($this->matcher->get_options()->mode, $subexpr);
+            $hasattempts = $hasattempts || ($cur !== null);
+            if (self::is_completely_captured($cur[0], $cur[1])) {
+                return $cur;
+            }
+        }
+
+        return $hasattempts ? self::empty_subpatt_match() : null;
+    }
+
+    protected function last_subexpr_approximate_match($subexpr) {
+        $array = array_reverse($this->stack);
+
+        $hasattempts = false;
+
+        foreach ($array as $item) {
+            $cur = $item->last_subexpr_approximate_match($this->matcher->get_options()->mode, $subexpr);
             $hasattempts = $hasattempts || ($cur !== null);
             if (self::is_completely_captured($cur[0], $cur[1])) {
                 return $cur;
@@ -538,6 +622,8 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
     public function to_matching_results() {
         $index = array();
         $length = array();
+        $indexapproximate = array();
+        $lengthapproximate = array();
         $subexprs = array(-2);
         for ($subexpr = 0; $subexpr <= $this->matcher->get_max_subexpr(); $subexpr++) {
             $subexprs[] = $subexpr;
@@ -551,6 +637,15 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             } else {
                 $index[$subexpr] = qtype_preg_matching_results::NO_MATCH_FOUND;
                 $length[$subexpr] = qtype_preg_matching_results::NO_MATCH_FOUND;
+            }
+
+            $approximatematch = $this->last_subexpr_approximate_match($subexpr);
+            if ($approximatematch !== null && self::is_completely_captured($approximatematch[0], $approximatematch[1])) {
+                $indexapproximate[$subexpr] = $approximatematch[0];
+                $lengthapproximate[$subexpr] = $approximatematch[1];
+            } else {
+                $indexapproximate[$subexpr] = qtype_preg_matching_results::NO_MATCH_FOUND;
+                $lengthapproximate[$subexpr] = qtype_preg_matching_results::NO_MATCH_FOUND;
             }
         }
 
@@ -571,8 +666,28 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
                 $length[-2] = $this->length_minus_nonconsuming() - $cur[0];
             }
         }
-        $result = new qtype_preg_matching_results($this->is_full(), $index, $length, $this->left, $this->extendedmatch, $this->typos());
+        if ($lengthapproximate[0] === qtype_preg_matching_results::NO_MATCH_FOUND) {
+            $cur = $this->current_approximate_match(0);
+            if ($cur !== null && $cur[0] !== qtype_preg_matching_results::NO_MATCH_FOUND) {
+                //$firstskippedcount = $cur[0] - $this->startpos;
+                $index[0] = $cur[0];
+                $length[0] = $this->length_minus_nonconsuming() + $this->typos()->count(qtype_preg_typo::INSERTION);
+            }
+        }
+        if ($lengthapproximate[-2] === qtype_preg_matching_results::NO_MATCH_FOUND) {
+            $cur = $this->current_approximate_match(-2);
+            if ($cur !== null && $cur[0] !== qtype_preg_matching_results::NO_MATCH_FOUND) {
+                $index[-2] = $cur[0];
+                $length[-2] = $this->length_minus_nonconsuming() - $cur[0] + $this->typos()->count(qtype_preg_typo::INSERTION);
+            }
+        }
+
+        $approximatematch = new qtype_preg_matching_results($this->is_full(), $indexapproximate, $lengthapproximate, $this->left, $this->typos(), $this->extendedmatch, null);
+        $approximatematch->set_source_info(new \qtype_poasquestion\utf8_string($this->typos()->approximate_string()), $this->matcher->get_max_subexpr(), $this->matcher->get_subexpr_name_to_number_map());
+
+        $result = new qtype_preg_matching_results($this->is_full(), $index, $length, $this->left, $this->typos(), $this->extendedmatch, $approximatematch);
         $result->set_source_info($this->str, $this->matcher->get_max_subexpr(), $this->matcher->get_subexpr_name_to_number_map());
+
         return $result;
     }
 
@@ -849,9 +964,9 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
         return true;
     }
 
-    public function write_tag_values($transition, $strpos, $matchlen) {
+    public function write_tag_values($transition, $strpos, $matchlen, $afterinsertion = false) {
         $end = end($this->stack);
-        $end->write_tag_values($transition, $strpos, $matchlen, $this->matcher);
+        $end->write_tag_values($transition, $strpos, $matchlen, $this->matcher, $afterinsertion);
     }
 
     public function recursive_calls_sequence() {
