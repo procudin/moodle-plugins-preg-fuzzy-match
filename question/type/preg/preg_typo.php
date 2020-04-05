@@ -111,19 +111,31 @@ class qtype_preg_typo_container {
     /** @var array $errors array of typotype => array(qtype_preg_typo1, qtype_preg_typo2) */
     protected $errors;
 
+    /** @var array $errorscount array of typotype => count */
+    protected $errorscount;
 
+    /** @var utf8_string $str string with typos */
+    protected $str;
 
-    public function __construct() {
+    public function __construct($str) {
         $this->errors = [
                 qtype_preg_typo::SUBSTITUTION => [],
                 qtype_preg_typo::INSERTION => [],
                 qtype_preg_typo::DELETION => [],
                 qtype_preg_typo::TRANSPOSITION => [],
         ];
+        $this->errorscount = [
+            qtype_preg_typo::SUBSTITUTION => 0,
+            qtype_preg_typo::INSERTION => 0,
+            qtype_preg_typo::DELETION => 0,
+            qtype_preg_typo::TRANSPOSITION => 0,
+        ];
+        $this->str = $str;
         $this->count = 0;
     }
 
     public function contains($type, $pos, $char = null) {
+        $pos += count($this->errors[qtype_preg_typo::INSERTION]);
         $comparebychar = $type !== qtype_preg_typo::TRANSPOSITION && $type !== qtype_preg_typo::DELETION && $char !== null && strlen($char) > 0;
 
         foreach ($this->errors[$type] as $typo) {
@@ -149,10 +161,17 @@ class qtype_preg_typo_container {
     }
 
     public function remove($type, $pos) {
+        $pos += count($this->errors[qtype_preg_typo::INSERTION]);
         for ($count = count($this->errors[$type]), $i = $count - 1; $i >= 0; $i--) {
-            if ($this->errors[$type][$i]->position === $pos) {
+            $typo = $this->errors[$type][$i];
+            if ($typo->position === $pos) {
                 array_splice($this->errors[$type], $i, 1);
                 $this->count--;
+
+                if ($typo->type === qtype_preg_typo::INSERTION) {
+                    $this->str = utf8_string::substr($this->str, 0, $typo->position) . utf8_string::substr($this->str, $typo->position + 1);
+                }
+                --$this->errorscount[$typo->type];
                 return true;
             }
         }
@@ -170,7 +189,7 @@ class qtype_preg_typo_container {
 
         // If only 1 type.
         if ($type & ($type - 1) == 0) {
-            return count($this->errors[$type]);
+            return $this->errorscount[$type];
         }
 
         $result = 0;
@@ -189,12 +208,21 @@ class qtype_preg_typo_container {
         if (!is_a($typo, '\qtype_preg_typo')) {
             return false;
         }
+        $typo->position += count($this->errors[qtype_preg_typo::INSERTION]);
         $this->errors[$typo->type] [] = $typo;
         $this->count++;
+        ++$this->errorscount[$typo->type];
+        if ($typo->type === qtype_preg_typo::INSERTION) {
+            $this->str = utf8_string::substr($this->str, 0, $typo->position) . $typo->char . utf8_string::substr($this->str, $typo->position);
+        }
     }
 
-    public function get_errors() {
+    public function typos() {
         return $this->errors;
+    }
+
+    public function approximate_string() {
+        return $this->str;
     }
 
     /** Convert all substitutions to insertions and deletions.

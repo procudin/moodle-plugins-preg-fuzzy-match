@@ -149,6 +149,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $stackitem->full = false;
         $stackitem->next_char_flags = 0x00;
         $stackitem->matches = array();
+        $stackitem->approximatematches = array();
         $stackitem->subexpr_to_subpatt = array(0 => $this->astroot);   // Remember this explicitly
         $stackitem->last_transition = null;
         $stackitem->last_match_len = 0;
@@ -168,7 +169,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $result->left = qtype_preg_matching_results::UNKNOWN_CHARACTERS_LEFT;
         $result->extendedmatch = null;
         $result->str = clone $str;
-        $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos, new qtype_preg_typo_container()));
+        $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos, new qtype_preg_typo_container(clone $str)));
         $result->backtrack_states = array();
         if (in_array($state, $this->backtrackstates)) {
             $result->backtrack_states[] = $result;
@@ -330,7 +331,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             $result = true;
             $curstate->typos()->add(new qtype_preg_typo($pseudotype, $curpos, $char));
             $length = $issub ? 1 : 0;
-            $this->after_transition_passed($curstate, $transition, $curpos, $length, $addbacktracks);
+            $this->after_transition_passed($curstate, $transition, $curpos, $length, $addbacktracks, !$issub);
         }
 
         return $result;
@@ -462,14 +463,14 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
     /**
      * Updates all fields in the newstate after a transition match.
      */
-    protected function after_transition_passed($newstate, $transition, $curpos, $length, $addbacktracks = true) {
+    protected function after_transition_passed($newstate, $transition, $curpos, $length, $addbacktracks = true, $afterinsertion = false) {
         $endstates = $this->automaton->get_end_states($newstate->subexpr());
 
         $newstate->set_state($transition->to);
         $newstate->set_full(in_array($newstate->state(), $endstates));
         $newstate->left = $newstate->is_full() ? 0 : qtype_preg_matching_results::UNKNOWN_CHARACTERS_LEFT;
         $newstate->length += $length;
-        $newstate->write_tag_values($transition, $curpos, $length);
+        $newstate->write_tag_values($transition, $curpos, $length, $afterinsertion);
 
         if ($addbacktracks && in_array($transition->to, $this->backtrackstates)) {
             $newstate->backtrack_states[] = $newstate;

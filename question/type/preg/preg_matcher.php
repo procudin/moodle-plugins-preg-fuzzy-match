@@ -66,7 +66,9 @@ class qtype_preg_matching_results {
      */
     public $extensionstart;
 
-    /** @var object of qtype_preg_typo_container, containing all typos encountered by approximate matching */
+    public $approximatematch;
+
+    /** @var qtype_preg_typo_container, containing all typos encountered by approximate matching */
     public $typos;
     //      Source data.
     /** @var qtype_poasquestion\utf8_string A string being matched. */
@@ -76,7 +78,7 @@ class qtype_preg_matching_results {
     /** @var array A map where keys are subexpression names and values are their numbers. */
     protected $subexprmap;
 
-    public function __construct($full = false, $indexfirst = array(), $length = array(), $left = self::UNKNOWN_CHARACTERS_LEFT, $extendedmatch = null, $typos = null) {
+    public function __construct($full = false, $indexfirst = array(), $length = array(),  $left = self::UNKNOWN_CHARACTERS_LEFT, $typos = null, $extendedmatch = null, $approximatematch = null) {
         $this->full = $full;
         $this->indexfirst = $indexfirst;
         $this->length = $length;
@@ -84,6 +86,7 @@ class qtype_preg_matching_results {
         $this->extendedmatch = $extendedmatch;
         $this->extensionstart = self::NO_MATCH_FOUND;
         $this->typos = $typos;
+        $this->approximatematch = $approximatematch;
     }
 
     /**
@@ -259,7 +262,7 @@ class qtype_preg_matching_results {
         // $this->left = self::UNKNOWN_CHARACTERS_LEFT;
         $this->indexfirst = array();
         $this->length = array();
-        $this->typos = new qtype_preg_typo_container();
+        $this->typos = new qtype_preg_typo_container('');
         for ($i = 0; $i <= $this->maxsubexpr; $i++) {
             $this->indexfirst[$i] = self::NO_MATCH_FOUND;
             $this->length[$i] = self::NO_MATCH_FOUND;
