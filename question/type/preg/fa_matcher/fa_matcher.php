@@ -168,7 +168,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         $result->length = 0;
         $result->left = qtype_preg_matching_results::UNKNOWN_CHARACTERS_LEFT;
         $result->extendedmatch = null;
-        $result->str = clone $str;
+        $result->str = $str;
         $result->stack = array($this->create_fa_exec_stack_item(0, $state, $startpos, new qtype_preg_typo_container(clone $str)));
         $result->backtrack_states = array();
         if (in_array($state, $this->backtrackstates)) {
@@ -324,7 +324,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             return $result;
         }
 
-        // Try to generate transition character.        
+        // Try to generate transition character.
         list($flag, $char) = $transition->next_character($str, $str, $curpos, 0, $curstate, $this->typoblacklist);
         if ($flag != qtype_preg_leaf::NEXT_CHAR_CANNOT_GENERATE) {
             // If successfull generated.
@@ -421,18 +421,19 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
         // Don't try deletion for initial or end state
         //$subpatt = $newstate->matcher->get_ast_root()->subpattern;
         if (!isset($curstate->stack[0]->matches[0]) || $curstate->is_full()) {
-            return false;
+            return null;
         }
 
         // Do nothing if current char is in language blacklist
         if ($this->is_char_in_lang_typo_blacklist($curstate->str[$curpos])) {
-            return false;
+            return null;
         }
 
-        $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
-        $curstate->length += 1;
+        $newstate = clone $curstate;
+        $newstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
+        $newstate->length += 1;
 
-        return true;
+        return $newstate;
     }
 
 
@@ -1083,10 +1084,13 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                 }
 
                 // Try to deletion pseudotransition.
-                if ($curerrcount < $this->currentmaxtypos && $this->match_deletion_pseudotransitions($curstate, $curpos)) {
-                    self::ensure_index_exists($reached, $recursionlevel, $from, null);
-                    if ($reached[$recursionlevel][$from] === null || $curstate->leftmost_longest($reached[$recursionlevel][$from])) {
-                        $reached[$recursionlevel][$from] = $curstate;
+                if ($curerrcount < $this->currentmaxtypos) {
+                    $newstate = $this->match_deletion_pseudotransitions($curstate, $curpos);
+                    if ($newstate !== null) {
+                        self::ensure_index_exists($reached, $recursionlevel, $from, null);
+                        if ($reached[$recursionlevel][$from] === null || $newstate->leftmost_longest($reached[$recursionlevel][$from])) {
+                            $reached[$recursionlevel][$from] = $newstate;
+                        }
                     }
                 }
             }
@@ -1116,7 +1120,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     $index = self::create_index($newstate->recursive_calls_sequence(), $newstate->state());
                     self::ensure_index_exists($states, $index->recursionlevel, $index->state, null);
                     if ($states[$index->recursionlevel][$index->state] === null ||
-                            $newstate->leftmost_longest($states[$index->recursionlevel][$index->state])) {
+                            $newstate->leftmost_longest($states[$index->recursionlevel][$index->state], true, $newstate->recursion_level() === 0 && $newstate->is_full())) {
                         if ($statescount >= $this->maxstatescount) {
                             break;
                         }

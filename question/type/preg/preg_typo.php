@@ -38,6 +38,9 @@ class qtype_preg_typo {
     /** @var int typo position */
     public $position;
 
+    /** @var int typo position */
+    public $approximateposition;
+
     /** @var string typo character */
     public $char;
 
@@ -50,6 +53,7 @@ class qtype_preg_typo {
     public function __construct($type, $pos, $char = '') {
         $this->type = $type;
         $this->position = $pos;
+        $this->approximateposition = $pos;
         $this->char = $char;
     }
 
@@ -135,12 +139,13 @@ class qtype_preg_typo_container {
     }
 
     public function contains($type, $pos, $char = null) {
-        $pos += count($this->errors[qtype_preg_typo::INSERTION]);
         $comparebychar = $type !== qtype_preg_typo::TRANSPOSITION && $type !== qtype_preg_typo::DELETION && $char !== null && strlen($char) > 0;
 
         foreach ($this->errors[$type] as $typo) {
-            if ($typo->position === $pos
-                    && (!$comparebychar || strcmp($typo->char, $char) === 0)) {
+            if ($typo->position > $pos) {
+                return false;
+            }
+            if ($typo->position === $pos && (!$comparebychar || strcmp($typo->char, $char) === 0)) {
                 return true;
             }
         }
@@ -160,23 +165,24 @@ class qtype_preg_typo_container {
         return $result;
     }
 
-    public function remove($type, $pos) {
-        $pos += count($this->errors[qtype_preg_typo::INSERTION]);
-        for ($count = count($this->errors[$type]), $i = $count - 1; $i >= 0; $i--) {
+
+    /*
+     public function remove($type, $pos) {
+        for ($count = $this->errorscount[$type], $i = $count - 1; $i >= 0; $i--) {
             $typo = $this->errors[$type][$i];
             if ($typo->position === $pos) {
                 array_splice($this->errors[$type], $i, 1);
                 $this->count--;
-
-                if ($typo->type === qtype_preg_typo::INSERTION) {
-                    $this->str = utf8_string::substr($this->str, 0, $typo->position) . utf8_string::substr($this->str, $typo->position + 1);
-                }
                 --$this->errorscount[$typo->type];
+                if ($typo->type === qtype_preg_typo::INSERTION) {
+                    $this->str = utf8_string::substr($this->str, 0, $typo->approximateposition) . utf8_string::substr($this->str, $typo->approximateposition + 1);
+                }
                 return true;
             }
         }
         return false;
     }
+    */
 
     /** Returns count of chosen errors.
      * @param int $type
@@ -205,15 +211,12 @@ class qtype_preg_typo_container {
      * Add typo to container
      */
     public function add($typo) {
-        if (!is_a($typo, '\qtype_preg_typo')) {
-            return false;
-        }
-        $typo->position += count($this->errors[qtype_preg_typo::INSERTION]);
+        $typo->approximateposition = $typo->position + $this->errorscount[qtype_preg_typo::INSERTION];
         $this->errors[$typo->type] [] = $typo;
         $this->count++;
         ++$this->errorscount[$typo->type];
         if ($typo->type === qtype_preg_typo::INSERTION) {
-            $this->str = utf8_string::substr($this->str, 0, $typo->position) . $typo->char . utf8_string::substr($this->str, $typo->position);
+            $this->str = utf8_string::substr($this->str, 0, $typo->approximateposition) . $typo->char . utf8_string::substr($this->str, $typo->approximateposition);
         }
     }
 
@@ -226,8 +229,8 @@ class qtype_preg_typo_container {
     }
 
     /** Convert all substitutions to insertions and deletions.
-     * @param $container
-     * @return new container
+     * @param qtype_preg_typo_container $container
+     * @return qtype_preg_typo_container new container
      */
     public static function substitution_as_deletion_and_insertion($container) {
         $container = clone $container;
@@ -240,9 +243,12 @@ class qtype_preg_typo_container {
 
         $container->errors[qtype_preg_typo::SUBSTITUTION] = [];
         $container->count -= $subcount;
+        $container->errorscount[qtype_preg_typo::SUBSTITUTION] = 0;
 
         foreach ($substitutions as $sub) {
-            $container->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $sub->position));
+            $del = clone $sub;
+            $del->type = qtype_preg_typo::DELETION;
+            //$container->typos()[qtype_preg_typo::DELETION] []= ;
 
             // Find postion for insertion.
             $posforinsertion = -1;
@@ -262,7 +268,7 @@ class qtype_preg_typo_container {
                 $container->count++;
             }
         }
-        
+
         return $container;
     }
 
@@ -371,13 +377,13 @@ class qtype_preg_typo_container {
                 foreach ($typos as $typo) {
                     $typo->position -= $offset;
                 }
-            }     
-        }               
+            }
+        }
     }
 
     public function apply_with_ops($string, $startpos = 0, $length = -1) {
         $container = self::substitution_as_deletion_and_insertion($this);
-        
+
         // crop string
         $container->shift_left($startpos);
         $startpos = $startpos >= 0 ? $startpos : 0;
