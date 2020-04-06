@@ -333,8 +333,8 @@ class qtype_preg_question_test extends PHPUnit_Framework_TestCase {
         $this->assertTrue($bestfit['answer']->fraction == 0.7);
         $this->assertTrue($bestfit['match']->is_match() === true);
         $this->assertTrue($bestfit['match']->full === false);
-        $this->assertTrue($bestfit['match']->typos->count() === 0);
-        $this->assertTrue($bestfit['match']->left === 5);
+        $this->assertTrue($bestfit['match']->typos->count() === 1);
+        $this->assertTrue($bestfit['match']->left === 4);
         // parial without typos - chose match with minimal extension
         $bestfit = $testquestion->get_best_fit_answer(array('answer' => 'abb'));
         $this->assertTrue($bestfit['answer']->fraction == 0.7);

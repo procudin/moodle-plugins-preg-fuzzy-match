@@ -98,9 +98,6 @@ class qtype_preg_fa_stack_item {
         if ($afterinsertion) {
             --$insertions;
         }
-        if (!array_key_exists(2, $this->approximatematches[$subpatt][$count - 1])) {
-            $tmpo =123;
-        }
         $this->approximatematches[$subpatt][$count - 1] = array($index + $insertions, $this->approximatematches[$subpatt][$count - 1][1], $insertions);
     }
 
@@ -109,9 +106,6 @@ class qtype_preg_fa_stack_item {
             return;
         }
         $count = count($this->approximatematches[$subpatt]);
-        if (!array_key_exists(2, $this->approximatematches[$subpatt][$count - 1])) {
-            $tmpo =123;
-        }
         $this->approximatematches[$subpatt][$count - 1] = array($this->approximatematches[$subpatt][$count - 1][0], $length + $this->typos->count(qtype_preg_typo::INSERTION) - $this->approximatematches[$subpatt][$count - 1][2], $this->approximatematches[$subpatt][$count - 1][2]);
     }
 
@@ -706,7 +700,7 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
     /**
      * Returns true if this beats other, false if other beats this; for equal states returns false.
      */
-    public function leftmost_longest($other, $matchinginprogress = true) {
+    public function leftmost_longest($other, $matchinginprogress = true, $equalgenerations = true) {
         //echo "\n";
         //echo $this->subpatts_to_string();
         //echo "vs\n";
@@ -721,10 +715,22 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             return false;
         }
 
+        // special comprasion for deletion state.
+        /*
+         *
+         if ($this->length === $other->length && $equalgenerations) {
+            if ($this->typos()->count(qtype_preg_typo::DELETION) > $other->typos()->count(qtype_preg_typo::DELETION)) {
+                return false;
+            } else if ($this->typos()->count(qtype_preg_typo::DELETION) < $other->typos()->count(qtype_preg_typo::DELETION)) {
+                return true;
+            }
+        }
+        */
+
         // Check for min typos.
         $thistypocount = $this->typos()->count();
         $othertypocount = $other->typos()->count();
-        if ($matchinginprogress) {
+        if ($matchinginprogress && $equalgenerations) {
             if ($thistypocount < $othertypocount) {
                 return true;
             } else if ($thistypocount > $othertypocount) {
@@ -774,8 +780,16 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             }
         }
 
+        if (!$matchinginprogress && $equalgenerations) {
+            if ($thistypocount < $othertypocount) {
+                return true;
+            } else if ($thistypocount > $othertypocount) {
+                return false;
+            }
+        }
+
         // Choose by typo priority.
-        if ($thistypocount > 0 && $matchinginprogress) {
+        if ($thistypocount > 0 && $matchinginprogress && $equalgenerations) {
             if ($this->typos()->count(qtype_preg_typo::TRANSPOSITION) > $other->typos()->count(qtype_preg_typo::TRANSPOSITION)) {
                 return true;
             } else if ($this->typos()->count(qtype_preg_typo::TRANSPOSITION) < $other->typos()->count(qtype_preg_typo::TRANSPOSITION)) {
@@ -909,7 +923,7 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     /**
