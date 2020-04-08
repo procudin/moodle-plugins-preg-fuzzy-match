@@ -35,10 +35,10 @@ class qtype_preg_typo {
     /** @var int typo type */
     public $type;
 
-    /** @var int typo position */
+    /** @var int typo position in original string */
     public $position;
 
-    /** @var int typo position */
+    /** @var int typo position in approximate string */
     public $approximateposition;
 
     /** @var string typo character */
@@ -109,7 +109,7 @@ class qtype_preg_typo {
 }
 
 class qtype_preg_typo_container {
-    /** @var int $count errors count */
+    /** @var int $count total errors count */
     protected $count;
 
     /** @var array $errors array of typotype => array(qtype_preg_typo1, qtype_preg_typo2) */
@@ -118,7 +118,7 @@ class qtype_preg_typo_container {
     /** @var array $errorscount array of typotype => count */
     protected $errorscount;
 
-    /** @var utf8_string $str string with typos */
+    /** @var utf8_string $str matching string with inserted chars */
     protected $str;
 
     public function __construct($str) {
