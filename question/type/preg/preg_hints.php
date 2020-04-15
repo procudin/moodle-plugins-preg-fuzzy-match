@@ -426,19 +426,22 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         $matchingresult = clone $this->question->get_best_fit_answer($response)['match'];
         $str = $matchingresult->str();
 
-        // Replace substitutions with deletion and insertion.
-        $matchingresult->typos = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchingresult->typos);
+        // Convert to lexem label format.
+        list($string, $operations) = $matchingresult->typos->apply_with_ops();
 
-        // Add '...' character.
-        $startpos = $matchingresult->indexfirst[0];
-        $length = $matchingresult->length[0];
-        if (!$matchingresult->full) {
-            $str = \qtype_poasquestion\utf8_string::substr($str, 0, $startpos + $length) . core_text::code2utf8(0x2026);
-            $length++;
+        // crop string
+        $startpos = $matchingresult->approximatematch->indexfirst[0];
+        $length = $matchingresult->approximatematch->length[0];
+        if ($startpos > -1 && $length > -1) {
+            $string = \qtype_poasquestion\utf8_string::substr($string, $startpos, $length);
+            $operations = array_slice($operations, $startpos, $length);
         }
 
-        // Convert to lexem label format.
-        list($string, $operations) = $matchingresult->typos->apply_with_ops($str, $startpos, $length);
+        // Add '...' character.
+        if (!$matchingresult->full) {
+            $string = $string . core_text::code2utf8(0x2026);
+            $operations []= 'normal';
+        }
 
         $label = new \block_formal_langs_lexeme_label('');
         $label->set_text($string);
