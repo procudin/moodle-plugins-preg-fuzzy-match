@@ -346,7 +346,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             case qtype_preg_leaf_assert::SUBTYPE_DOLLAR:
                 if ($curpos == $strlen - 1) {
                     // If it's last char - delete it.
-                    $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, 0));
+                    $curstate->typos()->add(new qtype_preg_typo(qtype_preg_typo::DELETION, $curpos));
                     $result = true;
                     $curstate->length = $curpos;
                     $curstate->startpos = 0;
