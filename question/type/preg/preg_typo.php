@@ -287,10 +287,8 @@ class qtype_preg_typo_container {
                 if ($typo !== null) {
                     $tmp1 = utf8_string::substr($originalstring, $pos,1);
                     $tmp2 = utf8_string::substr($originalstring,$pos + 1,1);
-                    if ($tmp1 && $tmp2) {
-                        $result .= $tmp2 . $tmp1;
-                        ++$pos;
-                    }
+                    $result .= $tmp2 . $tmp1;
+                    ++$pos;
                     continue;
                 }
             }
@@ -323,7 +321,7 @@ class qtype_preg_typo_container {
             }
 
             $char = utf8_string::substr($originalstring, $pos, 1);
-            if (!$char) {
+            if ($char === "") {
                 break;
             }
             $result .= $char;
@@ -337,37 +335,42 @@ class qtype_preg_typo_container {
         $originalstring = $container->str;
         $result = "";
         $operations = [];
-        for ($i = 0; $i < utf8_string::strlen($originalstring); ++$i)
+        for ($pos = 0;; ++$pos)
         {
             // Apply transposition.
-            $typo = $container->get(qtype_preg_typo::TRANSPOSITION, $i);
+            $typo = $container->get(qtype_preg_typo::TRANSPOSITION, $pos);
             if ($typo !== null) {
-                $tmp1 = utf8_string::substr($originalstring, $i,1);
-                $tmp2 = utf8_string::substr($originalstring,$i + 1,1);
+                $tmp1 = utf8_string::substr($originalstring, $pos,1);
+                $tmp2 = utf8_string::substr($originalstring,$pos + 1,1);
                 $result .= $tmp2 . $tmp1;
-                $operations[$i+1] = $operations[$i] = 'transpose';
-                ++$i;
+                $operations[$pos+1] = $operations[$pos] = 'transpose';
+                ++$pos;
                 continue;
             }
 
             // Apply deletion.
-            $typo = $container->get(qtype_preg_typo::DELETION, $i);
+            $typo = $container->get(qtype_preg_typo::DELETION, $pos);
             if ($typo !== null) {
-                $operations[$i] = 'strikethrough';
-                $result .= $originalstring[$i];
+                $operations[$pos] = 'strikethrough';
+                $result .= utf8_string::substr($originalstring, $pos,1);
                 continue;
             }
 
             // Apply insertion.
-            $typo = $container->get(qtype_preg_typo::INSERTION, $i);
+            $typo = $container->get(qtype_preg_typo::INSERTION, $pos);
             if ($typo !== null) {
-                $operations[$i] = 'insert';
-                $result .= $originalstring[$i];
+                $operations[$pos] = 'insert';
+                $result .= utf8_string::substr($originalstring, $pos,1);
                 continue;
             }
 
-            $result .= $originalstring[$i];
-            $operations[$i] = 'normal';
+            $char = utf8_string::substr($originalstring, $pos, 1);
+            if ($char === "") {
+                break;
+            }
+
+            $result .= $char;
+            $operations[$pos] = 'normal';
         }
 
         return array($result, $operations);
