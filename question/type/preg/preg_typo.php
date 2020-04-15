@@ -83,25 +83,25 @@ class qtype_preg_typo {
     }
 
     /**
-     * Apply typo to string
+     * Apply typo to approximate string
      * @param string $string input string
      * @return string string after typo applying
      */
     public function apply($string) {
         switch ($this->type) {
             case self::DELETION:
-                $string = utf8_string::substr($string, 0, $this->position) . utf8_string::substr($string, $this->position + 1);
+                $string = utf8_string::substr($string, 0, $this->approximateposition) . utf8_string::substr($string, $this->approximateposition + 1);
                 break;
             case self::SUBSTITUTION:
-                $string = utf8_string::substr($string, 0, $this->position) . $this->char . utf8_string::substr($string, $this->position + 1);
+                $string = utf8_string::substr($string, 0, $this->approximateposition) . $this->char . utf8_string::substr($string, $this->approximateposition + 1);
                 break;
             case self::TRANSPOSITION:
-                $tmp1 = utf8_string::substr($string,$this->position,1);
-                $tmp2 = utf8_string::substr($string,$this->position + 1,1);
-                $string = utf8_string::substr($string, 0, $this->position) . $tmp2 . $tmp1 . utf8_string::substr($string, $this->position + 2);
+                $tmp1 = utf8_string::substr($string, $this->approximateposition,1);
+                $tmp2 = utf8_string::substr($string,$this->approximateposition + 1,1);
+                $string = utf8_string::substr($string, 0, $this->approximateposition) . $tmp2 . $tmp1 . utf8_string::substr($string, $this->approximateposition + 2);
                 break;
             case self::INSERTION:
-                $string = utf8_string::substr($string, 0, $this->position) . $this->char . utf8_string::substr($string, $this->position);
+                $string = utf8_string::substr($string, 0, $this->approximateposition) . $this->char . utf8_string::substr($string, $this->approximateposition);
                 break;
         }
         return $string;
@@ -112,7 +112,7 @@ class qtype_preg_typo_container {
     /** @var int $count total errors count */
     protected $count;
 
-    /** @var array $errors array of typotype => array(qtype_preg_typo1, qtype_preg_typo2) */
+    /** @var array $errors array of pairs typotype => array(qtype_preg_typo1, qtype_preg_typo2). Each typo group should always be sorted by typo position. */
     protected $errors;
 
     /** @var array $errorscount array of typotype => count */
@@ -152,6 +152,20 @@ class qtype_preg_typo_container {
         return false;
     }
 
+    protected function get($type, $approximatepos, $char = null) {
+        $comparebychar = $type !== qtype_preg_typo::TRANSPOSITION && $type !== qtype_preg_typo::DELETION && $char !== null && strlen($char) > 0;
+
+        foreach ($this->errors[$type] as $typo) {
+            if ($typo->approximateposition > $approximatepos) {
+                return null;
+            }
+            if ($typo->approximateposition === $approximatepos && (!$comparebychar || strcmp($typo->char, $char) === 0)) {
+                return $typo;
+            }
+        }
+        return null;
+    }
+
     public function __toString() {
         $result = "";
         foreach ($this->errors as $type => $errors) {
@@ -164,25 +178,6 @@ class qtype_preg_typo_container {
         }
         return $result;
     }
-
-
-    /*
-     public function remove($type, $pos) {
-        for ($count = $this->errorscount[$type], $i = $count - 1; $i >= 0; $i--) {
-            $typo = $this->errors[$type][$i];
-            if ($typo->position === $pos) {
-                array_splice($this->errors[$type], $i, 1);
-                $this->count--;
-                --$this->errorscount[$typo->type];
-                if ($typo->type === qtype_preg_typo::INSERTION) {
-                    $this->str = utf8_string::substr($this->str, 0, $typo->approximateposition) . utf8_string::substr($this->str, $typo->approximateposition + 1);
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-    */
 
     /** Returns count of chosen errors.
      * @param int $type
@@ -220,6 +215,45 @@ class qtype_preg_typo_container {
         }
     }
 
+    protected function add_inner($typo) {
+        // calculate approximate position
+        $approximatepos = $typo->position;
+        foreach ($this->errorscount[qtype_preg_typo::INSERTION] as $ins) {
+            if ($ins->position > $typo->position) {
+                break;
+            }
+            ++$approximatepos;
+        }
+        $typo->approximateposition = $approximatepos;
+
+        // calc position in target array
+        $posinarray = 0;
+        foreach ($this->errors[$typo->type] as $idx => $ext) {
+            if ($ext->position >= $typo->position) {
+                $posinarray = $idx;
+                break;
+            }
+        }
+        array_splice($this->errors[$typo->type], $posinarray, 0, [$typo]);
+
+
+        if ($typo->type === qtype_preg_typo::INSERTION) {
+            // move other typos
+            foreach ($this->errors as $typos) {
+                foreach ($typos as $exttypo) {
+                    if ($exttypo->approximateposition > $typo->approximateposition) {
+                        ++$exttypo->approximateposition;
+                    }
+                }
+            }
+            // change approximate string
+            $this->str = utf8_string::substr($this->str, 0, $typo->approximateposition) . $typo->char . utf8_string::substr($this->str, $typo->approximateposition);
+        }
+
+        $this->errorscount[$typo->type] = count($this->errors[$typo->type]);
+        $this->count = array_sum($this->errorscount);
+    }
+
     public function typos() {
         return $this->errors;
     }
@@ -241,179 +275,122 @@ class qtype_preg_typo_container {
             return $container;
         }
 
-        $container->errors[qtype_preg_typo::SUBSTITUTION] = [];
-        $container->count -= $subcount;
-        $container->errorscount[qtype_preg_typo::SUBSTITUTION] = 0;
-
         foreach ($substitutions as $sub) {
             $del = clone $sub;
             $del->type = qtype_preg_typo::DELETION;
-            //$container->typos()[qtype_preg_typo::DELETION] []= ;
+            $del->char = null;
 
-            // Find postion for insertion.
-            $posforinsertion = -1;
-            foreach ($container->errors[qtype_preg_typo::INSERTION] as $ind => $error) {
-                if ($error->position >= $sub->position + 1) {
-                    $posforinsertion = $ind;
-                    break;
-                }
-            }
+            $container->add_inner($del);
 
-            if ($posforinsertion === -1) {
-                // Add to the end of insertion container.
-                $container->add(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char));
-            } else {
-                // Insert to found position.
-                array_splice($container->errors[qtype_preg_typo::INSERTION], $ind, 0, array(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char)));
-                $container->count++;
-            }
+            $container->add_inner(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char));
         }
+
+        $container->errors[qtype_preg_typo::SUBSTITUTION] = [];
+        $container->errorscount[qtype_preg_typo::SUBSTITUTION] = 0;
+        $container->count = array_sum($container->errorscount);
 
         return $container;
     }
 
-    /** Apply typos to given string
-     * @param $string
-     * @param bool $modifycurrent should we modify current object
-     * @param int $ignoredtypos ignored typos
-     * @return pair of (string,container)
+    /** Apply all typos to given string
+     * @param string $string
+     * @param $ignoredtypes Ingnored typo types.
+     * @return string string with applyied typos
      */
-    protected function apply_inner($string, $modifycurrent = false, $ignoredtypos = 0) {
-        $container = $this;
-        if (!$modifycurrent) {
-            $container = clone $container;
-        }
-
-        $deletions = $container->errors[qtype_preg_typo::DELETION];
-        $insertions = $container->errors[qtype_preg_typo::INSERTION];
-        $transpositions = $container->errors[qtype_preg_typo::TRANSPOSITION];
-        $substitutions =  $container->errors[qtype_preg_typo::SUBSTITUTION];
-
+    public function apply($ignoredtypos = 0) {
         $applydeletions = ($ignoredtypos & qtype_preg_typo::DELETION) == 0;
         $applyinsertions = ($ignoredtypos & qtype_preg_typo::INSERTION) == 0;
         $applytranspositions = ($ignoredtypos & qtype_preg_typo::TRANSPOSITION) == 0;
         $applysubstitutions = ($ignoredtypos & qtype_preg_typo::SUBSTITUTION) == 0;
 
-        // Apply transposition.
-        if ($applytranspositions) {
-            foreach ($transpositions as $typo) {
-                $string = $typo->apply($string);
+        $originalstring = $this->str;
+        $result = "";
+        for ($i = 0; $i < utf8_string::strlen($originalstring); ++$i)
+        {
+            // Apply transposition.
+            if ($applytranspositions) {
+                $typo = $this->get(qtype_preg_typo::TRANSPOSITION, $i);
+                if ($typo !== null) {
+                    $tmp1 = utf8_string::substr($originalstring, $i,1);
+                    $tmp2 = utf8_string::substr($originalstring,$i + 1,1);
+                    $result .= $tmp2 . $tmp1;
+                    ++$i;
+                    continue;
+                }
             }
+
+            // Apply substitutions.
+            if ($applysubstitutions) {
+                $typo = $this->get(qtype_preg_typo::SUBSTITUTION, $i);
+                if ($typo !== null) {
+                    $result .= $typo->char;
+                    continue;
+                }
+            }
+
+            // Apply deletion.
+            if ($applydeletions) {
+                $typo = $this->get(qtype_preg_typo::DELETION, $i);
+                if ($typo !== null) {
+                    // Do nothing
+                    continue;
+                }
+            }
+
+            // By defalt approximate string contains applyed insertions, so behaviour same as deletion if $applyinsertions disabled
+            if (!$applyinsertions) {
+                $typo = $this->get(qtype_preg_typo::INSERTION, $i);
+                if ($typo !== null) {
+                    // Do nothing
+                    continue;
+                }
+            }
+
+            $result .= $originalstring[$i];
         }
 
-        // Apply substitutions.
-        if ($applysubstitutions) {
-            foreach ($substitutions as $typo) {
-                $string = $typo->apply($string);
-            }
-        }
-
-        // Apply insertions.
-        for ($i = 0, $count = count($insertions); $applyinsertions && $i < $count; $i++) {
-            $string = $insertions[$i]->apply($string);
-
-            for ($j = $i + 1; $j < $count; $j++) {
-                $insertions[$j]->position++;
-            }
-
-            foreach ($deletions as $del) {
-                if ($del->position >= $insertions[$i]->position) {
-                    $del->position++;
-                }
-            }
-            foreach ($transpositions as $tr) {
-                if ($tr->position >= $insertions[$i]->position) {
-                    $tr->position++;
-                }
-            }
-            foreach ($substitutions as $sub) {
-                if ($sub->position >= $insertions[$i]->position) {
-                    $sub->position++;
-                }
-            }
-        }
-
-        // Apply deletions.
-        for ($i = 0, $count = count($deletions); $applydeletions && $i < $count; $i++) {
-            $string = $deletions[$i]->apply($string);
-
-            for ($j = $i + 1; $j < $count; $j++) {
-                $deletions[$j]->position--;
-            }
-
-            foreach ($insertions as $ins) {
-                if ($ins->position > $deletions[$i]->position) {
-                    $ins->position--;
-                }
-            }
-            foreach ($transpositions as $tr) {
-                if ($tr->position > $deletions[$i]->position) {
-                    $tr->position--;
-                }
-            }
-            foreach ($substitutions as $sub) {
-                if ($sub->position > $deletions[$i]->position) {
-                    $sub->position--;
-                }
-            }
-        }
-
-        return array($string, $container);
+        return $result;
     }
 
-    /** Apply all typos to given string
-     * @param $string
-     * @param $ignoredtypes Ingnored typo types.
-     * @return string
-     */
-    public function apply($string, $ignoredtypos = 0) {
-        list($newstring, $newcontainer) = $this->apply_inner($string, false, $ignoredtypos);
-        return $newstring;
-    }
-
-    private function shift_left($offset) {
-        if ($offset > 0) {
-            foreach ($this->errors as $typos) {
-                foreach ($typos as $typo) {
-                    $typo->position -= $offset;
-                }
-            }
-        }
-    }
-
-    public function apply_with_ops($string, $startpos = 0, $length = -1) {
+    public function apply_with_ops() {
         $container = self::substitution_as_deletion_and_insertion($this);
-
-        // crop string
-        $container->shift_left($startpos);
-        $startpos = $startpos >= 0 ? $startpos : 0;
-        $length = $length !== -1 ? $length : utf8_string::strlen($string);
-        $string = utf8_string::substr($string, $startpos, $length); 
-        
-        list($string, $container) = $this->apply_inner($string, true, qtype_preg_typo::TRANSPOSITION | qtype_preg_typo::DELETION);
-
-        $deletions = $container->errors[qtype_preg_typo::DELETION];
-        $insertions = $container->errors[qtype_preg_typo::INSERTION];
-        $transpositions = $container->errors[qtype_preg_typo::TRANSPOSITION];
+        $originalstring = $container->str;
+        $result = "";
         $operations = [];
-
-        foreach($deletions as $del) {
-            $operations[$del->position] = 'strikethrough';
-        }
-        foreach($insertions as $ins) {
-            $operations[$ins->position] = 'insert';
-        }
-        foreach($transpositions as $tr) {
-            $operations[$tr->position] = $operations[$tr->position + 1] = 'transpose';
-        }
-
-        for ($i = 0; $i < utf8_string::strlen($string); $i++) {
-            if (!isset($operations[$i])) {
-                $operations[$i] = 'normal';
+        for ($i = 0; $i < utf8_string::strlen($originalstring); ++$i)
+        {
+            // Apply transposition.
+            $typo = $container->get(qtype_preg_typo::TRANSPOSITION, $i);
+            if ($typo !== null) {
+                $tmp1 = utf8_string::substr($originalstring, $i,1);
+                $tmp2 = utf8_string::substr($originalstring,$i + 1,1);
+                $result .= $tmp2 . $tmp1;
+                $operations[$i+1] = $operations[$i] = 'transpose';
+                ++$i;
+                continue;
             }
+
+            // Apply deletion.
+            $typo = $container->get(qtype_preg_typo::DELETION, $i);
+            if ($typo !== null) {
+                $operations[$i] = 'strikethrough';
+                $result .= $originalstring[$i];
+                continue;
+            }
+
+            // Apply insertion.
+            $typo = $container->get(qtype_preg_typo::INSERTION, $i);
+            if ($typo !== null) {
+                $operations[$i] = 'insert';
+                $result .= $originalstring[$i];
+                continue;
+            }
+
+            $result .= $originalstring[$i];
+            $operations[$i] = 'normal';
         }
 
-        return array($string, $operations);
+        return array($result, $operations);
     }
 
 }
