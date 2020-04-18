@@ -330,7 +330,7 @@ class qtype_preg_typo_container {
         return $result;
     }
 
-    public function apply_with_ops() {
+    public function to_lexem_label_format() {
         $container = self::substitution_as_deletion_and_insertion($this);
         $originalstring = $container->str;
         $result = "";

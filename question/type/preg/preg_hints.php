@@ -424,10 +424,9 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
     public function render_hint($renderer, question_attempt $qa, question_display_options $options, $response = null) {
         // Get matching result.
         $matchingresult = clone $this->question->get_best_fit_answer($response)['match'];
-        $str = $matchingresult->str();
 
         // Convert to lexem label format.
-        list($string, $operations) = $matchingresult->typos->apply_with_ops();
+        list($string, $operations) = $matchingresult->typos->to_lexem_label_format();
 
         // crop string
         $startpos = $matchingresult->approximatematch->indexfirst[0];
