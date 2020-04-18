@@ -17,18 +17,19 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
     protected $passednormaltests = [];
 
     /** @var Logfile's name*/
-    protected $logfilename = __DIR__  . '/errorslog.txt';
-
-    /** @var Logs for saving*/
-    protected $logcontent = '';
+    protected $logfilename;
 
     public function engine_name() {
         return 'fa_matcher';
     }
 
+    public function setUp()
+    {
+        $this->logfilename = __DIR__  . "/errorslog_" . date('Y_m_d___H_i_s') . ".txt";
+    }
+
     public function log($message) {
-        $this->logcontent .= $message;
-        file_put_contents($this->logfilename, $this->logcontent);
+        file_put_contents($this->logfilename, $message, FILE_APPEND);
     }
 
     public function accept_regex($regex) {
