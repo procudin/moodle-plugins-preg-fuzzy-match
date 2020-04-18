@@ -76,7 +76,6 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
             }
 
             $regextags [] = self::TAG_DONT_CHECK_PARTIAL;
-            $regextags [] = self::TAG_FAIL_MODE_MERGE;
             $regextags [] = self::TAG_ALLOW_FUZZY;
 
             $matcher_merged = null;
@@ -103,12 +102,12 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
                     $options->approximatematch = true;
                     $options->langid = null;
                     $options->typolimit = (int)(!isset($fuzzyexpected['errorslimit']) ? 0 : $fuzzyexpected['errorslimit']);
-                    $options->mergeassertions = true;
+                    $options->mergeassertions = in_array(self::TAG_FAIL_MODE_MERGE, $tags) || isset($fuzzyexpected['typos']) && array_key_exists(8, $fuzzyexpected['typos']);
                     $options->extensionneeded = !in_array(self::TAG_DONT_CHECK_PARTIAL, $regextags);
                     $matcher = $this->get_matcher($this->engine_name(), $regex, $options);
                     $timeend = round(microtime(true) * 1000);
                     if ($timeend - $timestart > self::MAX_BUILDING_TIME) {
-                        $message = "\nSlow building on regex : '$regex', str : '$str', errorslimit : {$matcher->options->typolimit}";
+                        $message = "\nSlow building on regex : '$regex', str : '$str', errorslimit : {$matcher->get_options()->typolimit}";
                         $this->log($message);
                         $slowbuildtests[] = $message;
                     }
