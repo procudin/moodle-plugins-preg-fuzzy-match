@@ -288,7 +288,7 @@ class qtype_preg_fuzzy_fa_cross_tester extends qtype_preg_cross_tester {
         // Apply typos to string && run normal match.
         $errorsapplyed = false;
         if ($isbetter && $obtained->full) {
-            $strafterapplying = $obtained->typos->apply($str);
+            $strafterapplying = $obtained->typos->apply();
 
             $matcher->get_options()->typolimit = 0;
 

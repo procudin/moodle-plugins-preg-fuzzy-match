@@ -1297,7 +1297,7 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
                     if ($ext === null) {
                         continue;
                     }
-                    if ($result->extendedmatch === null || $match->left < $result->left && $result->typos()->count() === 0 && $match->typos()->count() === 0) {
+                    if ($result->extendedmatch === null || $match->left < $result->left) {
                         $result->extendedmatch = $ext;
                         $result->left = $match->left;
                     }
