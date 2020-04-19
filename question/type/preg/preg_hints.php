@@ -85,7 +85,8 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
         if ($this->could_show_hint($matchresults, false)) {// Hint could be computed.
             if (!$matchresults->full) {// There is a hint to show.
                 $wronghead = $renderer->render_unmatched($matchresults->match_heading());
-                $correctpart = $this->render_matched_with_errors($renderer, $matchresults);
+                $correctpart = $this->render_raw_with_typos($renderer, $matchresults->approximatematch, $matchresults->approximatematch->str(), $matchresults->approximatematch->index_first(), $matchresults->approximatematch->length());
+                $correctpart = $renderer->render_matched($correctpart, false);
                 $hint = $renderer->render_hinted($this->hinted_string($matchresults));
                 if ($this->to_be_continued($matchresults)) {
                     $hint .= $renderer->render_tobecontinued();
@@ -185,7 +186,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
     /**
      * Renders matched string part with typos.
      */
-    private function render_raw_with_typos($renderer, $matchresults, $str, $index_first, $length) {
+    protected function render_raw_with_typos($renderer, $matchresults, $str, $index_first, $length) {
         if ($matchresults->typos->count() === 0) {
             return htmlspecialchars(core_text::substr($str, $index_first, $length));
         }
