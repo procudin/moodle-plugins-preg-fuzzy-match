@@ -738,6 +738,21 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             }
         }
 
+        /*
+        if ($thistypocount || $othertypocount) {
+            if ($this->startpos < $other->startpos) {
+                return true;
+            } else if ($this->startpos > $other->startpos) {
+                return false;
+            }
+            if ($this->length > $other->length) {
+                return true;
+            } else if ($this->length < $other->length) {
+                return false;
+            }
+        }
+        */
+
         // Choose the leftmost match
         // Indices for the whole regex can differ when assertions merging is turned on.
         $this_index = isset($this->stack[0]->matches[$this->matcher->get_ast_root()->subpattern])
