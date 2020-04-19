@@ -93,7 +93,7 @@ class qtype_preg_typo_container {
     /** @var array $errorscount array of typotype => count */
     protected $errorscount;
 
-    /** @var utf8_string $str matching string with inserted chars */
+    /** @var string $str matching string with inserted chars */
     protected $str;
 
     public function __construct($str) {
@@ -109,7 +109,7 @@ class qtype_preg_typo_container {
             qtype_preg_typo::DELETION => 0,
             qtype_preg_typo::TRANSPOSITION => 0,
         ];
-        $this->str = $str;
+        $this->str = is_a($str, '\qtype_poasquestion\utf8_string') ? $str->string() : $str;
         $this->count = 0;
     }
 
