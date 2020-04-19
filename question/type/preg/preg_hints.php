@@ -426,6 +426,9 @@ class qtype_preg_hinthowtofixpic extends qtype_poasquestion\hint {
         $startpos = $matchingresult->approximatematch->indexfirst[0];
         $length = $matchingresult->approximatematch->length[0];
         if ($startpos > -1 && $length > -1) {
+            // we have already replaced all substitutions with deletion & insertion, so target match length should be increased with substitutions count
+            $length += $matchingresult->typos->count(qtype_preg_typo::SUBSTITUTION);
+
             $string = \qtype_poasquestion\utf8_string::substr($string, $startpos, $length);
             $operations = array_slice($operations, $startpos, $length);
         }
