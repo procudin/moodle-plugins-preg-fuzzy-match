@@ -200,8 +200,11 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
                     break;
                 case $matchresults->typos->contains_approximate(qtype_preg_typo::TRANSPOSITION, $i):
                 case $matchresults->typos->contains_approximate(qtype_preg_typo::TRANSPOSITION, $i - 1):
-                case $matchresults->typos->contains_approximate(qtype_preg_typo::SUBSTITUTION, $i):
                     $result .= $renderer->render_typo(core_text::substr($str, $i, 1));
+                    break;
+                case $matchresults->typos->contains_approximate(qtype_preg_typo::SUBSTITUTION, $i):
+                    $result .= $renderer->render_unmatched(core_text::substr($str, $i, 1));
+                    $result .= $renderer->render_typo('…');
                     break;
                 case $matchresults->typos->contains_approximate(qtype_preg_typo::DELETION, $i):
                     $result .= $renderer->render_unmatched(core_text::substr($str, $i, 1));
