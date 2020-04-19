@@ -1497,6 +1497,12 @@ class qtype_preg_fa_matcher extends qtype_preg_matcher {
             return;
         }
 
+        // force enabling mergeassertions for approximate matching
+        // TODO remove
+        if ($options->approximatematch) {
+            $options->mergeassertions = true;
+        }
+
         try {
             $this->automaton = $this->build_fa($this->dstroot, $this->options->mergeassertions);
         } catch (qtype_preg_toolargefa_exception $e) {
