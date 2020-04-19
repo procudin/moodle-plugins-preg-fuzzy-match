@@ -250,36 +250,6 @@ class qtype_preg_typo_container {
         return $this->str;
     }
 
-    /** Convert all substitutions to insertions and deletions.
-     * @param qtype_preg_typo_container $container
-     * @return qtype_preg_typo_container new container
-     */
-    public static function substitution_as_deletion_and_insertion($container) {
-        $container = clone $container;
-        $substitutions = $container->errors[qtype_preg_typo::SUBSTITUTION];
-        $subcount = count($substitutions);
-
-        if ($subcount === 0) {
-            return $container;
-        }
-
-        $container->errors[qtype_preg_typo::SUBSTITUTION] = [];
-        $container->errorscount[qtype_preg_typo::SUBSTITUTION] = 0;
-        foreach ($substitutions as $sub) {
-            $del = clone $sub;
-            $del->type = qtype_preg_typo::DELETION;
-            $del->char = null;
-
-            $container->add_inner($del);
-
-            $container->add_inner(new qtype_preg_typo(qtype_preg_typo::INSERTION, $sub->position + 1, $sub->char));
-        }
-
-        $container->count = array_sum($container->errorscount);
-
-        return $container;
-    }
-
     /** Apply all typos to given string
      * @param string $string
      * @param $ignoredtypes Ingnored typo types.
@@ -345,36 +315,49 @@ class qtype_preg_typo_container {
     }
 
     public function to_lexem_label_format() {
-        $container = self::substitution_as_deletion_and_insertion($this);
-        $originalstring = $container->str;
+        $originalstring = $this->str;
         $result = "";
         $operations = [];
         for ($pos = 0;; ++$pos)
         {
             // Apply transposition.
-            $typo = $container->get(qtype_preg_typo::TRANSPOSITION, $pos);
+            $typo = $this->get(qtype_preg_typo::TRANSPOSITION, $pos);
             if ($typo !== null) {
                 $tmp1 = utf8_string::substr($originalstring, $pos,1);
                 $tmp2 = utf8_string::substr($originalstring,$pos + 1,1);
                 $result .= $tmp2 . $tmp1;
-                $operations[$pos+1] = $operations[$pos] = 'transpose';
+                $operations []= 'transpose';
+                $operations []= 'transpose';
                 ++$pos;
                 continue;
             }
 
             // Apply deletion.
-            $typo = $container->get(qtype_preg_typo::DELETION, $pos);
+            $typo = $this->get(qtype_preg_typo::DELETION, $pos);
             if ($typo !== null) {
-                $operations[$pos] = 'strikethrough';
+                $operations []= 'strikethrough';
                 $result .= utf8_string::substr($originalstring, $pos,1);
                 continue;
             }
 
             // Apply insertion.
-            $typo = $container->get(qtype_preg_typo::INSERTION, $pos);
+            $typo = $this->get(qtype_preg_typo::INSERTION, $pos);
             if ($typo !== null) {
-                $operations[$pos] = 'insert';
+                $operations []= 'insert';
                 $result .= utf8_string::substr($originalstring, $pos,1);
+                continue;
+            }
+
+            // Apply substitution (as deletion and insertion).
+            $typo = $this->get(qtype_preg_typo::SUBSTITUTION, $pos);
+            if ($typo !== null) {
+                // deletion
+                $operations []= 'strikethrough';
+                $result .= utf8_string::substr($originalstring, $pos,1);
+
+                // insertion
+                $operations []= 'insert';
+                $result .= $typo->char;
                 continue;
             }
 
@@ -384,7 +367,7 @@ class qtype_preg_typo_container {
             }
 
             $result .= $char;
-            $operations[$pos] = 'normal';
+            $operations []= 'normal';
         }
 
         return array($result, $operations);
