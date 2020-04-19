@@ -51,7 +51,7 @@ class qtype_preg_regex_testing_tool implements qtype_preg_i_authoring_tool {
     private $matcher = null;
     private $errormsgs = null;
 
-    public function __construct($regex, $strings, $usecase, $exactmatch, $engine, $notation, $selection, $approximatematch, $maxtypos) {
+    public function __construct($regex, $strings, $usecase, $exactmatch, $engine, $notation, $selection, $approximatematch = false, $maxtypos = 0) {
         global $CFG;
 
         $this->regex = $regex;
