@@ -127,6 +127,20 @@ class qtype_preg_typo_container {
         return false;
     }
 
+    public function contains_approximate($type, $approximatepos, $char = null) {
+        $comparebychar = $type !== qtype_preg_typo::TRANSPOSITION && $type !== qtype_preg_typo::DELETION && $char !== null && strlen($char) > 0;
+
+        foreach ($this->errors[$type] as $typo) {
+            if ($typo->approximateposition > $approximatepos) {
+                return false;
+            }
+            if ($typo->approximateposition === $approximatepos && (!$comparebychar || strcmp($typo->char, $char) === 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected function get($type, $approximatepos, $char = null) {
         $comparebychar = $type !== qtype_preg_typo::TRANSPOSITION && $type !== qtype_preg_typo::DELETION && $char !== null && strlen($char) > 0;
 

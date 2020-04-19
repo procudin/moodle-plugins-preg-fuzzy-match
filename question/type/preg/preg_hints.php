@@ -143,78 +143,71 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
         $correctpart = '';
         $wrongtail = '';
         if ($testing) { // Add icon, showing whether match is full or no.
-           $wronghead .= $renderer->render_match_icon($matchresults->full, $matchresults->typos->count());
+            $wronghead .= $renderer->render_match_icon($matchresults->full, $matchresults->typos->count());
         }
 
-        if ($this->could_show_hint($matchresults, $testing)) {
+        $matchresults = $matchresults->approximatematch ? $matchresults->approximatematch : $matchresults;
 
-            $wronghead .= $renderer->render_unmatched($matchresults->match_heading());
+        if ($this->could_show_hint($matchresults, $testing)) {
+            $tmp = $this->render_raw_with_typos($renderer, $matchresults, $matchresults->str(), 0, $matchresults->index_first());
+            $wronghead .= $renderer->render_unmatched($tmp, false);
 
             if (!isset($matchresults->length[-2]) || $matchresults->length[-2] == qtype_preg_matching_results::NO_MATCH_FOUND) {
                 // No selection or no match with selection.
-                $correctpart = $this->render_matched_with_errors($renderer, $matchresults);
+                $tmp = $this->render_raw_with_typos($renderer, $matchresults, $matchresults->str(), $matchresults->index_first(), $matchresults->length());
+                $correctpart = $renderer->render_matched($tmp, false);
             } else {
                 // We need to substract index_first of the match from all indexes when cuttring from matched part.
-                $correctstr = $matchresults->matched_part();
                 $substract = $matchresults->index_first();
                 // Before selection.
-                $correctpart = $renderer->render_matched(core_text::substr($correctstr, 0, $matchresults->index_first(-2) - $substract));
+                $tmp = $this->render_raw_with_typos($renderer, $matchresults, $matchresults->str(), $substract, $matchresults->index_first(-2) - $substract);
+                $correctpart = $renderer->render_matched($tmp, false);
                 // Selection.
-                $correctpart .= $renderer->render_hinted(core_text::substr($correctstr, $matchresults->index_first(-2) - $substract, $matchresults->length(-2)));
+                $tmp = $this->render_raw_with_typos($renderer, $matchresults, $matchresults->str(), $matchresults->index_first(-2), $matchresults->length(-2));
+                $tmp = $renderer->render_matched($tmp, false);
+                $correctpart .= $renderer->render_selected($tmp, false);
                 // After selection.
-                $correctpart .= $renderer->render_matched(core_text::substr($correctstr, $matchresults->index_first(-2) - $substract + $matchresults->length(-2)));
+                $tmp = $this->render_raw_with_typos($renderer, $matchresults, $matchresults->str(), $matchresults->index_first(-2) + $matchresults->length(-2), $substract + $matchresults->length() - $matchresults->length(-2) - $matchresults->index_first(-2));
+                $correctpart .=  $renderer->render_matched($tmp, false);
             }
-            $wrongtail = $renderer->render_unmatched($matchresults->match_tail());
+
+            $tmp = $this->render_raw_with_typos($renderer, $matchresults, $matchresults->str(), $matchresults->index_first() + $matchresults->length(), core_text::strlen($matchresults->str()) - $matchresults->index_first() - $matchresults->length());
+            $wrongtail = $renderer->render_unmatched($tmp, false);
+
             if ($this->to_be_continued($matchresults)) {
                 $wrongtail .= $renderer->render_tobecontinued();
             }
         }
 
-         return $wronghead.$correctpart.$wrongtail;
+        return $wronghead.$correctpart.$wrongtail;
     }
 
     /**
      * Renders matched string part with typos.
      */
-    private function render_matched_with_errors($renderer, $matchresults) {
+    private function render_raw_with_typos($renderer, $matchresults, $str, $index_first, $length) {
         if ($matchresults->typos->count() === 0) {
-            return $renderer->render_matched($matchresults->matched_part());
+            return htmlspecialchars(core_text::substr($str, $index_first, $length));
         }
-
-        $matchresults = clone $matchresults;
-        $matchresults->typos = qtype_preg_typo_container::substitution_as_deletion_and_insertion($matchresults->typos);
 
         $result = '';
-        $str = $matchresults->str()->string();
-        $index_first = $matchresults->index_first();
-        $length = $index_first + $matchresults->length();
-        $checkinsertion = true;
+        $length = $index_first + $length;
         for ($i = $index_first; $i < $length; $i++) {
             switch (true) {
-                case $checkinsertion && $matchresults->typos->contains(qtype_preg_typo::INSERTION, $i):
-                    $result .= $renderer->render_hinted(core_text::code2utf8(0x2026));
-                    $i--;
-                    $checkinsertion = false;
+                case $matchresults->typos->contains_approximate(qtype_preg_typo::INSERTION, $i):
+                    $result .= $renderer->render_typo('…');
                     break;
-                case $matchresults->typos->contains(qtype_preg_typo::TRANSPOSITION, $i):
-                    $result .= $renderer->render_hinted(core_text::substr($str, $i++, 2));
-                    $checkinsertion = true;
+                case $matchresults->typos->contains_approximate(qtype_preg_typo::TRANSPOSITION, $i):
+                case $matchresults->typos->contains_approximate(qtype_preg_typo::TRANSPOSITION, $i - 1):
+                case $matchresults->typos->contains_approximate(qtype_preg_typo::SUBSTITUTION, $i):
+                    $result .= $renderer->render_typo(core_text::substr($str, $i, 1));
                     break;
-                case $matchresults->typos->contains(qtype_preg_typo::SUBSTITUTION, $i):
-                    $result .= $renderer->render_hinted(core_text::substr($str, $i, 1));
-                    $checkinsertion = true;
-                    break;
-                case $matchresults->typos->contains(qtype_preg_typo::DELETION, $i):
+                case $matchresults->typos->contains_approximate(qtype_preg_typo::DELETION, $i):
                     $result .= $renderer->render_unmatched(core_text::substr($str, $i, 1));
-                    $checkinsertion = true;
                     break;
                 default:
-                    $result .= $renderer->render_matched(core_text::substr($str, $i, 1));
-                    $checkinsertion = true;
+                    $result .= htmlspecialchars(core_text::substr($str, $i, 1));
             }
-        }
-        if ($matchresults->typos->contains(qtype_preg_typo::INSERTION, $length)) {
-            $result .= $renderer->render_hinted(core_text::code2utf8(0x2026));
         }
 
         return $result;

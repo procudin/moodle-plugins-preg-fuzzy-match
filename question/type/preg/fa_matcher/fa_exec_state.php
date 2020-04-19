@@ -664,15 +664,15 @@ class qtype_preg_fa_exec_state implements qtype_preg_matcher_state {
             $cur = $this->current_approximate_match(0);
             if ($cur !== null && $cur[0] !== qtype_preg_matching_results::NO_MATCH_FOUND) {
                 //$firstskippedcount = $cur[0] - $this->startpos;
-                $index[0] = $cur[0];
-                $length[0] = $this->length_minus_nonconsuming() + $this->typos()->count(qtype_preg_typo::INSERTION);
+                $indexapproximate[0] = $cur[0];
+                $lengthapproximate[0] = $this->length_minus_nonconsuming() + $this->typos()->count(qtype_preg_typo::INSERTION);
             }
         }
         if ($lengthapproximate[-2] === qtype_preg_matching_results::NO_MATCH_FOUND) {
             $cur = $this->current_approximate_match(-2);
             if ($cur !== null && $cur[0] !== qtype_preg_matching_results::NO_MATCH_FOUND) {
-                $index[-2] = $cur[0];
-                $length[-2] = $this->length_minus_nonconsuming() - $cur[0] + $this->typos()->count(qtype_preg_typo::INSERTION);
+                $indexapproximate[-2] = $cur[0];
+                $lengthapproximate[-2] = $this->length_minus_nonconsuming() - $cur[0] + $this->typos()->count(qtype_preg_typo::INSERTION);
             }
         }
 

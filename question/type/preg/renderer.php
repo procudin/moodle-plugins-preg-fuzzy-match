@@ -103,42 +103,64 @@ class qtype_preg_renderer extends qtype_shortanswer_renderer {
         return $hintmessage.$output;
     }
 
-    /** Renders matched part of the response */
-    public function render_matched($str) {
+    public function render_typo($str, $encode = true) {
+        $str = $encode ? htmlspecialchars($str) : $str;
         if ($str !== '') {
-            return html_writer::tag('span', htmlspecialchars($str), array('class' => $this->feedback_class(1)));
+            return html_writer::tag('span', $str, array('class' => $this->feedback_class(0.5)));
+        }
+        return '';
+    }
+
+    /** Renders matched part of the response */
+    public function render_selected($str, $encode = true) {
+        $str = $encode ? htmlspecialchars($str) : $str;
+        if ($str !== '') {
+            return html_writer::tag('span', $str, array('class' => 'qtype-preg-selection'));
+        }
+        return '';
+    }
+
+    /** Renders matched part of the response */
+    public function render_matched($str, $encode = true) {
+        $str = $encode ? htmlspecialchars($str) : $str;
+        if ($str !== '') {
+            return html_writer::tag('span', $str, array('class' => $this->feedback_class(1)));
         }
         return '';
     }
 
     /** Renders unmatched part of the response */
-    public function render_unmatched($str) {
+    public function render_unmatched($str, $encode = true) {
+        $str = $encode ? htmlspecialchars($str) : $str;
         if ($str !== '') {
-            return html_writer::tag('span', htmlspecialchars($str), array('class' => $this->feedback_class(0)));
+            return html_writer::tag('span', $str, array('class' => $this->feedback_class(0)));
         }
         return '';
     }
 
     /** Renders hinted part of the response*/
-    public function render_hinted($str) {
+    public function render_hinted($str, $encode = true) {
+        $str = $encode ? htmlspecialchars($str) : $str;
         if ($str !== '') {
-            return html_writer::tag('span', htmlspecialchars($str), array('class' => $this->feedback_class(0.5)));
+            return html_writer::tag('span', $str, array('class' => $this->feedback_class(0.5)));
         }
         return '';
     }
 
     /** Renders part of the response that should be deleted*/
-    public function render_deleted($str) {
+    public function render_deleted($str, $encode = true) {
+        $str = $encode ? htmlspecialchars($str) : $str;
         if ($str !== '') {
-            return html_writer::tag('span', html_writer::tag('del', htmlspecialchars($str)), array('class' => $this->feedback_class(0)));
+            return html_writer::tag('span', html_writer::tag('del', $str), array('class' => $this->feedback_class(0)));
         }
         return '';
     }
 
     /** Renders part of the response that should be inserted*/
-    public function render_inserted($str) {
+    public function render_inserted($str, $encode = true) {
+        $str = $encode ? htmlspecialchars($str) : $str;
         if ($str !== '') {
-            return html_writer::tag('ins', htmlspecialchars($str));
+            return html_writer::tag('ins', $str);
         }
         return '';
     }
