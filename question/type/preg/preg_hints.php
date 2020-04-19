@@ -122,7 +122,7 @@ class qtype_preg_hintmatchingpart extends qtype_poasquestion\hint {
     /**
      * Render colored string showing matched and non-matched parts of response.
      */
-    public function render_hint($renderer, question_attempt $qa = null, question_display_options $options = null, $response = null) {
+    public function render_hint($renderer, question_attempt $qa, question_display_options $options, $response = null) {
         $bestfit = $this->question->get_best_fit_answer($response);
         $matchresults = $bestfit['match'];
         return $this->render_colored_string_by_matchresults($renderer, $matchresults);
