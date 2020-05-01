@@ -30,7 +30,7 @@ global $CFG;
 require_once($CFG->dirroot . '/question/type/preg/question.php');
 require_once($CFG->dirroot . '/question/type/writeregex/question.php');
 
-class qtype_writeregex_compare_strings_analyzer_test extends PHPUnit_Framework_TestCase {
+class qtype_writeregex_compare_strings_analyzer_test extends PHPUnit\Framework\TestCase {
 
     public function test_get_fitness() {
         $question = new qtype_writeregex_question();
