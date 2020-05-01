@@ -31,7 +31,7 @@ require_once($CFG->dirroot . '/question/type/preg/question.php');
 require_once($CFG->dirroot . '/question/type/writeregex/question.php');
 require_once($CFG->dirroot . '/question/type/writeregex/questiontype.php');
 
-class qtype_writeregex_question_test extends PHPUnit_Framework_TestCase {
+class qtype_writeregex_question_test extends PHPUnit\Framework\TestCase {
 
     public function test_get_best_fit_answer() {
         $floatcompareepsilon = 0.00001;

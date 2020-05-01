@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class qtype_poasquestion_string_test extends PHPUnit_Framework_TestCase {
+class qtype_poasquestion_string_test extends PHPUnit\Framework\TestCase {
 
     public function test_string() {
         $str1 = new qtype_poasquestion\utf8_string('аzб');
