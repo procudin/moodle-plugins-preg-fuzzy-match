@@ -1314,6 +1314,11 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
                 approximatematch: $('#id_approximatematch_auth :selected').val(),
                 maxtypos: $('#id_maxtypos_auth').val(),
                 usecase: $('#id_usecase_auth :selected').val(),
+                // hintpossible enables mode, which if the selected matcher contains errors, testing tool displays errors,
+                // otherwise it switches to the php matcher at the background.
+                // First one should be enabled for regex constructor mod, second - for question editor
+                // '/question.php' indicates whether it is question editor
+                hintpossible: window.location.href.indexOf('/question.php') === -1 ? 1 : 0,
                 indfirst: indfirst,
                 indlast: indlast,
                 strings: $('#id_regex_match_text').val(),
