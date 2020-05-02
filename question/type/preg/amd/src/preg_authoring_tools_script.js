@@ -149,7 +149,7 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
 
                     // Add handlers for the regex testing textarea.
                     $('#id_regex_match_text').keyup(self.textbutton_widget.fix_textarea_rows);
-                    $("#id_regex_match_text").after('<div style="width:100%; display:inline-block">&nbsp;<div style="display:inline-block" id="id_test_regex" class="que"></div></div>');
+                    $("#id_regex_match_text").after('<div>&nbsp;<div style="display:inline-block" id="id_test_regex" class="que"></div></div>');
 
                     // Hide the non-working "displayas".
                     $('#fgroup_id_charset_process_radioset').hide();
