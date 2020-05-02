@@ -842,3 +842,6 @@ $string['simplification_errors_short_1'] = 'Excess simple assertion "^"';
 $string['simplification_errors_full_1'] = 'Simple assertion "^" is superfluous, since it is not at the beginning of the regular expression';
 $string['simplification_errors_short_2'] = 'Excess simple assertion "$"';
 $string['simplification_errors_full_2'] = 'Simple assertion "$" is superfluous, since it is not at the ending of the regular expression';
+
+// privacy
+$string['privacy:metadata'] = 'Тив вопроса Preg не хранит пользовательские данные.';
