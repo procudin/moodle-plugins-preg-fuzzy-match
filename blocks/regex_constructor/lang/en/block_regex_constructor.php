@@ -29,3 +29,6 @@ $string['pluginname'] = 'Regex constructor block';
 $string['regex_constructor'] = 'Regex constructor';
 $string['regex_constructor:addinstance'] = 'Add a new Regex constructor block';
 $string['regex_constructor:myaddinstance'] = 'Add a new Regex constructor block to the My Moodle page';
+
+// privacy
+$string['privacy:metadata'] = 'The \'Regex constructor block\' do not store user data.';
