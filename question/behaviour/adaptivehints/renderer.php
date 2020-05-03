@@ -87,7 +87,7 @@ class qbehaviour_adaptivehints_renderer extends qbehaviour_adaptive_renderer {
             'id' => $qa->get_behaviour_field_name($hintkey.'btn'),
             'name' => $qa->get_behaviour_field_name($hintkey.'btn'),
             'value' => get_string('hintbtn', 'qbehaviour_adaptivehints', $hintobj->hint_description()),
-            'class' => 'submit btn',
+            'class' => 'submit btn btn-secondary',
         );
         if ($options->readonly) {
             $attributes['disabled'] = 'disabled';
