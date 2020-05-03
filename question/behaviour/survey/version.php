@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbehaviour_survey';
-$plugin->version   = 2020020700;
-$plugin->requires  = 2016120509;
-$plugin->release = 'Survey behaviour 3.2';
+$plugin->version   = 2020050300;
+$plugin->requires  = 2018120309;
+$plugin->release = 'Survey behaviour 3.6';
 $plugin->maturity  = MATURITY_STABLE;
