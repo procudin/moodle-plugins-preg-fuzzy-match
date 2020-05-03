@@ -29,5 +29,10 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/question/behaviour/interactive/renderer.php');
 
 class qbehaviour_interactivehints_renderer extends qbehaviour_interactive_renderer {
-    // TODO: there seems nothing to do here.
+    public function feedback(question_attempt $qa, question_display_options $options) {
+        $parentfeedback = parent::feedback($qa, $options);
+        
+        // replace old css classes with new ones
+        return preg_replace('/class\s*\=\s*([\'\"])(.*?)\1/', 'class=$1$2 btn-secondary$1', $parentfeedback);        
+    }
 }
