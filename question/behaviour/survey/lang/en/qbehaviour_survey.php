@@ -26,3 +26,7 @@
 $string['notcomplete'] = 'Not complete';
 $string['pluginname'] = 'Survey';
 $string['thanks'] = 'Thanks for the answer!';
+
+// privacy
+$string['privacy:metadata'] = 'The \'Survey\' do not store user data.';
+
