@@ -13,19 +13,27 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * Strings for component 'qbehaviour_survey', language 'ru'.
+ * Privacy Subsystem for qbehaviour_survey implementing null_provider.
  *
- * @package    qbehaviour
- * @subpackage survey
- * @copyright  2017 Volgograd State Technical University
+ * @package    survey
+ * @copyright  2020 Oleg Sychev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['notcomplete'] = 'В процессе';
-$string['pluginname'] = 'Опрос';
-$string['thanks'] = 'Спасибо за ответ!';
+namespace qbehaviour_survey\privacy;
 
-// privacy
-$string['privacy:metadata'] = '\'Опрос\' не хранит пользовательские данные.';
+defined('MOODLE_INTERNAL') || die();
+
+class provider implements \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
