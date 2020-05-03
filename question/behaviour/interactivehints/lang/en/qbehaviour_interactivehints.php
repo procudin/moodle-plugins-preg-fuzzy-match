@@ -24,3 +24,6 @@
  */
 
 $string['pluginname'] = 'Interactive mode with hinting';
+
+// privacy
+$string['privacy:metadata'] = 'The \'Interactive mode with hinting\' do not store user data.';

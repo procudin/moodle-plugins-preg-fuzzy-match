@@ -29,3 +29,6 @@ $string['pluginname'] = 'Adaptive mode with hinting';
 $string['withpenalty'] = ' with penalty of {$a}';
 $string['withpenaltyapprox'] = ' with penalty of {$a} (subject to change if you change you answer)';
 $string['withpossiblepenalty'] = ' with possible penalty of {$a} for incorrect answer';
+
+// privacy
+$string['privacy:metadata'] = 'The \'Adaptive hint\' do not store user data.';

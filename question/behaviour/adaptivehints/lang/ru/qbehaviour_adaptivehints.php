@@ -29,3 +29,6 @@ $string['pluginname'] = 'Адаптивный режим с подсказкам
 $string['withpenalty'] = ' с вычетом {$a}';
 $string['withpenaltyapprox'] = ' с вычетом {$a} (может измениться при смене ответа)';
 $string['withpossiblepenalty'] = ' с возможным вычетом {$a} за неправильный ответ';
+
+// privacy
+$string['privacy:metadata'] = '\'Адаптивный режим с подсказками\' не хранит пользовательские данные.';
