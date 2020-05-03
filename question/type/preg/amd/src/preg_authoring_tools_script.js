@@ -361,9 +361,9 @@ define(['jquery', 'qtype_poasquestion/poasquestion_text_and_button'], (function 
 
     collapse_block_title_clicked : function (e) {
         if ($('#simplification_tool_collapse_btn').hasClass("collapsed")) {
-            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/clean/core/1461098461/t/expanded)');
+            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/boost/core/1461098461/t/expanded)');
         } else {
-            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/clean/core/1461098461/t/collapsed)');
+            $('#collapse_block_toggle').css('background-image', 'url(/moodle/theme/image.php/boost/core/1461098461/t/collapsed)');
         }
     },
 
