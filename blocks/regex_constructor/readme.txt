@@ -3,5 +3,5 @@ vizualising and explaining it in different ways, and test it on the strings.
 
 This block relies on Preg question type to work with regexes.
 
-For documentation, see http://docs.moodle.org/25/en/Preg_question_type - 
+For documentation, see http://docs.moodle.org/38/en/Preg_question_type - 
 the section on Regex Constructor.
