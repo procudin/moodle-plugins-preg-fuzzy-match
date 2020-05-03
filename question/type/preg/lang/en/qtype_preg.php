@@ -844,4 +844,4 @@ $string['simplification_errors_short_2'] = 'Excess simple assertion "$"';
 $string['simplification_errors_full_2'] = 'Simple assertion "$" is superfluous, since it is not at the ending of the regular expression';
 
 // privacy
-$string['privacy:metadata'] = 'Тив вопроса Preg не хранит пользовательские данные.';
+$string['privacy:metadata'] = 'The Preg question type do not store user data.';

@@ -25,3 +25,6 @@
 $string['No'] = ' #{$a}';
 $string['pluginname'] = 'POAS abstract question';
 $string['teachertext'] = 'from teacher{$a}';
+
+// privacy
+$string['privacy:metadata'] = 'The \'POAS abstract question\' do not store user data.';

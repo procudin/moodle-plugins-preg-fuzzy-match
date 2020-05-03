@@ -844,4 +844,4 @@ $string['simplification_errors_short_2'] = 'Лишнее простое утве
 $string['simplification_errors_full_2'] = 'Простое утверждение "$" является лишним, т.к. оно стоит не в конце регулярного выражения';
 
 // privacy
-$string['privacy:metadata'] = 'The Preg question type do not store user data.';
+$string['privacy:metadata'] = 'Тип вопроса Preg не хранит пользовательские данные.';

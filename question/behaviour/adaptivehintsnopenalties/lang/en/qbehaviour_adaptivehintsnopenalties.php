@@ -25,3 +25,6 @@
 
 $string['hintused'] = 'Looked for hint: {$a->hint} for response {$a->response}.';
 $string['pluginname'] = 'Adaptive mode with hinting (no penalties)';
+
+// privacy
+$string['privacy:metadata'] = 'The \'Adaptive mode with hinting (no penalties)\' do not store user data.';
